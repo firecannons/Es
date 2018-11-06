@@ -87,7 +87,8 @@ class Parser ( ) :
         'CLASS_AFTER_DECLARING_SIZE' : 21 ,
         'MAKING_TEMPLATE' : 22 ,
         'AFTER_TEMPLATE_NAME' : 23 ,
-        'AFTER_TEMPLATE' : 24
+        'AFTER_TEMPLATE' : 24 ,
+        'ACTION_AT_END' : 25
         
     }
     
@@ -126,7 +127,7 @@ class Parser ( ) :
     
     MAIN_METHOD_NAMES = {
         'ON_CREATE' : 'On_Create' ,
-        'EQUALS_SIGN' : '='
+        'EQUALS_SIGN' : 'On_Equals'
     }
     
     OPERATORS = {
@@ -286,6 +287,7 @@ class Parser ( ) :
                     #print ( 'exiting function ' , self . CurrentFunction )
                     self . CurrentFunction = ''
                     self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
+                    OutputText = self . CalcActionReturnOutput ( OutputText )
                 elif self . CurrentClass != '' :
                     print ( 'exiting class ' , self . CurrentClass )
                     self . CurrentClass = ''
@@ -461,6 +463,7 @@ class Parser ( ) :
             if Token == self . SPECIAL_CHARS [ 'LEFT_PAREN' ] :
                 self . State = self . MAIN_STATES [ 'ACTION_NEW_PARAMETER' ]
             elif Token == self . SPECIAL_CHARS [ 'NEWLINE' ] :
+                OutputText = self . OutputActionStartCode ( OutputText )
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
             else :
                 CompilerIssue . OutputError ( 'Expected left paren or newline in action declaration' , self . EXIT_ON_ERROR )
@@ -479,11 +482,10 @@ class Parser ( ) :
                     CompilerIssue . OutputError ( 'There is already a \'' + Token + '\' in the current scope' , self . EXIT_ON_ERROR )
                 else :
                     NewSymbol = MySymbol ( Token , self . SavedType )
-                    print ( self . TypeTable [ self . SavedType ] . Size , self . CurrentSTOffset , 'asfdasfd' )
                     self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType ] . Size
                     NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                    print ( 'self . CurrentSTOffset = ' + str ( self . CurrentSTOffset ) )
                     self . GetCurrentST ( ) [ Token ] = NewSymbol
+                    self . CurrentTypeTable ( ) . append ( NewSymbol )
                     self . State = self . MAIN_STATES [ 'ACTION_AFTER_PARAM' ]
             else :
                 CompilerIssue . OutputError ( 'Invalid variable name in action declaration' , self . EXIT_ON_ERROR )
@@ -491,8 +493,14 @@ class Parser ( ) :
             if Token == self . SPECIAL_CHARS [ 'COMMA' ] :
                 self . State = self . MAIN_STATES [ 'ACTION_NEW_PARAMETER' ]
             elif Token == self . SPECIAL_CHARS [ 'RIGHT_PAREN' ] :
+                self . State = self . MAIN_STATES [ 'ACTION_AT_END' ]
+        elif self . State == self . MAIN_STATES [ 'ACTION_AT_END' ] :
+            if Token == self . SPECIAL_CHARS [ 'NEWLINE' ] :
                 self . CurrentSTOffset = deepcopy ( self . ACTION_DEFINITION_OFFSET )
+                OutputText = self . OutputActionStartCode ( OutputText )
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            else :
+                CompilerIssue . OutputError ( 'Expected NEWLINE after action' , self . EXIT_ON_ERROR )
         elif self . State == self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ] :
             if Token == self . COLON :
                 self . State = self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ]
@@ -506,6 +514,16 @@ class Parser ( ) :
             
                 
         return SavedWordArray , WordIndex , OutputText
+    
+    def CalcActionReturnOutput ( self , OutputText ) :
+        OutputText = OutputText + 'ret' + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        return OutputText
+    
+    def OutputActionStartCode ( self , OutputText ) :
+        OutputText = OutputText + self . CurrentFunction + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        for Parameter in self . CurrentTypeTable ( ) :
+            OutputText = OutputText + 'add rsp , ' + str ( self . TypeTable [ Parameter . Type ] . Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        return OutputText
     
     def GetUntilNewline ( self , SavedWordArray , WordIndex ) :
         LineWordArray = [ ]
@@ -753,7 +771,11 @@ class Lexer ( ) :
 class Compiler ( ) :
     BEGINNING_TEXT = '''format ELF64 executable 3
 segment readable executable
-entry Main'''
+entry Main
+
+
+
+'''
     
     FILE_READ_FLAG = "r"
     FILE_WRITE_FLAG = "w"
