@@ -1,0 +1,1 @@
+8/12/2018: The language cannot currently do fuction declarations, it will only be able to do function definitions.  Not that all I have is a lexer right now, so I am only saying what it should do right now.
