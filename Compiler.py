@@ -165,9 +165,11 @@ class Parser ( ) :
     
     FUNCTION_OUTPUT_DELIMITER = '__'
     
-    STACK_FRAME_BEGIN = '''push ebp\nmov ebp, esp\nsub	esp, 8'''
+    STACK_FRAME_BEGIN = '''push ebp\nmov ebp, esp\nsub esp, 8\n\n'''
     
-    STACK_FRAME_END = '''mov esp, ebp\npop ebp'''
+    STACK_FRAME_END = '''\nmov esp, ebp\npop ebp'''
+    
+    SHIFT_DOWN_STRING = 'sub esp, '
     
     
     ACTION_DECLARATION_OFFSET = -16
@@ -323,10 +325,12 @@ class Parser ( ) :
                     if Token not in self . GetCurrentST ( ) :
                         NewSymbol = MySymbol ( Token , self . SavedType )
                         self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType ] . Size
-                        self . TypeTable [ self . CurrentClass ] . Size = self . TypeTable [ self . CurrentClass ] . Size + self . TypeTable [ self . SavedType ] . Size
                         NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
                         self . GetCurrentST ( ) [ Token ] = NewSymbol
-                        self . TypeTable [ self . CurrentClass ] . InnerTypes [ Token ] = NewSymbol
+                        if self . CurrentClass != '' :
+                            self . TypeTable [ self . CurrentClass ] . Size = self . TypeTable [ self . CurrentClass ] . Size + self . TypeTable [ self . SavedType ] . Size
+                            self . TypeTable [ self . CurrentClass ] . InnerTypes [ Token ] = NewSymbol
+                        OutputText = self . CalcDeclarationOutput ( self . TypeTable [ self . SavedType ] . Size , OutputText )
                         self . State = self . MAIN_STATES [ 'AFTER_DECLARING_VARIABLE' ]
                     else :
                         CompilerIssue . OutputError ( 'A variable named ' + Token + ' has already been declared' , self . EXIT_ON_ERROR )
@@ -523,7 +527,7 @@ class Parser ( ) :
         return SavedWordArray , WordIndex , OutputText
     
     def CalcActionReturnOutput ( self , OutputText ) :
-        OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . STACK_FRAME_END + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . STACK_FRAME_END + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + 'ret' + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
@@ -536,10 +540,14 @@ class Parser ( ) :
         OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . STACK_FRAME_BEGIN + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
+    def CalcDeclarationOutput ( self , Size , OutputText ) :
+        OutputText = OutputText + self . SHIFT_DOWN_STRING + str ( Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        return OutputText
+    
     def OutputActionStartCode ( self , OutputText ) :
         OutputText = OutputText + self . CalcFunctionName ( self . CurrentClass , self . CurrentFunction )
-        for Parameter in self . CurrentTypeTable ( ) :
-            OutputText = OutputText + 'add rsp , ' + str ( self . TypeTable [ Parameter . Type ] . Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        #for Parameter in self . CurrentTypeTable ( ) :
+            #OutputText = OutputText + 'add rsp , ' + str ( self . TypeTable [ Parameter . Type ] . Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
     def GetUntilNewline ( self , SavedWordArray , WordIndex ) :
