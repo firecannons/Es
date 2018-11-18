@@ -163,6 +163,8 @@ class Parser ( ) :
     
     EMPTY_ARRAY = [ ]
     
+    FUNCTION_OUTPUT_DELIMITER = '__'
+    
     
     ACTION_DECLARATION_OFFSET = -16
     ACTION_DEFINITION_OFFSET = 0
@@ -267,8 +269,6 @@ class Parser ( ) :
         #print ( 'Parsing ' , Token , self . State , self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , self . CurrentFunctionType )
         #print ( 'Parsing -> \'' + Token + '\'' , 'self . State = ' + str ( self . State ) , ' len ( self . STStack ) = ' + str ( len ( self . STStack ) ) )
         if self . State == self . MAIN_STATES [ 'START_OF_LINE' ] :
-            if self . CurrentFunction != '' and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
-                print ( 'In Asm Function -> Will output ASM to output' )
             if Token == self . KEYWORDS [ 'USING' ] :
                 self . State = self . MAIN_STATES [ 'USING_WAITING_FOR_WORD' ]
             elif Token == self . KEYWORDS [ 'CLASS' ] :
@@ -292,6 +292,9 @@ class Parser ( ) :
                     print ( 'exiting class ' , self . CurrentClass )
                     self . CurrentClass = ''
                 self . STStack . pop ( len ( self . STStack ) - 1 )
+            elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
+                OutputText = OutputText + Token
+                print ( 'In Asm Function -> Will output ASM to output' )
             elif self . IsValidName ( Token ) == True :
                 if self . CurrentFunctionType == self . FUNCTION_TYPES [ 'NORMAL' ] :
                     if Token in self . TypeTable :
@@ -519,8 +522,16 @@ class Parser ( ) :
         OutputText = OutputText + 'ret' + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
+    def CalcFunctionName ( self , Class , Function ) :
+        OutputText = ''
+        if Class != '' :
+            OutputText = OutputText + Class + self . FUNCTION_OUTPUT_DELIMITER
+        OutputText = OutputText + Function
+        OutputText = OutputText + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        return OutputText
+    
     def OutputActionStartCode ( self , OutputText ) :
-        OutputText = OutputText + self . CurrentFunction + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . CalcFunctionName ( self . CurrentClass , self . CurrentFunction )
         for Parameter in self . CurrentTypeTable ( ) :
             OutputText = OutputText + 'add rsp , ' + str ( self . TypeTable [ Parameter . Type ] . Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
