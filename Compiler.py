@@ -165,6 +165,10 @@ class Parser ( ) :
     
     FUNCTION_OUTPUT_DELIMITER = '__'
     
+    STACK_FRAME_BEGIN = '''push ebp\nmov ebp, esp\nsub	esp, 8'''
+    
+    STACK_FRAME_END = '''mov esp, ebp\npop ebp'''
+    
     
     ACTION_DECLARATION_OFFSET = -16
     ACTION_DEFINITION_OFFSET = 0
@@ -519,6 +523,7 @@ class Parser ( ) :
         return SavedWordArray , WordIndex , OutputText
     
     def CalcActionReturnOutput ( self , OutputText ) :
+        OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . STACK_FRAME_END + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + 'ret' + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
@@ -528,6 +533,7 @@ class Parser ( ) :
             OutputText = OutputText + Class + self . FUNCTION_OUTPUT_DELIMITER
         OutputText = OutputText + Function
         OutputText = OutputText + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . STACK_FRAME_BEGIN + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
     def OutputActionStartCode ( self , OutputText ) :
@@ -724,7 +730,8 @@ class Lexer ( ) :
         CurrentLetter ) :
         if self . IsSavedWordExisting ( ) == True :
             self . ProcessAppendWord ( self . SavedWord )
-        if self . State == self . MAIN_STATES [ 'IN_ONE_LINE_COMMENT' ] or self . State == self . MAIN_STATES [ 'IN_MULTILINE_COMMENT' ] :
+        if self . State == self . MAIN_STATES [ 'IN_ONE_LINE_COMMENT' ] or self . State == self . MAIN_STATES [ 'IN_MULTILINE_COMMENT' ]\
+            or self . State == self . MAIN_STATES [ 'IN_ASM_FUNCTION' ] :
             self . AddCharacterToSavedWord ( CurrentLetter )
     
     def IsSavedWordExisting ( self ) :
@@ -780,12 +787,9 @@ class Lexer ( ) :
         return self . SavedWordArray
 
 class Compiler ( ) :
-    BEGINNING_TEXT = '''format ELF64 executable 3
+    BEGINNING_TEXT = '''format ELF executable 3
 segment readable executable
-entry Main
-
-
-
+entry Main\n\n
 '''
     
     FILE_READ_FLAG = "r"

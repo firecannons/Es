@@ -10,7 +10,7 @@ class Byte size 1
         
         action asm on = ( Byte Source )
             mov ecx, rbp
-            add ecx, 17
+            add ecx, 9
             movb eax, [ecx]
             sub ecx, 1
             mov [ecx], eax
