@@ -125,11 +125,6 @@ class Parser ( ) :
         'NORMAL' : 1
     }
     
-    MAIN_METHOD_NAMES = {
-        'ON_CREATE' : 'On_Create' ,
-        'EQUALS_SIGN' : 'On_Equals'
-    }
-    
     OPERATORS = {
         'COLON' : ':' ,
         'LEFT_PAREN' : '(' ,
@@ -145,6 +140,17 @@ class Parser ( ) :
         'LESS_THAN' : '<' ,
         'EQUALS' : '=' ,
         'RIGHT_PAREN' : ')' ,
+        'CREATE' : 'create'
+    }
+    
+    MAIN_METHOD_NAMES = {
+        OPERATORS [ 'EQUALS' ] : 'On_Equals' ,
+        OPERATORS [ 'CREATE' ] : 'On_Create'
+    }
+    
+    OPERATOR_MAPPING = {
+        OPERATORS [ 'EQUALS' ] : MAIN_METHOD_NAMES [ '=' ] ,
+        OPERATORS [ 'CREATE' ] : MAIN_METHOD_NAMES [ 'create' ]
     }
     
     OPERATOR_PRECEDENCE = [
@@ -154,6 +160,21 @@ class Parser ( ) :
         { OPERATORS [ 'EQUALS' ] } ,
         { OPERATORS [ 'RIGHT_PAREN' ] }
     ]
+    
+    ASM_COMMANDS = {
+        'CALL' : 'call'
+    }
+    
+    POINTER_SIZE = 4
+    
+    ASM_TEXT = {
+        'LOAD_TEXT' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
+            'mov ebx, ebp\n' +\
+            'add ebx, {}\n' +\
+            'mov [esp], ebx\n' ,
+        'ALLOC_BYTE' : 'add esp, -1\n' ,
+        'SET_CURRENT_BYTE' : 'mov byte [esp], {}\n'
+    }
     
     EXIT_ON_ERROR = True
     
@@ -165,14 +186,14 @@ class Parser ( ) :
     
     FUNCTION_OUTPUT_DELIMITER = '__'
     
-    STACK_FRAME_BEGIN = '''push ebp\nmov ebp, esp\nsub esp, 8\n\n'''
+    STACK_FRAME_BEGIN = '''push ebp\nmov ebp, esp\nadd esp, -8\n\n'''
     
     STACK_FRAME_END = '''\nmov esp, ebp\npop ebp'''
     
-    SHIFT_DOWN_STRING = 'sub esp, '
+    SHIFT_STRING = 'add esp, {}'
     
     
-    ACTION_DECLARATION_OFFSET = -16
+    ACTION_DECLARATION_OFFSET = -8
     ACTION_DEFINITION_OFFSET = 0
     
     def __init__ ( self ) :
@@ -216,7 +237,38 @@ class Parser ( ) :
             Output = False
         return Output
     
-    def DoOperation ( self , Index , WordArray , CurrentClass ) :
+    def AllocateByte ( self , CurrentOperand ) :
+        OutputText = ''
+        OutputText = OutputText + self . ASM_TEXT [ 'ALLOC_BYTE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . ASM_TEXT [ 'SET_CURRENT_BYTE' ] . format ( CurrentOperand ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        self . CurrentSTOffset = self . CurrentSTOffset + 1
+        return OutputText
+    
+    def CalcFunctionCall ( self , Operator , ArrayOfOperands , LeftOperand ) :
+        OutputText = ''
+        OriginalOffset = self . CurrentSTOffset
+        Class = ''
+        for CurrentOperand in ArrayOfOperands :
+            OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand)
+            if CurrentOperand . isdigit ( ) == True :
+                OutputText = OutputText + self . AllocateByte ( CurrentOperand )
+            Found , CurrentSymbol = self . CheckCurrentSTs ( CurrentOperand )
+            OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( self . CurrentSTOffset )
+            self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
+        if LeftOperand != '' :
+            OutputText = OutputText + ';Loading {}\n'.format(LeftOperand)
+            Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
+            OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( self . CurrentSTOffset )
+            self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
+            Class = CurrentSymbol . Type
+        FunctionName = self . ResolveActionToAsm ( Operator , Class )
+        OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + ' ' + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . SHIFT_STRING . format ( self . CurrentSTOffset - OriginalOffset )
+        self . CurrentSTOffset = OriginalOffset
+        return OutputText
+            
+    
+    def DoOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
         if WordArray [ Index + 1 ] == self . OPERATORS [ 'COLON' ] :
             IsFunction = False
             IsSymbol = False
@@ -235,12 +287,14 @@ class Parser ( ) :
             elif IsFound == False :
                 CompilerIssue . OutputError ( 'Unknown ' + Operator + ' is not an allowed operator' , self . EXIT_ON_ERROR )
         elif WordArray [ Index + 1 ] == self . OPERATORS [ 'EQUALS' ] :
+            RightOperand = WordArray [ Index + 2 ]
+            OutputText = OutputText + self . CalcFunctionCall ( WordArray [ Index + 1 ] , [RightOperand] , WordArray [ Index ] )
             WordArray . pop ( Index + 1 )
             WordArray . pop ( Index + 1 )
-        return CurrentClass
+        return OutputText
         
     
-    def Reduce ( self , Token , SavedWordArray ) :
+    def Reduce ( self , Token , SavedWordArray , OutputText ) :
         WordIndex = 0
         CurrentClass = ''
         FunctionStack = [ ]
@@ -249,15 +303,17 @@ class Parser ( ) :
             Token1 = SavedWordArray [ WordIndex ]
             Token2 = SavedWordArray [ WordIndex + 1 ]
             Token3 = SavedWordArray [ WordIndex + 2 ]
+            if Token2 == '(' :
+                break
             if len ( SavedWordArray ) > 4 :
                 Token4 = SavedWordArray [ WordIndex + 3 ]
                 Token5 = SavedWordArray [ WordIndex + 4 ]
                 if self . OpOneHighestPrecedence ( Token2 , Token4 ) :
-                    self . DoOperation ( WordIndex , SavedWordArray , CurrentClass )
+                    OutputText = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
                 else :
-                    self . DoOperation ( WordIndex + 2 , SavedWordArray , CurrentClass )
+                    OutputText = self . DoOperation ( WordIndex + 2 , SavedWordArray , CurrentClass , OutputText )
             else :
-                self . DoOperation ( WordIndex , SavedWordArray , CurrentClass )
+                OutputText = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
             print ( 'Reducing ' , SavedWordArray )
         '''
         WordIndex = 0
@@ -269,10 +325,11 @@ class Parser ( ) :
             elif self . GetTypeTable ( Expr
             else :
                 CompilerIssue . OutputError ( '\'end\' found when not in any upper scope' , self . EXIT_ON_ERROR )'''
+        return OutputText
         
     
     def ParseToken ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        #print ( 'Parsing ' , Token , self . State , self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , self . CurrentFunctionType )
+        print ( 'Parsing ' , Token , self . State , self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , self . CurrentFunctionType , self . CurrentSTOffset )
         #print ( 'Parsing -> \'' + Token + '\'' , 'self . State = ' + str ( self . State ) , ' len ( self . STStack ) = ' + str ( len ( self . STStack ) ) )
         if self . State == self . MAIN_STATES [ 'START_OF_LINE' ] :
             if Token == self . KEYWORDS [ 'USING' ] :
@@ -302,21 +359,20 @@ class Parser ( ) :
                 OutputText = OutputText + Token
                 print ( 'In Asm Function -> Will output ASM to output' )
             elif self . IsValidName ( Token ) == True :
-                if self . CurrentFunctionType == self . FUNCTION_TYPES [ 'NORMAL' ] :
-                    if Token in self . TypeTable :
-                        if self . TypeTable [ Token ] . IsFunction == False :
-                            self . SavedType = Token
-                            self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
-                        else :
-                            Found = self . CheckCurrentSTs ( Token )
-                            LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
-                            #self . Reduce ( Token , LineWordArray )
-                    elif self . CheckCurrentSTs ( Token ) :
+                if Token in self . TypeTable :
+                    if self . TypeTable [ Token ] . IsFunction == False :
+                        self . SavedType = Token
+                        self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
+                    else :
                         Found = self . CheckCurrentSTs ( Token )
                         LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
-                        #self . Reduce ( Token , LineWordArray )
-                    else :
-                        CompilerIssue . OutputError ( 'Type \'' + Token + '\' not found' , self . EXIT_ON_ERROR )
+                        #OutputText = self . Reduce ( Token , LineWordArray , OutputText )
+                elif self . CheckCurrentSTs ( Token ) :
+                    Found = self . CheckCurrentSTs ( Token )
+                    LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
+                    OutputText = self . Reduce ( Token , LineWordArray , OutputText )
+                else :
+                    CompilerIssue . OutputError ( 'Type or symbol \'' + Token + '\' not found' , self . EXIT_ON_ERROR )
         elif self . State == self . MAIN_STATES [ 'DECLARING_VARIABLE' ] :
             if self . CurrentFunctionType == self . FUNCTION_TYPES [ 'NORMAL' ] :
                 if Token == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
@@ -330,6 +386,7 @@ class Parser ( ) :
                         if self . CurrentClass != '' :
                             self . TypeTable [ self . CurrentClass ] . Size = self . TypeTable [ self . CurrentClass ] . Size + self . TypeTable [ self . SavedType ] . Size
                             self . TypeTable [ self . CurrentClass ] . InnerTypes [ Token ] = NewSymbol
+                        OutputText = OutputText + ';Declaring {}\n' . format ( Token )
                         OutputText = self . CalcDeclarationOutput ( self . TypeTable [ self . SavedType ] . Size , OutputText )
                         self . State = self . MAIN_STATES [ 'AFTER_DECLARING_VARIABLE' ]
                     else :
@@ -460,16 +517,12 @@ class Parser ( ) :
             else :
                 CompilerIssue . OutputError ( Token + ' is in the wrong format for a method name' , self . EXIT_ON_ERROR )
         elif self . State == self . MAIN_STATES [ 'ACTION_AFTER_ON' ] :
-            if Token == self . KEYWORDS [ 'CREATE' ] :
-                self . CurrentFunction = self . MAIN_METHOD_NAMES [ 'ON_CREATE' ]
-                self . TypeTable [ self . CurrentClass ] . InnerTypes [ self . CurrentFunction ] = Function ( self . CurrentFunction )
-                self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
-            elif Token == self . KEYWORDS [ 'EQUALS_SIGN' ] :
-                self . CurrentFunction = self . MAIN_METHOD_NAMES [ 'EQUALS_SIGN' ]
+            if self . CanResolveSymbolAction ( Token ) :
+                self . CurrentFunction = self . ResolveActionToAsm ( Token , self . CurrentClass )
                 self . TypeTable [ self . CurrentClass ] . InnerTypes [ self . CurrentFunction ] = Function ( self . CurrentFunction )
                 self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
             else :
-                CompilerIssue . OutputError ( 'Expected special action after \'' + self . KEYWORDS [ 'OPERATOR' ] + '\'' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Cannot overload operator \'' + Token + '\'' , self . EXIT_ON_ERROR )
         elif self . State == self . MAIN_STATES [ 'ACTION_AFTER_NAME' ] :
             if Token == self . SPECIAL_CHARS [ 'LEFT_PAREN' ] :
                 self . State = self . MAIN_STATES [ 'ACTION_NEW_PARAMETER' ]
@@ -522,9 +575,29 @@ class Parser ( ) :
                 CompilerIssue . OutputError ( 'Cound not find ' + Token + ' in ' + self . SavedLeftOperand . Name + ' which is of type '
                     + self . SavedLeftOperand . Type , self . EXIT_ON_ERROR )
                 self . State = self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ]
-            
-                
         return SavedWordArray , WordIndex , OutputText
+    
+    def ResolveActionToName ( self , Action , Class ) :
+        Output = ''
+        if Action in self . MAIN_METHOD_NAMES :
+            Output = Output + self . MAIN_METHOD_NAMES [ Action ]
+        else :
+            Output = Output + Action
+        return Output
+    
+    def ResolveActionToAsm ( self , Action , Class ) :
+        Output = ''
+        if Class != '' :
+            Output = Output + Class + self . FUNCTION_OUTPUT_DELIMITER
+        Output = Output + self . ResolveActionToName ( Action , Class )
+        return Output
+            
+    
+    def CanResolveSymbolAction ( self , ActionSymbol ) :
+        Output = True
+        if ActionSymbol in self . OPERATORS and ActionSymbol in self . MAIN_METHOD_NAMES :
+            Output = True
+        return Output
     
     def CalcActionReturnOutput ( self , OutputText ) :
         OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . STACK_FRAME_END + self . SPECIAL_CHARS [ 'NEWLINE' ]
@@ -533,15 +606,13 @@ class Parser ( ) :
     
     def CalcFunctionName ( self , Class , Function ) :
         OutputText = ''
-        if Class != '' :
-            OutputText = OutputText + Class + self . FUNCTION_OUTPUT_DELIMITER
-        OutputText = OutputText + Function
+        OutputText = OutputText + self . ResolveActionToName ( Function , Class )
         OutputText = OutputText + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . STACK_FRAME_BEGIN + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
     def CalcDeclarationOutput ( self , Size , OutputText ) :
-        OutputText = OutputText + self . SHIFT_DOWN_STRING + str ( Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . SHIFT_STRING . format ( -Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
     def OutputActionStartCode ( self , OutputText ) :
@@ -561,15 +632,15 @@ class Parser ( ) :
     def GetCurrentST ( self ) :
         return self . STStack [ len ( self . STStack ) - 1 ]
     
-    def CheckCurrentSTs ( self , SymbolName ) :
+    def CheckCurrentSTs ( self , NameOfSymbol ) :
         Found = False
         OutSymbol = None
         Index = 0
         StackHeight = len ( self . STStack ) - 1
         while Found == False and StackHeight - Index >= 0 :
-            if SymbolName in self . STStack [ StackHeight - Index ] :
+            if NameOfSymbol in self . STStack [ StackHeight - Index ] :
                 Found = True
-                OutSymbol = self . STStack [ StackHeight - Index ] [ SymbolName ]
+                OutSymbol = self . STStack [ StackHeight - Index ] [ NameOfSymbol ]
             Index = Index + 1
         return Found , OutSymbol
         
