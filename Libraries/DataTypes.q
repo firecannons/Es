@@ -6,6 +6,13 @@ class Byte size 1
         
         action asm on create
             ; asm comment
+            ; mov address of the object into
+            mov ebx, ebp
+            add ebx, 8
+            mov eax, [ebx]
+            
+            mov byte [eax], 101
+            
         end
         
         action asm on = ( Byte Source )

@@ -140,7 +140,7 @@ class Parser ( ) :
         'LESS_THAN' : '<' ,
         'EQUALS' : '=' ,
         'RIGHT_PAREN' : ')' ,
-        'CREATE' : 'create'
+        'CREATE' : 'create' ,
     }
     
     MAIN_METHOD_NAMES = {
@@ -154,7 +154,8 @@ class Parser ( ) :
     }
     
     OPERATOR_PRECEDENCE = [
-        { OPERATORS [ 'COLON' ] , OPERATORS [ 'LEFT_PAREN' ] } ,
+        { OPERATORS [ 'COLON' ] , SPECIAL_CHARS [ 'COMMA' ] } ,
+        { OPERATORS [ 'LEFT_PAREN' ] } ,
         { OPERATORS [ 'PLUS' ] , OPERATORS [ 'MINUS' ] , OPERATORS [ 'MULT' ] , OPERATORS [ 'DIVIDE' ] } ,
         { OPERATORS [ 'IS_EQUAL' ] , OPERATORS [ 'NOT_EQUAL' ] , OPERATORS [ 'LESS_OR_EQUAL' ] , OPERATORS [ 'GREATER_OR_EQUAL' ] } ,
         { OPERATORS [ 'EQUALS' ] } ,
@@ -173,7 +174,11 @@ class Parser ( ) :
             'add ebx, {}\n' +\
             'mov [esp], ebx\n' ,
         'ALLOC_BYTE' : 'add esp, -1\n' ,
-        'SET_CURRENT_BYTE' : 'mov byte [esp], {}\n'
+        'SET_CURRENT_BYTE' : 'mov byte [esp], {}\n' ,
+        'DEFAULT_CREATE' : 'add esp, {}\n' +\
+            'mov ebx, ebp\n' +\
+            'add ebx, {}\n' +\
+            'mov [esp], ebx\n'
     }
     
     EXIT_ON_ERROR = True
@@ -186,14 +191,18 @@ class Parser ( ) :
     
     FUNCTION_OUTPUT_DELIMITER = '__'
     
-    STACK_FRAME_BEGIN = '''push ebp\nmov ebp, esp\nadd esp, -8\n\n'''
+    STACK_FRAME_BEGIN = '''push ebp\nmov ebp, esp\n\n'''
     
     STACK_FRAME_END = '''\nmov esp, ebp\npop ebp'''
     
-    SHIFT_STRING = 'add esp, {}'
+    SHIFT_STRING = 'add esp, {}\n'
+    
+    BYTE_SIZE = 1
+    
+    SPACE = ' '
     
     
-    ACTION_DECLARATION_OFFSET = -8
+    ACTION_DECLARATION_OFFSET = 0
     ACTION_DEFINITION_OFFSET = 0
     
     def __init__ ( self ) :
@@ -241,7 +250,7 @@ class Parser ( ) :
         OutputText = ''
         OutputText = OutputText + self . ASM_TEXT [ 'ALLOC_BYTE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + self . ASM_TEXT [ 'SET_CURRENT_BYTE' ] . format ( CurrentOperand ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
-        self . CurrentSTOffset = self . CurrentSTOffset + 1
+        self . CurrentSTOffset = self . CurrentSTOffset - self . BYTE_SIZE
         return OutputText
     
     def CalcFunctionCall ( self , Operator , ArrayOfOperands , LeftOperand ) :
@@ -250,25 +259,34 @@ class Parser ( ) :
         Class = ''
         for CurrentOperand in ArrayOfOperands :
             OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand)
+            OperandOffset = 0
             if CurrentOperand . isdigit ( ) == True :
                 OutputText = OutputText + self . AllocateByte ( CurrentOperand )
-            Found , CurrentSymbol = self . CheckCurrentSTs ( CurrentOperand )
-            OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( self . CurrentSTOffset )
+                OperandOffset = self . CurrentSTOffset
+            else :
+                Found , CurrentSymbol = self . CheckCurrentSTs ( CurrentOperand )
+                OperandOffset = CurrentSymbol . Offset
+            OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( OperandOffset )
+            print ( self . CurrentSTOffset , OriginalOffset , self . POINTER_SIZE)
             self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
+            print ( self . CurrentSTOffset , OriginalOffset )
         if LeftOperand != '' :
             OutputText = OutputText + ';Loading {}\n'.format(LeftOperand)
             Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
-            OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( self . CurrentSTOffset )
+            OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( CurrentSymbol . Offset )
             self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
             Class = CurrentSymbol . Type
         FunctionName = self . ResolveActionToAsm ( Operator , Class )
-        OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + ' ' + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
-        OutputText = OutputText + self . SHIFT_STRING . format ( self . CurrentSTOffset - OriginalOffset )
+        OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        print ( self . CurrentSTOffset , OriginalOffset )
+        OutputText = OutputText + self . SHIFT_STRING . format ( OriginalOffset - self . CurrentSTOffset )
         self . CurrentSTOffset = OriginalOffset
         return OutputText
             
     
     def DoOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
+        ParameterArray = [ ]
+        CurrentObject = ''
         if WordArray [ Index + 1 ] == self . OPERATORS [ 'COLON' ] :
             IsFunction = False
             IsSymbol = False
@@ -286,7 +304,28 @@ class Parser ( ) :
                     CompilerIssue . OutputError ( 'Class \'' + CurrentClass + '\' has no variable \'' + WordArray [ Index + 2 ] + '\'.' , self . EXIT_ON_ERROR )
             elif IsFound == False :
                 CompilerIssue . OutputError ( 'Unknown ' + Operator + ' is not an allowed operator' , self . EXIT_ON_ERROR )
-        elif WordArray [ Index + 1 ] == self . OPERATORS [ 'EQUALS' ] :
+        elif WordArray [ Index + 1 ] == self . OPERATORS [ 'LEFT_PAREN' ] :
+            CurrentClass = ''
+            if CurrentObject != '' :
+                Found , CurrentClass = self . CheckCurrentSTs ( CurrentObject )
+                CurrentClass = CurrentClass . type
+            if self . GetTypeTable ( CurrentClass , WordArray [ Index ] ) :
+                ParameterArray = [ WordArray [ Index + 2 ] ] + ParameterArray
+                OutputText = OutputText + self . CalcFunctionCall ( WordArray [ Index ] , ParameterArray , CurrentObject )
+                WordArray . pop ( Index + 1 )
+                WordArray . pop ( Index + 1 )
+            else :
+                CompilerIssue . OutputError ( 'Function \'' + CurrentClass + ':' + WordArray [ Index ] + '\' does not exist.' , self . EXIT_ON_ERROR )
+        elif WordArray [ Index + 1 ] == self . SPECIAL_CHARS [ 'COMMA' ] :
+            CurrentClass = CurrentObject . type
+            if self . GetTypeTable ( CurrentClass , WordArray [ Index ] ) :
+                CallingFunction = True
+                ParameterArray = [ WordArray [ Index + 2 ] ] + ParameterArray
+                WordArray . pop ( Index )
+                WordArray . pop ( Index )
+                WordArray . pop ( Index )
+                WordArray . pop ( Index )
+        elif WordArray [ Index + 1 ] in self . OPERATORS . values ( ) :
             RightOperand = WordArray [ Index + 2 ]
             OutputText = OutputText + self . CalcFunctionCall ( WordArray [ Index + 1 ] , [RightOperand] , WordArray [ Index ] )
             WordArray . pop ( Index + 1 )
@@ -303,15 +342,13 @@ class Parser ( ) :
             Token1 = SavedWordArray [ WordIndex ]
             Token2 = SavedWordArray [ WordIndex + 1 ]
             Token3 = SavedWordArray [ WordIndex + 2 ]
-            if Token2 == '(' :
-                break
             if len ( SavedWordArray ) > 4 :
                 Token4 = SavedWordArray [ WordIndex + 3 ]
                 Token5 = SavedWordArray [ WordIndex + 4 ]
                 if self . OpOneHighestPrecedence ( Token2 , Token4 ) :
                     OutputText = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
                 else :
-                    OutputText = self . DoOperation ( WordIndex + 2 , SavedWordArray , CurrentClass , OutputText )
+                    WordIndex = WordIndex + 2
             else :
                 OutputText = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
             print ( 'Reducing ' , SavedWordArray )
@@ -366,7 +403,7 @@ class Parser ( ) :
                     else :
                         Found = self . CheckCurrentSTs ( Token )
                         LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
-                        #OutputText = self . Reduce ( Token , LineWordArray , OutputText )
+                        OutputText = self . Reduce ( Token , LineWordArray , OutputText )
                 elif self . CheckCurrentSTs ( Token ) :
                     Found = self . CheckCurrentSTs ( Token )
                     LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
@@ -387,7 +424,7 @@ class Parser ( ) :
                             self . TypeTable [ self . CurrentClass ] . Size = self . TypeTable [ self . CurrentClass ] . Size + self . TypeTable [ self . SavedType ] . Size
                             self . TypeTable [ self . CurrentClass ] . InnerTypes [ Token ] = NewSymbol
                         OutputText = OutputText + ';Declaring {}\n' . format ( Token )
-                        OutputText = self . CalcDeclarationOutput ( self . TypeTable [ self . SavedType ] . Size , OutputText )
+                        OutputText = self . CalcDeclarationOutput ( self . SavedType , OutputText )
                         self . State = self . MAIN_STATES [ 'AFTER_DECLARING_VARIABLE' ]
                     else :
                         CompilerIssue . OutputError ( 'A variable named ' + Token + ' has already been declared' , self . EXIT_ON_ERROR )
@@ -611,8 +648,13 @@ class Parser ( ) :
         OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . STACK_FRAME_BEGIN + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
-    def CalcDeclarationOutput ( self , Size , OutputText ) :
-        OutputText = OutputText + self . SHIFT_STRING . format ( -Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
+    def CalcDeclarationOutput ( self , SavedType , OutputText ) :
+        
+        OutputText = OutputText + self . SHIFT_STRING . format ( -self . TypeTable [ SavedType ] . Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . ASM_TEXT [ 'DEFAULT_CREATE' ] . format ( -self . POINTER_SIZE , self . CurrentSTOffset )
+        OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + self . ResolveActionToAsm ( 'create' , self . TypeTable [ SavedType ] . Name ) +\
+            self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . SHIFT_STRING . format ( self . POINTER_SIZE )
         return OutputText
     
     def OutputActionStartCode ( self , OutputText ) :
