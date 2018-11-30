@@ -114,6 +114,69 @@ mov esp, ebp
 pop ebp
 ret
 
+OutputByte5:
+
+push ebp
+mov ebp, esp
+
+
+    ; load a pointer to the byte in ecx
+    mov ecx, ebp
+    add ecx, 8
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov ecx, ebp
+    add ecx, 12
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov ecx, ebp
+    add ecx, 16
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov ecx, ebp
+    add ecx, 20
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov ecx, ebp
+    add ecx, 24
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+
+
+mov esp, ebp
+pop ebp
+ret
+
 Main:
 
 push ebp
@@ -289,6 +352,140 @@ add ebx, -1
 mov [esp], ebx
 call OutputByte2
 add esp, 8
+;Declaring B3
+add esp, -1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -3
+mov [esp], ebx
+call Byte__On_Create
+add esp, 4
+;Declaring B4
+add esp, -1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -4
+mov [esp], ebx
+call Byte__On_Create
+add esp, 4
+;Declaring B5
+add esp, -1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -5
+mov [esp], ebx
+call Byte__On_Create
+add esp, 4
+;Loading 100
+add esp, -1
+
+mov byte [esp], 100
+
+add esp, -4
+mov ebx, ebp
+add ebx, -6
+mov [esp], ebx
+;Loading L
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 9
+;Loading 101
+add esp, -1
+
+mov byte [esp], 101
+
+add esp, -4
+mov ebx, ebp
+add ebx, -6
+mov [esp], ebx
+;Loading B2
+add esp, -4
+mov ebx, ebp
+add ebx, -2
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 9
+;Loading 102
+add esp, -1
+
+mov byte [esp], 102
+
+add esp, -4
+mov ebx, ebp
+add ebx, -6
+mov [esp], ebx
+;Loading B3
+add esp, -4
+mov ebx, ebp
+add ebx, -3
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 9
+;Loading 103
+add esp, -1
+
+mov byte [esp], 103
+
+add esp, -4
+mov ebx, ebp
+add ebx, -6
+mov [esp], ebx
+;Loading B4
+add esp, -4
+mov ebx, ebp
+add ebx, -4
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 9
+;Loading 104
+add esp, -1
+
+mov byte [esp], 104
+
+add esp, -4
+mov ebx, ebp
+add ebx, -6
+mov [esp], ebx
+;Loading B5
+add esp, -4
+mov ebx, ebp
+add ebx, -5
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 9
+;Loading B5
+add esp, -4
+mov ebx, ebp
+add ebx, -5
+mov [esp], ebx
+;Loading B4
+add esp, -4
+mov ebx, ebp
+add ebx, -4
+mov [esp], ebx
+;Loading B3
+add esp, -4
+mov ebx, ebp
+add ebx, -3
+mov [esp], ebx
+;Loading B2
+add esp, -4
+mov ebx, ebp
+add ebx, -2
+mov [esp], ebx
+;Loading L
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx
+call OutputByte5
+add esp, 20
 
 
 mov esp, ebp
