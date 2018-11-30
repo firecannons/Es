@@ -217,6 +217,7 @@ class Parser ( ) :
         self . CurrentSTOffset = 0
         self . SavedLeftOperand = ''
         self . TemplateItemNumber = 0
+        self . ParameterArray = [ ]
     
     def Parse ( self , SavedWordArray , OutputText ) :
         WordIndex = 0
@@ -229,6 +230,8 @@ class Parser ( ) :
     
     def GetOperatorDepth ( self , Operator ) :
         Depth = -1
+        if Operator == self . EMPTY_STRING :
+            Depth = len ( self . OPERATOR_PRECEDENCE )
         DepthIndex = 0
         while DepthIndex < len ( self . OPERATOR_PRECEDENCE ) and Depth == -1 :
             if Operator in self . OPERATOR_PRECEDENCE [ DepthIndex ] :
@@ -285,7 +288,6 @@ class Parser ( ) :
             
     
     def DoOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
-        ParameterArray = [ ]
         CurrentObject = ''
         if WordArray [ Index + 1 ] == self . OPERATORS [ 'COLON' ] :
             IsFunction = False
@@ -305,32 +307,42 @@ class Parser ( ) :
             elif IsFound == False :
                 CompilerIssue . OutputError ( 'Unknown ' + Operator + ' is not an allowed operator' , self . EXIT_ON_ERROR )
         elif WordArray [ Index + 1 ] == self . OPERATORS [ 'LEFT_PAREN' ] :
-            CurrentClass = ''
-            if CurrentObject != '' :
-                Found , CurrentClass = self . CheckCurrentSTs ( CurrentObject )
-                CurrentClass = CurrentClass . type
-            if self . GetTypeTable ( CurrentClass , WordArray [ Index ] ) :
-                ParameterArray = [ WordArray [ Index + 2 ] ] + ParameterArray
-                OutputText = OutputText + self . CalcFunctionCall ( WordArray [ Index ] , ParameterArray , CurrentObject )
-                WordArray . pop ( Index + 1 )
-                WordArray . pop ( Index + 1 )
+            if WordArray [ Index ] in self . OPERATORS :
+                if WordArray [ Index + 3 ] == self . OPERATORS [ 'RIGHT_PAREN' ] :
+                    WordArray . pop ( Index + 1 )
+                    WordArray . pop ( Index + 3 )
             else :
-                CompilerIssue . OutputError ( 'Function \'' + CurrentClass + ':' + WordArray [ Index ] + '\' does not exist.' , self . EXIT_ON_ERROR )
+                print ( "Computing left paren" )
+                CurrentClass = ''
+                if CurrentObject != '' :
+                    Found , CurrentClass = self . CheckCurrentSTs ( CurrentObject )
+                    CurrentClass = CurrentClass . type
+                if self . GetTypeTable ( CurrentClass , WordArray [ Index ] ) :
+                    print ( 'before ParameterArray' , self . ParameterArray )
+                    self . ParameterArray = [ WordArray [ Index + 2 ] ] + self . ParameterArray
+                    print ( 'Adding to ParameterArray ' , WordArray [ Index + 2 ] , self . ParameterArray )
+                    OutputText = OutputText + self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CurrentObject )
+                    self . ParameterArray = [ ]
+                    WordArray . pop ( Index )
+                    WordArray . pop ( Index )
+                    WordArray . pop ( Index )
+                    WordArray . pop ( Index )
+                else :
+                    CompilerIssue . OutputError ( 'Function \'' + CurrentClass + ':' + WordArray [ Index ] + '\' does not exist.' , self . EXIT_ON_ERROR )
+        elif WordArray [ Index + 1 ] == self . OPERATORS [ 'RIGHT_PAREN' ] :
+            Index = Index - 2
         elif WordArray [ Index + 1 ] == self . SPECIAL_CHARS [ 'COMMA' ] :
-            CurrentClass = CurrentObject . type
-            if self . GetTypeTable ( CurrentClass , WordArray [ Index ] ) :
-                CallingFunction = True
-                ParameterArray = [ WordArray [ Index + 2 ] ] + ParameterArray
-                WordArray . pop ( Index )
-                WordArray . pop ( Index )
-                WordArray . pop ( Index )
-                WordArray . pop ( Index )
+            CallingFunction = True
+            self . ParameterArray = [ WordArray [ Index ] ] + self . ParameterArray
+            print ( 'Adding to ParameterArray ' , WordArray [ Index ] , self . ParameterArray )
+            WordArray . pop ( Index )
+            WordArray . pop ( Index )
         elif WordArray [ Index + 1 ] in self . OPERATORS . values ( ) :
             RightOperand = WordArray [ Index + 2 ]
             OutputText = OutputText + self . CalcFunctionCall ( WordArray [ Index + 1 ] , [RightOperand] , WordArray [ Index ] )
             WordArray . pop ( Index + 1 )
             WordArray . pop ( Index + 1 )
-        return OutputText
+        return OutputText , Index
         
     
     def Reduce ( self , Token , SavedWordArray , OutputText ) :
@@ -338,20 +350,29 @@ class Parser ( ) :
         CurrentClass = ''
         FunctionStack = [ ]
         while len ( SavedWordArray ) > 2 :
-            print ( SavedWordArray )
+            print ( SavedWordArray , WordIndex )
             Token1 = SavedWordArray [ WordIndex ]
             Token2 = SavedWordArray [ WordIndex + 1 ]
-            Token3 = SavedWordArray [ WordIndex + 2 ]
-            if len ( SavedWordArray ) > 4 :
+            Token3 = ''
+            Token4 = ''
+            Token5 = ''
+            if len ( SavedWordArray ) - WordIndex > 2 :
+                Token3 = SavedWordArray [ WordIndex + 2 ]
+            if len ( SavedWordArray ) - WordIndex > 3 :
                 Token4 = SavedWordArray [ WordIndex + 3 ]
+            print ( len ( SavedWordArray ) , WordIndex , len ( SavedWordArray ) - WordIndex )
+            if len ( SavedWordArray ) - WordIndex > 4 :
                 Token5 = SavedWordArray [ WordIndex + 4 ]
-                if self . OpOneHighestPrecedence ( Token2 , Token4 ) :
-                    OutputText = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
-                else :
-                    WordIndex = WordIndex + 2
+            if self . OpOneHighestPrecedence ( Token2 , Token4 ) :
+                OutputText , WordIndex = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
+                print ( 'WordIndex = ' , WordIndex , 'len ( SavedWordArray ) = ' , len ( SavedWordArray ) )
+                print ( 'Reducing to ' , SavedWordArray )
             else :
+                WordIndex = WordIndex + 2
+                print ( 'Shifting ' , SavedWordArray )
+            '''else :
                 OutputText = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
-            print ( 'Reducing ' , SavedWordArray )
+                print ( 'Reducing to' , SavedWordArray )'''
         '''
         WordIndex = 0
         ExprCurrentClass = ''

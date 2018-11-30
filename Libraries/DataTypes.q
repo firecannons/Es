@@ -28,6 +28,17 @@ class Byte size 1
             mov ebx, [ebx]
             
             ; mov value of eax into position of [ebx]
-            mov [ebx], eax
+            mov byte [ebx], al
+            
+            
+            
+            
+            
+            ;mov ecx, ebx
+            ; Set other values
+            ;mov	eax, 4
+            ;mov	ebx, 1
+            ;mov	edx, 1
+            ;int	0x80
         end
 end

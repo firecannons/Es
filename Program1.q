@@ -11,5 +11,5 @@ end
 action Main
     hello ( 1 , "2" , "me" )
 
-    nothing ( 4 )
+    nothing ( 4 + 2 )
 end
