@@ -117,4 +117,39 @@ action Main
     B4 = 103
     B5 = 104
     OutputByte5 ( L , B2 , B3 , B4 , B5 )
+    B5 = 32
+    OutputByte ( B5 )
+    OutputByte ( B5 )
+    OutputByte ( B5 )
+    OutputByte ( B5 )
+    OutputByte ( B5 )
+    Byte S1
+    Byte S2
+    Byte S3
+    S1 = 100
+    S2 = 101
+    S3 = S1
+    S1 = S2
+    S2 = S3
+    OutputByte ( S1 )
+    OutputByte ( S2 )
+    OutputByte ( S3 )
+    S3 = S3 + 1
+    OutputByte ( S3 )
+    S3 = S3 + 1
+    OutputByte ( S3 )
+    S3 = S3 + 1
+    OutputByte ( S3 )
+    S3 = S3 + 1
+    OutputByte ( S3 )
+    S3 = S3 + 1
+    OutputByte ( S3 )
+    S3 = S3 + 1
+    OutputByte ( S3 )
+    S3 = S3 + 1
+    OutputByte ( S3 )
+    S3 = S3 + 1
+    OutputByte ( S3 )
+    S3 = S3 + 1
+    OutputByte ( S3 )
 end

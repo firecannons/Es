@@ -88,7 +88,9 @@ class Parser ( ) :
         'MAKING_TEMPLATE' : 22 ,
         'AFTER_TEMPLATE_NAME' : 23 ,
         'AFTER_TEMPLATE' : 24 ,
-        'ACTION_AT_END' : 25
+        'ACTION_AT_END' : 25 ,
+        'RETURN_WAITING_FOR_PARAM' : 26 ,
+        'RETURN_AT_END' : 27
         
     }
     
@@ -103,7 +105,8 @@ class Parser ( ) :
         'NORMAL' : 'normal' ,
         'CREATE' : 'create' ,
         'END' : 'end' ,
-        'EQUALS_SIGN' : '='
+        'EQUALS_SIGN' : '=' ,
+        'RETURNS' : 'returns'
         
     }
     
@@ -145,12 +148,13 @@ class Parser ( ) :
     
     MAIN_METHOD_NAMES = {
         OPERATORS [ 'EQUALS' ] : 'On_Equals' ,
-        OPERATORS [ 'CREATE' ] : 'On_Create'
+        OPERATORS [ 'CREATE' ] : 'On_Create' ,
+        OPERATORS [ 'PLUS' ] : 'On_Plus'
     }
     
     OPERATOR_MAPPING = {
         OPERATORS [ 'EQUALS' ] : MAIN_METHOD_NAMES [ '=' ] ,
-        OPERATORS [ 'CREATE' ] : MAIN_METHOD_NAMES [ 'create' ]
+        OPERATORS [ 'CREATE' ] : MAIN_METHOD_NAMES [ 'create' ] ,
     }
     
     OPERATOR_PRECEDENCE = [
@@ -201,6 +205,8 @@ class Parser ( ) :
     
     SPACE = ' '
     
+    RETURN_TEMP_LETTER = '['
+    
     
     ACTION_DECLARATION_OFFSET = 0
     ACTION_DEFINITION_OFFSET = 0
@@ -218,6 +224,7 @@ class Parser ( ) :
         self . SavedLeftOperand = ''
         self . TemplateItemNumber = 0
         self . ParameterArray = [ ]
+        self . ReturnTempIndex = 0
     
     def Parse ( self , SavedWordArray , OutputText ) :
         WordIndex = 0
@@ -260,6 +267,15 @@ class Parser ( ) :
         OutputText = ''
         OriginalOffset = self . CurrentSTOffset
         Class = ''
+        Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
+        if Found == True :
+            Class = CurrentSymbol . Type
+        for ReturnObject in self . GetTypeTable ( Class , '' ) [ self . ResolveActionToAsm ( Operator , Class ) ] . ReturnValues :
+            OutputText = OutputText + ';Adding return value {}\n'.format(ReturnObject.Name)
+            ReturnType = self . TypeTable [ ReturnObject . Type ]
+            OutputText = OutputText + self . SHIFT_STRING . format ( -ReturnType . Size )
+            self . CurrentSTOffset = self . CurrentSTOffset + -ReturnType . Size
+        AfterReturnOffset = self . CurrentSTOffset
         for CurrentOperand in ArrayOfOperands :
             OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand)
             OperandOffset = 0
@@ -274,16 +290,16 @@ class Parser ( ) :
             self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
             print ( self . CurrentSTOffset , OriginalOffset )
         if LeftOperand != '' :
-            OutputText = OutputText + ';Loading {}\n'.format(LeftOperand)
             Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
+            Class = CurrentSymbol . Type
+            OutputText = OutputText + ';Loading {}\n'.format(LeftOperand)
             OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( CurrentSymbol . Offset )
             self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
-            Class = CurrentSymbol . Type
         FunctionName = self . ResolveActionToAsm ( Operator , Class )
         OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
         print ( self . CurrentSTOffset , OriginalOffset )
-        OutputText = OutputText + self . SHIFT_STRING . format ( OriginalOffset - self . CurrentSTOffset )
-        self . CurrentSTOffset = OriginalOffset
+        OutputText = OutputText + self . SHIFT_STRING . format ( AfterReturnOffset - self . CurrentSTOffset )
+        self . CurrentSTOffset = AfterReturnOffset
         return OutputText
             
     
@@ -339,10 +355,31 @@ class Parser ( ) :
             WordArray . pop ( Index )
         elif WordArray [ Index + 1 ] in self . OPERATORS . values ( ) :
             RightOperand = WordArray [ Index + 2 ]
-            OutputText = OutputText + self . CalcFunctionCall ( WordArray [ Index + 1 ] , [RightOperand] , WordArray [ Index ] )
+            OutputText = OutputText + self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , WordArray [ Index ] )
+            
+            Found , CurrentClass = self . CheckCurrentSTs ( WordArray [ Index ] )
+            if Found == True :
+                CurrentClass = CurrentClass . Type
+            else :
+                CurrentClass = ''
+            print ( ' one ' , WordArray [ Index + 1 ] )
+            print ( self . ResolveActionToAsm ( WordArray [ Index + 1 ] , CurrentClass ) , WordArray [ Index + 1 ] , CurrentClass )
+            print ( self . GetTypeTable ( CurrentClass , '' ) )
+            print ( self . ResolveActionToAsm ( WordArray [ Index + 1 ] , CurrentClass ) )
+            ReturnArray = self . GetTypeTable ( CurrentClass , '' ) [ self . ResolveActionToAsm ( WordArray [ Index + 1 ] , CurrentClass ) ] . ReturnValues
+            if len ( ReturnArray ) > 0 :
+                NewName = self . RETURN_TEMP_LETTER + str ( self . ReturnTempIndex )
+                ReturnType = ReturnArray [ 0 ] . Type
+                NewSymbol = MySymbol ( NewName , ReturnType )
+                NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+                self . GetCurrentST ( ) [ NewName ] = NewSymbol
+                self . ReturnTempIndex = self . ReturnTempIndex + 1
+                WordArray [ Index ] = NewName
+            
+            
             WordArray . pop ( Index + 1 )
             WordArray . pop ( Index + 1 )
-        return OutputText , Index
+        return OutputText , Index , WordArray
         
     
     def Reduce ( self , Token , SavedWordArray , OutputText ) :
@@ -364,12 +401,15 @@ class Parser ( ) :
             if len ( SavedWordArray ) - WordIndex > 4 :
                 Token5 = SavedWordArray [ WordIndex + 4 ]
             if self . OpOneHighestPrecedence ( Token2 , Token4 ) :
-                OutputText , WordIndex = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
+                OutputText , WordIndex ,  SavedWordArray = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
                 print ( 'WordIndex = ' , WordIndex , 'len ( SavedWordArray ) = ' , len ( SavedWordArray ) )
                 print ( 'Reducing to ' , SavedWordArray )
             else :
                 WordIndex = WordIndex + 2
                 print ( 'Shifting ' , SavedWordArray )
+                
+            if len ( SavedWordArray ) - WordIndex < 2 :
+                WordIndex = WordIndex - 2
             '''else :
                 OutputText = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
                 print ( 'Reducing to' , SavedWordArray )'''
@@ -621,8 +661,26 @@ class Parser ( ) :
                 self . CurrentSTOffset = deepcopy ( self . ACTION_DEFINITION_OFFSET )
                 OutputText = self . OutputActionStartCode ( OutputText )
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            elif Token == self . KEYWORDS [ 'RETURNS' ] :
+                self . State = self . MAIN_STATES [ 'RETURN_WAITING_FOR_PARAM' ]
             else :
-                CompilerIssue . OutputError ( 'Expected NEWLINE after action' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected NEWLINE or ' , self . KEYWORDS [ 'RETURNS' ] , ' after action' , self . EXIT_ON_ERROR )
+        elif self . State == self . MAIN_STATES [ 'RETURN_WAITING_FOR_PARAM' ] :
+            if Token in self . TypeTable :
+                NewSymbol = MySymbol ( deepcopy ( self . EMPTY_STRING ) , Token )
+                self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ Token ] . Size
+                NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+                self . GetTypeTable ( self . CurrentClass , '' ) [ self . CurrentFunction ] . ReturnValues . append ( NewSymbol )
+                self . State = self . MAIN_STATES [ 'RETURN_AT_END' ]
+            else :
+                CompilerIssue . OutputError ( 'The type {} is not a currently valid type' . format ( Token ) , self . EXIT_ON_ERROR )
+        elif self . State == self . MAIN_STATES [ 'RETURN_AT_END' ] :
+            if Token == self . SPECIAL_CHARS [ 'NEWLINE' ] :
+                self . CurrentSTOffset = deepcopy ( self . ACTION_DEFINITION_OFFSET )
+                OutputText = self . OutputActionStartCode ( OutputText )
+                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            else :
+                CompilerIssue . OutputError ( 'Expected NEWLINE after return values' , self . EXIT_ON_ERROR )
         elif self . State == self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ] :
             if Token == self . COLON :
                 self . State = self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ]

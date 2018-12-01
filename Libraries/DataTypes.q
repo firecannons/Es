@@ -41,4 +41,24 @@ class Byte size 1
             ;mov	edx, 1
             ;int	0x80
         end
+        
+        action asm on + ( Byte Rhs ) returns Byte
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform addition
+            add byte cl, al
+            
+            ; mov value into return area
+            add ebx, 9
+            mov byte [ebx], cl
+        end
 end
