@@ -150,6 +150,16 @@ action Main
     OutputByte ( S3 )
     S3 = S3 + 1
     OutputByte ( S3 )
-    S3 = S3 + 1
+    S3 = S3 - 1
+    OutputByte ( S3 )
+    S3 = S3 - 1
+    OutputByte ( S3 )
+    S3 = S3 - 1
+    OutputByte ( S3 )
+    S3 = S3 - 1
+    OutputByte ( S3 )
+    S3 = S3 - 1
+    OutputByte ( S3 )
+    S3 = S3 - 1
     OutputByte ( S3 )
 end

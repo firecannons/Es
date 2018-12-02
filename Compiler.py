@@ -143,13 +143,14 @@ class Parser ( ) :
         'LESS_THAN' : '<' ,
         'EQUALS' : '=' ,
         'RIGHT_PAREN' : ')' ,
-        'CREATE' : 'create' ,
+        'CREATE' : 'create'
     }
     
     MAIN_METHOD_NAMES = {
         OPERATORS [ 'EQUALS' ] : 'On_Equals' ,
         OPERATORS [ 'CREATE' ] : 'On_Create' ,
-        OPERATORS [ 'PLUS' ] : 'On_Plus'
+        OPERATORS [ 'PLUS' ] : 'On_Plus' ,
+        OPERATORS [ 'MINUS' ] : 'On_Minus'
     }
     
     OPERATOR_MAPPING = {
@@ -263,18 +264,26 @@ class Parser ( ) :
         self . CurrentSTOffset = self . CurrentSTOffset - self . BYTE_SIZE
         return OutputText
     
-    def CalcFunctionCall ( self , Operator , ArrayOfOperands , LeftOperand ) :
+    def CalcFunctionCall ( self , Operator , ArrayOfOperands , LeftOperand , WordArray , Index ) :
         OutputText = ''
         OriginalOffset = self . CurrentSTOffset
         Class = ''
-        Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
-        if Found == True :
+        if LeftOperand != '' :
+            Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
             Class = CurrentSymbol . Type
-        for ReturnObject in self . GetTypeTable ( Class , '' ) [ self . ResolveActionToAsm ( Operator , Class ) ] . ReturnValues :
+        for ReturnObject in self . GetActionReturnValues ( Class , self . ResolveActionToAsm ( Operator , Class ) ) :
             OutputText = OutputText + ';Adding return value {}\n'.format(ReturnObject.Name)
             ReturnType = self . TypeTable [ ReturnObject . Type ]
             OutputText = OutputText + self . SHIFT_STRING . format ( -ReturnType . Size )
             self . CurrentSTOffset = self . CurrentSTOffset + -ReturnType . Size
+            
+            NewName = self . RETURN_TEMP_LETTER + str ( self . ReturnTempIndex )
+            ReturnType = ReturnObject . Type
+            NewSymbol = MySymbol ( NewName , ReturnType )
+            NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+            self . GetCurrentST ( ) [ NewName ] = NewSymbol
+            self . ReturnTempIndex = self . ReturnTempIndex + 1
+            WordArray [ Index ] = NewName
         AfterReturnOffset = self . CurrentSTOffset
         for CurrentOperand in ArrayOfOperands :
             OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand)
@@ -300,7 +309,7 @@ class Parser ( ) :
         print ( self . CurrentSTOffset , OriginalOffset )
         OutputText = OutputText + self . SHIFT_STRING . format ( AfterReturnOffset - self . CurrentSTOffset )
         self . CurrentSTOffset = AfterReturnOffset
-        return OutputText
+        return OutputText , WordArray
             
     
     def DoOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
@@ -337,7 +346,8 @@ class Parser ( ) :
                     print ( 'before ParameterArray' , self . ParameterArray )
                     self . ParameterArray = [ WordArray [ Index + 2 ] ] + self . ParameterArray
                     print ( 'Adding to ParameterArray ' , WordArray [ Index + 2 ] , self . ParameterArray )
-                    OutputText = OutputText + self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CurrentObject )
+                    NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CurrentObject , WordArray , Index )
+                    OutputText = OutputText + NewOutputText
                     self . ParameterArray = [ ]
                     WordArray . pop ( Index )
                     WordArray . pop ( Index )
@@ -355,27 +365,8 @@ class Parser ( ) :
             WordArray . pop ( Index )
         elif WordArray [ Index + 1 ] in self . OPERATORS . values ( ) :
             RightOperand = WordArray [ Index + 2 ]
-            OutputText = OutputText + self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , WordArray [ Index ] )
-            
-            Found , CurrentClass = self . CheckCurrentSTs ( WordArray [ Index ] )
-            if Found == True :
-                CurrentClass = CurrentClass . Type
-            else :
-                CurrentClass = ''
-            print ( ' one ' , WordArray [ Index + 1 ] )
-            print ( self . ResolveActionToAsm ( WordArray [ Index + 1 ] , CurrentClass ) , WordArray [ Index + 1 ] , CurrentClass )
-            print ( self . GetTypeTable ( CurrentClass , '' ) )
-            print ( self . ResolveActionToAsm ( WordArray [ Index + 1 ] , CurrentClass ) )
-            ReturnArray = self . GetTypeTable ( CurrentClass , '' ) [ self . ResolveActionToAsm ( WordArray [ Index + 1 ] , CurrentClass ) ] . ReturnValues
-            if len ( ReturnArray ) > 0 :
-                NewName = self . RETURN_TEMP_LETTER + str ( self . ReturnTempIndex )
-                ReturnType = ReturnArray [ 0 ] . Type
-                NewSymbol = MySymbol ( NewName , ReturnType )
-                NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                self . GetCurrentST ( ) [ NewName ] = NewSymbol
-                self . ReturnTempIndex = self . ReturnTempIndex + 1
-                WordArray [ Index ] = NewName
-            
+            NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , WordArray [ Index ] , WordArray , Index )
+            OutputText = OutputText + NewOutputText
             
             WordArray . pop ( Index + 1 )
             WordArray . pop ( Index + 1 )
@@ -670,7 +661,7 @@ class Parser ( ) :
                 NewSymbol = MySymbol ( deepcopy ( self . EMPTY_STRING ) , Token )
                 self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ Token ] . Size
                 NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                self . GetTypeTable ( self . CurrentClass , '' ) [ self . CurrentFunction ] . ReturnValues . append ( NewSymbol )
+                self . GetActionReturnValues ( self . CurrentClass , self . CurrentFunction ) . append ( NewSymbol )
                 self . State = self . MAIN_STATES [ 'RETURN_AT_END' ]
             else :
                 CompilerIssue . OutputError ( 'The type {} is not a currently valid type' . format ( Token ) , self . EXIT_ON_ERROR )
@@ -779,6 +770,13 @@ class Parser ( ) :
             OutTable = self . TypeTable [ Class ] . InnerTypes
         if Function != '' :
             OutTable = OutTable [ Function ] . Parameters
+        return OutTable
+    
+    def GetActionReturnValues ( self , Class , Function ) :
+        OutTable = self . TypeTable
+        if Class != '' :
+            OutTable = self . TypeTable [ Class ] . InnerTypes
+        OutTable = OutTable [ Function ] . ReturnValues
         return OutTable
     
     def FunctionInTypes ( self , Table , FuncName ) :
