@@ -165,8 +165,13 @@ action Main
     
     S3 = S3 - 1
     OutputByte ( S3 )
-    Byte S4
+    Byte S4 = 1
     S3 = S3 - S4
     OutputByte ( S3 )
+    
+    Byte S5 = 115
+    OutputByte ( S5 )
+    Byte S6 = S5
+    OutputByte ( S6 )
     
 end
