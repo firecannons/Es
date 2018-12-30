@@ -46,6 +46,10 @@ class Type ( ) :
         self . IsFunction = False
         self . Templates = { }
 
+class ScopeAdder ( ) :
+    def __init__ ( self , Type ) :
+        self . Type = Type
+
 class CompilerIssue :
     
     FAIL_COLOR_TEXT = '\033[91m'
@@ -90,7 +94,8 @@ class Parser ( ) :
         'AFTER_TEMPLATE' : 24 ,
         'ACTION_AT_END' : 25 ,
         'RETURN_WAITING_FOR_PARAM' : 26 ,
-        'RETURN_AT_END' : 27
+        'RETURN_AT_END' : 27 ,
+        'REDUCING_IF' : 28
         
     }
     
@@ -106,7 +111,8 @@ class Parser ( ) :
         'CREATE' : 'create' ,
         'END' : 'end' ,
         'EQUALS_SIGN' : '=' ,
-        'RETURNS' : 'returns'
+        'RETURNS' : 'returns' ,
+        'IF' : 'if'
         
     }
     
@@ -150,7 +156,8 @@ class Parser ( ) :
         OPERATORS [ 'EQUALS' ] : 'On_Equals' ,
         OPERATORS [ 'CREATE' ] : 'On_Create' ,
         OPERATORS [ 'PLUS' ] : 'On_Plus' ,
-        OPERATORS [ 'MINUS' ] : 'On_Minus'
+        OPERATORS [ 'MINUS' ] : 'On_Minus' ,
+        OPERATORS [ 'GREATER_THAN' ] : 'Greater_Than'
     }
     
     OPERATOR_MAPPING = {
@@ -208,6 +215,13 @@ class Parser ( ) :
     
     RETURN_TEMP_LETTER = '['
     
+    SCOPE_ADDER_TYPES = {
+        'IF' : 0 ,
+        'LOOP' : 1
+    }
+    
+    BYTE_TYPE_NAME = 'Byte'
+    
     
     ACTION_DECLARATION_OFFSET = 0
     ACTION_DEFINITION_OFFSET = 0
@@ -226,6 +240,7 @@ class Parser ( ) :
         self . TemplateItemNumber = 0
         self . ParameterArray = [ ]
         self . ReturnTempIndex = 0
+        self . ScopeAdderStack = [ ]
     
     def Parse ( self , SavedWordArray , OutputText ) :
         WordIndex = 0
@@ -268,6 +283,19 @@ class Parser ( ) :
         OutputText = ''
         OriginalOffset = self . CurrentSTOffset
         Class = ''
+        ArrayIndex = 0
+        for CurrentOperand in ArrayOfOperands :
+            if CurrentOperand . isdigit ( ) == True :
+                OutputText = OutputText + self . AllocateByte ( CurrentOperand )
+                ByteType = self . TypeTable [ self . BYTE_TYPE_NAME ]
+                NewName = self . RETURN_TEMP_LETTER + str ( self . ReturnTempIndex )
+                OutputText = OutputText + ';Declaring {}\n' . format ( NewName )
+                ArrayOfOperands [ ArrayIndex ] = NewName
+                NewSymbol = MySymbol ( NewName , ByteType )
+                NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+                self . GetCurrentST ( ) [ NewName ] = NewSymbol
+                self . ReturnTempIndex = self . ReturnTempIndex + 1
+            ArrayIndex = ArrayIndex + 1
         if LeftOperand != '' :
             Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
             Class = CurrentSymbol . Type
@@ -288,12 +316,8 @@ class Parser ( ) :
         for CurrentOperand in ArrayOfOperands :
             OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand)
             OperandOffset = 0
-            if CurrentOperand . isdigit ( ) == True :
-                OutputText = OutputText + self . AllocateByte ( CurrentOperand )
-                OperandOffset = self . CurrentSTOffset
-            else :
-                Found , CurrentSymbol = self . CheckCurrentSTs ( CurrentOperand )
-                OperandOffset = CurrentSymbol . Offset
+            Found , CurrentSymbol = self . CheckCurrentSTs ( CurrentOperand )
+            OperandOffset = CurrentSymbol . Offset
             OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( OperandOffset )
             print ( self . CurrentSTOffset , OriginalOffset , self . POINTER_SIZE)
             self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
@@ -373,7 +397,7 @@ class Parser ( ) :
         return OutputText , Index , WordArray
         
     
-    def Reduce ( self , Token , SavedWordArray , OutputText ) :
+    def Reduce ( self , Token , SavedWordArray , OutputText , IsInIf ) :
         WordIndex = 0
         CurrentClass = ''
         FunctionStack = [ ]
@@ -435,6 +459,8 @@ class Parser ( ) :
             elif Token == self . KEYWORDS [ 'END' ] :
                 if len ( self . STStack ) == 0 :
                     CompilerIssue . OutputError ( '\'end\' found when not in any upper scope' , self . EXIT_ON_ERROR )
+                elif len ( self . ScopeAdderStack ) > 0 :
+                    self . ScopeAdderStack . pop ( len ( self . ScopeAdderStack ) - 1 )
                 elif self . CurrentFunction != '' :
                     #print ( 'exiting function ' , self . CurrentFunction )
                     self . CurrentFunction = ''
@@ -444,6 +470,11 @@ class Parser ( ) :
                     print ( 'exiting class ' , self . CurrentClass )
                     self . CurrentClass = ''
                 self . STStack . pop ( len ( self . STStack ) - 1 )
+            elif Token == self . KEYWORDS [ 'IF' ] :
+                NewScopeAdder = ScopeAdder ( self . SCOPE_ADDER_TYPES [ 'IF' ] )
+                self . ScopeAdderStack . append ( NewScopeAdder )
+                LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
+                OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
             elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
                 OutputText = OutputText + Token
                 print ( 'In Asm Function -> Will output ASM to output' )
@@ -455,11 +486,11 @@ class Parser ( ) :
                     else :
                         Found = self . CheckCurrentSTs ( Token )
                         LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
-                        OutputText = self . Reduce ( Token , LineWordArray , OutputText )
+                        OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
                 elif self . CheckCurrentSTs ( Token ) :
                     Found = self . CheckCurrentSTs ( Token )
                     LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
-                    OutputText = self . Reduce ( Token , LineWordArray , OutputText )
+                    OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
                 else :
                     CompilerIssue . OutputError ( 'Type or symbol \'' + Token + '\' not found' , self . EXIT_ON_ERROR )
         elif self . State == self . MAIN_STATES [ 'DECLARING_VARIABLE' ] :
