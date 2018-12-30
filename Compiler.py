@@ -508,7 +508,9 @@ class Parser ( ) :
                             self . TypeTable [ self . CurrentClass ] . InnerTypes [ Token ] = NewSymbol
                         OutputText = OutputText + ';Declaring {}\n' . format ( Token )
                         OutputText = self . CalcDeclarationOutput ( self . SavedType , OutputText )
-                        self . State = self . MAIN_STATES [ 'AFTER_DECLARING_VARIABLE' ]
+                        LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
+                        OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
+                        self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
                     else :
                         CompilerIssue . OutputError ( 'A variable named ' + Token + ' has already been declared' , self . EXIT_ON_ERROR )
                 else :

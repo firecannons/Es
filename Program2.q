@@ -93,7 +93,7 @@ end
 
 
 action Main
-    Byte L
+    Byte L = 102
     OutputByte ( L )
     L = 100
     L = 120
@@ -166,7 +166,6 @@ action Main
     S3 = S3 - 1
     OutputByte ( S3 )
     Byte S4
-    S4 = 0
     S3 = S3 - S4
     OutputByte ( S3 )
     
