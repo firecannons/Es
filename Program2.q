@@ -173,5 +173,16 @@ action Main
     OutputByte ( S5 )
     Byte S6 = S5
     OutputByte ( S6 )
+    S6 = S6 - 5
+    OutputByte ( S6 )
+    
+    repeat while S6 > 105
+        S6 = S6 - 1
+    end
+    
+    OutputByte ( S6 )
+    OutputByte ( S6 )
+    OutputByte ( S6 )
+    OutputByte ( S6 )
     
 end

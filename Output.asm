@@ -138,7 +138,7 @@ mov esp, ebp
 pop ebp
 ret
 
-Byte__Greater_Than:
+Byte__On_Greater_Than:
 
 push ebp
 mov ebp, esp
@@ -161,6 +161,7 @@ mov ebp, esp
             
             ; move result onto stack
             add ebx, 8
+            mov ebx, [ebx]
             mov byte [ebx], al
             
         
@@ -1540,9 +1541,64 @@ add ebx, -64
 mov [esp], ebx
 call OutputByte
 add esp, 4
+add esp, -1
 
+mov byte [esp], 5
 
-mov esp, ebp
-pop ebp
-ret
+;Declaring [53
+;Adding return value 
+add esp, -1
+;Loading [53
+add esp, -4
+mov ebx, ebp
+add ebx, -65
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Minus
+add esp, 8
+;Loading [54
+add esp, -4
+mov ebx, ebp
+add ebx, -66
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call OutputByte
+add esp, 4
+R0:
+add esp, -1
+
+mov byte [esp], 105
+
+;Declaring [55
+;Adding return value 
+add esp, -1
+;Loading [55
+add esp, -4
+mov ebx, ebp
+add ebx, -67
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Greater_Than
+add esp, 8
+test cl, cl
+	jne R1
 

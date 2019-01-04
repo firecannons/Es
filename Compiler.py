@@ -95,7 +95,8 @@ class Parser ( ) :
         'ACTION_AT_END' : 25 ,
         'RETURN_WAITING_FOR_PARAM' : 26 ,
         'RETURN_AT_END' : 27 ,
-        'REDUCING_IF' : 28
+        'REDUCING_IF' : 28 ,
+        'AFTER_REPEAT' : 29
         
     }
     
@@ -112,7 +113,9 @@ class Parser ( ) :
         'END' : 'end' ,
         'EQUALS_SIGN' : '=' ,
         'RETURNS' : 'returns' ,
-        'IF' : 'if'
+        'IF' : 'if' ,
+        'REPEAT' : 'repeat' ,
+        'WHILE' : 'while'
         
     }
     
@@ -157,7 +160,7 @@ class Parser ( ) :
         OPERATORS [ 'CREATE' ] : 'On_Create' ,
         OPERATORS [ 'PLUS' ] : 'On_Plus' ,
         OPERATORS [ 'MINUS' ] : 'On_Minus' ,
-        OPERATORS [ 'GREATER_THAN' ] : 'Greater_Than'
+        OPERATORS [ 'GREATER_THAN' ] : 'On_Greater_Than'
     }
     
     OPERATOR_MAPPING = {
@@ -169,7 +172,7 @@ class Parser ( ) :
         { OPERATORS [ 'COLON' ] , SPECIAL_CHARS [ 'COMMA' ] } ,
         { OPERATORS [ 'LEFT_PAREN' ] } ,
         { OPERATORS [ 'PLUS' ] , OPERATORS [ 'MINUS' ] , OPERATORS [ 'MULT' ] , OPERATORS [ 'DIVIDE' ] } ,
-        { OPERATORS [ 'IS_EQUAL' ] , OPERATORS [ 'NOT_EQUAL' ] , OPERATORS [ 'LESS_OR_EQUAL' ] , OPERATORS [ 'GREATER_OR_EQUAL' ] } ,
+        { OPERATORS [ 'IS_EQUAL' ] , OPERATORS [ 'NOT_EQUAL' ] , OPERATORS [ 'LESS_OR_EQUAL' ] , OPERATORS [ 'GREATER_OR_EQUAL' ] , OPERATORS [ 'GREATER_THAN' ] } ,
         { OPERATORS [ 'EQUALS' ] } ,
         { OPERATORS [ 'RIGHT_PAREN' ] }
     ]
@@ -209,6 +212,9 @@ class Parser ( ) :
     
     SHIFT_STRING = 'add esp, {}\n'
     
+    COMPARISON_ASM = '''test cl, cl
+	jne R{}\n\n'''
+    
     BYTE_SIZE = 1
     
     SPACE = ' '
@@ -217,14 +223,17 @@ class Parser ( ) :
     
     SCOPE_ADDER_TYPES = {
         'IF' : 0 ,
-        'LOOP' : 1
+        'REPEAT' : 1
     }
     
     BYTE_TYPE_NAME = 'Byte'
     
-    
     ACTION_DECLARATION_OFFSET = 0
     ACTION_DEFINITION_OFFSET = 0
+    
+    NEW_ROUTINE_TEXT = 'R{}:\n'
+    
+    JUMP_TO_ROUTINE_ASM = 'jmp R{}'
     
     def __init__ ( self ) :
         self . State = deepcopy ( self . MAIN_STATES [ 'START_OF_LINE' ] )
@@ -241,6 +250,8 @@ class Parser ( ) :
         self . ParameterArray = [ ]
         self . ReturnTempIndex = 0
         self . ScopeAdderStack = [ ]
+        self . OffsetStack = [ 0 ]
+        self . RoutineCounter = 0
     
     def Parse ( self , SavedWordArray , OutputText ) :
         WordIndex = 0
@@ -277,6 +288,20 @@ class Parser ( ) :
         OutputText = OutputText + self . ASM_TEXT [ 'ALLOC_BYTE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + self . ASM_TEXT [ 'SET_CURRENT_BYTE' ] . format ( CurrentOperand ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
         self . CurrentSTOffset = self . CurrentSTOffset - self . BYTE_SIZE
+        return OutputText
+    
+    def OutputNewAsmRoutine ( self , OutputText , RoutineNumber ) :
+        OutputText = OutputText + self . NEW_ROUTINE_TEXT . format ( RoutineNumber )
+        RoutineNumber = RoutineNumber + 1
+        return OutputText , RoutineNumber
+    
+    def OutputComparisonAsm ( self , OutputText ) :
+        OutputText = OutputText + self . COMPARISON_ASM . format ( self . RoutineCounter )
+        self . RoutineCounter = self . RoutineCounter + 1
+        return OutputText
+    
+    def OutputJumpToBeginning ( self , OutputText ) :
+        OutputText = OutputText + self . JUMP_TO_ROUTINE_ASM . format ( self . RountineCounter - 1 )
         return OutputText
     
     def CalcFunctionCall ( self , Operator , ArrayOfOperands , LeftOperand , WordArray , Index ) :
@@ -450,16 +475,24 @@ class Parser ( ) :
             elif Token == self . KEYWORDS [ 'CLASS' ] :
                 self . State = self . MAIN_STATES [ 'CLASS_AFTER' ]
                 self . STStack . append ( { } )
+                self . OffsetStack . append ( self . CurrentSTOffset )
             elif Token == self . KEYWORDS [ 'ACTION' ] :
                 self . State = self . MAIN_STATES [ 'ACTION_AFTER' ]
                 self.  CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
                 self . CurrentSTOffset = deepcopy ( self . ACTION_DECLARATION_OFFSET )
                 self . ActionTypeDeclared = False
                 self . STStack . append ( { } )
+                self . OffsetStack . append ( self . CurrentSTOffset )
             elif Token == self . KEYWORDS [ 'END' ] :
                 if len ( self . STStack ) == 0 :
                     CompilerIssue . OutputError ( '\'end\' found when not in any upper scope' , self . EXIT_ON_ERROR )
-                elif len ( self . ScopeAdderStack ) > 0 :
+                if len ( self . STStack ) > 3 :
+                    OutOfAdderValue = self . OffsetStack [ len ( self . OffsetStack ) - 1 ]
+                    OutputText = OutputText + self . SHIFT_STRING . format ( self . CurrentSTOffset - OutOfAdderValue )
+                    print ( 'OK ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , len ( self . ScopeAdderStack ) )
+                    if self . ScopeAdderStack [ len ( self . ScopeAdderStack ) - 1 ] . Type == self . SCOPE_ADDER_TYPE [ 'REPEAT' ] :
+                        OutputText = OutputText + self . OutputJumpToBeginning ( OutputText )
+                        self . CurrentSTOffset = OutOfAdderValue
                     self . ScopeAdderStack . pop ( len ( self . ScopeAdderStack ) - 1 )
                 elif self . CurrentFunction != '' :
                     #print ( 'exiting function ' , self . CurrentFunction )
@@ -470,11 +503,18 @@ class Parser ( ) :
                     print ( 'exiting class ' , self . CurrentClass )
                     self . CurrentClass = ''
                 self . STStack . pop ( len ( self . STStack ) - 1 )
+                self . OffsetStack . pop ( len ( self . OffsetStack ) - 1 )
             elif Token == self . KEYWORDS [ 'IF' ] :
-                NewScopeAdder = ScopeAdder ( self . SCOPE_ADDER_TYPES [ 'IF' ] )
+                NewScopeAdder = ScopeAdder ( self . SCOPE_ADDER_TYPES [ 'REPEAT' ] )
                 self . ScopeAdderStack . append ( NewScopeAdder )
+                self . OffsetStack . append ( self . CurrentSTOffset )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
                 OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
+            elif Token == self . KEYWORDS [ 'REPEAT' ] :
+                NewScopeAdder = ScopeAdder ( self . SCOPE_ADDER_TYPES [ 'REPEAT' ] )
+                self . ScopeAdderStack . append ( NewScopeAdder )
+                self . OffsetStack . append ( self . CurrentSTOffset )
+                self . State = self . MAIN_STATES [ 'AFTER_REPEAT' ]
             elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
                 OutputText = OutputText + Token
                 print ( 'In Asm Function -> Will output ASM to output' )
@@ -715,6 +755,12 @@ class Parser ( ) :
                 CompilerIssue . OutputError ( 'Cound not find ' + Token + ' in ' + self . SavedLeftOperand . Name + ' which is of type '
                     + self . SavedLeftOperand . Type , self . EXIT_ON_ERROR )
                 self . State = self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ]
+        elif self . State == self . MAIN_STATES [ 'AFTER_REPEAT' ] :
+            if Token == self . KEYWORDS [ 'WHILE' ] :
+                OutputText , self . RoutineCounter = self . OutputNewAsmRoutine ( OutputText , self . RoutineCounter )
+                LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
+                OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
+                OutputText = self . OutputComparisonAsm ( OutputText )
         return SavedWordArray , WordIndex , OutputText
     
     def ResolveActionToName ( self , Action , Class ) :
