@@ -199,7 +199,14 @@ class Parser ( ) :
         'DEFAULT_CREATE' : 'add esp, {}\n' +\
             'mov ebx, ebp\n' +\
             'add ebx, {}\n' +\
-            'mov [esp], ebx\n'
+            'mov [esp], ebx\n' ,
+        'STACK_FRAME_BEGIN' : 'push ebp\nmov ebp, esp\n\n' ,
+        'STACK_FRAME_END' : '\nmov esp, ebp\npop ebp' ,
+        'SHIFT_STRING' : 'add esp, {}\n' ,
+        'SET_REG_STRING' : 'mov {}, {}\n' ,
+        'WHILE_COMPARISON' : 'mov byte cl, [esp]\ntest cl, cl\nje R{}\n\n' ,
+        'NEW_ROUTINE_TEXT' : 'R{}:\n' ,
+        'JUMP_TO_ROUTINE_ASM' : 'jmp R{}\n'
     }
     
     EXIT_ON_ERROR = True
@@ -212,22 +219,9 @@ class Parser ( ) :
     
     FUNCTION_OUTPUT_DELIMITER = '__'
     
-    STACK_FRAME_BEGIN = '''push ebp\nmov ebp, esp\n\n'''
-    
-    STACK_FRAME_END = '''\nmov esp, ebp\npop ebp'''
-    
-    SHIFT_STRING = 'add esp, {}\n'
-    
-    SET_REG_STRING = 'mov {}, {}\n'
-    
     REGISTERS = {
         'STACK_TOP' : 'esp'
     }
-    
-    COMPARISON_ASM = '''
-    mov byte cl, [esp]
-    test cl, cl
-    je R{}\n\n'''
     
     BYTE_SIZE = 1
     
@@ -245,15 +239,11 @@ class Parser ( ) :
     ACTION_DECLARATION_OFFSET = 0
     ACTION_DEFINITION_OFFSET = 0
     
-    NEW_ROUTINE_TEXT = 'R{}:\n'
-    
-    JUMP_TO_ROUTINE_ASM = 'jmp R{}\n'
-    
     def __init__ ( self ) :
         self . State = deepcopy ( self . MAIN_STATES [ 'START_OF_LINE' ] )
         self . SavedLine = ''
         self . TypeTable = { }
-        self . STStack = [ { }s ]
+        self . STStack = [ { } ]
         self . CurrentClass = ''
         self . CurrentFunction = ''
         self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
@@ -305,16 +295,16 @@ class Parser ( ) :
         return OutputText
     
     def OutputNewAsmRoutine ( self , OutputText , RoutineNumber ) :
-        OutputText = OutputText + self . NEW_ROUTINE_TEXT . format ( RoutineNumber )
+        OutputText = OutputText + self . ASM_TEXT [ 'NEW_ROUTINE_TEXT' ] . format ( RoutineNumber )
         RoutineNumber = RoutineNumber + 1
         return OutputText , RoutineNumber
     
     def OutputComparisonAsm ( self , OutputText ) :
-        OutputText = OutputText + self . COMPARISON_ASM . format ( self . RoutineCounter )
+        OutputText = OutputText + self . ASM_TEXT [ 'WHILE_COMPARISON' ] . format ( self . RoutineCounter )
         return OutputText
     
     def OutputJumpToRoutine ( self , OutputText , RoutineNumber ) :
-        OutputText = OutputText + self . JUMP_TO_ROUTINE_ASM . format ( RoutineNumber )
+        OutputText = OutputText + self . ASM_TEXT [ 'JUMP_TO_ROUTINE_ASM' ] . format ( RoutineNumber )
         return OutputText
         
     def OutputMoveRegister ( self , OutputText , Register , Number ) :
@@ -349,7 +339,7 @@ class Parser ( ) :
         for ReturnObject in self . GetActionReturnValues ( Class , self . ResolveActionToAsm ( Operator , Class ) ) :
             OutputText = OutputText + ';Adding return value {}\n'.format(ReturnObject.Name)
             ReturnType = self . TypeTable [ ReturnObject . Type ]
-            OutputText = OutputText + self . SHIFT_STRING . format ( -ReturnType . Size )
+            OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( -ReturnType . Size )
             self . CurrentSTOffset = self . CurrentSTOffset + -ReturnType . Size
             
             NewName = self . RETURN_TEMP_LETTER + str ( self . ReturnTempIndex )
@@ -380,7 +370,7 @@ class Parser ( ) :
         FunctionName = self . ResolveActionToAsm ( Operator , Class )
         OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
         print ( self . CurrentSTOffset , OriginalOffset )
-        OutputText = OutputText + self . SHIFT_STRING . format ( AfterReturnOffset - self . CurrentSTOffset )
+        OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( AfterReturnOffset - self . CurrentSTOffset )
         self . CurrentSTOffset = AfterReturnOffset
         return OutputText , WordArray
             
@@ -513,7 +503,7 @@ class Parser ( ) :
                 # There is an initial scope (global) so this should be three (global, class, function)
                 if len ( self . ScopeAdderStack ) > 0 :
                     OutOfAdderValue = self . OffsetStack [ len ( self . OffsetStack ) - 1 ]
-                    OutputText = OutputText + self . SHIFT_STRING . format ( OutOfAdderValue - self . CurrentSTOffset )
+                    OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( OutOfAdderValue - self . CurrentSTOffset )
                     print ( 'OK ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , len ( self . ScopeAdderStack ) )
                     if self . ScopeAdderStack [ len ( self . ScopeAdderStack ) - 1 ] . Type == self . SCOPE_ADDER_TYPES [ 'REPEAT' ] :
                         OutputText = self . OutputJumpToRoutine ( OutputText , self . RoutineCounter - 1 )
@@ -817,7 +807,7 @@ class Parser ( ) :
         return Output
     
     def CalcActionReturnOutput ( self , OutputText ) :
-        OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . STACK_FRAME_END + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_END' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + 'ret' + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
@@ -825,16 +815,19 @@ class Parser ( ) :
         OutputText = ''
         OutputText = OutputText + self . ResolveActionToName ( Function , Class )
         OutputText = OutputText + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
-        OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . STACK_FRAME_BEGIN + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_BEGIN' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        return OutputText
+    
+    def CalcCallLine ( self , OutputText , FunctionName ) :
+        OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
     
     def CalcDeclarationOutput ( self , SavedType , OutputText ) :
         
-        OutputText = OutputText + self . SHIFT_STRING . format ( -self . TypeTable [ SavedType ] . Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( -self . TypeTable [ SavedType ] . Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + self . ASM_TEXT [ 'DEFAULT_CREATE' ] . format ( -self . POINTER_SIZE , self . CurrentSTOffset )
-        OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + self . ResolveActionToAsm ( 'create' , self . TypeTable [ SavedType ] . Name ) +\
-            self . SPECIAL_CHARS [ 'NEWLINE' ]
-        OutputText = OutputText + self . SHIFT_STRING . format ( self . POINTER_SIZE )
+        OutputText = self . CalcCallLine ( OutputText , self . ResolveActionToAsm ( 'create' , self . TypeTable [ SavedType ] . Name ) )
+        OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( self . POINTER_SIZE )
         return OutputText
     
     def OutputActionStartCode ( self , OutputText ) :

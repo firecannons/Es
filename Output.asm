@@ -1648,10 +1648,9 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Greater_Than
 add esp, 8
-
-    mov byte cl, [esp]
-    test cl, cl
-    je R1
+mov byte cl, [esp]
+test cl, cl
+je R1
 
 ;Loading S6
 add esp, -4
