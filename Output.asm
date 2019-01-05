@@ -169,6 +169,129 @@ mov esp, ebp
 pop ebp
 ret
 
+Byte__On_Greater_Equal:
+
+push ebp
+mov ebp, esp
+
+
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            setge byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+        
+
+mov esp, ebp
+pop ebp
+ret
+
+Byte__On_If_Equal:
+
+push ebp
+mov ebp, esp
+
+
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            sete byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+        
+
+mov esp, ebp
+pop ebp
+ret
+
+Byte__On_Less_Than:
+
+push ebp
+mov ebp, esp
+
+
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            setl byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+        
+
+mov esp, ebp
+pop ebp
+ret
+
+Byte__On_Less_Or_Equal:
+
+push ebp
+mov ebp, esp
+
+
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            setle byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+        
+
+mov esp, ebp
+pop ebp
+ret
+
 OutputByte:
 
 push ebp
@@ -1678,59 +1801,69 @@ mov byte cl, [esp]
 test cl, cl
 je S1
 
-;Declaring S9
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call OutputByte
+add esp, 4
 add esp, -1
 
+mov byte [esp], 1
+
+;Declaring [60
+;Adding return value 
+add esp, -1
+;Loading [60
 add esp, -4
 mov ebx, ebp
 add ebx, -74
 mov [esp], ebx
-call Byte__On_Create
-add esp, 4
-add esp, -1
-
-mov byte [esp], 122
-
-;Declaring [60
-;Loading [60
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Minus
+add esp, 8
+;Loading [61
 add esp, -4
 mov ebx, ebp
 add ebx, -75
 mov [esp], ebx
-;Loading S9
+;Loading S6
 add esp, -4
 mov ebx, ebp
-add ebx, -74
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+add esp, 4
+jmp S0
+S1:
+add esp, 2
+add esp, -1
+
+mov byte [esp], 65
+
+;Declaring [62
+;Loading [62
+add esp, -4
+mov ebx, ebp
+add ebx, -72
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
 S2:
 add esp, -1
 
-mov byte [esp], 65
-
-;Declaring [61
-;Adding return value 
-add esp, -1
-;Loading [61
-add esp, -4
-mov ebx, ebp
-add ebx, -76
-mov [esp], ebx
-;Loading S9
-add esp, -4
-mov ebx, ebp
-add ebx, -74
-mov [esp], ebx
-call Byte__On_Greater_Than
-add esp, 8
-mov byte cl, [esp]
-test cl, cl
-je S3
-
-add esp, -1
-
-mov byte [esp], 1
+mov byte [esp], 121
 
 ;Declaring [63
 ;Adding return value 
@@ -1738,138 +1871,131 @@ add esp, -1
 ;Loading [63
 add esp, -4
 mov ebx, ebp
-add ebx, -78
+add ebx, -73
 mov [esp], ebx
-;Loading S9
+;Loading S6
 add esp, -4
 mov ebx, ebp
-add ebx, -74
-mov [esp], ebx
-call Byte__On_Minus
-add esp, 8
-;Loading [64
-add esp, -4
-mov ebx, ebp
-add ebx, -79
-mov [esp], ebx
-;Loading S9
-add esp, -4
-mov ebx, ebp
-add ebx, -74
-mov [esp], ebx
-call Byte__On_Equals
-add esp, 8
-;Declaring S10
-add esp, -1
-
-add esp, -4
-mov ebx, ebp
-add ebx, -80
-mov [esp], ebx
-call Byte__On_Create
-add esp, 4
-add esp, -1
-
-mov byte [esp], 122
-
-;Declaring [65
-;Loading [65
-add esp, -4
-mov ebx, ebp
-add ebx, -81
-mov [esp], ebx
-;Loading S10
-add esp, -4
-mov ebx, ebp
-add ebx, -80
-mov [esp], ebx
-call Byte__On_Equals
-add esp, 8
-S4:
-add esp, -1
-
-mov byte [esp], 65
-
-;Declaring [66
-;Adding return value 
-add esp, -1
-;Loading [66
-add esp, -4
-mov ebx, ebp
-add ebx, -82
-mov [esp], ebx
-;Loading S10
-add esp, -4
-mov ebx, ebp
-add ebx, -80
+add ebx, -64
 mov [esp], ebx
 call Byte__On_Greater_Than
 add esp, 8
 mov byte cl, [esp]
 test cl, cl
-je S5
+jne S3
 
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call OutputByte
+add esp, 4
 add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [68
+;Declaring [65
 ;Adding return value 
 add esp, -1
-;Loading [68
+;Loading [65
 add esp, -4
 mov ebx, ebp
-add ebx, -84
+add ebx, -75
 mov [esp], ebx
-;Loading S10
+;Loading S6
 add esp, -4
 mov ebx, ebp
-add ebx, -80
+add ebx, -64
 mov [esp], ebx
-call Byte__On_Minus
+call Byte__On_Plus
 add esp, 8
-;Loading [69
+;Loading [66
 add esp, -4
 mov ebx, ebp
-add ebx, -85
+add ebx, -76
 mov [esp], ebx
-;Loading S10
+;Loading S6
 add esp, -4
 mov ebx, ebp
-add ebx, -80
+add ebx, -64
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
-;Declaring S11
-add esp, -1
-
-add esp, -4
-mov ebx, ebp
-add ebx, -86
-mov [esp], ebx
-call Byte__On_Create
 add esp, 4
-add esp, -1
-
-mov byte [esp], 122
-
-;Declaring [70
-;Loading [70
-add esp, -4
-mov ebx, ebp
-add ebx, -87
-mov [esp], ebx
-;Loading S11
-add esp, -4
-mov ebx, ebp
-add ebx, -86
-mov [esp], ebx
-call Byte__On_Equals
-add esp, 8
-S6:
+jmp S2
+S3:
+add esp, 2
+S4:
 add esp, -1
 
 mov byte [esp], 65
+
+;Declaring [67
+;Adding return value 
+add esp, -1
+;Loading [67
+add esp, -4
+mov ebx, ebp
+add ebx, -73
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Less_Or_Equal
+add esp, 8
+mov byte cl, [esp]
+test cl, cl
+jne S5
+
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [69
+;Adding return value 
+add esp, -1
+;Loading [69
+add esp, -4
+mov ebx, ebp
+add ebx, -75
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Minus
+add esp, 8
+;Loading [70
+add esp, -4
+mov ebx, ebp
+add ebx, -76
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+add esp, 4
+jmp S4
+S5:
+add esp, 2
+S6:
+add esp, -1
+
+mov byte [esp], 122
 
 ;Declaring [71
 ;Adding return value 
@@ -1877,19 +2003,26 @@ add esp, -1
 ;Loading [71
 add esp, -4
 mov ebx, ebp
-add ebx, -88
+add ebx, -73
 mov [esp], ebx
-;Loading S11
+;Loading S6
 add esp, -4
 mov ebx, ebp
-add ebx, -86
+add ebx, -64
 mov [esp], ebx
-call Byte__On_Greater_Than
+call Byte__On_Greater_Equal
 add esp, 8
 mov byte cl, [esp]
 test cl, cl
-je S7
+jne S7
 
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call OutputByte
+add esp, 4
 add esp, -1
 
 mov byte [esp], 1
@@ -1900,132 +2033,16 @@ add esp, -1
 ;Loading [73
 add esp, -4
 mov ebx, ebp
-add ebx, -90
+add ebx, -75
 mov [esp], ebx
-;Loading S11
+;Loading S6
 add esp, -4
 mov ebx, ebp
-add ebx, -86
+add ebx, -64
 mov [esp], ebx
-call Byte__On_Minus
+call Byte__On_Plus
 add esp, 8
 ;Loading [74
-add esp, -4
-mov ebx, ebp
-add ebx, -91
-mov [esp], ebx
-;Loading S11
-add esp, -4
-mov ebx, ebp
-add ebx, -86
-mov [esp], ebx
-call Byte__On_Equals
-add esp, 8
-;Declaring S12
-add esp, -1
-
-add esp, -4
-mov ebx, ebp
-add ebx, -92
-mov [esp], ebx
-call Byte__On_Create
-add esp, 4
-add esp, -1
-
-mov byte [esp], 122
-
-;Declaring [75
-;Loading [75
-add esp, -4
-mov ebx, ebp
-add ebx, -93
-mov [esp], ebx
-;Loading S12
-add esp, -4
-mov ebx, ebp
-add ebx, -92
-mov [esp], ebx
-call Byte__On_Equals
-add esp, 8
-S8:
-add esp, -1
-
-mov byte [esp], 65
-
-;Declaring [76
-;Adding return value 
-add esp, -1
-;Loading [76
-add esp, -4
-mov ebx, ebp
-add ebx, -94
-mov [esp], ebx
-;Loading S12
-add esp, -4
-mov ebx, ebp
-add ebx, -92
-mov [esp], ebx
-call Byte__On_Greater_Than
-add esp, 8
-mov byte cl, [esp]
-test cl, cl
-je S9
-
-add esp, -1
-
-mov byte [esp], 1
-
-;Declaring [78
-;Adding return value 
-add esp, -1
-;Loading [78
-add esp, -4
-mov ebx, ebp
-add ebx, -96
-mov [esp], ebx
-;Loading S12
-add esp, -4
-mov ebx, ebp
-add ebx, -92
-mov [esp], ebx
-call Byte__On_Minus
-add esp, 8
-;Loading [79
-add esp, -4
-mov ebx, ebp
-add ebx, -97
-mov [esp], ebx
-;Loading S12
-add esp, -4
-mov ebx, ebp
-add ebx, -92
-mov [esp], ebx
-call Byte__On_Equals
-add esp, 8
-add esp, 4
-jmp S8
-S9:
-add esp, 2
-add esp, 6
-jmp S6
-S7:
-add esp, 2
-add esp, 6
-jmp S4
-S5:
-add esp, 2
-add esp, 6
-jmp S2
-S3:
-add esp, 2
-add esp, -1
-
-mov byte [esp], 1
-
-;Declaring [80
-;Adding return value 
-add esp, -1
-;Loading [80
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2035,12 +2052,66 @@ add esp, -4
 mov ebx, ebp
 add ebx, -64
 mov [esp], ebx
-call Byte__On_Minus
+call Byte__On_Equals
 add esp, 8
-;Loading [81
+add esp, 4
+jmp S6
+S7:
+add esp, 2
+S8:
+add esp, -1
+
+mov byte [esp], 65
+
+;Declaring [75
+;Adding return value 
+add esp, -1
+;Loading [75
 add esp, -4
 mov ebx, ebp
-add ebx, -77
+add ebx, -73
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_If_Equal
+add esp, 8
+mov byte cl, [esp]
+test cl, cl
+jne S9
+
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [77
+;Adding return value 
+add esp, -1
+;Loading [77
+add esp, -4
+mov ebx, ebp
+add ebx, -75
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Minus
+add esp, 8
+;Loading [78
+add esp, -4
+mov ebx, ebp
+add ebx, -76
 mov [esp], ebx
 ;Loading S6
 add esp, -4
@@ -2049,9 +2120,75 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
-add esp, 6
-jmp S0
-S1:
+add esp, 4
+jmp S8
+S9:
+add esp, 2
+S10:
+add esp, -1
+
+mov byte [esp], 122
+
+;Declaring [79
+;Adding return value 
+add esp, -1
+;Loading [79
+add esp, -4
+mov ebx, ebp
+add ebx, -73
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Less_Than
+add esp, 8
+mov byte cl, [esp]
+test cl, cl
+je S11
+
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [81
+;Adding return value 
+add esp, -1
+;Loading [81
+add esp, -4
+mov ebx, ebp
+add ebx, -75
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Plus
+add esp, 8
+;Loading [82
+add esp, -4
+mov ebx, ebp
+add ebx, -76
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+add esp, 4
+jmp S10
+S11:
 add esp, 2
 ;Loading S6
 add esp, -4

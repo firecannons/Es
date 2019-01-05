@@ -168,7 +168,11 @@ class Parser ( ) :
         OPERATORS [ 'CREATE' ] : 'On_Create' ,
         OPERATORS [ 'PLUS' ] : 'On_Plus' ,
         OPERATORS [ 'MINUS' ] : 'On_Minus' ,
-        OPERATORS [ 'GREATER_THAN' ] : 'On_Greater_Than'
+        OPERATORS [ 'GREATER_THAN' ] : 'On_Greater_Than' ,
+        OPERATORS [ 'GREATER_OR_EQUAL' ] : 'On_Greater_Equal' ,
+        OPERATORS [ 'IS_EQUAL' ] : 'On_If_Equal' ,
+        OPERATORS [ 'LESS_THAN' ] : 'On_Less_Than' ,
+        OPERATORS [ 'LESS_OR_EQUAL' ] : 'On_Less_Or_Equal'
     }
     
     OPERATOR_MAPPING = {
@@ -180,7 +184,7 @@ class Parser ( ) :
         { OPERATORS [ 'COLON' ] , SPECIAL_CHARS [ 'COMMA' ] } ,
         { OPERATORS [ 'LEFT_PAREN' ] } ,
         { OPERATORS [ 'PLUS' ] , OPERATORS [ 'MINUS' ] , OPERATORS [ 'MULT' ] , OPERATORS [ 'DIVIDE' ] } ,
-        { OPERATORS [ 'IS_EQUAL' ] , OPERATORS [ 'NOT_EQUAL' ] , OPERATORS [ 'LESS_OR_EQUAL' ] , OPERATORS [ 'GREATER_OR_EQUAL' ] , OPERATORS [ 'GREATER_THAN' ] } ,
+        { OPERATORS [ 'IS_EQUAL' ] , OPERATORS [ 'NOT_EQUAL' ] , OPERATORS [ 'GREATER_THAN' ] , OPERATORS [ 'GREATER_OR_EQUAL' ] , OPERATORS [ 'LESS_OR_EQUAL' ] , OPERATORS [ 'LESS_THAN' ] } ,
         { OPERATORS [ 'EQUALS' ] } ,
         { OPERATORS [ 'RIGHT_PAREN' ] }
     ]
@@ -309,7 +313,7 @@ class Parser ( ) :
         return OutputText
     
     def OutputUntilComparisonAsm ( self , OutputText , RoutineNumber ) :
-        OutputText = OutputText + self . ASM_TEXT [ 'WHILE_COMPARISON' ] . format ( RoutineNumber )
+        OutputText = OutputText + self . ASM_TEXT [ 'UNTIL_COMPARISON' ] . format ( RoutineNumber )
         return OutputText
     
     def OutputJumpToRoutine ( self , OutputText , RoutineNumber ) :

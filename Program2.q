@@ -181,23 +181,34 @@ action Main
     Byte S8 = 121
     
     repeat while S6 > 65
-        Byte S9 = 122
-        repeat while S9 > 65
-            S9 = S9 - 1
-            Byte S10 = 122
-            repeat while S10 > 65
-                S10 = S10 - 1
-                Byte S11 = 122
-                repeat while S11 > 65
-                    S11 = S11 - 1
-                    Byte S12 = 122
-                    repeat while S12 > 65
-                        S12 = S12 - 1
-                    end
-                end
-            end
-        end
+        OutputByte ( S6 )
         S6 = S6 - 1
+    end
+    
+    S6 = 65
+    repeat until S6 > 121
+        OutputByte ( S6 )
+        S6 = S6 + 1
+    end
+    
+    repeat until S6 <= 65
+        OutputByte ( S6 )
+        S6 = S6 - 1
+    end
+    
+    repeat until S6 >= 122
+        OutputByte ( S6 )
+        S6 = S6 + 1
+    end
+    
+    repeat until S6 == 65
+        OutputByte ( S6 )
+        S6 = S6 - 1
+    end
+    
+    repeat while S6 < 122
+        OutputByte ( S6 )
+        S6 = S6 + 1
     end
     
     OutputByte ( S6 )
