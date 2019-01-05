@@ -178,12 +178,17 @@ action Main
     OutputByte ( S6 )
     S6 = 122
     Byte S7 = 65
+    Byte S8 = 121
     
-    repeat while S6 > 65
-        OutputByte ( S6 )
-        OutputByte ( S7 )
+    repeat while S6 > 120
         S6 = S6 - 1
-        S7 = S7 + 1
+    end
+    
+    S6 = 120
+    OutputByte ( S6 )
+    repeat while S6 > 100
+        OutputByte ( S8 )
+        S6 = S6 - 1
     end
     
     OutputByte ( S6 )

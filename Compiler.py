@@ -51,10 +51,11 @@ class ScopeAdder ( ) :
         self . Type = Type
 
 class Scope ( ) :
-    def __init__ ( self , Type , Offset ) :
+    def __init__ ( self , Type , Offset , RoutineNumber = -1 ) :
         self . Type = Type
         self . Offset = Offset
         self . Symbols = { }
+        self . RoutineNumber = RoutineNumber
 
 class CompilerIssue :
     
@@ -295,13 +296,12 @@ class Parser ( ) :
         self . CurrentSTOffset = self . CurrentSTOffset - self . BYTE_SIZE
         return OutputText
     
-    def OutputNewAsmRoutine ( self , OutputText , RoutineNumber ) :
+    def OutputAsmRoutine ( self , OutputText , RoutineNumber ) :
         OutputText = OutputText + self . ASM_TEXT [ 'NEW_ROUTINE_TEXT' ] . format ( RoutineNumber )
-        RoutineNumber = RoutineNumber + 1
-        return OutputText , RoutineNumber
+        return OutputText
     
-    def OutputComparisonAsm ( self , OutputText ) :
-        OutputText = OutputText + self . ASM_TEXT [ 'WHILE_COMPARISON' ] . format ( self . RoutineCounter )
+    def OutputComparisonAsm ( self , OutputText , RoutineNumber ) :
+        OutputText = OutputText + self . ASM_TEXT [ 'WHILE_COMPARISON' ] . format ( RoutineNumber )
         return OutputText
     
     def OutputJumpToRoutine ( self , OutputText , RoutineNumber ) :
@@ -499,33 +499,35 @@ class Parser ( ) :
             elif Token == self . KEYWORDS [ 'END' ] :
                 if len ( self . STStack ) == 0 :
                     CompilerIssue . OutputError ( '\'end\' found when not in any upper scope' , self . EXIT_ON_ERROR )
+                CurrentST = self . GetCurrentST ( )
                 # There is an initial scope (global) so this should be three (global, class, function)
-                if self . STStack  [ len ( self . STStack ) - 1 ] . Type == self . SCOPE_TYPES [ 'IF' ]\
-                    or self . STStack  [ len ( self . STStack ) - 1 ] . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
-                    OutOfAdderValue = self . STStack [ len ( self . STStack ) - 1 ] . Offset
-                    OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( OutOfAdderValue - self . CurrentSTOffset )
+                if CurrentST . Type == self . SCOPE_TYPES [ 'IF' ]\
+                    or CurrentST . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
+                    OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( CurrentST . Offset - self . CurrentSTOffset )
                     print ( 'OK ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) )
-                    if self . STStack [ len ( self . STStack ) - 1 ] . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
-                        OutputText = self . OutputJumpToRoutine ( OutputText , self . RoutineCounter - 1 )
-                        self . CurrentSTOffset = OutOfAdderValue
-                    OutputText , self . RoutineCounter = self . OutputNewAsmRoutine ( OutputText , self . RoutineCounter )
+                    if CurrentST . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
+                        OutputText = self . OutputJumpToRoutine ( OutputText , CurrentST . RoutineNumber )
+                        self . CurrentSTOffset = CurrentST . Offset
+                    OutputText = self . OutputAsmRoutine ( OutputText , CurrentST . RoutineNumber + 1 )
+                    OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( CurrentST . Offset - CurrentST . OffsetAfterComparison )
                 elif self . CurrentFunction != '' :
                     #print ( 'exiting function ' , self . CurrentFunction )
                     self . CurrentFunction = ''
                     self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
                     OutputText = self . CalcActionReturnOutput ( OutputText )
-                elif self . CurrentClass != '' :s
+                elif self . CurrentClass != '' :
                     print ( 'exiting class ' , self . CurrentClass )
                     self . CurrentClass = ''
                 self . STStack . pop ( len ( self . STStack ) - 1 )
             elif Token == self . KEYWORDS [ 'IF' ] :
-                NewScopeAdder = ScopeAdder ( self . SCOPE_TYPES [ 'REPEAT' ] )
+                NewScopeAdder = ScopeAdder ( self . SCOPE_TYPES [ 'IF' ] )
                 self . ScopeAdderStack . append ( NewScopeAdder )
                 self . OffsetStack . append ( self . CurrentSTOffset )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
                 OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
             elif Token == self . KEYWORDS [ 'REPEAT' ] :
-                self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'REPEAT' ] , self . CurrentSTOffset ) )
+                self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'REPEAT' ] , self . CurrentSTOffset , self . RoutineCounter ) )
+                self . RoutineCounter = self . RoutineCounter + 2
                 self . State = self . MAIN_STATES [ 'AFTER_REPEAT' ]
             elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
                 OutputText = OutputText + Token
@@ -769,10 +771,11 @@ class Parser ( ) :
                 self . State = self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ]
         elif self . State == self . MAIN_STATES [ 'AFTER_REPEAT' ] :
             if Token == self . KEYWORDS [ 'WHILE' ] :
-                OutputText , self . RoutineCounter = self . OutputNewAsmRoutine ( OutputText , self . RoutineCounter )
+                OutputText = self . OutputAsmRoutine ( OutputText , self . GetCurrentST ( ) . RoutineNumber )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
                 OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
-                OutputText = self . OutputComparisonAsm ( OutputText )
+                OutputText = self . OutputComparisonAsm ( OutputText , self . GetCurrentST ( ) . RoutineNumber + 1 )
+                self . GetCurrentST ( ) . OffsetAfterComparison = self . CurrentSTOffset
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
             else :
                 CompilerIssue . OutputError ( 'Expected {} after {}' . format ( self . KEYWORDS [ 'WHILE' ] , self . KEYWORDS [ 'REPEAT' ] ) , self . EXIT_ON_ERROR )
