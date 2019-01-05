@@ -50,6 +50,12 @@ class ScopeAdder ( ) :
     def __init__ ( self , Type ) :
         self . Type = Type
 
+class Scope ( ) :
+    def __init__ ( self , Type , Offset ) :
+        self . Type = Type
+        self . Offset = Offset
+        self . Symbols = { }
+
 class CompilerIssue :
     
     FAIL_COLOR_TEXT = '\033[91m'
@@ -212,6 +218,12 @@ class Parser ( ) :
     
     SHIFT_STRING = 'add esp, {}\n'
     
+    SET_REG_STRING = 'mov {}, {}\n'
+    
+    REGISTERS = {
+        'STACK_TOP' : 'esp'
+    }
+    
     COMPARISON_ASM = '''
     mov byte cl, [esp]
     test cl, cl
@@ -241,7 +253,7 @@ class Parser ( ) :
         self . State = deepcopy ( self . MAIN_STATES [ 'START_OF_LINE' ] )
         self . SavedLine = ''
         self . TypeTable = { }
-        self . STStack = [ { } ]
+        self . STStack = [ { }s ]
         self . CurrentClass = ''
         self . CurrentFunction = ''
         self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
@@ -304,6 +316,15 @@ class Parser ( ) :
     def OutputJumpToRoutine ( self , OutputText , RoutineNumber ) :
         OutputText = OutputText + self . JUMP_TO_ROUTINE_ASM . format ( RoutineNumber )
         return OutputText
+        
+    def OutputMoveRegister ( self , OutputText , Register , Number ) :
+        OutputText = OutputText + self . SET_REG_STRING . format ( Register , Number )
+        return OutputText
+    
+    def OutputMoveStackRegister ( self , OutputText , Number ) :
+        OutputText = self . OutputMoveRegister ( OutputText , self . REGISTERS [ 'STACK_TOP' ] , Number )
+        return OutputText
+        
     
     def CalcFunctionCall ( self , Operator , ArrayOfOperands , LeftOperand , WordArray , Index ) :
         OutputText = ''
