@@ -180,15 +180,14 @@ action Main
     Byte S7 = 65
     Byte S8 = 121
     
-    repeat while S6 > 120
+    repeat while S6 > 65
+        Byte S9 = 122
+        repeat while S9 > 65
+            S9 = S9 - 1
+            OutputByte ( S9 )
+        end
         S6 = S6 - 1
-    end
-    
-    S6 = 120
-    OutputByte ( S6 )
-    repeat while S6 > 100
-        OutputByte ( S8 )
-        S6 = S6 - 1
+        S8 = 200
     end
     
     OutputByte ( S6 )
