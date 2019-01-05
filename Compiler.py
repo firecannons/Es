@@ -229,9 +229,12 @@ class Parser ( ) :
     
     RETURN_TEMP_LETTER = '['
     
-    SCOPE_ADDER_TYPES = {
+    SCOPE_TYPES = {
         'IF' : 0 ,
-        'REPEAT' : 1
+        'REPEAT' : 1 ,
+        'GLOBAL' : 2 ,
+        'CLASS' : 3 ,
+        'ACTION' : 4
     }
     
     BYTE_TYPE_NAME = 'Byte'
@@ -243,7 +246,7 @@ class Parser ( ) :
         self . State = deepcopy ( self . MAIN_STATES [ 'START_OF_LINE' ] )
         self . SavedLine = ''
         self . TypeTable = { }
-        self . STStack = [ { } ]
+        self . STStack = [ Scope ( self . SCOPE_TYPES [ 'GLOBAL' ] , 0 ) ]
         self . CurrentClass = ''
         self . CurrentFunction = ''
         self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
@@ -253,8 +256,6 @@ class Parser ( ) :
         self . TemplateItemNumber = 0
         self . ParameterArray = [ ]
         self . ReturnTempIndex = 0
-        self . ScopeAdderStack = [ ]
-        self . OffsetStack = [ 0 ]
         self . RoutineCounter = 0
     
     def Parse ( self , SavedWordArray , OutputText ) :
@@ -330,7 +331,7 @@ class Parser ( ) :
                 ArrayOfOperands [ ArrayIndex ] = NewName
                 NewSymbol = MySymbol ( NewName , ByteType )
                 NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                self . GetCurrentST ( ) [ NewName ] = NewSymbol
+                self . GetCurrentST ( ) . Symbols [ NewName ] = NewSymbol
                 self . ReturnTempIndex = self . ReturnTempIndex + 1
             ArrayIndex = ArrayIndex + 1
         if LeftOperand != '' :
@@ -346,7 +347,7 @@ class Parser ( ) :
             ReturnType = ReturnObject . Type
             NewSymbol = MySymbol ( NewName , ReturnType )
             NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-            self . GetCurrentST ( ) [ NewName ] = NewSymbol
+            self . GetCurrentST ( ) . Symbols [ NewName ] = NewSymbol
             self . ReturnTempIndex = self . ReturnTempIndex + 1
             WordArray [ Index ] = NewName
         AfterReturnOffset = self . CurrentSTOffset
@@ -488,51 +489,44 @@ class Parser ( ) :
                 self . State = self . MAIN_STATES [ 'USING_WAITING_FOR_WORD' ]
             elif Token == self . KEYWORDS [ 'CLASS' ] :
                 self . State = self . MAIN_STATES [ 'CLASS_AFTER' ]
-                self . STStack . append ( { } )
-                self . OffsetStack . append ( self . CurrentSTOffset )
+                self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'CLASS' ] , self . CurrentSTOffset ) )
             elif Token == self . KEYWORDS [ 'ACTION' ] :
                 self . State = self . MAIN_STATES [ 'ACTION_AFTER' ]
                 self.  CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
                 self . CurrentSTOffset = deepcopy ( self . ACTION_DECLARATION_OFFSET )
                 self . ActionTypeDeclared = False
-                self . STStack . append ( { } )
-                self . OffsetStack . append ( self . CurrentSTOffset )
+                self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'ACTION' ] , self . CurrentSTOffset ) )
             elif Token == self . KEYWORDS [ 'END' ] :
                 if len ( self . STStack ) == 0 :
                     CompilerIssue . OutputError ( '\'end\' found when not in any upper scope' , self . EXIT_ON_ERROR )
                 # There is an initial scope (global) so this should be three (global, class, function)
-                if len ( self . ScopeAdderStack ) > 0 :
-                    OutOfAdderValue = self . OffsetStack [ len ( self . OffsetStack ) - 1 ]
+                if self . STStack  [ len ( self . STStack ) - 1 ] . Type == self . SCOPE_TYPES [ 'IF' ]\
+                    or self . STStack  [ len ( self . STStack ) - 1 ] . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
+                    OutOfAdderValue = self . STStack [ len ( self . STStack ) - 1 ] . Offset
                     OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( OutOfAdderValue - self . CurrentSTOffset )
-                    print ( 'OK ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , len ( self . ScopeAdderStack ) )
-                    if self . ScopeAdderStack [ len ( self . ScopeAdderStack ) - 1 ] . Type == self . SCOPE_ADDER_TYPES [ 'REPEAT' ] :
+                    print ( 'OK ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) )
+                    if self . STStack [ len ( self . STStack ) - 1 ] . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
                         OutputText = self . OutputJumpToRoutine ( OutputText , self . RoutineCounter - 1 )
                         self . CurrentSTOffset = OutOfAdderValue
                     OutputText , self . RoutineCounter = self . OutputNewAsmRoutine ( OutputText , self . RoutineCounter )
-                    self . ScopeAdderStack . pop ( len ( self . ScopeAdderStack ) - 1 )
                 elif self . CurrentFunction != '' :
                     #print ( 'exiting function ' , self . CurrentFunction )
                     self . CurrentFunction = ''
                     self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
                     OutputText = self . CalcActionReturnOutput ( OutputText )
-                elif self . CurrentClass != '' :
+                elif self . CurrentClass != '' :s
                     print ( 'exiting class ' , self . CurrentClass )
                     self . CurrentClass = ''
                 self . STStack . pop ( len ( self . STStack ) - 1 )
-                self . OffsetStack . pop ( len ( self . OffsetStack ) - 1 )
             elif Token == self . KEYWORDS [ 'IF' ] :
-                NewScopeAdder = ScopeAdder ( self . SCOPE_ADDER_TYPES [ 'REPEAT' ] )
+                NewScopeAdder = ScopeAdder ( self . SCOPE_TYPES [ 'REPEAT' ] )
                 self . ScopeAdderStack . append ( NewScopeAdder )
                 self . OffsetStack . append ( self . CurrentSTOffset )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
                 OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
             elif Token == self . KEYWORDS [ 'REPEAT' ] :
-                NewScopeAdder = ScopeAdder ( self . SCOPE_ADDER_TYPES [ 'REPEAT' ] )
-                self . ScopeAdderStack . append ( NewScopeAdder )
-                self . OffsetStack . append ( self . CurrentSTOffset )
-                self . STStack . append ( { } )
+                self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'REPEAT' ] , self . CurrentSTOffset ) )
                 self . State = self . MAIN_STATES [ 'AFTER_REPEAT' ]
-                print ( 'len ( self . ScopeAdderStack ) =' , len ( self . ScopeAdderStack ) )
             elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
                 OutputText = OutputText + Token
                 print ( 'In Asm Function -> Will output ASM to output' )
@@ -556,11 +550,11 @@ class Parser ( ) :
                 if Token == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
                     self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
                 elif self . SavedType in self . TypeTable :
-                    if Token not in self . GetCurrentST ( ) :
+                    if Token not in self . GetCurrentST ( ) . Symbols :
                         NewSymbol = MySymbol ( Token , self . SavedType )
                         self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType ] . Size
                         NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                        self . GetCurrentST ( ) [ Token ] = NewSymbol
+                        self . GetCurrentST ( ) . Symbols [ Token ] = NewSymbol
                         if self . CurrentClass != '' :
                             self . TypeTable [ self . CurrentClass ] . Size = self . TypeTable [ self . CurrentClass ] . Size + self . TypeTable [ self . SavedType ] . Size
                             self . TypeTable [ self . CurrentClass ] . InnerTypes [ Token ] = NewSymbol
@@ -728,7 +722,7 @@ class Parser ( ) :
                     NewSymbol = MySymbol ( Token , self . SavedType )
                     self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType ] . Size
                     NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                    self . GetCurrentST ( ) [ Token ] = NewSymbol
+                    self . GetCurrentST ( ) . Symbols [ Token ] = NewSymbol
                     self . CurrentTypeTable ( ) . append ( NewSymbol )
                     self . State = self . MAIN_STATES [ 'ACTION_AFTER_PARAM' ]
             else :
@@ -853,9 +847,9 @@ class Parser ( ) :
         Index = 0
         StackHeight = len ( self . STStack ) - 1
         while Found == False and StackHeight - Index >= 0 :
-            if NameOfSymbol in self . STStack [ StackHeight - Index ] :
+            if NameOfSymbol in self . STStack [ StackHeight - Index ] . Symbols :
                 Found = True
-                OutSymbol = self . STStack [ StackHeight - Index ] [ NameOfSymbol ]
+                OutSymbol = self . STStack [ StackHeight - Index ] . Symbols [ NameOfSymbol ]
             Index = Index + 1
         return Found , OutSymbol
         
