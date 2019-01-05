@@ -114,7 +114,6 @@ class Byte size 1
             
             ; move result onto stack
             add ebx, 8
-            mov ebx, [ebx]
             mov byte [ebx], al
             
         end

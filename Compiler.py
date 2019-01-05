@@ -212,8 +212,10 @@ class Parser ( ) :
     
     SHIFT_STRING = 'add esp, {}\n'
     
-    COMPARISON_ASM = '''test cl, cl
-	jne R{}\n\n'''
+    COMPARISON_ASM = '''
+    mov byte cl, [esp]
+    test cl, cl
+    je R{}\n\n'''
     
     BYTE_SIZE = 1
     
@@ -233,7 +235,7 @@ class Parser ( ) :
     
     NEW_ROUTINE_TEXT = 'R{}:\n'
     
-    JUMP_TO_ROUTINE_ASM = 'jmp R{}'
+    JUMP_TO_ROUTINE_ASM = 'jmp R{}\n'
     
     def __init__ ( self ) :
         self . State = deepcopy ( self . MAIN_STATES [ 'START_OF_LINE' ] )
@@ -297,11 +299,10 @@ class Parser ( ) :
     
     def OutputComparisonAsm ( self , OutputText ) :
         OutputText = OutputText + self . COMPARISON_ASM . format ( self . RoutineCounter )
-        self . RoutineCounter = self . RoutineCounter + 1
         return OutputText
     
-    def OutputJumpToBeginning ( self , OutputText ) :
-        OutputText = OutputText + self . JUMP_TO_ROUTINE_ASM . format ( self . RountineCounter - 1 )
+    def OutputJumpToRoutine ( self , OutputText , RoutineNumber ) :
+        OutputText = OutputText + self . JUMP_TO_ROUTINE_ASM . format ( RoutineNumber )
         return OutputText
     
     def CalcFunctionCall ( self , Operator , ArrayOfOperands , LeftOperand , WordArray , Index ) :
@@ -341,7 +342,9 @@ class Parser ( ) :
         for CurrentOperand in ArrayOfOperands :
             OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand)
             OperandOffset = 0
+            print ( 'CurrentOperand = ' , CurrentOperand )
             Found , CurrentSymbol = self . CheckCurrentSTs ( CurrentOperand )
+            print ( 'Found =' , Found , ' CurrentSymbol =' , CurrentSymbol , len ( self . STStack ) )
             OperandOffset = CurrentSymbol . Offset
             OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( OperandOffset )
             print ( self . CurrentSTOffset , OriginalOffset , self . POINTER_SIZE)
@@ -486,13 +489,15 @@ class Parser ( ) :
             elif Token == self . KEYWORDS [ 'END' ] :
                 if len ( self . STStack ) == 0 :
                     CompilerIssue . OutputError ( '\'end\' found when not in any upper scope' , self . EXIT_ON_ERROR )
-                if len ( self . STStack ) > 3 :
+                # There is an initial scope (global) so this should be three (global, class, function)
+                if len ( self . ScopeAdderStack ) > 0 :
                     OutOfAdderValue = self . OffsetStack [ len ( self . OffsetStack ) - 1 ]
-                    OutputText = OutputText + self . SHIFT_STRING . format ( self . CurrentSTOffset - OutOfAdderValue )
+                    OutputText = OutputText + self . SHIFT_STRING . format ( OutOfAdderValue - self . CurrentSTOffset )
                     print ( 'OK ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , len ( self . ScopeAdderStack ) )
-                    if self . ScopeAdderStack [ len ( self . ScopeAdderStack ) - 1 ] . Type == self . SCOPE_ADDER_TYPE [ 'REPEAT' ] :
-                        OutputText = OutputText + self . OutputJumpToBeginning ( OutputText )
+                    if self . ScopeAdderStack [ len ( self . ScopeAdderStack ) - 1 ] . Type == self . SCOPE_ADDER_TYPES [ 'REPEAT' ] :
+                        OutputText = self . OutputJumpToRoutine ( OutputText , self . RoutineCounter - 1 )
                         self . CurrentSTOffset = OutOfAdderValue
+                    OutputText , self . RoutineCounter = self . OutputNewAsmRoutine ( OutputText , self . RoutineCounter )
                     self . ScopeAdderStack . pop ( len ( self . ScopeAdderStack ) - 1 )
                 elif self . CurrentFunction != '' :
                     #print ( 'exiting function ' , self . CurrentFunction )
@@ -514,7 +519,9 @@ class Parser ( ) :
                 NewScopeAdder = ScopeAdder ( self . SCOPE_ADDER_TYPES [ 'REPEAT' ] )
                 self . ScopeAdderStack . append ( NewScopeAdder )
                 self . OffsetStack . append ( self . CurrentSTOffset )
+                self . STStack . append ( { } )
                 self . State = self . MAIN_STATES [ 'AFTER_REPEAT' ]
+                print ( 'len ( self . ScopeAdderStack ) =' , len ( self . ScopeAdderStack ) )
             elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
                 OutputText = OutputText + Token
                 print ( 'In Asm Function -> Will output ASM to output' )
@@ -761,6 +768,9 @@ class Parser ( ) :
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
                 OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
                 OutputText = self . OutputComparisonAsm ( OutputText )
+                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            else :
+                CompilerIssue . OutputError ( 'Expected {} after {}' . format ( self . KEYWORDS [ 'WHILE' ] , self . KEYWORDS [ 'REPEAT' ] ) , self . EXIT_ON_ERROR )
         return SavedWordArray , WordIndex , OutputText
     
     def ResolveActionToName ( self , Action , Class ) :
