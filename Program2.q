@@ -190,12 +190,14 @@ action Main
                 Byte S11 = 122
                 repeat while S11 > 65
                     S11 = S11 - 1
-                    OutputByte ( S11 )
+                    Byte S12 = 122
+                    repeat while S12 > 65
+                        S12 = S12 - 1
+                    end
                 end
             end
         end
         S6 = S6 - 1
-        S8 = 200
     end
     
     OutputByte ( S6 )

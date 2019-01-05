@@ -122,7 +122,8 @@ class Parser ( ) :
         'RETURNS' : 'returns' ,
         'IF' : 'if' ,
         'REPEAT' : 'repeat' ,
-        'WHILE' : 'while'
+        'WHILE' : 'while' ,
+        'UNTIL' : 'until'
         
     }
     
@@ -190,6 +191,8 @@ class Parser ( ) :
     
     POINTER_SIZE = 4
     
+    ASM_ROUTINE_LETTER = 'S'
+    
     ASM_TEXT = {
         'LOAD_TEXT' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
             'mov ebx, ebp\n' +\
@@ -205,9 +208,10 @@ class Parser ( ) :
         'STACK_FRAME_END' : '\nmov esp, ebp\npop ebp' ,
         'SHIFT_STRING' : 'add esp, {}\n' ,
         'SET_REG_STRING' : 'mov {}, {}\n' ,
-        'WHILE_COMPARISON' : 'mov byte cl, [esp]\ntest cl, cl\nje R{}\n\n' ,
-        'NEW_ROUTINE_TEXT' : 'R{}:\n' ,
-        'JUMP_TO_ROUTINE_ASM' : 'jmp R{}\n'
+        'WHILE_COMPARISON' : 'mov byte cl, [esp]\ntest cl, cl\nje ' + ASM_ROUTINE_LETTER + '{}\n\n' ,
+        'UNTIL_COMPARISON' : 'mov byte cl, [esp]\ntest cl, cl\njne ' + ASM_ROUTINE_LETTER + '{}\n\n' ,
+        'NEW_ROUTINE_TEXT' : ASM_ROUTINE_LETTER + '{}:\n' ,
+        'JUMP_TO_ROUTINE_ASM' : 'jmp ' + ASM_ROUTINE_LETTER + '{}\n'
     }
     
     EXIT_ON_ERROR = True
@@ -300,7 +304,11 @@ class Parser ( ) :
         OutputText = OutputText + self . ASM_TEXT [ 'NEW_ROUTINE_TEXT' ] . format ( RoutineNumber )
         return OutputText
     
-    def OutputComparisonAsm ( self , OutputText , RoutineNumber ) :
+    def OutputWhileComparisonAsm ( self , OutputText , RoutineNumber ) :
+        OutputText = OutputText + self . ASM_TEXT [ 'WHILE_COMPARISON' ] . format ( RoutineNumber )
+        return OutputText
+    
+    def OutputUntilComparisonAsm ( self , OutputText , RoutineNumber ) :
         OutputText = OutputText + self . ASM_TEXT [ 'WHILE_COMPARISON' ] . format ( RoutineNumber )
         return OutputText
     
@@ -770,15 +778,19 @@ class Parser ( ) :
                     + self . SavedLeftOperand . Type , self . EXIT_ON_ERROR )
                 self . State = self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ]
         elif self . State == self . MAIN_STATES [ 'AFTER_REPEAT' ] :
-            if Token == self . KEYWORDS [ 'WHILE' ] :
+            if Token != self . KEYWORDS [ 'WHILE' ] and Token != self . KEYWORDS [ 'UNTIL' ] :
+                CompilerIssue . OutputError ( 'Expected \'{}\' or \'{}\' after {}' . format ( self . KEYWORDS [ 'WHILE' ] , self . KEYWORDS [ 'UNTIL' ] , self . KEYWORDS [ 'REPEAT' ] )
+                    , self . EXIT_ON_ERROR )
+            else :
                 OutputText = self . OutputAsmRoutine ( OutputText , self . GetCurrentST ( ) . RoutineNumber )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
                 OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
-                OutputText = self . OutputComparisonAsm ( OutputText , self . GetCurrentST ( ) . RoutineNumber + 1 )
+                if Token == self . KEYWORDS [ 'WHILE' ] :
+                    OutputText = self . OutputWhileComparisonAsm ( OutputText , self . GetCurrentST ( ) . RoutineNumber + 1 )
+                else :
+                    OutputText = self . OutputUntilComparisonAsm ( OutputText , self . GetCurrentST ( ) . RoutineNumber + 1 )
                 self . GetCurrentST ( ) . OffsetAfterComparison = self . CurrentSTOffset
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
-            else :
-                CompilerIssue . OutputError ( 'Expected {} after {}' . format ( self . KEYWORDS [ 'WHILE' ] , self . KEYWORDS [ 'REPEAT' ] ) , self . EXIT_ON_ERROR )
         return SavedWordArray , WordIndex , OutputText
     
     def ResolveActionToName ( self , Action , Class ) :
