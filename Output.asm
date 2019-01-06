@@ -2557,6 +2557,233 @@ jmp S19
 S18:
 add esp, 2
 S19:
+add esp, -1
+
+mov byte [esp], 65
+
+;Declaring [101
+;Adding return value 
+add esp, -1
+;Loading [101
+add esp, -4
+mov ebx, ebp
+add ebx, -76
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_If_Equal
+add esp, 8
+mov byte cl, [esp]
+test cl, cl
+je S20
+
+add esp, -1
+
+mov byte [esp], 89
+
+;Declaring [103
+;Loading [103
+add esp, -4
+mov ebx, ebp
+add ebx, -78
+mov [esp], ebx
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 69
+
+;Declaring [104
+;Loading [104
+add esp, -4
+mov ebx, ebp
+add ebx, -79
+mov [esp], ebx
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 83
+
+;Declaring [105
+;Loading [105
+add esp, -4
+mov ebx, ebp
+add ebx, -80
+mov [esp], ebx
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, 5
+jmp S21
+S20:
+add esp, 2
+add esp, -1
+
+mov byte [esp], 65
+
+;Declaring [106
+;Adding return value 
+add esp, -1
+;Loading [106
+add esp, -4
+mov ebx, ebp
+add ebx, -76
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_If_Equal
+add esp, 8
+mov byte cl, [esp]
+test cl, cl
+je S22
+
+add esp, -1
+
+mov byte [esp], 78
+
+;Declaring [108
+;Loading [108
+add esp, -4
+mov ebx, ebp
+add ebx, -78
+mov [esp], ebx
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 79
+
+;Declaring [109
+;Loading [109
+add esp, -4
+mov ebx, ebp
+add ebx, -79
+mov [esp], ebx
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, 4
+jmp S21
+S22:
+add esp, 2
+add esp, -1
+
+mov byte [esp], 77
+
+;Declaring [110
+;Loading [110
+add esp, -4
+mov ebx, ebp
+add ebx, -76
+mov [esp], ebx
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 65
+
+;Declaring [111
+;Loading [111
+add esp, -4
+mov ebx, ebp
+add ebx, -77
+mov [esp], ebx
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading WriteByte
+add esp, -4
+mov ebx, ebp
+add ebx, -74
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, 2
+jmp S21
+S23:
+add esp, 0
+S21:
 ;Loading S6
 add esp, -4
 mov ebx, ebp

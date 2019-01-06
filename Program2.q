@@ -239,6 +239,25 @@ action Main
         OutputByte ( WriteByte )
     end
     
+    if S6 == 65
+        WriteByte = 89
+        OutputByte ( WriteByte )
+        WriteByte = 69
+        OutputByte ( WriteByte )
+        WriteByte = 83
+        OutputByte ( WriteByte )
+    elseif S6 == 65
+        WriteByte = 78
+        OutputByte ( WriteByte )
+        WriteByte = 79
+        OutputByte ( WriteByte )
+    else
+        WriteByte = 77
+        OutputByte ( WriteByte )
+        WriteByte = 65
+        OutputByte ( WriteByte )
+    end
+    
     OutputByte ( S6 )
     OutputByte ( S6 )
     OutputByte ( S6 )
