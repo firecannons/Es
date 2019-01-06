@@ -56,6 +56,8 @@ class Scope ( ) :
         self . Offset = Offset
         self . Symbols = { }
         self . RoutineNumber = RoutineNumber
+        if Type == Parser . SCOPE_TYPES [ 'IF' ] :
+            self . EndRoutineNumber = RoutineNumber + 1
 
 class CompilerIssue :
     
@@ -523,11 +525,16 @@ class Parser ( ) :
                     or CurrentST . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
                     OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( CurrentST . Offset - self . CurrentSTOffset )
                     print ( 'OK ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , CurrentST . Type )
+                    self . CurrentSTOffset = CurrentST . Offset
                     if CurrentST . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
                         OutputText = self . OutputJumpToRoutine ( OutputText , CurrentST . RoutineNumber )
-                    self . CurrentSTOffset = CurrentST . Offset
-                    OutputText = self . OutputAsmRoutine ( OutputText , CurrentST . RoutineNumber + 1 )
+                        OutputText = self . OutputAsmRoutine ( OutputText , CurrentST . RoutineNumber + 1 )
+                    if CurrentST . Type == self . SCOPE_TYPES [ 'IF' ] :
+                        OutputText = self . OutputJumpToRoutine ( OutputText , CurrentST . EndRoutineNumber )
+                        OutputText = self . OutputAsmRoutine ( OutputText , CurrentST . RoutineNumber )
                     OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( CurrentST . Offset - CurrentST . OffsetAfterComparison )
+                    if CurrentST . Type == self . SCOPE_TYPES [ 'IF' ] :
+                        OutputText = self . OutputAsmRoutine ( OutputText , CurrentST . EndRoutineNumber )
                 elif self . CurrentFunction != '' :
                     #print ( 'exiting function ' , self . CurrentFunction )
                     self . CurrentFunction = ''
@@ -540,10 +547,9 @@ class Parser ( ) :
             elif Token == self . KEYWORDS [ 'IF' ] :
                 self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'IF' ] , self . CurrentSTOffset , self . RoutineCounter ) )
                 self . RoutineCounter = self . RoutineCounter + 2
-                OutputText = self . OutputAsmRoutine ( OutputText , self . GetCurrentST ( ) . RoutineNumber )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
                 OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
-                OutputText = self . OutputIfComparisonAsm ( OutputText , self . GetCurrentST ( ) . RoutineNumber + 1 )
+                OutputText = self . OutputIfComparisonAsm ( OutputText , self . GetCurrentST ( ) . RoutineNumber )
                 self . GetCurrentST ( ) . OffsetAfterComparison = self . CurrentSTOffset
             elif Token == self . KEYWORDS [ 'REPEAT' ] :
                 self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'REPEAT' ] , self . CurrentSTOffset , self . RoutineCounter ) )

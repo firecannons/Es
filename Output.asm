@@ -2310,7 +2310,6 @@ add ebx, -64
 mov [esp], ebx
 call OutputByte
 add esp, 4
-S14:
 add esp, -1
 
 mov byte [esp], 66
@@ -2332,7 +2331,7 @@ call Byte__On_If_Equal
 add esp, 8
 mov byte cl, [esp]
 test cl, cl
-je S15
+je S14
 
 add esp, -1
 
@@ -2352,8 +2351,10 @@ mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
 add esp, 3
-S15:
+jmp S15
+S14:
 add esp, 2
+S15:
 ;Declaring WriteByte
 add esp, -1
 
@@ -2380,10 +2381,9 @@ add ebx, -74
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
-S16:
 add esp, -1
 
-mov byte [esp], 101
+mov byte [esp], 65
 
 ;Declaring [92
 ;Adding return value 
@@ -2402,7 +2402,7 @@ call Byte__On_If_Equal
 add esp, 8
 mov byte cl, [esp]
 test cl, cl
-je S17
+je S16
 
 add esp, -1
 
@@ -2477,12 +2477,13 @@ mov [esp], ebx
 call OutputByte
 add esp, 4
 add esp, 5
-S17:
+jmp S17
+S16:
 add esp, 2
-S18:
+S17:
 add esp, -1
 
-mov byte [esp], 101
+mov byte [esp], 65
 
 ;Declaring [97
 ;Adding return value 
@@ -2501,7 +2502,7 @@ call Byte__On_Not_Equal
 add esp, 8
 mov byte cl, [esp]
 test cl, cl
-je S19
+je S18
 
 add esp, -1
 
@@ -2552,8 +2553,10 @@ mov [esp], ebx
 call OutputByte
 add esp, 4
 add esp, 4
-S19:
+jmp S19
+S18:
 add esp, 2
+S19:
 ;Loading S6
 add esp, -4
 mov ebx, ebp

@@ -223,7 +223,7 @@ action Main
     end
     
     Byte WriteByte = 0
-    if S6 == 101
+    if S6 == 65
         WriteByte = 89
         OutputByte ( WriteByte )
         WriteByte = 69
@@ -232,7 +232,7 @@ action Main
         OutputByte ( WriteByte )
     end
     
-    if S6 != 101
+    if S6 != 65
         WriteByte = 78
         OutputByte ( WriteByte )
         WriteByte = 79
