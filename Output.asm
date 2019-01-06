@@ -285,6 +285,36 @@ mov ebp, esp
             ; move result onto stack
             add ebx, 8
             mov byte [ebx], al
+        
+
+mov esp, ebp
+pop ebp
+ret
+
+Byte__On_Not_Equal:
+
+push ebp
+mov ebp, esp
+
+
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            setne byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
             
         
 
@@ -2189,6 +2219,72 @@ add esp, 8
 add esp, 4
 jmp S10
 S11:
+add esp, 2
+S12:
+add esp, -1
+
+mov byte [esp], 65
+
+;Declaring [83
+;Adding return value 
+add esp, -1
+;Loading [83
+add esp, -4
+mov ebx, ebp
+add ebx, -73
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Not_Equal
+add esp, 8
+mov byte cl, [esp]
+test cl, cl
+je S13
+
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [85
+;Adding return value 
+add esp, -1
+;Loading [85
+add esp, -4
+mov ebx, ebp
+add ebx, -75
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Minus
+add esp, 8
+;Loading [86
+add esp, -4
+mov ebx, ebp
+add ebx, -76
+mov [esp], ebx
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+add esp, 4
+jmp S12
+S13:
 add esp, 2
 ;Loading S6
 add esp, -4

@@ -211,6 +211,11 @@ action Main
         S6 = S6 + 1
     end
     
+    repeat while S6 != 65
+        OutputByte ( S6 )
+        S6 = S6 - 1
+    end
+    
     OutputByte ( S6 )
     OutputByte ( S6 )
     OutputByte ( S6 )

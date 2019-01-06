@@ -202,6 +202,27 @@ class Byte size 1
             ; move result onto stack
             add ebx, 8
             mov byte [ebx], al
+        end
+        
+        action asm on != ( Byte Rhs ) returns Bool
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            setne byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
             
         end
 end

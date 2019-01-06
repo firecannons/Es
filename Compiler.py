@@ -153,7 +153,7 @@ class Parser ( ) :
         'MULT' : '*' ,
         'DIVIDE' : '/' ,
         'IS_EQUAL' : '==' ,
-        'NOT_EQUAL' : '!-' ,
+        'NOT_EQUAL' : '!=' ,
         'LESS_OR_EQUAL' : '<=' ,
         'GREATER_OR_EQUAL' : '>=' ,
         'GREATER_THAN' : '>' ,
@@ -172,7 +172,8 @@ class Parser ( ) :
         OPERATORS [ 'GREATER_OR_EQUAL' ] : 'On_Greater_Equal' ,
         OPERATORS [ 'IS_EQUAL' ] : 'On_If_Equal' ,
         OPERATORS [ 'LESS_THAN' ] : 'On_Less_Than' ,
-        OPERATORS [ 'LESS_OR_EQUAL' ] : 'On_Less_Or_Equal'
+        OPERATORS [ 'LESS_OR_EQUAL' ] : 'On_Less_Or_Equal' ,
+        OPERATORS [ 'NOT_EQUAL' ] : 'On_Not_Equal'
     }
     
     OPERATOR_MAPPING = {
