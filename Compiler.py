@@ -215,6 +215,7 @@ class Parser ( ) :
         'SET_REG_STRING' : 'mov {}, {}\n' ,
         'WHILE_COMPARISON' : 'mov byte cl, [esp]\ntest cl, cl\nje ' + ASM_ROUTINE_LETTER + '{}\n\n' ,
         'UNTIL_COMPARISON' : 'mov byte cl, [esp]\ntest cl, cl\njne ' + ASM_ROUTINE_LETTER + '{}\n\n' ,
+        'IF_COMPARISON' : 'mov byte cl, [esp]\ntest cl, cl\nje ' + ASM_ROUTINE_LETTER + '{}\n\n' ,
         'NEW_ROUTINE_TEXT' : ASM_ROUTINE_LETTER + '{}:\n' ,
         'JUMP_TO_ROUTINE_ASM' : 'jmp ' + ASM_ROUTINE_LETTER + '{}\n'
     }
@@ -315,6 +316,10 @@ class Parser ( ) :
     
     def OutputUntilComparisonAsm ( self , OutputText , RoutineNumber ) :
         OutputText = OutputText + self . ASM_TEXT [ 'UNTIL_COMPARISON' ] . format ( RoutineNumber )
+        return OutputText
+    
+    def OutputIfComparisonAsm ( self , OutputText , RoutineNumber ) :
+        OutputText = OutputText + self . ASM_TEXT [ 'IF_COMPARISON' ] . format ( RoutineNumber )
         return OutputText
     
     def OutputJumpToRoutine ( self , OutputText , RoutineNumber ) :
@@ -517,10 +522,10 @@ class Parser ( ) :
                 if CurrentST . Type == self . SCOPE_TYPES [ 'IF' ]\
                     or CurrentST . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
                     OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( CurrentST . Offset - self . CurrentSTOffset )
-                    print ( 'OK ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) )
+                    print ( 'OK ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , CurrentST . Type )
                     if CurrentST . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
                         OutputText = self . OutputJumpToRoutine ( OutputText , CurrentST . RoutineNumber )
-                        self . CurrentSTOffset = CurrentST . Offset
+                    self . CurrentSTOffset = CurrentST . Offset
                     OutputText = self . OutputAsmRoutine ( OutputText , CurrentST . RoutineNumber + 1 )
                     OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( CurrentST . Offset - CurrentST . OffsetAfterComparison )
                 elif self . CurrentFunction != '' :
@@ -533,11 +538,13 @@ class Parser ( ) :
                     self . CurrentClass = ''
                 self . STStack . pop ( len ( self . STStack ) - 1 )
             elif Token == self . KEYWORDS [ 'IF' ] :
-                NewScopeAdder = ScopeAdder ( self . SCOPE_TYPES [ 'IF' ] )
-                self . ScopeAdderStack . append ( NewScopeAdder )
-                self . OffsetStack . append ( self . CurrentSTOffset )
+                self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'IF' ] , self . CurrentSTOffset , self . RoutineCounter ) )
+                self . RoutineCounter = self . RoutineCounter + 2
+                OutputText = self . OutputAsmRoutine ( OutputText , self . GetCurrentST ( ) . RoutineNumber )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
                 OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
+                OutputText = self . OutputIfComparisonAsm ( OutputText , self . GetCurrentST ( ) . RoutineNumber + 1 )
+                self . GetCurrentST ( ) . OffsetAfterComparison = self . CurrentSTOffset
             elif Token == self . KEYWORDS [ 'REPEAT' ] :
                 self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'REPEAT' ] , self . CurrentSTOffset , self . RoutineCounter ) )
                 self . RoutineCounter = self . RoutineCounter + 2
