@@ -5,8 +5,9 @@ Repeat Until        X
 Repeat For          
 Repeat X Times      
 If                  X
-If Elseif           
-If Else             
+If Elseif           X
+If Else             X
+All Subroutines are L#
 Templates
 Addressing Class Variables
 Parenthesese in expressions
