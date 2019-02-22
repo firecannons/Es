@@ -59,17 +59,25 @@ class Scope ( ) :
         if Type == Parser . SCOPE_TYPES [ 'IF' ] :
             self . EndRoutineNumber = RoutineNumber + 1
 
+class MyToken ( ) :
+    def __init__ ( self , Name , LineNumber , FileName ) :
+        self . Name = Name
+        self . LineNumber = LineNumber
+        self . FileName = FileName
+
 class CompilerIssue :
     
     FAIL_COLOR_TEXT = '\033[91m'
     END_COLOR_TEXT = '\033[0m'
     
     ERROR_START_TEXT = 'ERROR: '
+    ON_LINE_TEXT = ' on line '
     
-    @staticmethod
-    def OutputError ( ErrorText , Exit ) :
+    @classmethod
+    def OutputError ( cls , ErrorText , Exit , TokenObject ) :
         print ( CompilerIssue . FAIL_COLOR_TEXT + CompilerIssue . ERROR_START_TEXT\
          + ErrorText + CompilerIssue . END_COLOR_TEXT )
+        print ( CompilerIssue . FAIL_COLOR_TEXT + TokenObject . FileName + cls . ON_LINE_TEXT + str ( TokenObject . LineNumber ) )
         if Exit == True :
             exit ( )
 
@@ -276,8 +284,8 @@ class Parser ( ) :
     def Parse ( self , SavedWordArray , OutputText ) :
         WordIndex = 0
         while WordIndex < len ( SavedWordArray ) :
-            Token = SavedWordArray [ WordIndex ]
-            SavedWordArray , WordIndex , OutputText = self . ParseToken ( Token , SavedWordArray , WordIndex , OutputText )
+            Token = SavedWordArray [ WordIndex ] . Name
+            SavedWordArray , WordIndex , OutputText = self . ParseToken ( Token , SavedWordArray , WordIndex , OutputText , SavedWordArray [ WordIndex ] )
             WordIndex = WordIndex + 1
         PrintObject ( self . TypeTable )
         return OutputText , SavedWordArray
@@ -292,7 +300,7 @@ class Parser ( ) :
                 Depth = DepthIndex
             DepthIndex = DepthIndex + 1
         if Depth == -1 :
-            CompilerIssue . OutputError ( 'Operator \'' + Operator + '\' is not an allowed operator' , self . EXIT_ON_ERROR )
+            CompilerIssue . OutputError ( 'Operator \'' + Operator + '\' is not an allowed operator' , self . EXIT_ON_ERROR , TokenObject )
         return Depth
     
     def OpOneHighestPrecedence ( self , Op1 , Op2 ) :
@@ -414,9 +422,9 @@ class Parser ( ) :
                     WordArray . pop ( Index )
                     WordArray . pop ( Index )
                 else :
-                    CompilerIssue . OutputError ( 'Class \'' + CurrentClass + '\' has no variable \'' + WordArray [ Index + 2 ] + '\'.' , self . EXIT_ON_ERROR )
+                    CompilerIssue . OutputError ( 'Class \'' + CurrentClass + '\' has no variable \'' + WordArray [ Index + 2 ] + '\'.' , self . EXIT_ON_ERROR , TokenObject )
             elif IsFound == False :
-                CompilerIssue . OutputError ( 'Unknown ' + Operator + ' is not an allowed operator' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Unknown ' + Operator + ' is not an allowed operator' , self . EXIT_ON_ERROR , TokenObject )
         elif WordArray [ Index + 1 ] == self . OPERATORS [ 'LEFT_PAREN' ] :
             if WordArray [ Index ] in self . OPERATORS :
                 if WordArray [ Index + 3 ] == self . OPERATORS [ 'RIGHT_PAREN' ] :
@@ -440,7 +448,7 @@ class Parser ( ) :
                     WordArray . pop ( Index )
                     WordArray . pop ( Index )
                 else :
-                    CompilerIssue . OutputError ( 'Function \'' + CurrentClass + ':' + WordArray [ Index ] + '\' does not exist.' , self . EXIT_ON_ERROR )
+                    CompilerIssue . OutputError ( 'Function \'' + CurrentClass + ':' + WordArray [ Index ] + '\' does not exist.' , self . EXIT_ON_ERROR , TokenObject )
         elif WordArray [ Index + 1 ] == self . OPERATORS [ 'RIGHT_PAREN' ] :
             Index = Index - 2
         elif WordArray [ Index + 1 ] == self . SPECIAL_CHARS [ 'COMMA' ] :
@@ -499,11 +507,11 @@ class Parser ( ) :
             if self . CheckCurrentSTs ( Token ) == True :
             elif self . GetTypeTable ( Expr
             else :
-                CompilerIssue . OutputError ( '\'end\' found when not in any upper scope' , self . EXIT_ON_ERROR )'''
+                CompilerIssue . OutputError ( '\'end\' found when not in any upper scope' , self . EXIT_ON_ERROR , TokenObject )'''
         return OutputText
         
     
-    def ParseToken ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+    def ParseToken ( self , Token , SavedWordArray , WordIndex , OutputText , TokenObject ) :
         print ( 'Parsing ' , Token , self . State , self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , self . CurrentFunctionType , self . CurrentSTOffset )
         #print ( 'Parsing -> \'' + Token + '\'' , 'self . State = ' + str ( self . State ) , ' len ( self . STStack ) = ' + str ( len ( self . STStack ) ) )
         if self . State == self . MAIN_STATES [ 'START_OF_LINE' ] :
@@ -520,7 +528,7 @@ class Parser ( ) :
                 self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'ACTION' ] , self . CurrentSTOffset ) )
             elif Token == self . KEYWORDS [ 'END' ] :
                 if len ( self . STStack ) == 0 :
-                    CompilerIssue . OutputError ( '\'end\' found when not in any upper scope' , self . EXIT_ON_ERROR )
+                    CompilerIssue . OutputError ( '\'end\' found when not in any upper scope' , self . EXIT_ON_ERROR , TokenObject )
                 CurrentST = self . GetCurrentST ( )
                 # There is an initial scope (global) so this should be three (global, class, function)
                 if CurrentST . Type == self . SCOPE_TYPES [ 'IF' ]\
@@ -599,7 +607,7 @@ class Parser ( ) :
                     LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                     OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
                 else :
-                    CompilerIssue . OutputError ( 'Type or symbol \'' + Token + '\' not found' , self . EXIT_ON_ERROR )
+                    CompilerIssue . OutputError ( 'Type or symbol \'' + Token + '\' not found' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'DECLARING_VARIABLE' ] :
             if self . CurrentFunctionType == self . FUNCTION_TYPES [ 'NORMAL' ] :
                 if Token == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
@@ -619,35 +627,35 @@ class Parser ( ) :
                         OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
                         self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
                     else :
-                        CompilerIssue . OutputError ( 'A variable named ' + Token + ' has already been declared' , self . EXIT_ON_ERROR )
+                        CompilerIssue . OutputError ( 'A variable named ' + Token + ' has already been declared' , self . EXIT_ON_ERROR , TokenObject )
                 else :
-                    CompilerIssue . OutputError ( 'The type \'' + self . SavedType + '\' is not currently a declared type and is not template start ' , self . EXIT_ON_ERROR )
+                    CompilerIssue . OutputError ( 'The type \'' + self . SavedType + '\' is not currently a declared type and is not template start ' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'AFTER_DECLARING_VARIABLE' ] :
             if Token == self . SPECIAL_CHARS [ 'NEWLINE' ] :
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
             else :
-                CompilerIssue . OutputError ( 'Expected newline encountered \'' + Token + '\'' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected newline encountered \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'MAKING_TEMPLATE' ] :
             if self . IsValidName ( Token ) == True :
                 if Token in self . TypeTable :
                     if self . TypeTable [ Token ] . IsFunction == False :
                         self . State = self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ]
                     else :
-                       CompilerIssue . OutputError ( 'Template type \'' + Token + '\' was found to be a function not class', self . EXIT_ON_ERROR ) 
+                       CompilerIssue . OutputError ( 'Template type \'' + Token + '\' was found to be a function not class', self . EXIT_ON_ERROR , TokenObject ) 
                 else :
-                    CompilerIssue . OutputError ( 'Template type \'' + Token + '\' not found in type table', self . EXIT_ON_ERROR )
+                    CompilerIssue . OutputError ( 'Template type \'' + Token + '\' not found in type table', self . EXIT_ON_ERROR , TokenObject )
             else :
-                CompilerIssue . OutputError ( 'Expected valid type for template instead of \'' + Token + '\'', self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected valid type for template instead of \'' + Token + '\'', self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ] :
             if Token == self . SPECIAL_CHARS [ 'COMMA' ] :
                 self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
             elif Token == self . SPECIAL_CHARS [ 'TEMPLATE_END' ] :
                 self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
             else :
-                CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\' instead of \'' + Token + '\'' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\' instead of \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'USING_WAITING_FOR_WORD' ] :
             if Token . isalnum ( ) == False :
-                CompilerIssue . OutputError ( '\'' + Token + '\' is not alphanumeric' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( '\'' + Token + '\' is not alphanumeric' , self . EXIT_ON_ERROR , TokenObject )
             else :
                 self . SavedLine = self . SavedLine + Token
                 self . State = self . MAIN_STATES [ 'USING_AFTER_WORD' ]
@@ -660,17 +668,17 @@ class Parser ( ) :
                 Path = Path + self . SPECIAL_CHARS [ 'PERIOD' ] + self . PROGRAM_EXTENSION
                 Text = self . ReadFile ( Path )
                 MyLexer = Lexer ( )
-                NewTokens = MyLexer . MakeTokens ( Text )
+                NewTokens = MyLexer . MakeTokens ( Text , Path )
                 FirstWordArray = SavedWordArray [ 0 : WordIndex + 1 : ]
                 SecondWordArray = SavedWordArray [ WordIndex : len ( SavedWordArray ) : ]
                 SavedWordArray = FirstWordArray + NewTokens + SecondWordArray
                 self . SavedLine = ''
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
             else :
-                CompilerIssue . OutputError ( Token + ' is not a period or newline' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( Token + ' is not a period or newline' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'CLASS_AFTER' ] :
             if self . IsValidName ( Token ) == False :
-                CompilerIssue . OutputError ( Token + ' is in the wrong format for a class name' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( Token + ' is in the wrong format for a class name' , self . EXIT_ON_ERROR , TokenObject )
             else :
                 self . TypeTable [ Token ] = Type ( Token )
                 self . CurrentClass = Token
@@ -683,10 +691,10 @@ class Parser ( ) :
             elif Token == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
                 self . State = self . MAIN_STATES [ 'CLASS_MAKING_TEMPLATE' ]
             else :
-                CompilerIssue . OutputError ( 'Expected \'' + self . KEYWORDS [ 'SIZE' ] + '\' or newline or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_START' ] + '\'' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected \'' + self . KEYWORDS [ 'SIZE' ] + '\' or newline or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_START' ] + '\'' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'CLASS_MAKING_TEMPLATE' ] :
             if self . IsValidName ( Token ) == False :
-                CompilerIssue . OutputError ( Token + ' is in the wrong format for a template name' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( Token + ' is in the wrong format for a template name' , self . EXIT_ON_ERROR , TokenObject )
             else :
                 self . TypeTable [ self . CurrentClass ] . Templates [ Token ] = set ( )
                 self . State = self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATE_NAME' ]
@@ -696,83 +704,93 @@ class Parser ( ) :
             elif Token == self . SPECIAL_CHARS [ 'TEMPLATE_END' ] :
                 self . State = self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATES' ]
             else :
-                CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\'.'  , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\'.'  , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATES' ] :
             if Token == self . SPECIAL_CHARS [ 'NEWLINE' ] :
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
             elif Token == self . KEYWORDS [ 'SIZE' ] :
                 self . State = self . MAIN_STATES [ 'CLASS_DECLARING_SIZE' ]
             else :
-                CompilerIssue . OutputError ( 'Expected \'' + self . KEYWORDS [ 'SIZE' ] + '\' or newline' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected \'' + self . KEYWORDS [ 'SIZE' ] + '\' or newline' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'CLASS_DECLARING_SIZE' ] :
             if Token . isdigit ( ) == True :
                 self . TypeTable [ self . CurrentClass ] . Size = int ( Token )
                 self . State = self . MAIN_STATES [ 'CLASS_AFTER_DECLARING_SIZE' ]
             else :
-                CompilerIssue . OutputError ( 'Expected number to go after' + self . KEYWORDS [ 'SIZE' ] , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected number to go after' + self . KEYWORDS [ 'SIZE' ] , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'CLASS_AFTER_DECLARING_SIZE' ] :
             if Token == self . SPECIAL_CHARS [ 'NEWLINE' ] :
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
             else :
-                CompilerIssue . OutputError ( 'Expected newline after declaring class size' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected newline after declaring class size' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'ACTION_AFTER' ] :
             if Token == self . KEYWORDS [ 'ASM' ] :
                 if self . ActionTypeDeclared == True :
-                    CompilerIssue . OutputError ( '\'' + self . KEYWORDS [ 'ASM' ] + '\' declared twice on function' , self . EXIT_ON_ERROR )
+                    CompilerIssue . OutputError ( '\'' + self . KEYWORDS [ 'ASM' ] + '\' declared twice on function' , self . EXIT_ON_ERROR , TokenObject )
                 else :
                     self . CurrentFunctionType = self . FUNCTION_TYPES [ 'ASM' ]
                     self . ActionTypeDeclared = True
             elif Token == self . KEYWORDS [ 'NORMAL' ] :
                 if self . ActionTypeDeclared == True :
-                    CompilerIssue . OutputError ( '\'' + self . KEYWORDS [ 'NORMAL' ] + '\' declared twice on function' , self . EXIT_ON_ERROR )
+                    CompilerIssue . OutputError ( '\'' + self . KEYWORDS [ 'NORMAL' ] + '\' declared twice on function' , self . EXIT_ON_ERROR , TokenObject )
                 else :
                     self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
                     self . ActionTypeDeclared = True
             elif self . IsValidName ( Token ) == True :
                 if self . CurrentClass != '' :
-                    if self . FunctionInTypes ( self . TypeTable [ self . CurrentClass ] . InnerTypes , Token ) :
-                        CompilerIssue . OutputError ( self . CurrentClass + ' already has a symbol named ' + Token , self . EXIT_ON_ERROR )
+                    if Token == self . KEYWORDS [ 'ON' ] :
+                        self . State = self . MAIN_STATES [ 'ACTION_AFTER_ON' ]
                     else :
-                        if Token == self . KEYWORDS [ 'ON' ] :
-                            self . State = self . MAIN_STATES [ 'ACTION_AFTER_ON' ]
+                        Found , OutSymbol = self . CheckCurrentSTs ( Token )
+                        if self . ResolveActionToAsm ( Token , self . CurrentClass ) in self . CurrentTypeTable ( ) :
+                            CompilerIssue . OutputError ( self . CurrentClass + ' already has a action named ' + Token , self . EXIT_ON_ERROR , TokenObject )
                         else :
                             self . CurrentTypeTable ( ) [ Token ] = Function ( self . CurrentFunction )
                             self . CurrentFunction = Token
                             self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
                 else :
-                    self . TypeTable [ Token ] = Function ( Token )
-                    self . CurrentFunction = Token
-                    self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
+                    Found , OutSymbol = self . CheckCurrentSTs ( Token )
+                    if self . ResolveActionToAsm ( Token , self . CurrentClass ) in self . CurrentTypeTable ( ) :
+                        CompilerIssue . OutputError ( self . CurrentClass + ' already has a action named ' + Token , self . EXIT_ON_ERROR , TokenObject )
+                    else :
+                        self . TypeTable [ Token ] = Function ( Token )
+                        self . CurrentFunction = Token
+                        self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
             else :
-                CompilerIssue . OutputError ( Token + ' is in the wrong format for a method name' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( Token + ' is in the wrong format for a method name' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'ACTION_AFTER_ON' ] :
             if self . CanResolveSymbolAction ( Token ) :
-                self . CurrentFunction = self . ResolveActionToAsm ( Token , self . CurrentClass )
-                self . TypeTable [ self . CurrentClass ] . InnerTypes [ self . CurrentFunction ] = Function ( self . CurrentFunction )
-                self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
+                print ( 'yo' + Token )
+                if self . ResolveActionToAsm ( Token , self . CurrentClass ) in self . CurrentTypeTable ( ) :
+                    CompilerIssue . OutputError ( self . CurrentClass + ' has already overloaded operator \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
+                else :
+                    self . CurrentFunction = self . ResolveActionToAsm ( Token , self . CurrentClass )
+                    self . TypeTable [ self . CurrentClass ] . InnerTypes [ self . CurrentFunction ] = Function ( self . CurrentFunction )
+                    self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
             else :
-                CompilerIssue . OutputError ( 'Cannot overload operator \'' + Token + '\'' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Cannot overload operator \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'ACTION_AFTER_NAME' ] :
+            print(Token)
             if Token == self . SPECIAL_CHARS [ 'LEFT_PAREN' ] :
                 self . State = self . MAIN_STATES [ 'ACTION_NEW_PARAMETER' ]
             elif Token == self . SPECIAL_CHARS [ 'NEWLINE' ] :
                 OutputText = self . OutputActionStartCode ( OutputText )
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
             else :
-                CompilerIssue . OutputError ( 'Expected left paren or newline in action declaration' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected left paren or newline in action declaration' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'ACTION_NEW_PARAMETER' ] :
             if self . IsValidName ( Token ) :
                 if Token in self . TypeTable :
                     self . SavedType = Token
                     self . State = self . MAIN_STATES [ 'ACTION_PARAM_NAME' ]
                 else :
-                    CompilerIssue . OutputError ( 'Unknown type \'' + Token + '\'' , self . EXIT_ON_ERROR )
+                    CompilerIssue . OutputError ( 'Unknown type \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
             else :
-                CompilerIssue . OutputError ( 'Expected variable or right paren in action declaration' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected variable or right paren in action declaration' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'ACTION_PARAM_NAME' ] :
             if self . IsValidName ( Token ) :
                 if Token in self . CurrentTypeTable ( ) :
-                    CompilerIssue . OutputError ( 'There is already a \'' + Token + '\' in the current scope' , self . EXIT_ON_ERROR )
+                    CompilerIssue . OutputError ( 'There is already a \'' + Token + '\' in the current scope' , self . EXIT_ON_ERROR , TokenObject )
                 else :
                     NewSymbol = MySymbol ( Token , self . SavedType )
                     self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType ] . Size
@@ -781,7 +799,7 @@ class Parser ( ) :
                     self . CurrentTypeTable ( ) . append ( NewSymbol )
                     self . State = self . MAIN_STATES [ 'ACTION_AFTER_PARAM' ]
             else :
-                CompilerIssue . OutputError ( 'Invalid variable name in action declaration' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Invalid variable name in action declaration' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'ACTION_AFTER_PARAM' ] :
             if Token == self . SPECIAL_CHARS [ 'COMMA' ] :
                 self . State = self . MAIN_STATES [ 'ACTION_NEW_PARAMETER' ]
@@ -795,7 +813,7 @@ class Parser ( ) :
             elif Token == self . KEYWORDS [ 'RETURNS' ] :
                 self . State = self . MAIN_STATES [ 'RETURN_WAITING_FOR_PARAM' ]
             else :
-                CompilerIssue . OutputError ( 'Expected NEWLINE or ' , self . KEYWORDS [ 'RETURNS' ] , ' after action' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected NEWLINE or ' , self . KEYWORDS [ 'RETURNS' ] , ' after action' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'RETURN_WAITING_FOR_PARAM' ] :
             if Token in self . TypeTable :
                 NewSymbol = MySymbol ( deepcopy ( self . EMPTY_STRING ) , Token )
@@ -804,14 +822,14 @@ class Parser ( ) :
                 self . GetActionReturnValues ( self . CurrentClass , self . CurrentFunction ) . append ( NewSymbol )
                 self . State = self . MAIN_STATES [ 'RETURN_AT_END' ]
             else :
-                CompilerIssue . OutputError ( 'The type {} is not a currently valid type' . format ( Token ) , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'The type {} is not a currently valid type' . format ( Token ) , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'RETURN_AT_END' ] :
             if Token == self . SPECIAL_CHARS [ 'NEWLINE' ] :
                 self . CurrentSTOffset = deepcopy ( self . ACTION_DEFINITION_OFFSET )
                 OutputText = self . OutputActionStartCode ( OutputText )
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
             else :
-                CompilerIssue . OutputError ( 'Expected NEWLINE after return values' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'Expected NEWLINE after return values' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ] :
             if Token == self . COLON :
                 self . State = self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ]
@@ -820,12 +838,12 @@ class Parser ( ) :
                 self . State = self . MAIN_STATES [ 'WAITING_FOR_RIGHT_OPERATOR' ]
             else :
                 CompilerIssue . OutputError ( 'Cound not find ' + Token + ' in ' + self . SavedLeftOperand . Name + ' which is of type '
-                    + self . SavedLeftOperand . Type , self . EXIT_ON_ERROR )
+                    + self . SavedLeftOperand . Type , self . EXIT_ON_ERROR , TokenObject )
                 self . State = self . MAIN_STATES [ 'WAITING_FOR_OPERATOR' ]
         elif self . State == self . MAIN_STATES [ 'AFTER_REPEAT' ] :
             if Token != self . KEYWORDS [ 'WHILE' ] and Token != self . KEYWORDS [ 'UNTIL' ] :
                 CompilerIssue . OutputError ( 'Expected \'{}\' or \'{}\' after {}' . format ( self . KEYWORDS [ 'WHILE' ] , self . KEYWORDS [ 'UNTIL' ] , self . KEYWORDS [ 'REPEAT' ] )
-                    , self . EXIT_ON_ERROR )
+                    , self . EXIT_ON_ERROR , TokenObject )
             else :
                 OutputText = self . OutputAsmRoutine ( OutputText , self . GetCurrentST ( ) . RoutineNumber )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
@@ -893,8 +911,8 @@ class Parser ( ) :
     def GetUntilNewline ( self , SavedWordArray , WordIndex ) :
         LineWordArray = [ ]
         TempWordIndex = WordIndex
-        while SavedWordArray [ WordIndex ] != self . SPECIAL_CHARS [ 'NEWLINE' ] :
-            LineWordArray . append ( SavedWordArray [ WordIndex ] )
+        while SavedWordArray [ WordIndex ] . Name != self . SPECIAL_CHARS [ 'NEWLINE' ] :
+            LineWordArray . append ( SavedWordArray [ WordIndex ] . Name )
             WordIndex = WordIndex + 1
         return LineWordArray , WordIndex
     
@@ -935,13 +953,6 @@ class Parser ( ) :
             OutTable = self . TypeTable [ Class ] . InnerTypes
         OutTable = OutTable [ Function ] . ReturnValues
         return OutTable
-    
-    def FunctionInTypes ( self , Table , FuncName ) :
-        Output = False
-        for Type in Table :
-            if Table [ Type ] . Name == FuncName :
-                Output = True
-        return Output
     
     
     def IsValidName ( self , Token ) :
@@ -1002,9 +1013,11 @@ class Lexer ( ) :
         self . SavedWordArray = deepcopy ( self . SAVED_WORD_ARRAY_DEFAULT )
         self . State = self . MAIN_STATES [ 'NORMAL' ]
         self . StartingQuotation = self . QUOTATIONS [ 0 ]
+        self . LineNumber = 1
+        self . FileName = ''
     
     def AppendWordToSavedArray ( self , Text ) :
-        self . SavedWordArray . append ( Text ) 
+        self . SavedWordArray . append ( MyToken ( Text , self . LineNumber , self . FileName ) ) 
         self . EraseSavedWord ( )
     
     def ProcessAppendWord ( self , Text ) :
@@ -1019,7 +1032,9 @@ class Lexer ( ) :
                 self . StartingQuotation = Text
                 self . AppendWordToSavedArray ( Text )
             elif Text == self . ASM_TEXT :
-                if self . SavedWordArray [ len ( self . SavedWordArray ) - 1 ] == self . ACTION_TEXT :
+                print ( 'YES' )
+                if self . SavedWordArray [ len ( self . SavedWordArray ) - 1 ] . Name == self . ACTION_TEXT :
+                    print ( 'YEeeeeeeeeeS' )
                     self . State = self . MAIN_STATES [ 'ASM_ACTION_WAITING_FOR_LINE' ]
                     self . AppendWordToSavedArray ( Text )
             else :
@@ -1083,8 +1098,10 @@ class Lexer ( ) :
     
     def DoLetterIsWhiteSpaceInSetup ( self ,
         CurrentLetter ) :
+        print ( 'fire ' , self . IsSavedWordExisting ( ) , self . SavedWord , self . SavedWord == self . ASM_TEXT )
         if self . IsSavedWordExisting ( ) == True :
             self . ProcessAppendWord ( self . SavedWord )
+        print ( 'fire two ' , self . SavedWord , self . IsSavedWordExisting ( ) )
         if self . State == self . MAIN_STATES [ 'IN_ONE_LINE_COMMENT' ] or self . State == self . MAIN_STATES [ 'IN_MULTILINE_COMMENT' ]\
             or self . State == self . MAIN_STATES [ 'IN_ASM_FUNCTION' ] :
             self . AddCharacterToSavedWord ( CurrentLetter )
@@ -1126,20 +1143,24 @@ class Lexer ( ) :
             self . DoLetterIsMeaningfulInSetup ( CurrentLetter )
         elif self . IsLetterNewLine ( CurrentLetter ) :
             self . DoLetterIsNewLine ( CurrentLetter )
+            self . LineNumber = self . LineNumber + 1
         else :
             self . AddCharacterToSavedWord ( CurrentLetter )
     
-    def MakeTokens ( self , InputText ) :
+    def MakeTokens ( self , InputText , FileName ) :
+        self . FileName = FileName
         Position = 0
+        LineNumber = 0
         InputTextLength = len ( InputText )
         while ( Position < InputTextLength ) :
             CurrentLetter = InputText [ Position ]
             self . ProcessLetterInSetup ( CurrentLetter )
             Position = Position + 1
         if self . SavedWord != '' :
-            self. SavedWordArray . append ( self . SavedWord )
+            self. SavedWordArray . append ( MyToken ( self . SavedWord , self . LineNumber , FileName ) )
         print ( 'self . SavedWordArray = ' + str ( self . SavedWordArray ) )
         return self . SavedWordArray
+
 
 class Compiler ( ) :
     BEGINNING_TEXT = '''format ELF executable 3
@@ -1201,19 +1222,19 @@ entry Main\n\n
     
     def Compile ( self , InputFileName , OutputFileName ) :
         InputText = self . ReadInputFile ( InputFileName )
-        OutputText = self . CalcOutputText ( InputText )
+        OutputText = self . CalcOutputText ( InputText , InputFileName )
         self . WriteOutputFile ( OutputFileName + self . FASM_EXTENSION , OutputText )
     
-    def CalcOutputText ( self , InputText ) :
+    def CalcOutputText ( self , InputText , Path ) :
         OutputText = ''
         OutputText = OutputText + self . GetBeginningText ( )
-        OutputText = self . ProgramTranslation ( InputText , OutputText )
+        OutputText = self . ProgramTranslation ( InputText , OutputText , Path )
         return OutputText
     
-    def ProgramTranslation ( self , InputText , OutputText ) :
+    def ProgramTranslation ( self , InputText , OutputText , Path ) :
         MyLexer = Lexer ( )
         MyParser = Parser ( )
-        SavedWordArray = MyLexer . MakeTokens ( InputText )
+        SavedWordArray = MyLexer . MakeTokens ( InputText , Path )
         OutputText , SavedWordArray = MyParser . Parse ( SavedWordArray , OutputText )
         for i in SavedWordArray :
             print ( i )

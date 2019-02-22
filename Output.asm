@@ -796,6 +796,44 @@ add ebx, -6
 mov [esp], ebx
 call Integer__On_Equals
 add esp, 8
+;Loading L
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx
+;Loading I1
+add esp, -4
+mov ebx, ebp
+add ebx, -6
+mov [esp], ebx
+call Integer__On_Equals
+add esp, 8
+;Loading I1
+add esp, -4
+mov ebx, ebp
+add ebx, -6
+mov [esp], ebx
+;Loading L
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading I1
+add esp, -4
+mov ebx, ebp
+add ebx, -6
+mov [esp], ebx
+call OutputByte
+add esp, 4
+;Loading L
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx
+call OutputByte
+add esp, 4
 
 
 mov esp, ebp

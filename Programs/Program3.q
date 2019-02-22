@@ -97,5 +97,11 @@ action Main
     OutputByte ( L )
     
     Integer I1 = 100
+    I1 = L
+    L = I1
+    OutputByte ( I1 )
+    OutputByte ( L )
+    
+    I
     
 end
