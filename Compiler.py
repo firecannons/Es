@@ -391,20 +391,13 @@ class Parser ( ) :
         for CurrentOperand in ArrayOfOperands :
             OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand)
             OperandOffset = 0
-            print ( 'CurrentOperand = ' , CurrentOperand )
             Found , CurrentSymbol = self . CheckCurrentSTs ( CurrentOperand )
-            print ( 'Found =' , Found , ' CurrentSymbol =' , CurrentSymbol , len ( self . STStack ) )
             OperandOffset = CurrentSymbol . Offset
             OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( OperandOffset )
-            print ( self . CurrentSTOffset , OriginalOffset , self . POINTER_SIZE)
             self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
-            print ( self . CurrentSTOffset , OriginalOffset )
             if ActionParameters [ Index ] . Type != CurrentSymbol . Type . Name :
-                print ( 'sfda' , ActionParameters [ Index ] . Type , 'fire' , CurrentSymbol . Type , len ( ActionParameters ) , ActionParameters , ActionParameters [ Index ] )
                 PrintObject ( ActionParameters )
-                print('adfs')
                 PrintObject ( CurrentSymbol )
-                CompilerIssue . OutputError ( 'The errir' , self . EXIT_ON_ERROR , self . CurrentTokenObject )
             Index = Index + 1
         if LeftOperand != '' :
             Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
@@ -413,7 +406,6 @@ class Parser ( ) :
             OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( CurrentSymbol . Offset )
             self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
         OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
-        print ( self . CurrentSTOffset , OriginalOffset )
         OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( AfterReturnOffset - self . CurrentSTOffset )
         self . CurrentSTOffset = AfterReturnOffset
         return OutputText , WordArray
@@ -444,15 +436,12 @@ class Parser ( ) :
                     WordArray . pop ( Index + 1 )
                     WordArray . pop ( Index + 3 )
             else :
-                print ( "Computing left paren" )
                 CurrentClass = ''
                 if CurrentObject != '' :
                     Found , CurrentClass = self . CheckCurrentSTs ( CurrentObject )
                     CurrentClass = CurrentClass . type
                 if self . GetTypeTable ( CurrentClass , WordArray [ Index ] ) :
-                    print ( 'before ParameterArray' , self . ParameterArray )
                     self . ParameterArray = [ WordArray [ Index + 2 ] ] + self . ParameterArray
-                    print ( 'Adding to ParameterArray ' , WordArray [ Index + 2 ] , self . ParameterArray )
                     NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CurrentObject , WordArray , Index )
                     OutputText = OutputText + NewOutputText
                     self . ParameterArray = [ ]
@@ -467,7 +456,6 @@ class Parser ( ) :
         elif WordArray [ Index + 1 ] == self . SPECIAL_CHARS [ 'COMMA' ] :
             CallingFunction = True
             self . ParameterArray = [ WordArray [ Index ] ] + self . ParameterArray
-            print ( 'Adding to ParameterArray ' , WordArray [ Index ] , self . ParameterArray )
             WordArray . pop ( Index )
             WordArray . pop ( Index )
         elif WordArray [ Index + 1 ] in self . OPERATORS . values ( ) :
@@ -485,7 +473,6 @@ class Parser ( ) :
         CurrentClass = ''
         FunctionStack = [ ]
         while len ( SavedWordArray ) > 2 :
-            print ( SavedWordArray , WordIndex )
             Token1 = SavedWordArray [ WordIndex ]
             Token2 = SavedWordArray [ WordIndex + 1 ]
             Token3 = ''
@@ -495,16 +482,12 @@ class Parser ( ) :
                 Token3 = SavedWordArray [ WordIndex + 2 ]
             if len ( SavedWordArray ) - WordIndex > 3 :
                 Token4 = SavedWordArray [ WordIndex + 3 ]
-            print ( len ( SavedWordArray ) , WordIndex , len ( SavedWordArray ) - WordIndex )
             if len ( SavedWordArray ) - WordIndex > 4 :
                 Token5 = SavedWordArray [ WordIndex + 4 ]
             if self . OpOneHighestPrecedence ( Token2 , Token4 ) :
                 OutputText , WordIndex ,  SavedWordArray = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
-                print ( 'WordIndex = ' , WordIndex , 'len ( SavedWordArray ) = ' , len ( SavedWordArray ) )
-                print ( 'Reducing to ' , SavedWordArray )
             else :
                 WordIndex = WordIndex + 2
-                print ( 'Shifting ' , SavedWordArray )
                 
             if len ( SavedWordArray ) - WordIndex < 2 :
                 WordIndex = WordIndex - 2
@@ -543,7 +526,6 @@ class Parser ( ) :
             if CurrentST . Type == self . SCOPE_TYPES [ 'IF' ]\
                 or CurrentST . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
                 OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( CurrentST . Offset - self . CurrentSTOffset )
-                print ( 'OK ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , CurrentST . Type )
                 self . CurrentSTOffset = CurrentST . Offset
                 if CurrentST . Type == self . SCOPE_TYPES [ 'REPEAT' ] :
                     OutputText = self . OutputJumpToRoutine ( OutputText , CurrentST . RoutineNumber )
@@ -555,12 +537,10 @@ class Parser ( ) :
                 if CurrentST . Type == self . SCOPE_TYPES [ 'IF' ] :
                     OutputText = self . OutputAsmRoutine ( OutputText , CurrentST . EndRoutineNumber )
             elif self . CurrentFunction != '' :
-                #print ( 'exiting function ' , self . CurrentFunction )
                 self . CurrentFunction = ''
                 self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
                 OutputText = self . CalcActionReturnOutput ( OutputText )
             elif self . CurrentClass != '' :
-                print ( 'exiting class ' , self . CurrentClass )
                 self . CurrentClass = ''
             self . STStack . pop ( len ( self . STStack ) - 1 )
         elif Token == self . KEYWORDS [ 'IF' ] :
@@ -577,7 +557,6 @@ class Parser ( ) :
         elif Token == self . KEYWORDS [ 'ELSE_IF' ] :
             CurrentST = self . GetCurrentST ( )
             OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( CurrentST . Offset - self . CurrentSTOffset )
-            print ( 'OK2 ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , CurrentST . Type )
             self . CurrentSTOffset = CurrentST . Offset
             OutputText = self . OutputJumpToRoutine ( OutputText , CurrentST . EndRoutineNumber )
             OutputText = self . OutputAsmRoutine ( OutputText , CurrentST . RoutineNumber )
@@ -591,7 +570,6 @@ class Parser ( ) :
         elif Token == self . KEYWORDS [ 'ELSE' ] :
             CurrentST = self . GetCurrentST ( )
             OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( CurrentST . Offset - self . CurrentSTOffset )
-            print ( 'OK2 ' ,self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , CurrentST . Type )
             self . CurrentSTOffset = CurrentST . Offset
             OutputText = self . OutputJumpToRoutine ( OutputText , CurrentST . EndRoutineNumber )
             OutputText = self . OutputAsmRoutine ( OutputText , CurrentST . RoutineNumber )
@@ -601,7 +579,6 @@ class Parser ( ) :
             self . GetCurrentST ( ) . OffsetAfterComparison = self . CurrentSTOffset
         elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
             OutputText = OutputText + Token
-            print ( 'In Asm Function -> Will output ASM to output' )
         elif self . IsValidName ( Token ) == True :
             if Token in self . TypeTable :
                 if self . TypeTable [ Token ] . IsFunction == False :
@@ -622,7 +599,6 @@ class Parser ( ) :
     
     def ParseToken ( self , Token , SavedWordArray , WordIndex , OutputText , TokenObject ) :
         print ( 'Parsing ' , Token , self . State , self . CurrentClass , self . CurrentFunction , len ( self . STStack ) , self . CurrentFunctionType , self . CurrentSTOffset )
-        #print ( 'Parsing -> \'' + Token + '\'' , 'self . State = ' + str ( self . State ) , ' len ( self . STStack ) = ' + str ( len ( self . STStack ) ) )
         if self . State == self . MAIN_STATES [ 'START_OF_LINE' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessStartOfLine ( Token , SavedWordArray , WordIndex , OutputText, TokenObject )
         elif self . State == self . MAIN_STATES [ 'DECLARING_VARIABLE' ] :
@@ -777,7 +753,6 @@ class Parser ( ) :
                 CompilerIssue . OutputError ( Token + ' is in the wrong format for a method name' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'ACTION_AFTER_ON' ] :
             if self . CanResolveSymbolAction ( Token ) :
-                print ( 'yo' + Token )
                 if self . ResolveActionToAsm ( Token , self . CurrentClass ) in self . CurrentTypeTable ( ) :
                     CompilerIssue . OutputError ( self . CurrentClass + ' has already overloaded operator \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
                 else :
@@ -787,7 +762,6 @@ class Parser ( ) :
             else :
                 CompilerIssue . OutputError ( 'Cannot overload operator \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
         elif self . State == self . MAIN_STATES [ 'ACTION_AFTER_NAME' ] :
-            print(Token)
             if Token == self . SPECIAL_CHARS [ 'LEFT_PAREN' ] :
                 self . State = self . MAIN_STATES [ 'ACTION_NEW_PARAMETER' ]
             elif Token == self . SPECIAL_CHARS [ 'NEWLINE' ] :
@@ -1049,9 +1023,7 @@ class Lexer ( ) :
                 self . StartingQuotation = Text
                 self . AppendWordToSavedArray ( Text )
             elif Text == self . ASM_TEXT :
-                print ( 'YES' )
                 if self . SavedWordArray [ len ( self . SavedWordArray ) - 1 ] . Name == self . ACTION_TEXT :
-                    print ( 'YEeeeeeeeeeS' )
                     self . State = self . MAIN_STATES [ 'ASM_ACTION_WAITING_FOR_LINE' ]
                     self . AppendWordToSavedArray ( Text )
             else :
@@ -1115,10 +1087,8 @@ class Lexer ( ) :
     
     def DoLetterIsWhiteSpaceInSetup ( self ,
         CurrentLetter ) :
-        print ( 'fire ' , self . IsSavedWordExisting ( ) , self . SavedWord , self . SavedWord == self . ASM_TEXT )
         if self . IsSavedWordExisting ( ) == True :
             self . ProcessAppendWord ( self . SavedWord )
-        print ( 'fire two ' , self . SavedWord , self . IsSavedWordExisting ( ) )
         if self . State == self . MAIN_STATES [ 'IN_ONE_LINE_COMMENT' ] or self . State == self . MAIN_STATES [ 'IN_MULTILINE_COMMENT' ]\
             or self . State == self . MAIN_STATES [ 'IN_ASM_FUNCTION' ] :
             self . AddCharacterToSavedWord ( CurrentLetter )
@@ -1131,8 +1101,6 @@ class Lexer ( ) :
     
     def DoLetterIsMeaningfulInSetup ( self ,
         CurrentLetter ) :
-        if self . SavedWord == '3' :
-            print ( 'aha' , self . SafedWord , self . SavedWord . isalnum ( ) , self . IsSavedWordExisting ( ) , CurrentLetter )
         if self . IsSavedWordExisting ( ) == True and self . SavedWord . isalnum ( ) :
             self . ProcessAppendWord ( self . SavedWord )
         self . AddCharacterToSavedWord ( CurrentLetter )
