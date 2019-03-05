@@ -102,6 +102,4 @@ action Main
     OutputByte ( I1 )
     OutputByte ( L )
     
-    I
-    
 end
