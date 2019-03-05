@@ -287,24 +287,24 @@ class Parser ( ) :
         WordIndex = 0
         while WordIndex < len ( SavedWordArray ) :
             self . CurrentTokenObject = SavedWordArray [ WordIndex ]
-            Token = self . CurrentTokenObject . Name
+            Token = self . CurrentTokenObject
             self . CurrentToken = Token
             SavedWordArray , WordIndex , OutputText = self . ParseToken ( Token , SavedWordArray , WordIndex , OutputText , SavedWordArray [ WordIndex ] )
             WordIndex = WordIndex + 1
         PrintObject ( self . TypeTable )
         return OutputText , SavedWordArray
     
-    def GetOperatorDepth ( self , Operator ) :
+    def GetOperatorDepth ( self , Token ) :
         Depth = -1
-        if Operator == self . EMPTY_STRING :
+        if Token . Name == self . EMPTY_STRING :
             Depth = len ( self . OPERATOR_PRECEDENCE )
         DepthIndex = 0
         while DepthIndex < len ( self . OPERATOR_PRECEDENCE ) and Depth == -1 :
-            if Operator in self . OPERATOR_PRECEDENCE [ DepthIndex ] :
+            if Token . Name in self . OPERATOR_PRECEDENCE [ DepthIndex ] :
                 Depth = DepthIndex
             DepthIndex = DepthIndex + 1
         if Depth == -1 :
-            CompilerIssue . OutputError ( 'Operator \'' + Operator + '\' is not an allowed operator' , self . EXIT_ON_ERROR , TokenObject )
+            CompilerIssue . OutputError ( 'Operator \'' + Token . Name + '\' is not an allowed operator' , self . EXIT_ON_ERROR , Token )
         return Depth
     
     def OpOneHighestPrecedence ( self , Op1 , Op2 ) :
@@ -475,9 +475,9 @@ class Parser ( ) :
         while len ( SavedWordArray ) > 2 :
             Token1 = SavedWordArray [ WordIndex ]
             Token2 = SavedWordArray [ WordIndex + 1 ]
-            Token3 = ''
-            Token4 = ''
-            Token5 = ''
+            Token3 = MyToken ( '' , -1 , '' )
+            Token4 = MyToken ( '' , -1 , '' )
+            Token5 = MyToken ( '' , -1 , '' )
             if len ( SavedWordArray ) - WordIndex > 2 :
                 Token3 = SavedWordArray [ WordIndex + 2 ]
             if len ( SavedWordArray ) - WordIndex > 3 :
@@ -948,7 +948,7 @@ class Parser ( ) :
     
     def IsValidName ( self , Token ) :
         Output = True
-        if Token [ 0 ] . isalpha ( ) == False or Token . isalnum ( ) == False :
+        if Token . Name [ 0 ] . isalpha ( ) == False or Token . Name . isalnum ( ) == False :
             Output = False
         return Output
     
