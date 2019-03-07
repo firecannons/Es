@@ -354,6 +354,7 @@ class Parser ( ) :
         
     
     def CalcFunctionCall ( self , Operator , ArrayOfOperands , LeftOperand , WordArray , Index ) :
+        print ( 'asf' , ArrayOfOperands [ 0 ] )
         OutputText = ''
         OriginalOffset = self . CurrentSTOffset
         Class = ''
@@ -364,14 +365,16 @@ class Parser ( ) :
                 ByteType = self . TypeTable [ self . BYTE_TYPE_NAME ]
                 NewName = self . RETURN_TEMP_LETTER + str ( self . ReturnTempIndex )
                 OutputText = OutputText + ';Declaring {}\n' . format ( NewName )
-                ArrayOfOperands [ ArrayIndex ] = NewName
                 NewSymbol = MySymbol ( NewName , ByteType )
+                ArrayOfOperands [ ArrayIndex ] = NewSymbol
                 NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
                 self . GetCurrentST ( ) . Symbols [ NewName ] = NewSymbol
                 self . ReturnTempIndex = self . ReturnTempIndex + 1
             ArrayIndex = ArrayIndex + 1
         if LeftOperand != '' :
             Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
+            print ( Found , CurrentSymbol , 'asfwero8sdufio' , LeftOperand , LeftOperand . Name )
+            PrintObject ( self . STStack )
             Class = CurrentSymbol . Type
         for ReturnObject in self . GetTypeObject ( Class . Name , self . ResolveActionToAsm ( Operator , Class ) ) . ReturnValues :
             OutputText = OutputText + ';Adding return value {}\n'.format(ReturnObject.Name)
@@ -388,11 +391,13 @@ class Parser ( ) :
             WordArray [ Index ] = NewName
         AfterReturnOffset = self . CurrentSTOffset
         FunctionName = self . ResolveActionToAsm ( Operator , Class )
-        ActionParameters = self . GetTypeTable ( Class , FunctionName )
+        ActionParameters = self . GetTypeTable ( Class . Name , FunctionName )
         Index = 0
         for CurrentOperand in ArrayOfOperands :
             OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand)
             OperandOffset = 0
+            print ( 'asfd' , ArrayOfOperands [ 0 ] )
+            PrintObject(ArrayOfOperands)
             Found , CurrentSymbol = self . CheckCurrentSTs ( CurrentOperand )
             OperandOffset = CurrentSymbol . Offset
             OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( OperandOffset )
@@ -414,6 +419,7 @@ class Parser ( ) :
             
     
     def DoOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
+        print ( 'woah!' , WordArray [ 0 ] )
         CurrentObject = ''
         if WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'COLON' ] :
             IsFunction = False
@@ -444,6 +450,7 @@ class Parser ( ) :
                     CurrentClass = CurrentClass . type
                 if self . GetTypeTable ( CurrentClass , WordArray [ Index ] ) :
                     self . ParameterArray = [ WordArray [ Index + 2 ] ] + self . ParameterArray
+                    print ( 'w00t' , self . ParameterArray [ 0 ] )
                     NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CurrentObject , WordArray , Index )
                     OutputText = OutputText + NewOutputText
                     self . ParameterArray = [ ]
@@ -462,6 +469,7 @@ class Parser ( ) :
             WordArray . pop ( Index )
         elif WordArray [ Index + 1 ] . Name in self . OPERATORS . values ( ) :
             RightOperand = WordArray [ Index + 2 ]
+            print ( 't00w' , RightOperand , [ RightOperand ] )
             NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , WordArray [ Index ] , WordArray , Index )
             OutputText = OutputText + NewOutputText
             
@@ -478,7 +486,6 @@ class Parser ( ) :
         FunctionStack = [ ]
         while len ( SavedWordArray ) > 2 :
             #print(SavedWordArray[0].Name, SavedWordArray , len ( SavedWordArray ))
-            PrintObject ( SavedWordArray )
             Token1 = SavedWordArray [ WordIndex ]
             Token2 = SavedWordArray [ WordIndex + 1 ]
             Token3 = MyToken ( '' , -1 , '' )
@@ -593,7 +600,7 @@ class Parser ( ) :
                     self . SavedType = Token
                     self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
                 else :
-                    Found = self . CheckCurrentSTs ( Token . Name )
+                    Found = self . CheckCurrentSTs ( Token )
                     LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                     OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
             elif self . CheckCurrentSTs ( Token  . Name ) :
