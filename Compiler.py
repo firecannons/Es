@@ -420,67 +420,80 @@ class Parser ( ) :
         OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( AfterReturnOffset - self . CurrentSTOffset )
         self . CurrentSTOffset = AfterReturnOffset
         return OutputText , WordArray
-            
+    
+    def DoColonOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
+        IsFunction = False
+        IsSymbol = False
+        IsSymbol , CurrentObject = self . CheckCurrentSTs ( WordArray [ Index ] )
+        CurrentClass = CurrentObject . Type
+        if WordArray [ Index ] in self . CurrentTypeTable ( ) :
+            IsFunction = True
+        if IsSymbol == True or IsFunction == True :
+            if WordArray [ Index + 2 ] in self . TypeTable [ CurrentClass ] . InnerTypes :
+                NewType = self . TypeTable [ CurrentClass ] . InnerTypes [ WordArray [ Index + 2 ] ] . Type
+                CurrentClass = self . TypeTable [ NewType ]
+                WordArray . pop ( Index )
+                WordArray . pop ( Index )
+            else :
+                CompilerIssue . OutputError ( 'Class \'' + CurrentClass + '\' has no variable \'' + WordArray [ Index + 2 ] + '\'.' , self . EXIT_ON_ERROR , TokenObject )
+        elif IsFound == False :
+            CompilerIssue . OutputError ( 'Unknown ' + Operator + ' is not an allowed operator' , self . EXIT_ON_ERROR , TokenObject )
+        return Index , WordArray , CurrentClass , OutputText
+    
+    def DoLeftParenOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
+        CurrentObject = ''
+        if WordArray [ Index ] . Name in self . OPERATORS :
+            if WordArray [ Index + 3 ] == self . OPERATORS [ 'RIGHT_PAREN' ] :
+                WordArray . pop ( Index + 1 )
+                WordArray . pop ( Index + 3 )
+        else :
+            CurrentClass = ''
+            if CurrentObject != '' :
+                Found , CurrentClass = self . CheckCurrentSTs ( CurrentObject )
+                CurrentClass = CurrentClass . type
+            if self . GetTypeTable ( CurrentClass , WordArray [ Index ] . Name ) :
+                self . ParameterArray = [ WordArray [ Index + 2 ] ] + self . ParameterArray
+                print ( 'w00t' , self . ParameterArray [ 0 ] , CurrentClass , CurrentObject )
+                NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CurrentObject , WordArray , Index )
+                OutputText = OutputText + NewOutputText
+                self . ParameterArray = [ ]
+                WordArray . pop ( Index )
+                WordArray . pop ( Index )
+                WordArray . pop ( Index )
+                WordArray . pop ( Index )
+            else :
+                CompilerIssue . OutputError ( 'Function \'' + CurrentClass + ':' + WordArray [ Index ] + '\' does not exist.' , self . EXIT_ON_ERROR , TokenObject )
+        return Index , WordArray , CurrentClass , OutputText
+    
+    def DoCommaOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
+        CallingFunction = True
+        self . ParameterArray = [ WordArray [ Index ] ] + self . ParameterArray
+        WordArray . pop ( Index )
+        WordArray . pop ( Index )
+        return Index , WordArray , CurrentClass , OutputText
+    
+    def DoOperatorActionCall ( self , Index , WordArray , CurrentClass , OutputText ) :
+        RightOperand = WordArray [ Index + 2 ]
+        NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , WordArray [ Index ] , WordArray , Index )
+        OutputText = OutputText + NewOutputText
+        
+        WordArray . pop ( Index + 1 )
+        WordArray . pop ( Index + 1 )
+        return Index , WordArray , CurrentClass , OutputText
     
     def DoOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
-        print ( 'woah!' , WordArray [ 0 ] )
-        CurrentObject = ''
         if WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'COLON' ] :
-            IsFunction = False
-            IsSymbol = False
-            IsSymbol , CurrentObject = self . CheckCurrentSTs ( WordArray [ Index ] )
-            CurrentClass = CurrentObject . Type
-            if WordArray [ Index ] in self . CurrentTypeTable ( ) :
-                IsFunction = True
-            if IsSymbol == True or IsFunction == True :
-                if WordArray [ Index + 2 ] in self . TypeTable [ CurrentClass ] . InnerTypes :
-                    NewType = self . TypeTable [ CurrentClass ] . InnerTypes [ WordArray [ Index + 2 ] ] . Type
-                    CurrentClass = self . TypeTable [ NewType ]
-                    WordArray . pop ( Index )
-                    WordArray . pop ( Index )
-                else :
-                    CompilerIssue . OutputError ( 'Class \'' + CurrentClass + '\' has no variable \'' + WordArray [ Index + 2 ] + '\'.' , self . EXIT_ON_ERROR , TokenObject )
-            elif IsFound == False :
-                CompilerIssue . OutputError ( 'Unknown ' + Operator + ' is not an allowed operator' , self . EXIT_ON_ERROR , TokenObject )
+            Index , WordArray , CurrentClass , OutputText = self . DoColonOperation ( Index , WordArray , CurrentClass , OutputText )
         elif WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'LEFT_PAREN' ] :
-            if WordArray [ Index ] . Name in self . OPERATORS :
-                if WordArray [ Index + 3 ] == self . OPERATORS [ 'RIGHT_PAREN' ] :
-                    WordArray . pop ( Index + 1 )
-                    WordArray . pop ( Index + 3 )
-            else :
-                CurrentClass = ''
-                if CurrentObject != '' :
-                    Found , CurrentClass = self . CheckCurrentSTs ( CurrentObject )
-                    CurrentClass = CurrentClass . type
-                if self . GetTypeTable ( CurrentClass , WordArray [ Index ] . Name ) :
-                    self . ParameterArray = [ WordArray [ Index + 2 ] ] + self . ParameterArray
-                    print ( 'w00t' , self . ParameterArray [ 0 ] , CurrentClass , CurrentObject )
-                    NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CurrentObject , WordArray , Index )
-                    OutputText = OutputText + NewOutputText
-                    self . ParameterArray = [ ]
-                    WordArray . pop ( Index )
-                    WordArray . pop ( Index )
-                    WordArray . pop ( Index )
-                    WordArray . pop ( Index )
-                else :
-                    CompilerIssue . OutputError ( 'Function \'' + CurrentClass + ':' + WordArray [ Index ] + '\' does not exist.' , self . EXIT_ON_ERROR , TokenObject )
+            Index , WordArray , CurrentClass , OutputText = self . DoLeftParenOperation ( Index , WordArray , CurrentClass , OutputText )
         elif WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
             Index = Index - 2
         elif WordArray [ Index + 1 ] . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
-            CallingFunction = True
-            self . ParameterArray = [ WordArray [ Index ] ] + self . ParameterArray
-            WordArray . pop ( Index )
-            WordArray . pop ( Index )
+            Index , WordArray , CurrentClass , OutputText = self . DoCommaOperation ( Index , WordArray , CurrentClass , OutputText )
         elif WordArray [ Index + 1 ] . Name in self . OPERATORS . values ( ) :
-            RightOperand = WordArray [ Index + 2 ]
-            print ( 't00w' , RightOperand , [ RightOperand ] )
-            NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , WordArray [ Index ] , WordArray , Index )
-            OutputText = OutputText + NewOutputText
-            
-            WordArray . pop ( Index + 1 )
-            WordArray . pop ( Index + 1 )
+            Index , WordArray , CurrentClass , OutputText = self . DoOperatorActionCall ( Index , WordArray , CurrentClass , OutputText )
         else :
-            CompilerIssue . OutputError ( 'Could not reduce \'' + WordArray [ Inde + 1 ] . Name + '\'.' , self . EXIT_ON_ERROR , TokenObject )
+            CompilerIssue . OutputError ( 'Could not reduce \'' + WordArray [ Index + 1 ] . Name + '\'.' , self . EXIT_ON_ERROR , TokenObject )
         return OutputText , Index , WordArray
         
     
