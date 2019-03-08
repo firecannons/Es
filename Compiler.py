@@ -642,6 +642,31 @@ class Parser ( ) :
         else :
             CompilerIssue . OutputError ( '\'' + Token . Name + '\' is not a period or newline' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
+
+    def ProcessDeclaringVariable ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        if self . CurrentFunctionType == self . FUNCTION_TYPES [ 'NORMAL' ] :
+            if Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
+                self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
+            elif self . SavedType . Name in self . TypeTable :
+                if Token . Name not in self . GetCurrentST ( ) . Symbols :
+                    NewSymbol = MySymbol ( Token . Name , self . TypeTable [ self . SavedType . Name ] )
+                    self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType . Name ] . Size
+                    NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+                    self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
+                    if self . CurrentClass != None :
+                        self . TypeTable [ self . CurrentClass . Name ] . Size = self . TypeTable [ self . CurrentClass . Name ] . Size +\
+                        self . TypeTable [ self . SavedType . Name ] . Size
+                        self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token ] = NewSymbol
+                    OutputText = OutputText + ';Declaring {}\n' . format ( Token . Name )
+                    OutputText = self . CalcDeclarationOutput ( self . SavedType . Name , OutputText )
+                    LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
+                    OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
+                    self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+                else :
+                    CompilerIssue . OutputError ( 'A variable named ' + Token + ' has already been declared' , self . EXIT_ON_ERROR )
+            else :
+                CompilerIssue . OutputError ( 'The type \'' + self . SavedType . Name + '\' is not currently a declared type and is not template start ' , self . EXIT_ON_ERROR , Token )
+        return SavedWordArray , WordIndex , OutputText
     
     def PrintParsingStatus ( self , Token ) :
         ClassName = ''
@@ -657,28 +682,7 @@ class Parser ( ) :
         if self . State == self . MAIN_STATES [ 'START_OF_LINE' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessStartOfLine ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'DECLARING_VARIABLE' ] :
-            if self . CurrentFunctionType == self . FUNCTION_TYPES [ 'NORMAL' ] :
-                if Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
-                    self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
-                elif self . SavedType . Name in self . TypeTable :
-                    if Token . Name not in self . GetCurrentST ( ) . Symbols :
-                        NewSymbol = MySymbol ( Token . Name , self . TypeTable [ self . SavedType . Name ] )
-                        self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType . Name ] . Size
-                        NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                        self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
-                        if self . CurrentClass != None :
-                            self . TypeTable [ self . CurrentClass . Name ] . Size = self . TypeTable [ self . CurrentClass . Name ] . Size +\
-                                self . TypeTable [ self . SavedType . Name ] . Size
-                            self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token ] = NewSymbol
-                        OutputText = OutputText + ';Declaring {}\n' . format ( Token . Name )
-                        OutputText = self . CalcDeclarationOutput ( self . SavedType . Name , OutputText )
-                        LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
-                        OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
-                        self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
-                    else :
-                        CompilerIssue . OutputError ( 'A variable named ' + Token + ' has already been declared' , self . EXIT_ON_ERROR )
-                else :
-                    CompilerIssue . OutputError ( 'The type \'' + self . SavedType . Name + '\' is not currently a declared type and is not template start ' , self . EXIT_ON_ERROR , Token )
+            SavedWordArray , WordIndex , OutputText = self . ProcessDeclaringVariable ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'AFTER_DECLARING_VARIABLE' ] :
             if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
