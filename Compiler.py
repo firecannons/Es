@@ -292,7 +292,6 @@ class Parser ( ) :
             self . CurrentToken = Token
             SavedWordArray , WordIndex , OutputText = self . ParseToken ( Token , SavedWordArray , WordIndex , OutputText )
             WordIndex = WordIndex + 1
-        PrintObject ( self . TypeTable )
         return OutputText , SavedWordArray
     
     def GetOperatorDepth ( self , Token ) :
@@ -354,7 +353,6 @@ class Parser ( ) :
         
     
     def CalcFunctionCall ( self , Operator , ArrayOfOperands , LeftOperand , WordArray , Index ) :
-        print ( 'asf' , ArrayOfOperands [ 0 ] )
         OutputText = ''
         OriginalOffset = self . CurrentSTOffset
         Class = MySymbol ( '' , None )
@@ -371,11 +369,8 @@ class Parser ( ) :
                 self . GetCurrentST ( ) . Symbols [ NewName ] = NewSymbol
                 self . ReturnTempIndex = self . ReturnTempIndex + 1
             ArrayIndex = ArrayIndex + 1
-        print ('testing' , LeftOperand)
         if LeftOperand != '' :
             Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
-            print ( Found , CurrentSymbol , 'asfwero8sdufio' , LeftOperand , LeftOperand . Name )
-            PrintObject ( self . STStack )
             Class = CurrentSymbol
         ClassName = ''
         if Class . Type :
@@ -400,15 +395,10 @@ class Parser ( ) :
         for CurrentOperand in ArrayOfOperands :
             OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand . Name)
             OperandOffset = 0
-            print ( 'asfd' , ArrayOfOperands [ 0 ] )
-            PrintObject(ArrayOfOperands)
             Found , CurrentSymbol = self . CheckCurrentSTs ( CurrentOperand )
             OperandOffset = CurrentSymbol . Offset
             OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( OperandOffset )
             self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
-            if ActionParameters [ Index ] . Type != CurrentSymbol . Type . Name :
-                PrintObject ( ActionParameters )
-                PrintObject ( CurrentSymbol )
             Index = Index + 1
         if LeftOperand != '' :
             Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
@@ -453,7 +443,6 @@ class Parser ( ) :
                 CurrentClass = CurrentClass . type
             if self . GetTypeTable ( CurrentClass , WordArray [ Index ] . Name ) :
                 self . ParameterArray = [ WordArray [ Index + 2 ] ] + self . ParameterArray
-                print ( 'w00t' , self . ParameterArray [ 0 ] , CurrentClass , CurrentObject )
                 NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CurrentObject , WordArray , Index )
                 OutputText = OutputText + NewOutputText
                 self . ParameterArray = [ ]
@@ -502,7 +491,6 @@ class Parser ( ) :
         CurrentClass = ''
         FunctionStack = [ ]
         while len ( SavedWordArray ) > 2 :
-            #print(SavedWordArray[0].Name, SavedWordArray , len ( SavedWordArray ))
             Token1 = SavedWordArray [ WordIndex ]
             Token2 = SavedWordArray [ WordIndex + 1 ]
             Token3 = MyToken ( '' , -1 , '' )
@@ -515,10 +503,8 @@ class Parser ( ) :
             if len ( SavedWordArray ) - WordIndex > 4 :
                 Token5 = SavedWordArray [ WordIndex + 4 ]
             if self . OpOneHighestPrecedence ( Token2 , Token4 ) :
-                print ('psycho squad')
                 OutputText , WordIndex ,  SavedWordArray = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
             else :
-                print('kindness')
                 WordIndex = WordIndex + 2
                 
             if len ( SavedWordArray ) - WordIndex < 2 :
@@ -621,7 +607,6 @@ class Parser ( ) :
                     LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                     OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
             elif self . CheckCurrentSTs ( Token ) :
-                print ( Token . Name , self . TypeTable , 'asfd' )
                 Found = self . CheckCurrentSTs ( Token )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                 OutputText = self . Reduce ( Token . Name , LineWordArray , OutputText , False )
@@ -1291,7 +1276,6 @@ class Lexer ( ) :
             Position = Position + 1
         if self . SavedWord != '' :
             self. SavedWordArray . append ( MyToken ( self . SavedWord , self . LineNumber , FileName ) )
-        print ( 'self . SavedWordArray = ' + str ( self . SavedWordArray ) )
         return self . SavedWordArray
 
 
@@ -1370,7 +1354,7 @@ entry Main\n\n
         SavedWordArray = MyLexer . MakeTokens ( InputText , Path )
         OutputText , SavedWordArray = MyParser . Parse ( SavedWordArray , OutputText )
         for i in SavedWordArray :
-            print ( i )
+            print ( i . Name )
         return OutputText
     
     def GetBeginningText ( self ) :
