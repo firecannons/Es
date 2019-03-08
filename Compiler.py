@@ -350,7 +350,21 @@ class Parser ( ) :
     def OutputMoveStackRegister ( self , OutputText , Number ) :
         OutputText = self . OutputMoveRegister ( OutputText , self . REGISTERS [ 'STACK_TOP' ] , Number )
         return OutputText
-        
+
+    def GetNextTempVariableIndex ( self ) :
+        self.ReturnTempIndex = self . ReturnTempIndex + 1
+        return self . ReturnTempIndex - 1
+
+    def AllocateByteFromNumber ( self , CurrentOperand , OutputText , ArrayOfOperands , Index ) :
+        OutputText = OutputText + self.AllocateByte(CurrentOperand)
+        ByteType = self.TypeTable[self.BYTE_TYPE_NAME]
+        NewName = self.RETURN_TEMP_LETTER + str(self.GetNextTempVariableIndex())
+        OutputText = OutputText + ';Declaring {}\n'.format(NewName)
+        NewSymbol = MySymbol(NewName, ByteType)
+        ArrayOfOperands[Index] = NewSymbol
+        NewSymbol.Offset = deepcopy(self.CurrentSTOffset)
+        self.GetCurrentST().Symbols[NewName] = NewSymbol
+        return OutputText , ArrayOfOperands
     
     def CalcFunctionCall ( self , Operator , ArrayOfOperands , LeftOperand , WordArray , Index ) :
         OutputText = ''
@@ -359,15 +373,7 @@ class Parser ( ) :
         ArrayIndex = 0
         for CurrentOperand in ArrayOfOperands :
             if CurrentOperand . Name . isdigit ( ) == True :
-                OutputText = OutputText + self . AllocateByte ( CurrentOperand )
-                ByteType = self . TypeTable [ self . BYTE_TYPE_NAME ]
-                NewName = self . RETURN_TEMP_LETTER + str ( self . ReturnTempIndex )
-                OutputText = OutputText + ';Declaring {}\n' . format ( NewName )
-                NewSymbol = MySymbol ( NewName , ByteType )
-                ArrayOfOperands [ ArrayIndex ] = NewSymbol
-                NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                self . GetCurrentST ( ) . Symbols [ NewName ] = NewSymbol
-                self . ReturnTempIndex = self . ReturnTempIndex + 1
+                OutputText , ArrayOfOperands = self . AllocateByteFromNumber ( CurrentOperand , OutputText , ArrayOfOperands , Index )
             ArrayIndex = ArrayIndex + 1
         if LeftOperand != '' :
             Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
@@ -918,7 +924,7 @@ class Parser ( ) :
         print ( 'Parsing ' , Token . Name , self . State , ClassName , self . CurrentFunction , len ( self . STStack ) , self . SavedLine )
     
     def ParseToken ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        #self . PrintParsingStatus ( Token )
+        self . PrintParsingStatus ( Token )
         if self . State == self . MAIN_STATES [ 'START_OF_LINE' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessStartOfLine ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'DECLARING_VARIABLE' ] :
@@ -1145,7 +1151,7 @@ class Lexer ( ) :
         self . EraseSavedWord ( )
     
     def ProcessAppendWord ( self , Text ) :
-        #print ( 'Lexing \'' + Text + '\'' , 'self . State = ' + str ( self . State ) )
+        print ( 'Lexing \'' + Text + '\'' , 'self . State = ' + str ( self . State ) )
         if self . State == self . MAIN_STATES [ 'NORMAL' ] :
             if Text == self . SINGLE_LINE_COMMENT_START :
                 self . State = self . MAIN_STATES [ 'IN_ONE_LINE_COMMENT' ]
@@ -1353,8 +1359,8 @@ entry Main\n\n
         MyParser = Parser ( )
         SavedWordArray = MyLexer . MakeTokens ( InputText , Path )
         OutputText , SavedWordArray = MyParser . Parse ( SavedWordArray , OutputText )
-        #for i in SavedWordArray :
-        #    print ( i . Name )
+        for i in SavedWordArray :
+            print ( i . Name )
         return OutputText
     
     def GetBeginningText ( self ) :
