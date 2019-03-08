@@ -697,6 +697,43 @@ class Parser ( ) :
             CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\' instead of \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
     
+    def ProcessClassAfter ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        if self . IsValidName ( Token . Name ) == False :
+            CompilerIssue . OutputError ( Token + ' is in the wrong format for a class name' , self . EXIT_ON_ERROR , TokenObject )
+        else :
+            self . TypeTable [ Token . Name ] = Type ( Token . Name )
+            self . CurrentClass = self . TypeTable [ Token . Name ]
+            self . State = self . MAIN_STATES [ 'CLASS_AFTER_NAME' ]
+        return SavedWordArray , WordIndex , OutputText
+    
+    def ProcessClassAfterName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
+            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+        elif Token . Name == self . KEYWORDS [ 'SIZE' ] :
+            self . State = self . MAIN_STATES [ 'CLASS_DECLARING_SIZE' ]
+        elif Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
+            self . State = self . MAIN_STATES [ 'CLASS_MAKING_TEMPLATE' ]
+        else :
+            CompilerIssue . OutputError ( 'Expected \'' + self . KEYWORDS [ 'SIZE' ] + '\' or newline or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_START' ] + '\'' , self . EXIT_ON_ERROR , Token )
+        return SavedWordArray , WordIndex , OutputText
+    
+    def ProcessMakingTemplate ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        if self . IsValidName ( Token ) == False :
+            CompilerIssue . OutputError ( Token + ' is in the wrong format for a template name' , self . EXIT_ON_ERROR , TokenObject )
+        else :
+            self . TypeTable [ self . CurrentClass ] . Templates [ Token ] = set ( )
+            self . State = self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATE_NAME' ]
+        return SavedWordArray , WordIndex , OutputText
+    
+    def ProcessAfterTemplateName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        if Token . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
+            self . State = self . MAIN_STATES [ 'CLASS_MAKING_TEMPLATE' ]
+        elif Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_END' ] :
+            self . State = self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATES' ]
+        else :
+            CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\'.'  , self . EXIT_ON_ERROR , TokenObject ) 
+        return SavedWordArray , WordIndex , OutputText
+    
     def PrintParsingStatus ( self , Token ) :
         ClassName = ''
         if self . CurrentClass != None :
@@ -723,34 +760,13 @@ class Parser ( ) :
         elif self . State == self . MAIN_STATES [ 'USING_AFTER_WORD' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessUsingAfterWord ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'CLASS_AFTER' ] :
-            if self . IsValidName ( Token . Name ) == False :
-                CompilerIssue . OutputError ( Token + ' is in the wrong format for a class name' , self . EXIT_ON_ERROR , TokenObject )
-            else :
-                self . TypeTable [ Token . Name ] = Type ( Token . Name )
-                self . CurrentClass = self . TypeTable [ Token . Name ]
-                self . State = self . MAIN_STATES [ 'CLASS_AFTER_NAME' ]
+            SavedWordArray , WordIndex , OutputText = self . ProcessClassAfter ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'CLASS_AFTER_NAME' ] :
-            if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
-            elif Token . Name == self . KEYWORDS [ 'SIZE' ] :
-                self . State = self . MAIN_STATES [ 'CLASS_DECLARING_SIZE' ]
-            elif Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
-                self . State = self . MAIN_STATES [ 'CLASS_MAKING_TEMPLATE' ]
-            else :
-                CompilerIssue . OutputError ( 'Expected \'' + self . KEYWORDS [ 'SIZE' ] + '\' or newline or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_START' ] + '\'' , self . EXIT_ON_ERROR , Token )
+            SavedWordArray , WordIndex , OutputText = self . ProcessClassAfterName ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'CLASS_MAKING_TEMPLATE' ] :
-            if self . IsValidName ( Token ) == False :
-                CompilerIssue . OutputError ( Token + ' is in the wrong format for a template name' , self . EXIT_ON_ERROR , TokenObject )
-            else :
-                self . TypeTable [ self . CurrentClass ] . Templates [ Token ] = set ( )
-                self . State = self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATE_NAME' ]
+            SavedWordArray , WordIndex , OutputText = self . ProcessClassMakingTemplate ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATE_NAME' ] :
-            if Token . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
-                self . State = self . MAIN_STATES [ 'CLASS_MAKING_TEMPLATE' ]
-            elif Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_END' ] :
-                self . State = self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATES' ]
-            else :
-                CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\'.'  , self . EXIT_ON_ERROR , TokenObject )
+            SavedWordArray , WordIndex , OutputText = self . ProcessAfterTemplateName ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATES' ] :
             if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
