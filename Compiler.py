@@ -675,7 +675,7 @@ class Parser ( ) :
             CompilerIssue . OutputError ( 'Expected newline encountered \'' + Token . Name + '\'' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
     
-    def ProcessMakingTemplate ( self , Token , SavedWordArray , WordIndex , OutputText )
+    def ProcessMakingTemplate ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if self . IsValidName ( Token ) == True :
             if Token in self . TypeTable :
                 if self . TypeTable [ Token ] . IsFunction == False :
@@ -686,6 +686,15 @@ class Parser ( ) :
                 CompilerIssue . OutputError ( 'Template type \'' + Token + '\' not found in type table', self . EXIT_ON_ERROR , TokenObject )
         else :
             CompilerIssue . OutputError ( 'Expected valid type for template instead of \'' + Token + '\'', self . EXIT_ON_ERROR , TokenObject )
+        return SavedWordArray , WordIndex , OutputText
+    
+    def ProcessAfterTemplateName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        if Token . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
+            self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
+        elif Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_END' ] :
+            self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
+        else :
+            CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\' instead of \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
     
     def PrintParsingStatus ( self , Token ) :
@@ -708,12 +717,7 @@ class Parser ( ) :
         elif self . State == self . MAIN_STATES [ 'MAKING_TEMPLATE' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessMakingTemplate ( Token , SavedWordArray , WordIndex , OutputText ) 
         elif self . State == self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ] :
-            if Token . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
-                self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
-            elif Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_END' ] :
-                self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
-            else :
-                CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\' instead of \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
+            SavedWordArray , WordIndex , OutputText = self . ProcessAfterTemplateName ( self , Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'USING_WAITING_FOR_WORD' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessUsingWaitingForWord ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'USING_AFTER_WORD' ] :
