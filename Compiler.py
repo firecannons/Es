@@ -320,7 +320,7 @@ class Parser ( ) :
     def AllocateByte ( self , CurrentOperand ) :
         OutputText = ''
         OutputText = OutputText + self . ASM_TEXT [ 'ALLOC_BYTE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
-        OutputText = OutputText + self . ASM_TEXT [ 'SET_CURRENT_BYTE' ] . format ( CurrentOperand ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        OutputText = OutputText + self . ASM_TEXT [ 'SET_CURRENT_BYTE' ] . format ( CurrentOperand . Name ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
         self . CurrentSTOffset = self . CurrentSTOffset - self . BYTE_SIZE
         return OutputText
     
@@ -357,7 +357,7 @@ class Parser ( ) :
         print ( 'asf' , ArrayOfOperands [ 0 ] )
         OutputText = ''
         OriginalOffset = self . CurrentSTOffset
-        Class = ''
+        Class = MySymbol ( '' , None )
         ArrayIndex = 0
         for CurrentOperand in ArrayOfOperands :
             if CurrentOperand . Name . isdigit ( ) == True :
@@ -371,12 +371,16 @@ class Parser ( ) :
                 self . GetCurrentST ( ) . Symbols [ NewName ] = NewSymbol
                 self . ReturnTempIndex = self . ReturnTempIndex + 1
             ArrayIndex = ArrayIndex + 1
+        print ('testing' , LeftOperand)
         if LeftOperand != '' :
             Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
             print ( Found , CurrentSymbol , 'asfwero8sdufio' , LeftOperand , LeftOperand . Name )
             PrintObject ( self . STStack )
-            Class = CurrentSymbol . Type
-        for ReturnObject in self . GetTypeObject ( Class . Name , self . ResolveActionToAsm ( Operator , Class ) ) . ReturnValues :
+            Class = CurrentSymbol
+        ClassName = ''
+        if Class . Type :
+            ClassName = Class . Type . Name
+        for ReturnObject in self . GetTypeObject ( ClassName , self . ResolveActionToAsm ( Operator , Class . Type ) ) . ReturnValues :
             OutputText = OutputText + ';Adding return value {}\n'.format(ReturnObject.Name)
             ReturnType = self . TypeTable [ ReturnObject . Type ]
             OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( -ReturnType . Size )
@@ -390,11 +394,11 @@ class Parser ( ) :
             self . ReturnTempIndex = self . ReturnTempIndex + 1
             WordArray [ Index ] = NewName
         AfterReturnOffset = self . CurrentSTOffset
-        FunctionName = self . ResolveActionToAsm ( Operator , Class )
-        ActionParameters = self . GetTypeTable ( Class . Name , FunctionName )
+        FunctionName = self . ResolveActionToAsm ( Operator , Class . Type )
+        ActionParameters = self . GetTypeTable ( ClassName , FunctionName )
         Index = 0
         for CurrentOperand in ArrayOfOperands :
-            OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand)
+            OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand . Name)
             OperandOffset = 0
             print ( 'asfd' , ArrayOfOperands [ 0 ] )
             PrintObject(ArrayOfOperands)
@@ -409,7 +413,7 @@ class Parser ( ) :
         if LeftOperand != '' :
             Found , CurrentSymbol = self . CheckCurrentSTs ( LeftOperand )
             Class = CurrentSymbol . Type
-            OutputText = OutputText + ';Loading {}\n'.format(LeftOperand)
+            OutputText = OutputText + ';Loading {}\n'.format(LeftOperand . Name)
             OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( CurrentSymbol . Offset )
             self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
         OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
@@ -438,8 +442,8 @@ class Parser ( ) :
                     CompilerIssue . OutputError ( 'Class \'' + CurrentClass + '\' has no variable \'' + WordArray [ Index + 2 ] + '\'.' , self . EXIT_ON_ERROR , TokenObject )
             elif IsFound == False :
                 CompilerIssue . OutputError ( 'Unknown ' + Operator + ' is not an allowed operator' , self . EXIT_ON_ERROR , TokenObject )
-        elif WordArray [ Index + 1 ] == self . OPERATORS [ 'LEFT_PAREN' ] :
-            if WordArray [ Index ] in self . OPERATORS :
+        elif WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'LEFT_PAREN' ] :
+            if WordArray [ Index ] . Name in self . OPERATORS :
                 if WordArray [ Index + 3 ] == self . OPERATORS [ 'RIGHT_PAREN' ] :
                     WordArray . pop ( Index + 1 )
                     WordArray . pop ( Index + 3 )
@@ -448,9 +452,9 @@ class Parser ( ) :
                 if CurrentObject != '' :
                     Found , CurrentClass = self . CheckCurrentSTs ( CurrentObject )
                     CurrentClass = CurrentClass . type
-                if self . GetTypeTable ( CurrentClass , WordArray [ Index ] ) :
+                if self . GetTypeTable ( CurrentClass , WordArray [ Index ] . Name ) :
                     self . ParameterArray = [ WordArray [ Index + 2 ] ] + self . ParameterArray
-                    print ( 'w00t' , self . ParameterArray [ 0 ] )
+                    print ( 'w00t' , self . ParameterArray [ 0 ] , CurrentClass , CurrentObject )
                     NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CurrentObject , WordArray , Index )
                     OutputText = OutputText + NewOutputText
                     self . ParameterArray = [ ]
@@ -603,9 +607,9 @@ class Parser ( ) :
                     Found = self . CheckCurrentSTs ( Token )
                     LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                     OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
-            elif self . CheckCurrentSTs ( Token  . Name ) :
+            elif self . CheckCurrentSTs ( Token ) :
                 print ( Token . Name , self . TypeTable , 'asfd' )
-                Found = self . CheckCurrentSTs ( Token . Name )
+                Found = self . CheckCurrentSTs ( Token )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                 OutputText = self . Reduce ( Token . Name , LineWordArray , OutputText , False )
             else :
@@ -666,7 +670,7 @@ class Parser ( ) :
                             self . TypeTable [ self . CurrentClass . Name ] . Size = self . TypeTable [ self . CurrentClass . Name ] . Size +\
                                 self . TypeTable [ self . SavedType . Name ] . Size
                             self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token ] = NewSymbol
-                        OutputText = OutputText + ';Declaring {}\n' . format ( Token )
+                        OutputText = OutputText + ';Declaring {}\n' . format ( Token . Name )
                         OutputText = self . CalcDeclarationOutput ( self . SavedType . Name , OutputText )
                         LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                         OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
@@ -976,8 +980,10 @@ class Parser ( ) :
         OutTable = self . TypeTable
         if ClassName != '' :
             OutTable = self . TypeTable [ ClassName ]
-        if FunctionName != '' :
-            OutTable = OutTable . InnerTypes [ FunctionName ]
+            if FunctionName != '' :
+                OutTable = OutTable . InnerTypes [ FunctionName ]
+        elif FunctionName != '' :
+            OutTable = OutTable [ FunctionName ]
         return OutTable
     
     def GetActionReturnValues ( self , Class , Function ) :
