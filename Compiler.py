@@ -668,6 +668,26 @@ class Parser ( ) :
                 CompilerIssue . OutputError ( 'The type \'' + self . SavedType . Name + '\' is not currently a declared type and is not template start ' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
     
+    def ProcessAfterDeclaringVariable ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
+            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+        else :
+            CompilerIssue . OutputError ( 'Expected newline encountered \'' + Token . Name + '\'' , self . EXIT_ON_ERROR , Token )
+        return SavedWordArray , WordIndex , OutputText
+    
+    def ProcessMakingTemplate ( self , Token , SavedWordArray , WordIndex , OutputText )
+        if self . IsValidName ( Token ) == True :
+            if Token in self . TypeTable :
+                if self . TypeTable [ Token ] . IsFunction == False :
+                    self . State = self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ]
+                else :
+                   CompilerIssue . OutputError ( 'Template type \'' + Token + '\' was found to be a function not class', self . EXIT_ON_ERROR , TokenObject ) 
+            else :
+                CompilerIssue . OutputError ( 'Template type \'' + Token + '\' not found in type table', self . EXIT_ON_ERROR , TokenObject )
+        else :
+            CompilerIssue . OutputError ( 'Expected valid type for template instead of \'' + Token + '\'', self . EXIT_ON_ERROR , TokenObject )
+        return SavedWordArray , WordIndex , OutputText
+    
     def PrintParsingStatus ( self , Token ) :
         ClassName = ''
         if self . CurrentClass != None :
@@ -684,21 +704,9 @@ class Parser ( ) :
         elif self . State == self . MAIN_STATES [ 'DECLARING_VARIABLE' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessDeclaringVariable ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'AFTER_DECLARING_VARIABLE' ] :
-            if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
-            else :
-                CompilerIssue . OutputError ( 'Expected newline encountered \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
+            SavedWordArray , WordIndex , OutputText = self . ProcessAfterDeclaringVariable ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'MAKING_TEMPLATE' ] :
-            if self . IsValidName ( Token ) == True :
-                if Token in self . TypeTable :
-                    if self . TypeTable [ Token ] . IsFunction == False :
-                        self . State = self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ]
-                    else :
-                       CompilerIssue . OutputError ( 'Template type \'' + Token + '\' was found to be a function not class', self . EXIT_ON_ERROR , TokenObject ) 
-                else :
-                    CompilerIssue . OutputError ( 'Template type \'' + Token + '\' not found in type table', self . EXIT_ON_ERROR , TokenObject )
-            else :
-                CompilerIssue . OutputError ( 'Expected valid type for template instead of \'' + Token + '\'', self . EXIT_ON_ERROR , TokenObject )
+            SavedWordArray , WordIndex , OutputText = self . ProcessMakingTemplate ( Token , SavedWordArray , WordIndex , OutputText ) 
         elif self . State == self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ] :
             if Token . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
                 self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
