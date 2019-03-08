@@ -725,13 +725,22 @@ class Parser ( ) :
             self . State = self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATE_NAME' ]
         return SavedWordArray , WordIndex , OutputText
     
-    def ProcessAfterTemplateName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+    def ProcessClassAfterTemplateName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
             self . State = self . MAIN_STATES [ 'CLASS_MAKING_TEMPLATE' ]
         elif Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_END' ] :
             self . State = self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATES' ]
         else :
             CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\'.'  , self . EXIT_ON_ERROR , TokenObject ) 
+        return SavedWordArray , WordIndex , OutputText
+    
+    def ProcessClassAfterTemplates ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
+            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+        elif Token . Name == self . KEYWORDS [ 'SIZE' ] :
+            self . State = self . MAIN_STATES [ 'CLASS_DECLARING_SIZE' ]
+        else :
+            CompilerIssue . OutputError ( 'Expected \'' + self . KEYWORDS [ 'SIZE' ] + '\' or newline' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
     
     def PrintParsingStatus ( self , Token ) :
@@ -766,14 +775,9 @@ class Parser ( ) :
         elif self . State == self . MAIN_STATES [ 'CLASS_MAKING_TEMPLATE' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessClassMakingTemplate ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATE_NAME' ] :
-            SavedWordArray , WordIndex , OutputText = self . ProcessAfterTemplateName ( Token , SavedWordArray , WordIndex , OutputText )
+            SavedWordArray , WordIndex , OutputText = self . ProcessClassAfterTemplateName ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATES' ] :
-            if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
-            elif Token . Name == self . KEYWORDS [ 'SIZE' ] :
-                self . State = self . MAIN_STATES [ 'CLASS_DECLARING_SIZE' ]
-            else :
-                CompilerIssue . OutputError ( 'Expected \'' + self . KEYWORDS [ 'SIZE' ] + '\' or newline' , self . EXIT_ON_ERROR , TokenObject )
+            SavedWordArray , WordIndex , OutputText = self . ProcessClassAfterTemplates ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'CLASS_DECLARING_SIZE' ] :
             if Token . Name . isdigit ( ) == True :
                 self . CurrentClass . Size = int ( Token . Name )
