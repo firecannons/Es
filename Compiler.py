@@ -918,7 +918,7 @@ class Parser ( ) :
         print ( 'Parsing ' , Token . Name , self . State , ClassName , self . CurrentFunction , len ( self . STStack ) , self . SavedLine )
     
     def ParseToken ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        self . PrintParsingStatus ( Token )
+        #self . PrintParsingStatus ( Token )
         if self . State == self . MAIN_STATES [ 'START_OF_LINE' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessStartOfLine ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'DECLARING_VARIABLE' ] :
@@ -1145,7 +1145,7 @@ class Lexer ( ) :
         self . EraseSavedWord ( )
     
     def ProcessAppendWord ( self , Text ) :
-        print ( 'Lexing \'' + Text + '\'' , 'self . State = ' + str ( self . State ) )
+        #print ( 'Lexing \'' + Text + '\'' , 'self . State = ' + str ( self . State ) )
         if self . State == self . MAIN_STATES [ 'NORMAL' ] :
             if Text == self . SINGLE_LINE_COMMENT_START :
                 self . State = self . MAIN_STATES [ 'IN_ONE_LINE_COMMENT' ]
@@ -1353,8 +1353,8 @@ entry Main\n\n
         MyParser = Parser ( )
         SavedWordArray = MyLexer . MakeTokens ( InputText , Path )
         OutputText , SavedWordArray = MyParser . Parse ( SavedWordArray , OutputText )
-        for i in SavedWordArray :
-            print ( i . Name )
+        #for i in SavedWordArray :
+        #    print ( i . Name )
         return OutputText
     
     def GetBeginningText ( self ) :
