@@ -356,14 +356,14 @@ class Parser ( ) :
         return self . ReturnTempIndex - 1
 
     def AllocateByteFromNumber ( self , CurrentOperand , OutputText , ArrayOfOperands , Index ) :
-        OutputText = OutputText + self.AllocateByte(CurrentOperand)
-        ByteType = self.TypeTable[self.BYTE_TYPE_NAME]
-        NewName = self.RETURN_TEMP_LETTER + str(self.GetNextTempVariableIndex())
+        OutputText = OutputText + self . AllocateByte ( CurrentOperand )
+        ByteType = self . TypeTable [ self . BYTE_TYPE_NAME ]
+        NewName = self . RETURN_TEMP_LETTER + str ( self . GetNextTempVariableIndex ( ) )
         OutputText = OutputText + ';Declaring {}\n'.format(NewName)
-        NewSymbol = MySymbol(NewName, ByteType)
-        ArrayOfOperands[Index] = NewSymbol
-        NewSymbol.Offset = deepcopy(self.CurrentSTOffset)
-        self.GetCurrentST().Symbols[NewName] = NewSymbol
+        NewSymbol = MySymbol ( NewName , ByteType )
+        ArrayOfOperands [ Index ] = NewSymbol
+        NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+        self . GetCurrentST ( ) . Symbols [ NewName ] = NewSymbol
         return OutputText , ArrayOfOperands
 
     def GetObjectTypeName ( self , Object ) :
@@ -407,30 +407,37 @@ class Parser ( ) :
         OutputText = OutputText + self.ASM_TEXT['LOAD_TEXT'].format(OperandOffset)
         self.CurrentSTOffset = self.CurrentSTOffset + -self.POINTER_SIZE
         return OutputText
+
+    def LoadCallingObject ( self , Object , OutputText ) :
+        OutputText = OutputText + ';Loading a {} object\n'.format( Object . Type . Name )
+        OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( Object . Offset )
+        self.CurrentSTOffset = self.CurrentSTOffset + -self.POINTER_SIZE
+        return OutputText
+
+    def OutputCallFunction ( self , FunctionName , AfterReturnOffset , OutputText ) :
+        OutputText = OutputText + self.ASM_COMMANDS['CALL'] + self.SPACE + FunctionName + self.SPECIAL_CHARS['NEWLINE']
+        OutputText = OutputText + self.ASM_TEXT['SHIFT_STRING'].format(AfterReturnOffset - self.CurrentSTOffset)
+        return OutputText
     
     def CalcFunctionCall ( self , Operator , ArrayOfOperands , Object , WordArray , Index ) :
         OutputText = ''
         OriginalOffset = self . CurrentSTOffset
         Type = self . GetObjectType ( Object )
         TypeName = self . GetTypeName ( Type )
-        ArrayIndex = 0
+        FunctionName = self . ResolveActionToAsm ( Operator , Type )
+        Index = 0
         for CurrentOperand in ArrayOfOperands :
             if CurrentOperand . Name . isdigit ( ) == True :
                 OutputText , ArrayOfOperands = self . AllocateByteFromNumber ( CurrentOperand , OutputText , ArrayOfOperands , Index )
-            ArrayIndex = ArrayIndex + 1
-        for ReturnObject in self . GetTypeObjectFromNames ( TypeName , self . ResolveActionToAsm ( Operator , Type ) ) . ReturnValues :
+            Index = Index + 1
+        for ReturnObject in self . GetTypeObjectFromNames ( TypeName , FunctionName ) . ReturnValues :
             WordArray , Index , OutputText = self . AddReturnValue ( ReturnObject , OutputText )
         AfterReturnOffset = self . CurrentSTOffset
-        FunctionName = self . ResolveActionToAsm ( Operator , Type )
-        ActionParameters = self . GetTypeTableFromNames ( TypeName , FunctionName )
         for CurrentOperand in ArrayOfOperands :
             OutputText = self . OutputParameterLoad ( CurrentOperand , OutputText )
         if Type != None :
-            OutputText = OutputText + ';Loading a {} object\n'.format( Type . Name )
-            OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( Object . Offset )
-            self . CurrentSTOffset = self . CurrentSTOffset + -self . POINTER_SIZE
-        OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
-        OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( AfterReturnOffset - self . CurrentSTOffset )
+            OutputText = self . LoadCallingObject ( Object , OutputText )
+        OutputText = self . OutputCallFunction ( FunctionName , AfterReturnOffset , OutputText )
         self . CurrentSTOffset = AfterReturnOffset
         return OutputText , WordArray
 
