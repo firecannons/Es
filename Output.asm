@@ -756,7 +756,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -2
 mov [esp], ebx
-;Loading L
+;Loading a Byte object
 add esp, -4
 mov ebx, ebp
 add ebx, -1
@@ -789,7 +789,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -7
 mov [esp], ebx
-;Loading I1
+;Loading a Integer object
 add esp, -4
 mov ebx, ebp
 add ebx, -6
@@ -801,7 +801,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -1
 mov [esp], ebx
-;Loading I1
+;Loading a Integer object
 add esp, -4
 mov ebx, ebp
 add ebx, -6
@@ -813,7 +813,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -6
 mov [esp], ebx
-;Loading L
+;Loading a Byte object
 add esp, -4
 mov ebx, ebp
 add ebx, -1
