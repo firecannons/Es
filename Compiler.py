@@ -304,7 +304,6 @@ class Parser ( ) :
                 Depth = DepthIndex
             DepthIndex = DepthIndex + 1
         if Depth == -1 :
-            i = i[0]
             CompilerIssue . OutputError ( 'Operator \'' + Token . Name + '\' is not an allowed operator' , self . EXIT_ON_ERROR , Token )
         return Depth
     
@@ -355,13 +354,13 @@ class Parser ( ) :
         self.ReturnTempIndex = self . ReturnTempIndex + 1
         return self . ReturnTempIndex - 1
 
-    def AllocateByteFromNumber ( self , CurrentOperand , OutputText , ArrayOfOperands , Index ) :
+    def AllocateByteFromNumber ( self , CurrentOperand , OutputText , ArrayOfOperands , ArrayIndex ) :
         OutputText = OutputText + self . AllocateByte ( CurrentOperand )
         ByteType = self . TypeTable [ self . BYTE_TYPE_NAME ]
         NewName = self . RETURN_TEMP_LETTER + str ( self . GetNextTempVariableIndex ( ) )
         OutputText = OutputText + ';Declaring {}\n'.format(NewName)
         NewSymbol = MySymbol ( NewName , ByteType )
-        ArrayOfOperands [ Index ] = NewSymbol
+        ArrayOfOperands [ ArrayIndex ] = NewSymbol
         NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
         self . GetCurrentST ( ) . Symbols [ NewName ] = NewSymbol
         return OutputText , ArrayOfOperands
@@ -384,9 +383,9 @@ class Parser ( ) :
             TypeName = Type . Name
         return TypeName
 
-    def AddReturnValue ( self , ReturnObject , OutputText ) :
+    def AddReturnValue ( self , ReturnObject , WordArray , Index , OutputText ) :
         OutputText = OutputText + ';Adding return value {}\n'.format(ReturnObject.Name)
-        ReturnType = self.TypeTable[ReturnObject.Type]
+        ReturnType = ReturnObject.Type
         OutputText = OutputText + self.ASM_TEXT['SHIFT_STRING'].format(-ReturnType.Size)
         self.CurrentSTOffset = self.CurrentSTOffset + -ReturnType.Size
 
@@ -396,7 +395,7 @@ class Parser ( ) :
         NewSymbol.Offset = deepcopy(self.CurrentSTOffset)
         self.GetCurrentST().Symbols[NewName] = NewSymbol
         self.ReturnTempIndex = self.ReturnTempIndex + 1
-        WordArray[Index] = NewName
+        WordArray[Index] = MyToken ( NewName , WordArray [ Index - 1 ] . LineNumber , WordArray [ Index - 1 ] . FileName )
         return WordArray , Index , OutputText
 
     def OutputParameterLoad ( self , CurrentOperand , OutputText ) :
@@ -425,13 +424,17 @@ class Parser ( ) :
         Type = self . GetObjectType ( Object )
         TypeName = self . GetTypeName ( Type )
         FunctionName = self . ResolveActionToAsm ( Operator , Type )
-        Index = 0
+        ArrayIndex = 0
         for CurrentOperand in ArrayOfOperands :
             if CurrentOperand . Name . isdigit ( ) == True :
-                OutputText , ArrayOfOperands = self . AllocateByteFromNumber ( CurrentOperand , OutputText , ArrayOfOperands , Index )
-            Index = Index + 1
+                OutputText , ArrayOfOperands = self . AllocateByteFromNumber ( CurrentOperand , OutputText , ArrayOfOperands , ArrayIndex )
+            ArrayIndex = ArrayIndex + 1
+        #PrintObject ( self . TypeTable )
+        print ( TypeName , FunctionName )
         for ReturnObject in self . GetTypeObjectFromNames ( TypeName , FunctionName ) . ReturnValues :
-            WordArray , Index , OutputText = self . AddReturnValue ( ReturnObject , OutputText )
+            #PrintObject ( ReturnObject )
+            print ( ReturnObject )
+            WordArray , Index , OutputText = self . AddReturnValue ( ReturnObject , WordArray , Index , OutputText )
         AfterReturnOffset = self . CurrentSTOffset
         for CurrentOperand in ArrayOfOperands :
             OutputText = self . OutputParameterLoad ( CurrentOperand , OutputText )
@@ -531,6 +534,7 @@ class Parser ( ) :
                 Token4 = SavedWordArray [ WordIndex + 3 ]
             if len ( SavedWordArray ) - WordIndex > 4 :
                 Token5 = SavedWordArray [ WordIndex + 4 ]
+            print ('testng' , Token1 . Name , Token2 . Name , Token3 . Name , Token4 . Name , Token5 . Name )
             if self . OpOneHighestPrecedence ( Token2 , Token4 ) :
                 OutputText , WordIndex ,  SavedWordArray = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
             else :
@@ -891,7 +895,7 @@ class Parser ( ) :
 
     def ProcessReturnWaitingForParam ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name in self . TypeTable :
-            NewSymbol = MySymbol ( deepcopy ( self . EMPTY_STRING ) , Token )
+            NewSymbol = MySymbol ( deepcopy ( self . EMPTY_STRING ) , self . GetTypeObjectFromNames ( Token . Name , '' ) )
             self . CurrentSTOffset = self . CurrentSTOffset - self . CurrentClass . Size
             NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
             self . GetActionReturnValues ( self . CurrentClass , self . CurrentFunction ) . append ( NewSymbol )
@@ -922,9 +926,9 @@ class Parser ( ) :
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessAfterRepeat ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        if Token != self . KEYWORDS [ 'WHILE' ] and Token != self . KEYWORDS [ 'UNTIL' ] :
+        if Token . Name != self . KEYWORDS [ 'WHILE' ] and Token . Name != self . KEYWORDS [ 'UNTIL' ] :
             CompilerIssue . OutputError ( 'Expected \'{}\' or \'{}\' after {}' . format ( self . KEYWORDS [ 'WHILE' ] , self . KEYWORDS [ 'UNTIL' ] , self . KEYWORDS [ 'REPEAT' ] )
-                , self . EXIT_ON_ERROR , TokenObject )
+                , self . EXIT_ON_ERROR , Token )
         else :
             OutputText = self . OutputAsmRoutine ( OutputText , self . GetCurrentST ( ) . RoutineNumber )
             LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
