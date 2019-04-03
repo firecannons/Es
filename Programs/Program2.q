@@ -263,4 +263,9 @@ action Main
     OutputByte ( S6 )
     OutputByte ( S6 )
     
+    if S6 == 65
+        Byte MeByte
+    end
+    MeByte = 100
+    
 end

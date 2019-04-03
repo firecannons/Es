@@ -417,6 +417,14 @@ class Parser ( ) :
         OutputText = OutputText + self.ASM_COMMANDS['CALL'] + self.SPACE + FunctionName + self.SPECIAL_CHARS['NEWLINE']
         OutputText = OutputText + self.ASM_TEXT['SHIFT_STRING'].format(AfterReturnOffset - self.CurrentSTOffset)
         return OutputText
+
+    def CheckIfObjectInTokenValid ( self , Token ) :
+        print ( 'testing objet' , Token)
+        if Token != None :
+            if Token . Name . isdigit ( ) == False :
+                Found , Symbol = self . CheckCurrentSTs ( Token )
+                if Found == False :
+                    CompilerIssue . OutputError ( 'No variable named {} found' . format ( Token . Name ) , self . EXIT_ON_ERROR , Token )
     
     def CalcFunctionCall ( self , Operator , ArrayOfOperands , Object , WordArray , Index ) :
         OutputText = ''
@@ -472,6 +480,7 @@ class Parser ( ) :
         else :
             if LeftOperand != None :
                 Found , CallingObject = self . CheckCurrentSTs ( LeftOperand )
+                self . CheckIfObjectInTokenValid ( CallingObject )
             if self . GetTypeTableFromNames ( self . GetObjectTypeName ( CallingObject ) , WordArray [ Index ] . Name ) :
                 self . ParameterArray = [ WordArray [ Index + 2 ] ] + self . ParameterArray
                 NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CallingObject , WordArray , Index )
@@ -494,6 +503,7 @@ class Parser ( ) :
 
     def DoOperatorActionCall ( self , Index , WordArray , CurrentClass , OutputText ) :
         RightOperand = WordArray [ Index + 2 ]
+        self . CheckIfObjectInTokenValid ( RightOperand )
         Found , Object = self . CheckCurrentSTs ( WordArray [ Index ] )
         NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , Object , WordArray , Index )
         OutputText = OutputText + NewOutputText
@@ -809,7 +819,10 @@ class Parser ( ) :
                 else :
                     Found , OutSymbol = self . CheckCurrentSTs ( Token )
                     if self . ResolveActionToAsm ( Token , self . CurrentClass ) in self . CurrentTypeTable ( ) :
-                        CompilerIssue . OutputError ( self . CurrentClass + ' already has a action named ' + Token , self . EXIT_ON_ERROR , TokenObject )
+                        if self . CurrentClass != None :
+                            CompilerIssue . OutputError ( self . CurrentClass + ' already has a action named ' + Token . Name , self . EXIT_ON_ERROR , Token )
+                        else :
+                            CompilerIssue . OutputError ( 'There is already an action named ' + Token . Name , self . EXIT_ON_ERROR , Token )
                     else :
                         self . CurrentTypeTable ( ) [ Token . Name ] = Function ( Token . Name )
                         self . CurrentFunction = self . CurrentTypeTable ( ) [ Token . Name ]
@@ -817,7 +830,7 @@ class Parser ( ) :
             else :
                 Found , OutSymbol = self . CheckCurrentSTs ( Token )
                 if self . ResolveActionToAsm ( Token , self . CurrentClass ) in self . CurrentTypeTable ( ) :
-                    CompilerIssue . OutputError ( self . CurrentClass + ' already has a action named ' + Token , self . EXIT_ON_ERROR , TokenObject )
+                    CompilerIssue . OutputError ( self . CurrentClass + ' already has a action named ' + Token . Name , self . EXIT_ON_ERROR , TokenObject )
                 else :
                     self . CurrentFunction = Function ( Token . Name )
                     self . TypeTable [ Token . Name ] = self . CurrentFunction
@@ -829,7 +842,7 @@ class Parser ( ) :
     def ProcessActionAfterOn ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if self . CanResolveSymbolAction ( Token ) :
             if self . ResolveActionToAsm ( Token , self . CurrentClass ) in self . CurrentTypeTable ( ) :
-                CompilerIssue . OutputError ( self . CurrentClass + ' has already overloaded operator \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
+                CompilerIssue . OutputError ( self . CurrentClass . Name + ' has already overloaded operator \'' + Token . Name + '\'' , self . EXIT_ON_ERROR , Token )
             else :
                 Name = self . ResolveActionToAsm ( Token , self . CurrentClass )
                 self . CurrentFunction = Function ( Name )
