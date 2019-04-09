@@ -509,7 +509,6 @@ class Parser ( ) :
             CompilerIssue . OutputError ( 'No variable named \'' + WordArray [ Index ] . Name + '\' found in current scope.' , self . EXIT_ON_ERROR , WordArray [ Index ] )
         else :
             if self . IsInTypeTable ( Object . Type . Name , self . ResolveActionToAsm ( WordArray [ Index + 1 ] , Object . Type ) ) == True :
-                PrintObject(WordArray)
                 print ( WordArray [ Index + 1 ] . Name , RightOperand . Name , Object , WordArray [ Index ] )
                 NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , Object , WordArray , Index )
                 OutputText = OutputText + NewOutputText
@@ -751,9 +750,12 @@ class Parser ( ) :
         if self . IsValidName ( Token . Name ) == False :
             CompilerIssue . OutputError ( Token + ' is in the wrong format for a class name' , self . EXIT_ON_ERROR , TokenObject )
         else :
-            self . TypeTable [ Token . Name ] = Type ( Token . Name )
-            self . CurrentClass = self . TypeTable [ Token . Name ]
-            self . State = self . MAIN_STATES [ 'CLASS_AFTER_NAME' ]
+            if self . IsInTypeTable ( Token . Name , '' ) == True :
+                CompilerIssue . OutputError ( 'There is already a class named \'' + Token . Name + '\'.' , self . EXIT_ON_ERROR , Token )
+            else :
+                self . TypeTable [ Token . Name ] = Type ( Token . Name )
+                self . CurrentClass = self . TypeTable [ Token . Name ]
+                self . State = self . MAIN_STATES [ 'CLASS_AFTER_NAME' ]
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessClassAfterName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
@@ -1112,10 +1114,11 @@ class Parser ( ) :
     def IsInTypeTable ( self , ClassName , FunctionName ) :
         Output = True
         OutTable = self . TypeTable
-        if ClassName == '' or ClassName not in OutTable :
+        if ClassName != '' and ClassName not in OutTable :
             Output = False
-        OutTable = self . TypeTable [ ClassName ] . InnerTypes
-        if FunctionName == '' or FunctionName not in OutTable :
+        else :
+            OutTable = self . TypeTable [ ClassName ] . InnerTypes
+        if FunctionName != '' and FunctionName not in OutTable :
             Output = False
         return Output
 
