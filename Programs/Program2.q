@@ -265,7 +265,8 @@ action Main
     
     if S6 == 65
         Byte MeByte
+        MeByte = MeByte + 2
+        MeByte = MeByte + YouByte
     end
-    MeByte = 100
     
 end
