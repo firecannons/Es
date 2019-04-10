@@ -509,6 +509,7 @@ class Parser ( ) :
             CompilerIssue . OutputError ( 'No variable named \'' + WordArray [ Index ] . Name + '\' found in current scope.' , self . EXIT_ON_ERROR , WordArray [ Index ] )
         else :
             if self . IsInTypeTable ( Object . Type . Name , self . ResolveActionToAsm ( WordArray [ Index + 1 ] , Object . Type ) ) == True :
+                PrintObject(WordArray)
                 print ( WordArray [ Index + 1 ] . Name , RightOperand . Name , Object , WordArray [ Index ] )
                 NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , Object , WordArray , Index )
                 OutputText = OutputText + NewOutputText
@@ -651,7 +652,7 @@ class Parser ( ) :
         elif self . IsValidName ( Token . Name ) == True :
             if Token . Name in self . TypeTable :
                 if self . TypeTable [ Token . Name ] . IsFunction == False :
-                    self . SavedType = Token
+                    self . SavedType = self . TypeTable [ Token . Name ]
                     self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
                 else :
                     Found = self . CheckCurrentSTs ( Token )
@@ -876,7 +877,7 @@ class Parser ( ) :
     def ProcessActionNewParameter ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if self . IsValidName ( Token . Name ) :
             if Token . Name in self . TypeTable :
-                self . SavedType = Token
+                self . SavedType = self . TypeTable [ Token . Name ]
                 self . State = self . MAIN_STATES [ 'ACTION_PARAM_NAME' ]
             else :
                 CompilerIssue . OutputError ( 'Unknown type \'' + Token . Name + '\'' , self . EXIT_ON_ERROR , Token )
@@ -889,7 +890,7 @@ class Parser ( ) :
             if Token . Name in self . CurrentTypeTable ( ) :
                 CompilerIssue . OutputError ( 'There is already a \'' + Token . Name + '\' in the current scope' , self . EXIT_ON_ERROR , Token )
             else :
-                NewSymbol = MySymbol ( Token , self . SavedType )
+                NewSymbol = MySymbol ( Token . Name , self . SavedType )
                 self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType . Name ] . Size
                 NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
                 self . GetCurrentST ( ) . Symbols [ Token ] = NewSymbol
