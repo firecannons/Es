@@ -315,6 +315,27 @@ mov esp, ebp
 pop ebp
 ret
 
+;Declaring Position
+add esp, -4
+
+add esp, -4
+mov ebx, ebp
+add ebx, -4
+mov [esp], ebx
+call Integer__On_Create
+add esp, 4
+Pointer__On_Create:
+
+push ebp
+mov ebp, esp
+
+
+
+
+mov esp, ebp
+pop ebp
+ret
+
 Byte__On_Create:
 
 push ebp
@@ -3171,6 +3192,15 @@ jmp S25
 S24:
 add esp, 2
 S25:
+;Declaring joe
+add esp, -4
+
+add esp, -4
+mov ebx, ebp
+add ebx, -79
+mov [esp], ebx
+call Pointer__On_Create
+add esp, 4
 
 
 mov esp, ebp

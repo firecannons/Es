@@ -292,6 +292,8 @@ class Parser ( ) :
             self . CurrentToken = Token
             SavedWordArray , WordIndex , OutputText = self . ParseToken ( Token , SavedWordArray , WordIndex , OutputText )
             WordIndex = WordIndex + 1
+        print ( self . TypeTable , self . TypeTable [ 'Pointer' ] )
+        print ( self . TypeTable [ 'Pointer' ] . InnerTypes )
         return OutputText , SavedWordArray
     
     def GetOperatorDepth ( self , Token ) :
@@ -509,8 +511,6 @@ class Parser ( ) :
             CompilerIssue . OutputError ( 'No variable named \'' + WordArray [ Index ] . Name + '\' found in current scope.' , self . EXIT_ON_ERROR , WordArray [ Index ] )
         else :
             if self . IsInTypeTable ( Object . Type . Name , self . ResolveActionToAsm ( WordArray [ Index + 1 ] , Object . Type ) ) == True :
-                PrintObject(WordArray)
-                print ( WordArray [ Index + 1 ] . Name , RightOperand . Name , Object , WordArray [ Index ] )
                 NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , Object , WordArray , Index )
                 OutputText = OutputText + NewOutputText
 
@@ -706,7 +706,7 @@ class Parser ( ) :
                     if self . CurrentClass != None :
                         self . TypeTable [ self . CurrentClass . Name ] . Size = self . TypeTable [ self . CurrentClass . Name ] . Size +\
                         self . TypeTable [ self . SavedType . Name ] . Size
-                        self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token ] = NewSymbol
+                        self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token . Name ] = NewSymbol
                     OutputText = OutputText + ';Declaring {}\n' . format ( Token . Name )
                     OutputText = self . CalcDeclarationOutput ( self . SavedType . Name , OutputText )
                     LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
@@ -757,6 +757,7 @@ class Parser ( ) :
                 self . TypeTable [ Token . Name ] = Type ( Token . Name )
                 self . CurrentClass = self . TypeTable [ Token . Name ]
                 self . State = self . MAIN_STATES [ 'CLASS_AFTER_NAME' ]
+                print ( 'declaring' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessClassAfterName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
