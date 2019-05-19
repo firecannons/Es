@@ -403,6 +403,7 @@ class Parser ( ) :
     def OutputParameterLoad ( self , CurrentOperand , OutputText ) :
         OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand.Name)
         OperandOffset = 0
+        self . CheckIfObjectInTokenValid ( CurrentOperand )
         Found, CurrentSymbol = self.CheckCurrentSTs(CurrentOperand)
         OperandOffset = CurrentSymbol.Offset
         OutputText = OutputText + self.ASM_TEXT['LOAD_TEXT'].format(OperandOffset)
@@ -428,28 +429,43 @@ class Parser ( ) :
                 if Found == False :
                     CompilerIssue . OutputError ( 'No variable named {} found' . format ( Token . Name ) , self . EXIT_ON_ERROR , Token )
     
-    def CalcFunctionCall ( self , Operator , ArrayOfOperands , Object , WordArray , Index ) :
-        OutputText = ''
-        OriginalOffset = self . CurrentSTOffset
-        Type = self . GetObjectType ( Object )
-        TypeName = self . GetTypeName ( Type )
-        FunctionName = self . ResolveActionToAsm ( Operator , Type )
+    def AllocateLiterals ( self , OutputText , ArrayOfOperands ) :
         ArrayIndex = 0
         for CurrentOperand in ArrayOfOperands :
             if CurrentOperand . Name . isdigit ( ) == True :
                 OutputText , ArrayOfOperands = self . AllocateByteFromNumber ( CurrentOperand , OutputText , ArrayOfOperands , ArrayIndex )
             ArrayIndex = ArrayIndex + 1
-        #PrintObject ( self . TypeTable )
-        print ( TypeName , FunctionName )
+        return OutputText , ArrayOfOperands
+    
+    def AddReturnValues ( self , TypeName , FunctionName , WordArray , Index , OutputText ) :
         for ReturnObject in self . GetTypeObjectFromNames ( TypeName , FunctionName ) . ReturnValues :
-            #PrintObject ( ReturnObject )
-            print ( ReturnObject )
             WordArray , Index , OutputText = self . AddReturnValue ( ReturnObject , WordArray , Index , OutputText )
-        AfterReturnOffset = self . CurrentSTOffset
+        return WordArray , Index , OutputText
+    
+    def LoadParameters ( self ,  ArrayOfOperands , OutputText ) :
         for CurrentOperand in ArrayOfOperands :
             OutputText = self . OutputParameterLoad ( CurrentOperand , OutputText )
+        return OutputText
+    
+    def ResolveActionDetails ( self , Operator , Object ) :
+        Type = self . GetObjectType ( Object )
+        TypeName = self . GetTypeName ( Type )
+        FunctionName = self . ResolveActionToAsm ( Operator , Type )
+        return Type , TypeName , FunctionName
+    
+    def LoadValues ( self , OutputText , ArrayOfOperands , TypeName , FunctionName , WordArray , Index , Object , Type ) :
+        OutputText , ArrayOfOperands = self . AllocateLiterals ( OutputText , ArrayOfOperands )
+        WordArray , Index , OutputText = self . AddReturnValues ( TypeName , FunctionName , WordArray , Index , OutputText )
+        AfterReturnOffset = self . CurrentSTOffset
+        OutputText = self . LoadParameters ( ArrayOfOperands , OutputText )
         if Type != None :
             OutputText = self . LoadCallingObject ( Object , OutputText )
+        return OutputText , ArrayOfOperands , WordArray , Index , AfterReturnOffset
+    
+    def CalcFunctionCall ( self , Operator , ArrayOfOperands , Object , WordArray , Index ) :
+        OutputText = ''
+        Type , TypeName , FunctionName = self . ResolveActionDetails ( Operator , Object )
+        OutputText , ArrayOfOperands , WordArray , Index , AfterReturnOffset = self . LoadValues ( OutputText , ArrayOfOperands , TypeName , FunctionName , WordArray , Index , Object , Type )
         OutputText = self . OutputCallFunction ( FunctionName , AfterReturnOffset , OutputText )
         self . CurrentSTOffset = AfterReturnOffset
         return OutputText , WordArray
