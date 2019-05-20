@@ -384,6 +384,10 @@ class Parser ( ) :
         if Type != None :
             TypeName = Type . Name
         return TypeName
+    
+    def PrintWordArray ( self , WordArray ) :
+        for el in WordArray :
+            print ( el . Name )
 
     def AddReturnValue ( self , ReturnObject , WordArray , Index , OutputText ) :
         OutputText = OutputText + ';Adding return value {}\n'.format(ReturnObject.Name)
@@ -397,6 +401,8 @@ class Parser ( ) :
         NewSymbol.Offset = deepcopy(self.CurrentSTOffset)
         self.GetCurrentST().Symbols[NewName] = NewSymbol
         self.ReturnTempIndex = self.ReturnTempIndex + 1
+        # Put a temporary variable into the return value.  This is for scenarios like S1 = S2 + 1.  This
+        #   will turn into S1 = [temp].  Also remember that = does not return anything (for the moment).
         WordArray[Index] = MyToken ( NewName , WordArray [ Index - 1 ] . LineNumber , WordArray [ Index - 1 ] . FileName )
         return WordArray , Index , OutputText
 
