@@ -263,6 +263,7 @@ action Main
     OutputByte ( S6 )
     OutputByte ( S6 )
     OutputByte ( S6 + 2 )
+    OutputByte5 ( S6 + 1 , B2 , B3 , B4 , B5 )
     
     if S6 == 65
         Byte MeByte

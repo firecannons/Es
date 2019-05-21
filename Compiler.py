@@ -194,13 +194,13 @@ class Parser ( ) :
         OPERATORS [ 'CREATE' ] : MAIN_METHOD_NAMES [ 'create' ] ,
     }
     
-    OPERATOR_PRECEDENCE = [
-        { OPERATORS [ 'COLON' ] , SPECIAL_CHARS [ 'COMMA' ] } ,
-        { OPERATORS [ 'LEFT_PAREN' ] } ,
+    # Operator Precedence is opposite of operator eval order
+    OPERATOR_EVAL_ORDER = [
+        { OPERATORS [ 'COLON' ] } ,
         { OPERATORS [ 'PLUS' ] , OPERATORS [ 'MINUS' ] , OPERATORS [ 'MULT' ] , OPERATORS [ 'DIVIDE' ] } ,
         { OPERATORS [ 'IS_EQUAL' ] , OPERATORS [ 'NOT_EQUAL' ] , OPERATORS [ 'GREATER_THAN' ] , OPERATORS [ 'GREATER_OR_EQUAL' ] , OPERATORS [ 'LESS_OR_EQUAL' ] , OPERATORS [ 'LESS_THAN' ] } ,
         { OPERATORS [ 'EQUALS' ] } ,
-        { OPERATORS [ 'RIGHT_PAREN' ] }
+        { SPECIAL_CHARS [ 'COMMA' ] , OPERATORS [ 'LEFT_PAREN' ] , OPERATORS [ 'RIGHT_PAREN' ] }
     ]
     
     ASM_COMMANDS = {
@@ -299,10 +299,10 @@ class Parser ( ) :
     def GetOperatorDepth ( self , Token ) :
         Depth = -1
         if Token . Name == self . EMPTY_STRING :
-            Depth = len ( self . OPERATOR_PRECEDENCE )
+            Depth = len ( self . OPERATOR_EVAL_ORDER )
         DepthIndex = 0
-        while DepthIndex < len ( self . OPERATOR_PRECEDENCE ) and Depth == -1 :
-            if Token . Name in self . OPERATOR_PRECEDENCE [ DepthIndex ] :
+        while DepthIndex < len ( self . OPERATOR_EVAL_ORDER ) and Depth == -1 :
+            if Token . Name in self . OPERATOR_EVAL_ORDER [ DepthIndex ] :
                 Depth = DepthIndex
             DepthIndex = DepthIndex + 1
         if Depth == -1 :
