@@ -3126,7 +3126,7 @@ call OutputByte
 add esp, 4
 add esp, -1
 
-mov byte [esp], 65
+mov byte [esp], 2
 
 ;Declaring [112
 ;Adding return value 
@@ -3135,6 +3135,32 @@ add esp, -1
 add esp, -4
 mov ebx, ebp
 add ebx, -76
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Plus
+add esp, 8
+;Loading [113
+add esp, -4
+mov ebx, ebp
+add ebx, -77
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 65
+
+;Declaring [114
+;Adding return value 
+add esp, -1
+;Loading [114
+add esp, -4
+mov ebx, ebp
+add ebx, -78
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -3152,7 +3178,7 @@ add esp, -1
 
 add esp, -4
 mov ebx, ebp
-add ebx, -78
+add ebx, -80
 mov [esp], ebx
 call Byte__On_Create
 add esp, 4
@@ -3160,30 +3186,30 @@ add esp, -1
 
 mov byte [esp], 2
 
-;Declaring [114
+;Declaring [116
 ;Adding return value 
 add esp, -1
-;Loading [114
+;Loading [116
 add esp, -4
 mov ebx, ebp
-add ebx, -79
+add ebx, -81
 mov [esp], ebx
 ;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -78
-mov [esp], ebx
-call Byte__On_Plus
-add esp, 8
-;Loading [115
 add esp, -4
 mov ebx, ebp
 add ebx, -80
 mov [esp], ebx
+call Byte__On_Plus
+add esp, 8
+;Loading [117
+add esp, -4
+mov ebx, ebp
+add ebx, -82
+mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
 mov ebx, ebp
-add ebx, -78
+add ebx, -80
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
@@ -3197,7 +3223,7 @@ add esp, -4
 
 add esp, -4
 mov ebx, ebp
-add ebx, -79
+add ebx, -81
 mov [esp], ebx
 call Pointer__On_Create
 add esp, 4

@@ -497,11 +497,8 @@ class Parser ( ) :
 
     def DoLeftParenOperation ( self , Index , WordArray , LeftOperand , OutputText ) :
         CallingObject = None
-        if WordArray [ Index ] . Name in self . OPERATORS :
-            if WordArray [ Index + 3 ] == self . OPERATORS [ 'RIGHT_PAREN' ] :
-                WordArray . pop ( Index + 1 )
-                WordArray . pop ( Index + 3 )
-        else :
+        if WordArray [ Index + 3 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
+            print ( 'one' )
             if LeftOperand != None :
                 Found , CallingObject = self . CheckCurrentSTs ( LeftOperand )
                 self . CheckIfObjectInTokenValid ( CallingObject )
@@ -516,6 +513,8 @@ class Parser ( ) :
                 WordArray . pop ( Index )
             else :
                 CompilerIssue . OutputError ( 'Function \'' + CurrentClass + ':' + WordArray [ Index ] + '\' does not exist.' , self . EXIT_ON_ERROR , TokenObject )
+        else :
+            Index = Index + 2
         return Index , WordArray , LeftOperand , OutputText
 
     def DoCommaOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
