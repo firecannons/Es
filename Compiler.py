@@ -449,7 +449,10 @@ class Parser ( ) :
         return WordArray , Index , OutputText
     
     def LoadParameters ( self ,  ArrayOfOperands , OutputText ) :
-        for CurrentOperand in ArrayOfOperands :
+        # We reverse it because the order of pushing of operands is reversed
+        ReverseOperandArray = reversed ( ArrayOfOperands )
+        print ( ReverseOperandArray , ArrayOfOperands )
+        for CurrentOperand in ReverseOperandArray :
             OutputText = self . OutputParameterLoad ( CurrentOperand , OutputText )
         return OutputText
     
@@ -503,7 +506,7 @@ class Parser ( ) :
                 Found , CallingObject = self . CheckCurrentSTs ( LeftOperand )
                 self . CheckIfObjectInTokenValid ( CallingObject )
             if self . GetTypeTableFromNames ( self . GetObjectTypeName ( CallingObject ) , WordArray [ Index ] . Name ) :
-                self . ParameterArray = [ WordArray [ Index + 2 ] ] + self . ParameterArray
+                self . ParameterArray = self . ParameterArray + [ WordArray [ Index + 2 ] ]
                 NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CallingObject , WordArray , Index )
                 OutputText = OutputText + NewOutputText
                 self . ParameterArray = [ ]

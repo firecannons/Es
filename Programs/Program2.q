@@ -13,6 +13,40 @@ action asm OutputByte ( Byte L )
 	int	0x80
 end
 
+action asm OutputByte3 ( Byte L , Byte L2 , Byte L3 )
+    ; load a pointer to the byte in ecx
+    mov ecx, ebp
+    add ecx, 8
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov ecx, ebp
+    add ecx, 12
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov ecx, ebp
+    add ecx, 16
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+end
+
 action asm OutputByte2 ( Byte L , Byte L2 )
     ; load a pointer to the byte in ecx
     mov ecx, ebp
@@ -264,6 +298,9 @@ action Main
     OutputByte ( S6 )
     OutputByte ( S6 + 2 )
     OutputByte5 ( S6 + 1 , B2 , B3 , B4 , B5 )
+    OutputByte5 ( S6 + 1 , S6 + 2 , S6 + 3 , S6 + 4 , S6 + 5 )
+    OutputByte3 ( S6 , S6 + 1 , S6 + 2 )
+    OutputByte5 ( S6 + 1 , S6 + 1 + 1 , S6 + 1 + 1 + 1 , S6 + 4 , S6 + 5 )
     
     if S6 == 65
         Byte MeByte
