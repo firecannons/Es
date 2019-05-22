@@ -29,6 +29,7 @@ class MySymbol ( ) :
         self . Offset = 0
         self . IsFunction = False
         self . Templates = { }
+        self . IsReference = False
 
 class Function ( ) :
     def __init__ ( self , Name ) :
@@ -216,6 +217,11 @@ class Parser ( ) :
             'mov ebx, ebp\n' +\
             'add ebx, {}\n' +\
             'mov [esp], ebx\n' ,
+        'LOAD_TEXT_REFERENCE' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
+            'mov ebx, ebp\n' +\
+            'add ebx, {}\n' +\
+            'mov ebx, [ebx]\n' +\
+            'mov [esp], ebx\n' ,
         'ALLOC_BYTE' : 'add esp, -1\n' ,
         'SET_CURRENT_BYTE' : 'mov byte [esp], {}\n' ,
         'DEFAULT_CREATE' : 'add esp, {}\n' +\
@@ -265,6 +271,7 @@ class Parser ( ) :
     
     ACTION_DECLARATION_OFFSET = 0
     ACTION_DEFINITION_OFFSET = 0
+    ACTION_DECLARATION_PARAM_OFFSET = 8
     
     def __init__ ( self ) :
         self . State = deepcopy ( self . MAIN_STATES [ 'START_OF_LINE' ] )
@@ -405,21 +412,28 @@ class Parser ( ) :
         #   will turn into S1 = [temp].  Also remember that = does not return anything (for the moment).
         WordArray[Index] = MyToken ( NewName , WordArray [ Index - 1 ] . LineNumber , WordArray [ Index - 1 ] . FileName )
         return WordArray , Index , OutputText
-
-    def OutputParameterLoad ( self , CurrentOperand , OutputText ) :
-        OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand.Name)
+    
+    def LoadParameter ( self , CurrentOperand , OutputText ) :
         OperandOffset = 0
         self . CheckIfObjectInTokenValid ( CurrentOperand )
         Found, CurrentSymbol = self.CheckCurrentSTs(CurrentOperand)
         OperandOffset = CurrentSymbol.Offset
-        OutputText = OutputText + self.ASM_TEXT['LOAD_TEXT'].format(OperandOffset)
+        if CurrentSymbol . IsReference == False :
+            OutputText = OutputText + self.ASM_TEXT['LOAD_TEXT'].format(OperandOffset)
+        else :
+            OutputText = OutputText + self.ASM_TEXT['LOAD_TEXT_REFERENCE'].format(OperandOffset)
+            OutputText = OutputText + '; loading a reference!\n' 
         self.CurrentSTOffset = self.CurrentSTOffset + -self.POINTER_SIZE
+        return OutputText
+
+    def OutputParameterLoad ( self , CurrentOperand , OutputText ) :
+        OutputText = OutputText + ';Loading {}\n'.format(CurrentOperand.Name)
+        OutputText = self . LoadParameter ( CurrentOperand , OutputText )
         return OutputText
 
     def LoadCallingObject ( self , Object , OutputText ) :
         OutputText = OutputText + ';Loading a {} object\n'.format( Object . Type . Name )
-        OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( Object . Offset )
-        self.CurrentSTOffset = self.CurrentSTOffset + -self.POINTER_SIZE
+        OutputText = self . LoadParameter ( Object , OutputText )
         return OutputText
 
     def OutputCallFunction ( self , FunctionName , AfterReturnOffset , OutputText ) :
@@ -451,7 +465,6 @@ class Parser ( ) :
     def LoadParameters ( self ,  ArrayOfOperands , OutputText ) :
         # We reverse it because the order of pushing of operands is reversed
         ReverseOperandArray = reversed ( ArrayOfOperands )
-        print ( ReverseOperandArray , ArrayOfOperands )
         for CurrentOperand in ReverseOperandArray :
             OutputText = self . OutputParameterLoad ( CurrentOperand , OutputText )
         return OutputText
@@ -501,7 +514,6 @@ class Parser ( ) :
     def DoLeftParenOperation ( self , Index , WordArray , LeftOperand , OutputText ) :
         CallingObject = None
         if WordArray [ Index + 3 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
-            print ( 'one' )
             if LeftOperand != None :
                 Found , CallingObject = self . CheckCurrentSTs ( LeftOperand )
             if self . IsValidName ( WordArray [ Index ] . Name ) == True :
@@ -519,7 +531,6 @@ class Parser ( ) :
                     CompilerIssue . OutputError ( 'The class \'' + Object . Type . Name + '\' does not have a function \'' + WordArray [ Index + 1 ] . Name + '\'.' ,
                         self . EXIT_ON_ERROR , WordArray [ Index ] )
             else :
-                print ( 'wers' )
                 self . DropParens ( Index , WordArray )
                 Index = Index + 1
         else :
@@ -645,6 +656,7 @@ class Parser ( ) :
             self . State = self . MAIN_STATES [ 'ACTION_AFTER' ]
             self.  CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
             self . CurrentSTOffset = deepcopy ( self . ACTION_DECLARATION_OFFSET )
+            self . CurrentParamOffset = deepcopy ( self . ACTION_DECLARATION_PARAM_OFFSET )
             self . ActionTypeDeclared = False
             self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'ACTION' ] , self . CurrentSTOffset ) )
         elif Token . Name == self . KEYWORDS [ 'END' ] :
@@ -951,10 +963,12 @@ class Parser ( ) :
                 CompilerIssue . OutputError ( 'There is already a \'' + Token . Name + '\' in the current scope' , self . EXIT_ON_ERROR , Token )
             else :
                 NewSymbol = MySymbol ( Token . Name , self . SavedType )
-                self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType . Name ] . Size
-                NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                self . GetCurrentST ( ) . Symbols [ Token ] = NewSymbol
+                NewSymbol . IsReference = True
+                NewSymbol . Offset = deepcopy ( self . CurrentParamOffset )
+                self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
                 self . CurrentTypeTable ( ) . append ( NewSymbol )
+                self . CurrentParamOffset = self . CurrentParamOffset + self . POINTER_SIZE
+                print ( self . GetCurrentST ( ) . Symbols [ Token . Name ] . IsReference , Token . Name , self . CurrentFunction . Name , 'weoisfeife' )
                 self . State = self . MAIN_STATES [ 'ACTION_AFTER_PARAM' ]
         else :
             CompilerIssue . OutputError ( 'Invalid variable name in action declaration' , self . EXIT_ON_ERROR , TokenObject )

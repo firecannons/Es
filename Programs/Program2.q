@@ -47,6 +47,18 @@ action asm OutputByte3 ( Byte L , Byte L2 , Byte L3 )
     
 end
 
+action IndirectionOutput ( Byte L )
+    OutputByte ( L )
+end
+
+action IndirectionAddOutput ( Byte L )
+    OutputByte ( L + 1 )
+end
+
+action IndirectionAddTwoOutput ( Byte L )
+    OutputByte ( L + 2 )
+end
+
 action asm OutputByte2 ( Byte L , Byte L2 )
     ; load a pointer to the byte in ecx
     mov ecx, ebp
@@ -307,6 +319,12 @@ action Main
     OutputByte ( ( ( ( S6 ) ) ) )
     
     OutputByte ( ( ( ( S6 ) ) + 1 ) )
+    
+    IndirectionOutput ( S6 )
+    
+    IndirectionAddOutput ( S6 )
+    
+    IndirectionAddTwoOutput ( S6 )
     
     if S6 == 65
         Byte MeByte

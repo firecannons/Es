@@ -699,6 +699,107 @@ mov esp, ebp
 pop ebp
 ret
 
+IndirectionOutput:
+
+push ebp
+mov ebp, esp
+
+
+;Loading L
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+mov [esp], ebx
+; loading a reference!
+call OutputByte
+add esp, 4
+
+
+mov esp, ebp
+pop ebp
+ret
+
+IndirectionAddOutput:
+
+push ebp
+mov ebp, esp
+
+
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [0
+;Adding return value 
+add esp, -1
+;Loading [0
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+mov [esp], ebx
+; loading a reference!
+call Byte__On_Plus
+add esp, 8
+;Loading [1
+add esp, -4
+mov ebx, ebp
+add ebx, -2
+mov [esp], ebx
+call OutputByte
+add esp, 4
+
+
+mov esp, ebp
+pop ebp
+ret
+
+IndirectionAddTwoOutput:
+
+push ebp
+mov ebp, esp
+
+
+add esp, -1
+
+mov byte [esp], 2
+
+;Declaring [2
+;Adding return value 
+add esp, -1
+;Loading [2
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+mov [esp], ebx
+; loading a reference!
+call Byte__On_Plus
+add esp, 8
+;Loading [3
+add esp, -4
+mov ebx, ebp
+add ebx, -2
+mov [esp], ebx
+call OutputByte
+add esp, 4
+
+
+mov esp, ebp
+pop ebp
+ret
+
 OutputByte2:
 
 push ebp
@@ -814,8 +915,8 @@ add esp, -1
 
 mov byte [esp], 102
 
-;Declaring [0
-;Loading [0
+;Declaring [4
+;Loading [4
 add esp, -4
 mov ebx, ebp
 add ebx, -2
@@ -838,8 +939,8 @@ add esp, -1
 
 mov byte [esp], 100
 
-;Declaring [1
-;Loading [1
+;Declaring [5
+;Loading [5
 add esp, -4
 mov ebx, ebp
 add ebx, -3
@@ -855,8 +956,8 @@ add esp, -1
 
 mov byte [esp], 120
 
-;Declaring [2
-;Loading [2
+;Declaring [6
+;Loading [6
 add esp, -4
 mov ebx, ebp
 add ebx, -4
@@ -895,8 +996,8 @@ add esp, -1
 
 mov byte [esp], 110
 
-;Declaring [3
-;Loading [3
+;Declaring [7
+;Loading [7
 add esp, -4
 mov ebx, ebp
 add ebx, -6
@@ -950,8 +1051,8 @@ add esp, -1
 
 mov byte [esp], 121
 
-;Declaring [4
-;Loading [4
+;Declaring [8
+;Loading [8
 add esp, -4
 mov ebx, ebp
 add ebx, -7
@@ -967,8 +1068,8 @@ add esp, -1
 
 mov byte [esp], 119
 
-;Declaring [5
-;Loading [5
+;Declaring [9
+;Loading [9
 add esp, -4
 mov ebx, ebp
 add ebx, -8
@@ -1023,8 +1124,8 @@ add esp, -1
 
 mov byte [esp], 100
 
-;Declaring [6
-;Loading [6
+;Declaring [10
+;Loading [10
 add esp, -4
 mov ebx, ebp
 add ebx, -12
@@ -1040,8 +1141,8 @@ add esp, -1
 
 mov byte [esp], 101
 
-;Declaring [7
-;Loading [7
+;Declaring [11
+;Loading [11
 add esp, -4
 mov ebx, ebp
 add ebx, -13
@@ -1057,8 +1158,8 @@ add esp, -1
 
 mov byte [esp], 102
 
-;Declaring [8
-;Loading [8
+;Declaring [12
+;Loading [12
 add esp, -4
 mov ebx, ebp
 add ebx, -14
@@ -1074,8 +1175,8 @@ add esp, -1
 
 mov byte [esp], 103
 
-;Declaring [9
-;Loading [9
+;Declaring [13
+;Loading [13
 add esp, -4
 mov ebx, ebp
 add ebx, -15
@@ -1091,8 +1192,8 @@ add esp, -1
 
 mov byte [esp], 104
 
-;Declaring [10
-;Loading [10
+;Declaring [14
+;Loading [14
 add esp, -4
 mov ebx, ebp
 add ebx, -16
@@ -1135,8 +1236,8 @@ add esp, -1
 
 mov byte [esp], 32
 
-;Declaring [11
-;Loading [11
+;Declaring [15
+;Loading [15
 add esp, -4
 mov ebx, ebp
 add ebx, -17
@@ -1214,8 +1315,8 @@ add esp, -1
 
 mov byte [esp], 100
 
-;Declaring [12
-;Loading [12
+;Declaring [16
+;Loading [16
 add esp, -4
 mov ebx, ebp
 add ebx, -21
@@ -1231,8 +1332,8 @@ add esp, -1
 
 mov byte [esp], 101
 
-;Declaring [13
-;Loading [13
+;Declaring [17
+;Loading [17
 add esp, -4
 mov ebx, ebp
 add ebx, -22
@@ -1305,10 +1406,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [14
+;Declaring [18
 ;Adding return value 
 add esp, -1
-;Loading [14
+;Loading [18
 add esp, -4
 mov ebx, ebp
 add ebx, -23
@@ -1320,86 +1421,10 @@ add ebx, -20
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [15
-add esp, -4
-mov ebx, ebp
-add ebx, -24
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -20
-mov [esp], ebx
-call Byte__On_Equals
-add esp, 8
-;Loading S3
-add esp, -4
-mov ebx, ebp
-add ebx, -20
-mov [esp], ebx
-call OutputByte
-add esp, 4
-add esp, -1
-
-mov byte [esp], 1
-
-;Declaring [16
-;Adding return value 
-add esp, -1
-;Loading [16
-add esp, -4
-mov ebx, ebp
-add ebx, -25
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -20
-mov [esp], ebx
-call Byte__On_Plus
-add esp, 8
-;Loading [17
-add esp, -4
-mov ebx, ebp
-add ebx, -26
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -20
-mov [esp], ebx
-call Byte__On_Equals
-add esp, 8
-;Loading S3
-add esp, -4
-mov ebx, ebp
-add ebx, -20
-mov [esp], ebx
-call OutputByte
-add esp, 4
-add esp, -1
-
-mov byte [esp], 1
-
-;Declaring [18
-;Adding return value 
-add esp, -1
-;Loading [18
-add esp, -4
-mov ebx, ebp
-add ebx, -27
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -20
-mov [esp], ebx
-call Byte__On_Plus
-add esp, 8
 ;Loading [19
 add esp, -4
 mov ebx, ebp
-add ebx, -28
+add ebx, -24
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1425,7 +1450,7 @@ add esp, -1
 ;Loading [20
 add esp, -4
 mov ebx, ebp
-add ebx, -29
+add ebx, -25
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1437,7 +1462,7 @@ add esp, 8
 ;Loading [21
 add esp, -4
 mov ebx, ebp
-add ebx, -30
+add ebx, -26
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1463,7 +1488,7 @@ add esp, -1
 ;Loading [22
 add esp, -4
 mov ebx, ebp
-add ebx, -31
+add ebx, -27
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1475,7 +1500,7 @@ add esp, 8
 ;Loading [23
 add esp, -4
 mov ebx, ebp
-add ebx, -32
+add ebx, -28
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1501,7 +1526,7 @@ add esp, -1
 ;Loading [24
 add esp, -4
 mov ebx, ebp
-add ebx, -33
+add ebx, -29
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1513,7 +1538,7 @@ add esp, 8
 ;Loading [25
 add esp, -4
 mov ebx, ebp
-add ebx, -34
+add ebx, -30
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1539,7 +1564,7 @@ add esp, -1
 ;Loading [26
 add esp, -4
 mov ebx, ebp
-add ebx, -35
+add ebx, -31
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1551,7 +1576,7 @@ add esp, 8
 ;Loading [27
 add esp, -4
 mov ebx, ebp
-add ebx, -36
+add ebx, -32
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1577,7 +1602,7 @@ add esp, -1
 ;Loading [28
 add esp, -4
 mov ebx, ebp
-add ebx, -37
+add ebx, -33
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1589,7 +1614,7 @@ add esp, 8
 ;Loading [29
 add esp, -4
 mov ebx, ebp
-add ebx, -38
+add ebx, -34
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1615,19 +1640,19 @@ add esp, -1
 ;Loading [30
 add esp, -4
 mov ebx, ebp
-add ebx, -39
+add ebx, -35
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
 mov ebx, ebp
 add ebx, -20
 mov [esp], ebx
-call Byte__On_Minus
+call Byte__On_Plus
 add esp, 8
 ;Loading [31
 add esp, -4
 mov ebx, ebp
-add ebx, -40
+add ebx, -36
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1653,19 +1678,19 @@ add esp, -1
 ;Loading [32
 add esp, -4
 mov ebx, ebp
-add ebx, -41
+add ebx, -37
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
 mov ebx, ebp
 add ebx, -20
 mov [esp], ebx
-call Byte__On_Minus
+call Byte__On_Plus
 add esp, 8
 ;Loading [33
 add esp, -4
 mov ebx, ebp
-add ebx, -42
+add ebx, -38
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1691,7 +1716,7 @@ add esp, -1
 ;Loading [34
 add esp, -4
 mov ebx, ebp
-add ebx, -43
+add ebx, -39
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1703,7 +1728,7 @@ add esp, 8
 ;Loading [35
 add esp, -4
 mov ebx, ebp
-add ebx, -44
+add ebx, -40
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1729,7 +1754,7 @@ add esp, -1
 ;Loading [36
 add esp, -4
 mov ebx, ebp
-add ebx, -45
+add ebx, -41
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1741,7 +1766,7 @@ add esp, 8
 ;Loading [37
 add esp, -4
 mov ebx, ebp
-add ebx, -46
+add ebx, -42
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1767,7 +1792,7 @@ add esp, -1
 ;Loading [38
 add esp, -4
 mov ebx, ebp
-add ebx, -47
+add ebx, -43
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1779,7 +1804,7 @@ add esp, 8
 ;Loading [39
 add esp, -4
 mov ebx, ebp
-add ebx, -48
+add ebx, -44
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -1805,6 +1830,82 @@ add esp, -1
 ;Loading [40
 add esp, -4
 mov ebx, ebp
+add ebx, -45
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -20
+mov [esp], ebx
+call Byte__On_Minus
+add esp, 8
+;Loading [41
+add esp, -4
+mov ebx, ebp
+add ebx, -46
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -20
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading S3
+add esp, -4
+mov ebx, ebp
+add ebx, -20
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [42
+;Adding return value 
+add esp, -1
+;Loading [42
+add esp, -4
+mov ebx, ebp
+add ebx, -47
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -20
+mov [esp], ebx
+call Byte__On_Minus
+add esp, 8
+;Loading [43
+add esp, -4
+mov ebx, ebp
+add ebx, -48
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -20
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading S3
+add esp, -4
+mov ebx, ebp
+add ebx, -20
+mov [esp], ebx
+call OutputByte
+add esp, 4
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [44
+;Adding return value 
+add esp, -1
+;Loading [44
+add esp, -4
+mov ebx, ebp
 add ebx, -49
 mov [esp], ebx
 ;Loading a Byte object
@@ -1818,10 +1919,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [42
+;Declaring [46
 ;Adding return value 
 add esp, -1
-;Loading [42
+;Loading [46
 add esp, -4
 mov ebx, ebp
 add ebx, -51
@@ -1837,10 +1938,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [44
+;Declaring [48
 ;Adding return value 
 add esp, -1
-;Loading [44
+;Loading [48
 add esp, -4
 mov ebx, ebp
 add ebx, -53
@@ -1856,10 +1957,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [46
+;Declaring [50
 ;Adding return value 
 add esp, -1
-;Loading [46
+;Loading [50
 add esp, -4
 mov ebx, ebp
 add ebx, -55
@@ -1871,7 +1972,7 @@ add ebx, -54
 mov [esp], ebx
 call Byte__On_Minus
 add esp, 8
-;Loading [47
+;Loading [51
 add esp, -4
 mov ebx, ebp
 add ebx, -56
@@ -1894,10 +1995,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [48
+;Declaring [52
 ;Adding return value 
 add esp, -1
-;Loading [48
+;Loading [52
 add esp, -4
 mov ebx, ebp
 add ebx, -57
@@ -1909,7 +2010,7 @@ add ebx, -20
 mov [esp], ebx
 call Byte__On_Minus
 add esp, 8
-;Loading [49
+;Loading [53
 add esp, -4
 mov ebx, ebp
 add ebx, -58
@@ -1941,8 +2042,8 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [50
-;Loading [50
+;Declaring [54
+;Loading [54
 add esp, -4
 mov ebx, ebp
 add ebx, -60
@@ -1968,7 +2069,7 @@ add ebx, -20
 mov [esp], ebx
 call Byte__On_Minus
 add esp, 8
-;Loading [51
+;Loading [55
 add esp, -4
 mov ebx, ebp
 add ebx, -61
@@ -2000,8 +2101,8 @@ add esp, -1
 
 mov byte [esp], 115
 
-;Declaring [52
-;Loading [52
+;Declaring [56
+;Loading [56
 add esp, -4
 mov ebx, ebp
 add ebx, -63
@@ -2052,10 +2153,10 @@ add esp, -1
 
 mov byte [esp], 5
 
-;Declaring [53
+;Declaring [57
 ;Adding return value 
 add esp, -1
-;Loading [53
+;Loading [57
 add esp, -4
 mov ebx, ebp
 add ebx, -65
@@ -2067,7 +2168,7 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Minus
 add esp, 8
-;Loading [54
+;Loading [58
 add esp, -4
 mov ebx, ebp
 add ebx, -66
@@ -2097,8 +2198,8 @@ add esp, -1
 
 mov byte [esp], 122
 
-;Declaring [55
-;Loading [55
+;Declaring [59
+;Loading [59
 add esp, -4
 mov ebx, ebp
 add ebx, -67
@@ -2123,8 +2224,8 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [56
-;Loading [56
+;Declaring [60
+;Loading [60
 add esp, -4
 mov ebx, ebp
 add ebx, -69
@@ -2149,8 +2250,8 @@ add esp, -1
 
 mov byte [esp], 121
 
-;Declaring [57
-;Loading [57
+;Declaring [61
+;Loading [61
 add esp, -4
 mov ebx, ebp
 add ebx, -71
@@ -2167,10 +2268,10 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [58
+;Declaring [62
 ;Adding return value 
 add esp, -1
-;Loading [58
+;Loading [62
 add esp, -4
 mov ebx, ebp
 add ebx, -72
@@ -2197,10 +2298,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [60
+;Declaring [64
 ;Adding return value 
 add esp, -1
-;Loading [60
+;Loading [64
 add esp, -4
 mov ebx, ebp
 add ebx, -74
@@ -2212,7 +2313,7 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Minus
 add esp, 8
-;Loading [61
+;Loading [65
 add esp, -4
 mov ebx, ebp
 add ebx, -75
@@ -2232,8 +2333,8 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [62
-;Loading [62
+;Declaring [66
+;Loading [66
 add esp, -4
 mov ebx, ebp
 add ebx, -72
@@ -2250,10 +2351,10 @@ add esp, -1
 
 mov byte [esp], 121
 
-;Declaring [63
+;Declaring [67
 ;Adding return value 
 add esp, -1
-;Loading [63
+;Loading [67
 add esp, -4
 mov ebx, ebp
 add ebx, -73
@@ -2280,10 +2381,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [65
+;Declaring [69
 ;Adding return value 
 add esp, -1
-;Loading [65
+;Loading [69
 add esp, -4
 mov ebx, ebp
 add ebx, -75
@@ -2295,7 +2396,7 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [66
+;Loading [70
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2316,10 +2417,10 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [67
+;Declaring [71
 ;Adding return value 
 add esp, -1
-;Loading [67
+;Loading [71
 add esp, -4
 mov ebx, ebp
 add ebx, -73
@@ -2346,10 +2447,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [69
+;Declaring [73
 ;Adding return value 
 add esp, -1
-;Loading [69
+;Loading [73
 add esp, -4
 mov ebx, ebp
 add ebx, -75
@@ -2361,7 +2462,7 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Minus
 add esp, 8
-;Loading [70
+;Loading [74
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2382,10 +2483,10 @@ add esp, -1
 
 mov byte [esp], 122
 
-;Declaring [71
+;Declaring [75
 ;Adding return value 
 add esp, -1
-;Loading [71
+;Loading [75
 add esp, -4
 mov ebx, ebp
 add ebx, -73
@@ -2412,10 +2513,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [73
+;Declaring [77
 ;Adding return value 
 add esp, -1
-;Loading [73
+;Loading [77
 add esp, -4
 mov ebx, ebp
 add ebx, -75
@@ -2427,7 +2528,7 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [74
+;Loading [78
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2448,10 +2549,10 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [75
+;Declaring [79
 ;Adding return value 
 add esp, -1
-;Loading [75
+;Loading [79
 add esp, -4
 mov ebx, ebp
 add ebx, -73
@@ -2478,10 +2579,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [77
+;Declaring [81
 ;Adding return value 
 add esp, -1
-;Loading [77
+;Loading [81
 add esp, -4
 mov ebx, ebp
 add ebx, -75
@@ -2493,7 +2594,7 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Minus
 add esp, 8
-;Loading [78
+;Loading [82
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2514,10 +2615,10 @@ add esp, -1
 
 mov byte [esp], 122
 
-;Declaring [79
+;Declaring [83
 ;Adding return value 
 add esp, -1
-;Loading [79
+;Loading [83
 add esp, -4
 mov ebx, ebp
 add ebx, -73
@@ -2544,10 +2645,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [81
+;Declaring [85
 ;Adding return value 
 add esp, -1
-;Loading [81
+;Loading [85
 add esp, -4
 mov ebx, ebp
 add ebx, -75
@@ -2559,7 +2660,7 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [82
+;Loading [86
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2580,10 +2681,10 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [83
+;Declaring [87
 ;Adding return value 
 add esp, -1
-;Loading [83
+;Loading [87
 add esp, -4
 mov ebx, ebp
 add ebx, -73
@@ -2610,10 +2711,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [85
+;Declaring [89
 ;Adding return value 
 add esp, -1
-;Loading [85
+;Loading [89
 add esp, -4
 mov ebx, ebp
 add ebx, -75
@@ -2625,7 +2726,7 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Minus
 add esp, 8
-;Loading [86
+;Loading [90
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2645,8 +2746,8 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [87
-;Loading [87
+;Declaring [91
+;Loading [91
 add esp, -4
 mov ebx, ebp
 add ebx, -73
@@ -2669,10 +2770,10 @@ add esp, -1
 
 mov byte [esp], 66
 
-;Declaring [88
+;Declaring [92
 ;Adding return value 
 add esp, -1
-;Loading [88
+;Loading [92
 add esp, -4
 mov ebx, ebp
 add ebx, -74
@@ -2692,8 +2793,8 @@ add esp, -1
 
 mov byte [esp], 67
 
-;Declaring [90
-;Loading [90
+;Declaring [94
+;Loading [94
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2723,8 +2824,8 @@ add esp, -1
 
 mov byte [esp], 0
 
-;Declaring [91
-;Loading [91
+;Declaring [95
+;Loading [95
 add esp, -4
 mov ebx, ebp
 add ebx, -75
@@ -2740,10 +2841,10 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [92
+;Declaring [96
 ;Adding return value 
 add esp, -1
-;Loading [92
+;Loading [96
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2763,8 +2864,8 @@ add esp, -1
 
 mov byte [esp], 89
 
-;Declaring [94
-;Loading [94
+;Declaring [98
+;Loading [98
 add esp, -4
 mov ebx, ebp
 add ebx, -78
@@ -2787,8 +2888,8 @@ add esp, -1
 
 mov byte [esp], 69
 
-;Declaring [95
-;Loading [95
+;Declaring [99
+;Loading [99
 add esp, -4
 mov ebx, ebp
 add ebx, -79
@@ -2811,8 +2912,8 @@ add esp, -1
 
 mov byte [esp], 83
 
-;Declaring [96
-;Loading [96
+;Declaring [100
+;Loading [100
 add esp, -4
 mov ebx, ebp
 add ebx, -80
@@ -2840,10 +2941,10 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [97
+;Declaring [101
 ;Adding return value 
 add esp, -1
-;Loading [97
+;Loading [101
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2863,8 +2964,8 @@ add esp, -1
 
 mov byte [esp], 78
 
-;Declaring [99
-;Loading [99
+;Declaring [103
+;Loading [103
 add esp, -4
 mov ebx, ebp
 add ebx, -78
@@ -2887,8 +2988,8 @@ add esp, -1
 
 mov byte [esp], 79
 
-;Declaring [100
-;Loading [100
+;Declaring [104
+;Loading [104
 add esp, -4
 mov ebx, ebp
 add ebx, -79
@@ -2916,10 +3017,10 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [101
+;Declaring [105
 ;Adding return value 
 add esp, -1
-;Loading [101
+;Loading [105
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -2939,8 +3040,8 @@ add esp, -1
 
 mov byte [esp], 89
 
-;Declaring [103
-;Loading [103
+;Declaring [107
+;Loading [107
 add esp, -4
 mov ebx, ebp
 add ebx, -78
@@ -2963,8 +3064,8 @@ add esp, -1
 
 mov byte [esp], 69
 
-;Declaring [104
-;Loading [104
+;Declaring [108
+;Loading [108
 add esp, -4
 mov ebx, ebp
 add ebx, -79
@@ -2987,8 +3088,8 @@ add esp, -1
 
 mov byte [esp], 83
 
-;Declaring [105
-;Loading [105
+;Declaring [109
+;Loading [109
 add esp, -4
 mov ebx, ebp
 add ebx, -80
@@ -3015,10 +3116,10 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [106
+;Declaring [110
 ;Adding return value 
 add esp, -1
-;Loading [106
+;Loading [110
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -3038,8 +3139,8 @@ add esp, -1
 
 mov byte [esp], 78
 
-;Declaring [108
-;Loading [108
+;Declaring [112
+;Loading [112
 add esp, -4
 mov ebx, ebp
 add ebx, -78
@@ -3062,8 +3163,8 @@ add esp, -1
 
 mov byte [esp], 79
 
-;Declaring [109
-;Loading [109
+;Declaring [113
+;Loading [113
 add esp, -4
 mov ebx, ebp
 add ebx, -79
@@ -3090,8 +3191,8 @@ add esp, -1
 
 mov byte [esp], 77
 
-;Declaring [110
-;Loading [110
+;Declaring [114
+;Loading [114
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -3114,8 +3215,8 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [111
-;Loading [111
+;Declaring [115
+;Loading [115
 add esp, -4
 mov ebx, ebp
 add ebx, -77
@@ -3171,10 +3272,10 @@ add esp, -1
 
 mov byte [esp], 2
 
-;Declaring [112
+;Declaring [116
 ;Adding return value 
 add esp, -1
-;Loading [112
+;Loading [116
 add esp, -4
 mov ebx, ebp
 add ebx, -76
@@ -3186,7 +3287,7 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [113
+;Loading [117
 add esp, -4
 mov ebx, ebp
 add ebx, -77
@@ -3197,10 +3298,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [114
+;Declaring [118
 ;Adding return value 
 add esp, -1
-;Loading [114
+;Loading [118
 add esp, -4
 mov ebx, ebp
 add ebx, -78
@@ -3217,7 +3318,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -11
 mov [esp], ebx
-;Loading [115
+;Loading [119
 add esp, -4
 mov ebx, ebp
 add ebx, -79
@@ -3243,10 +3344,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [116
+;Declaring [120
 ;Adding return value 
 add esp, -1
-;Loading [116
+;Loading [120
 add esp, -4
 mov ebx, ebp
 add ebx, -80
@@ -3262,10 +3363,10 @@ add esp, -1
 
 mov byte [esp], 2
 
-;Declaring [118
+;Declaring [122
 ;Adding return value 
 add esp, -1
-;Loading [118
+;Loading [122
 add esp, -4
 mov ebx, ebp
 add ebx, -82
@@ -3281,10 +3382,10 @@ add esp, -1
 
 mov byte [esp], 3
 
-;Declaring [120
+;Declaring [124
 ;Adding return value 
 add esp, -1
-;Loading [120
+;Loading [124
 add esp, -4
 mov ebx, ebp
 add ebx, -84
@@ -3300,10 +3401,10 @@ add esp, -1
 
 mov byte [esp], 4
 
-;Declaring [122
+;Declaring [126
 ;Adding return value 
 add esp, -1
-;Loading [122
+;Loading [126
 add esp, -4
 mov ebx, ebp
 add ebx, -86
@@ -3319,10 +3420,10 @@ add esp, -1
 
 mov byte [esp], 5
 
-;Declaring [124
+;Declaring [128
 ;Adding return value 
 add esp, -1
-;Loading [124
+;Loading [128
 add esp, -4
 mov ebx, ebp
 add ebx, -88
@@ -3334,27 +3435,27 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [125
+;Loading [129
 add esp, -4
 mov ebx, ebp
 add ebx, -89
 mov [esp], ebx
-;Loading [123
+;Loading [127
 add esp, -4
 mov ebx, ebp
 add ebx, -87
 mov [esp], ebx
-;Loading [121
+;Loading [125
 add esp, -4
 mov ebx, ebp
 add ebx, -85
 mov [esp], ebx
-;Loading [119
+;Loading [123
 add esp, -4
 mov ebx, ebp
 add ebx, -83
 mov [esp], ebx
-;Loading [117
+;Loading [121
 add esp, -4
 mov ebx, ebp
 add ebx, -81
@@ -3365,10 +3466,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [126
+;Declaring [130
 ;Adding return value 
 add esp, -1
-;Loading [126
+;Loading [130
 add esp, -4
 mov ebx, ebp
 add ebx, -90
@@ -3384,10 +3485,10 @@ add esp, -1
 
 mov byte [esp], 2
 
-;Declaring [128
+;Declaring [132
 ;Adding return value 
 add esp, -1
-;Loading [128
+;Loading [132
 add esp, -4
 mov ebx, ebp
 add ebx, -92
@@ -3399,12 +3500,12 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [129
+;Loading [133
 add esp, -4
 mov ebx, ebp
 add ebx, -93
 mov [esp], ebx
-;Loading [127
+;Loading [131
 add esp, -4
 mov ebx, ebp
 add ebx, -91
@@ -3420,10 +3521,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [130
+;Declaring [134
 ;Adding return value 
 add esp, -1
-;Loading [130
+;Loading [134
 add esp, -4
 mov ebx, ebp
 add ebx, -94
@@ -3439,51 +3540,13 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [132
-;Adding return value 
-add esp, -1
-;Loading [132
-add esp, -4
-mov ebx, ebp
-add ebx, -96
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -64
-mov [esp], ebx
-call Byte__On_Plus
-add esp, 8
-add esp, -1
-
-mov byte [esp], 1
-
-;Declaring [134
-;Adding return value 
-add esp, -1
-;Loading [134
-add esp, -4
-mov ebx, ebp
-add ebx, -98
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -97
-mov [esp], ebx
-call Byte__On_Plus
-add esp, 8
-add esp, -1
-
-mov byte [esp], 1
-
 ;Declaring [136
 ;Adding return value 
 add esp, -1
 ;Loading [136
 add esp, -4
 mov ebx, ebp
-add ebx, -100
+add ebx, -96
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -3502,6 +3565,44 @@ add esp, -1
 ;Loading [138
 add esp, -4
 mov ebx, ebp
+add ebx, -98
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -97
+mov [esp], ebx
+call Byte__On_Plus
+add esp, 8
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [140
+;Adding return value 
+add esp, -1
+;Loading [140
+add esp, -4
+mov ebx, ebp
+add ebx, -100
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Plus
+add esp, 8
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [142
+;Adding return value 
+add esp, -1
+;Loading [142
+add esp, -4
+mov ebx, ebp
 add ebx, -102
 mov [esp], ebx
 ;Loading a Byte object
@@ -3515,10 +3616,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [140
+;Declaring [144
 ;Adding return value 
 add esp, -1
-;Loading [140
+;Loading [144
 add esp, -4
 mov ebx, ebp
 add ebx, -104
@@ -3534,10 +3635,10 @@ add esp, -1
 
 mov byte [esp], 4
 
-;Declaring [142
+;Declaring [146
 ;Adding return value 
 add esp, -1
-;Loading [142
+;Loading [146
 add esp, -4
 mov ebx, ebp
 add ebx, -106
@@ -3553,10 +3654,10 @@ add esp, -1
 
 mov byte [esp], 5
 
-;Declaring [144
+;Declaring [148
 ;Adding return value 
 add esp, -1
-;Loading [144
+;Loading [148
 add esp, -4
 mov ebx, ebp
 add ebx, -108
@@ -3568,27 +3669,27 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [145
+;Loading [149
 add esp, -4
 mov ebx, ebp
 add ebx, -109
 mov [esp], ebx
-;Loading [143
+;Loading [147
 add esp, -4
 mov ebx, ebp
 add ebx, -107
 mov [esp], ebx
-;Loading [141
+;Loading [145
 add esp, -4
 mov ebx, ebp
 add ebx, -105
 mov [esp], ebx
-;Loading [135
+;Loading [139
 add esp, -4
 mov ebx, ebp
 add ebx, -99
 mov [esp], ebx
-;Loading [131
+;Loading [135
 add esp, -4
 mov ebx, ebp
 add ebx, -95
@@ -3613,10 +3714,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [146
+;Declaring [150
 ;Adding return value 
 add esp, -1
-;Loading [146
+;Loading [150
 add esp, -4
 mov ebx, ebp
 add ebx, -110
@@ -3628,21 +3729,42 @@ add ebx, -64
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [147
+;Loading [151
 add esp, -4
 mov ebx, ebp
 add ebx, -111
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call IndirectionOutput
+add esp, 4
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call IndirectionAddOutput
+add esp, 4
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call IndirectionAddTwoOutput
+add esp, 4
 add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [148
+;Declaring [152
 ;Adding return value 
 add esp, -1
-;Loading [148
+;Loading [152
 add esp, -4
 mov ebx, ebp
 add ebx, -112
@@ -3671,10 +3793,10 @@ add esp, -1
 
 mov byte [esp], 2
 
-;Declaring [150
+;Declaring [154
 ;Adding return value 
 add esp, -1
-;Loading [150
+;Loading [154
 add esp, -4
 mov ebx, ebp
 add ebx, -115
@@ -3686,7 +3808,7 @@ add ebx, -114
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [151
+;Loading [155
 add esp, -4
 mov ebx, ebp
 add ebx, -116
