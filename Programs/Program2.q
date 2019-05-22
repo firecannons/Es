@@ -326,6 +326,15 @@ action Main
     
     IndirectionAddTwoOutput ( S6 )
     
+    Byte T1 = S6
+    Byte T2 = 1
+    
+    OutputByte ( ( T1 ) )
+    
+    OutputByte ( ( S6 ) + T2 )
+    
+    IndirectionAddOutput ( ( S6 ) + T2 )
+    
     if S6 == 65
         Byte MeByte
         MeByte = MeByte + 2

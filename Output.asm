@@ -3757,17 +3757,113 @@ add ebx, -64
 mov [esp], ebx
 call IndirectionAddTwoOutput
 add esp, 4
+;Declaring T1
+add esp, -1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -112
+mov [esp], ebx
+call Byte__On_Create
+add esp, 4
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -112
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Declaring T2
+add esp, -1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -113
+mov [esp], ebx
+call Byte__On_Create
+add esp, 4
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [152
+;Loading [152
+add esp, -4
+mov ebx, ebp
+add ebx, -114
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -113
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading T1
+add esp, -4
+mov ebx, ebp
+add ebx, -112
+mov [esp], ebx
+call OutputByte
+add esp, 4
+;Adding return value 
+add esp, -1
+;Loading T2
+add esp, -4
+mov ebx, ebp
+add ebx, -113
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Plus
+add esp, 8
+;Loading [153
+add esp, -4
+mov ebx, ebp
+add ebx, -115
+mov [esp], ebx
+call OutputByte
+add esp, 4
+;Adding return value 
+add esp, -1
+;Loading T2
+add esp, -4
+mov ebx, ebp
+add ebx, -113
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call Byte__On_Plus
+add esp, 8
+;Loading [154
+add esp, -4
+mov ebx, ebp
+add ebx, -116
+mov [esp], ebx
+call IndirectionAddOutput
+add esp, 4
 add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [152
+;Declaring [155
 ;Adding return value 
 add esp, -1
-;Loading [152
+;Loading [155
 add esp, -4
 mov ebx, ebp
-add ebx, -112
+add ebx, -117
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -3785,7 +3881,7 @@ add esp, -1
 
 add esp, -4
 mov ebx, ebp
-add ebx, -114
+add ebx, -119
 mov [esp], ebx
 call Byte__On_Create
 add esp, 4
@@ -3793,30 +3889,30 @@ add esp, -1
 
 mov byte [esp], 2
 
-;Declaring [154
+;Declaring [157
 ;Adding return value 
 add esp, -1
-;Loading [154
+;Loading [157
 add esp, -4
 mov ebx, ebp
-add ebx, -115
+add ebx, -120
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
 mov ebx, ebp
-add ebx, -114
+add ebx, -119
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [155
+;Loading [158
 add esp, -4
 mov ebx, ebp
-add ebx, -116
+add ebx, -121
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
 mov ebx, ebp
-add ebx, -114
+add ebx, -119
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
@@ -3830,7 +3926,7 @@ add esp, -4
 
 add esp, -4
 mov ebx, ebp
-add ebx, -115
+add ebx, -120
 mov [esp], ebx
 call Pointer__On_Create
 add esp, 4
