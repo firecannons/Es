@@ -585,7 +585,12 @@ class Parser ( ) :
         else :
             CompilerIssue . OutputError ( 'Could not reduce \'' + WordArray [ Index + 1 ] . Name + '\'.' , self . EXIT_ON_ERROR , TokenObject )
         return OutputText , Index , WordArray
-
+    
+    def IsRightParenNext ( self , Index , WordArray ) :
+        Output = False
+        if WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
+            Output = True
+        return Output
 
     def Reduce ( self , Token , SavedWordArray , OutputText , IsInIf ) :
         WordIndex = 0
@@ -606,6 +611,8 @@ class Parser ( ) :
             print ('testng' , Token1 . Name , Token2 . Name , Token3 . Name , Token4 . Name , Token5 . Name )
             if self . IsParenAheadTwo ( WordIndex , SavedWordArray ) == True :
                 WordIndex = WordIndex + 1
+            elif self . IsRightParenNext ( WordIndex , SavedWordArray ) == True :
+                WordIndex = WordIndex - 2
             elif self . OpOneHighestPrecedence ( Token2 , Token4 ) :
                 OutputText , WordIndex ,  SavedWordArray = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
             else :
