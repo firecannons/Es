@@ -504,18 +504,24 @@ class Parser ( ) :
             print ( 'one' )
             if LeftOperand != None :
                 Found , CallingObject = self . CheckCurrentSTs ( LeftOperand )
+            if self . IsValidName ( WordArray [ Index ] . Name ) == True :
                 self . CheckIfObjectInTokenValid ( CallingObject )
-            if self . GetTypeTableFromNames ( self . GetObjectTypeName ( CallingObject ) , WordArray [ Index ] . Name ) :
-                self . ParameterArray = self . ParameterArray + [ WordArray [ Index + 2 ] ]
-                NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CallingObject , WordArray , Index )
-                OutputText = OutputText + NewOutputText
-                self . ParameterArray = [ ]
-                WordArray . pop ( Index )
-                WordArray . pop ( Index )
-                WordArray . pop ( Index )
-                WordArray . pop ( Index )
+                if self . GetTypeTableFromNames ( self . GetObjectTypeName ( CallingObject ) , WordArray [ Index ] . Name ) :
+                    self . ParameterArray = self . ParameterArray + [ WordArray [ Index + 2 ] ]
+                    NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CallingObject , WordArray , Index )
+                    OutputText = OutputText + NewOutputText
+                    self . ParameterArray = [ ]
+                    WordArray . pop ( Index )
+                    WordArray . pop ( Index )
+                    WordArray . pop ( Index )
+                    WordArray . pop ( Index )
+                else :
+                    CompilerIssue . OutputError ( 'The class \'' + Object . Type . Name + '\' does not have a function \'' + WordArray [ Index + 1 ] . Name + '\'.' ,
+                        self . EXIT_ON_ERROR , WordArray [ Index ] )
             else :
-                CompilerIssue . OutputError ( 'Function \'' + CurrentClass + ':' + WordArray [ Index ] + '\' does not exist.' , self . EXIT_ON_ERROR , TokenObject )
+                print ( 'wers' )
+                self . DropParens ( Index , WordArray )
+                Index = Index + 1
         else :
             Index = Index + 2
         return Index , WordArray , LeftOperand , OutputText
@@ -544,12 +550,32 @@ class Parser ( ) :
                 CompilerIssue . OutputError ( 'The class \'' + Object . Type . Name + '\' does not have a function \'' + WordArray [ Index + 1 ] . Name + '\'.' ,
                     self . EXIT_ON_ERROR , WordArray [ Index ] )
         return Index , WordArray , CurrentClass , OutputText
+    
+    def CanDropParens ( self , Index , WordArray ) :
+        Output = False
+        if WordArray [ Index + 3 ] == self . OPERATORS [ 'RIGHT_PAREN' ] and WordArray [ Index + 1 ] == self . OPERATORS [ 'LEFT_PAREN' ] :
+            Output = True
+        return Output
+    
+    def DropParens ( self , Index , WordArray ) :
+        WordArray . pop ( Index + 3 )
+        WordArray . pop ( Index + 1 )
+        Index = Index + 1
+    
+    def IsParenAheadTwo ( self , Index , WordArray ) :
+        Output = False
+        if len ( WordArray ) > Index + 2 :
+            if WordArray [ Index + 2 ] . Name == self . OPERATORS [ 'LEFT_PAREN' ] :
+                Output = True
+        return Output
 
     def DoOperation ( self , Index , WordArray , CurrentClass , OutputText ) :
-        if WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'COLON' ] :
-            Index , WordArray , CurrentClass , OutputText = self . DoColonOperation ( Index , WordArray , CurrentClass , OutputText )
+        if self . IsParenAheadTwo ( Index , WordArray ) == True :
+            Index = Index + 1
         elif WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'LEFT_PAREN' ] :
             Index , WordArray , CurrentClass , OutputText = self . DoLeftParenOperation ( Index , WordArray , CurrentClass , OutputText )
+        elif WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'COLON' ] :
+            Index , WordArray , CurrentClass , OutputText = self . DoColonOperation ( Index , WordArray , CurrentClass , OutputText )
         elif WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
             Index = Index - 2
         elif WordArray [ Index + 1 ] . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
@@ -578,7 +604,9 @@ class Parser ( ) :
             if len ( SavedWordArray ) - WordIndex > 4 :
                 Token5 = SavedWordArray [ WordIndex + 4 ]
             print ('testng' , Token1 . Name , Token2 . Name , Token3 . Name , Token4 . Name , Token5 . Name )
-            if self . OpOneHighestPrecedence ( Token2 , Token4 ) :
+            if self . IsParenAheadTwo ( WordIndex , SavedWordArray ) == True :
+                WordIndex = WordIndex + 1
+            elif self . OpOneHighestPrecedence ( Token2 , Token4 ) :
                 OutputText , WordIndex ,  SavedWordArray = self . DoOperation ( WordIndex , SavedWordArray , CurrentClass , OutputText )
             else :
                 WordIndex = WordIndex + 2

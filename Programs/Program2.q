@@ -302,6 +302,12 @@ action Main
     OutputByte3 ( S6 , S6 + 1 , S6 + 2 )
     OutputByte5 ( S6 + 1 , S6 + 1 + 1 , S6 + 1 + 1 + 1 , S6 + 4 , S6 + 5 )
     
+    OutputByte ( ( S6 ) )
+    
+    OutputByte ( ( ( ( S6 ) ) ) )
+    
+    OutputByte ( ( ( ( S6 ) ) + 1 ) )
+    
     if S6 == 65
         Byte MeByte
         MeByte = MeByte + 2

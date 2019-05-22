@@ -3595,6 +3595,20 @@ add ebx, -95
 mov [esp], ebx
 call OutputByte5
 add esp, 20
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call OutputByte
+add esp, 4
+;Loading S6
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+call OutputByte
+add esp, 4
 add esp, -1
 
 mov byte [esp], 65
