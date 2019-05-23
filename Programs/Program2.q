@@ -341,6 +341,24 @@ action Main
     c : B2 = 4
     c : B1 = c : B1 + c : B2
     OutputByte ( c : B1 )
+    OutputByte ( c : B1 )
+    OutputByte ( c : B1 )
+    OutputByte ( c : B1 )
+    OutputByte ( c : B1 )
+    OutputByte ( c : B1 )
+    OutputByte ( c : B1 )
+    OutputByte ( c : B1 )
+    OutputByte ( c : B1 )
+    c : B1 = c : B1 + c : B2
+    OutputByte ( c : B1 )
+    
+    CapTest2 ct
+    ct : C1 : B1 = c : B1
+    OutputByte ( ct : C1 : B1 )
+    ct : C1 : B1 = ct : C1 : B1 + c : B2
+    OutputByte ( ct : C1 : B1 )
+    ct : C2 : B2 = ct : C1 : B1 + c : B2
+    OutputByte ( ct : C2 : B2 )
     
     if S6 == 65
         Byte MeByte

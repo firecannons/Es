@@ -779,13 +779,16 @@ class Parser ( ) :
         elif self . SavedType . Name in self . TypeTable :
             if Token . Name not in self . GetCurrentST ( ) . Symbols :
                 NewSymbol = MySymbol ( Token . Name , self . TypeTable [ self . SavedType . Name ] )
-                self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType . Name ] . Size
-                NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
                 if self . CurrentClass != None :
                     self . TypeTable [ self . CurrentClass . Name ] . Size = self . TypeTable [ self . CurrentClass . Name ] . Size +\
                         self . TypeTable [ self . SavedType . Name ] . Size
+                    NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
                     self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token . Name ] = NewSymbol
+                    self . CurrentSTOffset = self . CurrentSTOffset + self . TypeTable [ self . SavedType . Name ] . Size
+                else :
+                    self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType . Name ] . Size
+                    NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+                    self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
                 OutputText = OutputText + ';Declaring {}\n' . format ( Token . Name )
                 OutputText = self . CalcDeclarationOutput ( self . SavedType . Name , OutputText )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )

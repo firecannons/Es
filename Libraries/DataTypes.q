@@ -445,3 +445,11 @@ class CapTest
     action on create
     end
 end
+
+class CapTest2
+    CapTest C1
+    CapTest C2
+    
+    action on create
+    end
+end
