@@ -220,13 +220,6 @@ class Integer size 4
         end
 end
 
-class Pointer
-    Integer Position
-    
-    action on create
-    end
-end
-
 class Byte size 1
         
         action asm on create
@@ -436,4 +429,19 @@ class Byte size 1
             mov byte [ebx], al
             
         end
+end
+
+class Pointer
+    Integer Position
+    
+    action on create
+    end
+end
+
+class CapTest
+    Byte B1
+    Byte B2
+    
+    action on create
+    end
 end

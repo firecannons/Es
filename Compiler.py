@@ -500,13 +500,21 @@ class Parser ( ) :
         if WordArray [ Index ] in self . CurrentTypeTable ( ) :
             IsFunction = True
         if IsSymbol == True or IsFunction == True :
-            if WordArray [ Index + 2 ] in self . TypeTable [ CurrentClass ] . InnerTypes :
-                NewType = self . TypeTable [ CurrentClass ] . InnerTypes [ WordArray [ Index + 2 ] ] . Type
-                CurrentClass = self . TypeTable [ NewType ]
+            if WordArray [ Index + 2 ] . Name in self . TypeTable [ CurrentClass . Name ] . InnerTypes :
+                ClassTwo = self . TypeTable [ CurrentClass . Name ] . InnerTypes [ WordArray [ Index + 2 ] . Name ]
+                NewType = ClassTwo . Type
+                CurrentClass = self . TypeTable [ NewType . Name ]
                 WordArray . pop ( Index )
                 WordArray . pop ( Index )
+                NewName = self.RETURN_TEMP_LETTER + str(self.ReturnTempIndex)
+                NewSymbol = MySymbol(NewName, NewType)
+                print ( self . TypeTable [ CurrentClass . Name ] . InnerTypes , CurrentClass , CurrentObject , NewType . Name , CurrentObject.Offset , ClassTwo.Offset , 'sdaf' )
+                NewSymbol.Offset = deepcopy(CurrentObject.Offset) + deepcopy(ClassTwo.Offset)
+                self.GetCurrentST().Symbols[NewName] = NewSymbol
+                self.ReturnTempIndex = self.ReturnTempIndex + 1
+                WordArray[Index] = MyToken ( NewName , WordArray [ Index - 1 ] . LineNumber , WordArray [ Index - 1 ] . FileName )
             else :
-                CompilerIssue . OutputError ( 'Class \'' + CurrentClass + '\' has no variable \'' + WordArray [ Index + 2 ] + '\'.' , self . EXIT_ON_ERROR , TokenObject )
+                CompilerIssue . OutputError ( 'Class \'' + CurrentClass . Name + '\' has no variable \'' + WordArray [ Index + 2 ] . Name + '\'.' , self . EXIT_ON_ERROR , WordArray [ Index ] )
         elif IsFound == False :
             CompilerIssue . OutputError ( 'Unknown ' + Operator + ' is not an allowed operator' , self . EXIT_ON_ERROR , TokenObject )
         return Index , WordArray , CurrentClass , OutputText
@@ -548,6 +556,7 @@ class Parser ( ) :
         RightOperand = WordArray [ Index + 2 ]
         self . CheckIfObjectInTokenValid ( RightOperand )
         Found , Object = self . CheckCurrentSTs ( WordArray [ Index ] )
+        print ( Found , Object , WordArray [ Index ] . Name , len ( self . STStack ) , 'asdfwe' )
         if Found == False :
             CompilerIssue . OutputError ( 'No variable named \'' + WordArray [ Index ] . Name + '\' found in current scope.' , self . EXIT_ON_ERROR , WordArray [ Index ] )
         else :
@@ -765,28 +774,27 @@ class Parser ( ) :
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessDeclaringVariable ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        if self . CurrentFunctionType == self . FUNCTION_TYPES [ 'NORMAL' ] :
-            if Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
-                self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
-            elif self . SavedType . Name in self . TypeTable :
-                if Token . Name not in self . GetCurrentST ( ) . Symbols :
-                    NewSymbol = MySymbol ( Token . Name , self . TypeTable [ self . SavedType . Name ] )
-                    self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType . Name ] . Size
-                    NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                    self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
-                    if self . CurrentClass != None :
-                        self . TypeTable [ self . CurrentClass . Name ] . Size = self . TypeTable [ self . CurrentClass . Name ] . Size +\
+        if Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
+            self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
+        elif self . SavedType . Name in self . TypeTable :
+            if Token . Name not in self . GetCurrentST ( ) . Symbols :
+                NewSymbol = MySymbol ( Token . Name , self . TypeTable [ self . SavedType . Name ] )
+                self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType . Name ] . Size
+                NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+                self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
+                if self . CurrentClass != None :
+                    self . TypeTable [ self . CurrentClass . Name ] . Size = self . TypeTable [ self . CurrentClass . Name ] . Size +\
                         self . TypeTable [ self . SavedType . Name ] . Size
-                        self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token . Name ] = NewSymbol
-                    OutputText = OutputText + ';Declaring {}\n' . format ( Token . Name )
-                    OutputText = self . CalcDeclarationOutput ( self . SavedType . Name , OutputText )
-                    LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
-                    OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
-                    self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
-                else :
-                    CompilerIssue . OutputError ( 'A variable named ' + Token + ' has already been declared' , self . EXIT_ON_ERROR )
+                    self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token . Name ] = NewSymbol
+                OutputText = OutputText + ';Declaring {}\n' . format ( Token . Name )
+                OutputText = self . CalcDeclarationOutput ( self . SavedType . Name , OutputText )
+                LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
+                OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
+                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
             else :
-                CompilerIssue . OutputError ( 'The type \'' + self . SavedType . Name + '\' is not currently a declared type and is not template start ' , self . EXIT_ON_ERROR , Token )
+                CompilerIssue . OutputError ( 'A variable named ' + Token + ' has already been declared' , self . EXIT_ON_ERROR )
+        else :
+            CompilerIssue . OutputError ( 'The type \'' + self . SavedType . Name + '\' is not currently a declared type and is not template start ' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessAfterDeclaringVariable ( self , Token , SavedWordArray , WordIndex , OutputText ) :

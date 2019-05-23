@@ -335,6 +335,13 @@ action Main
     
     IndirectionAddOutput ( ( S6 ) + T2 )
     
+    CapTest c
+    c : B1 = 65
+    OutputByte ( c : B1 )
+    c : B2 = 4
+    c : B1 = c : B1 + c : B2
+    OutputByte ( c : B1 )
+    
     if S6 == 65
         Byte MeByte
         MeByte = MeByte + 2
