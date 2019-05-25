@@ -83,6 +83,19 @@ action asm OutputByte2 ( Byte L , Byte L2 )
     
 end
 
+class ClassScopeTest
+    Byte B2
+    
+    action on create
+        B2 = 65
+    end
+    
+    action RunTest
+        Byte B1 = 5
+        B2 = 66
+    end
+end
+
 action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
     ; load a pointer to the byte in ecx
     mov ecx, ebp
@@ -359,6 +372,12 @@ action Main
     OutputByte ( ct : C1 : B1 )
     ct : C2 : B2 = ct : C1 : B1 + c : B2
     OutputByte ( ct : C2 : B2 )
+    
+    ClassScopeTest CST
+    
+    OutputByte ( CST : B2 )
+    OutputByte ( CST : B2 )
+    
     
     if S6 == 65
         Byte MeByte

@@ -556,6 +556,12 @@ class Parser ( ) :
         RightOperand = WordArray [ Index + 2 ]
         self . CheckIfObjectInTokenValid ( RightOperand )
         Found , Object = self . CheckCurrentSTs ( WordArray [ Index ] )
+        for i in self . STStack :
+            ar = []
+            for i2 in i . Symbols :
+                ar . append ( i2  )
+            print ( ar )
+            
         print ( Found , Object , WordArray [ Index ] . Name , len ( self . STStack ) , 'asdfwe' )
         if Found == False :
             CompilerIssue . OutputError ( 'No variable named \'' + WordArray [ Index ] . Name + '\' found in current scope.' , self . EXIT_ON_ERROR , WordArray [ Index ] )
@@ -779,12 +785,13 @@ class Parser ( ) :
         elif self . SavedType . Name in self . TypeTable :
             if Token . Name not in self . GetCurrentST ( ) . Symbols :
                 NewSymbol = MySymbol ( Token . Name , self . TypeTable [ self . SavedType . Name ] )
-                if self . CurrentClass != None :
+                if self . CurrentClass != None and self . CurrentFunction == None :
                     self . TypeTable [ self . CurrentClass . Name ] . Size = self . TypeTable [ self . CurrentClass . Name ] . Size +\
                         self . TypeTable [ self . SavedType . Name ] . Size
                     NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
                     self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token . Name ] = NewSymbol
                     self . CurrentSTOffset = self . CurrentSTOffset + self . TypeTable [ self . SavedType . Name ] . Size
+                    self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
                 else :
                     self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType . Name ] . Size
                     NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
@@ -965,7 +972,7 @@ class Parser ( ) :
             else :
                 CompilerIssue . OutputError ( 'Unknown type \'' + Token . Name + '\'' , self . EXIT_ON_ERROR , Token )
         else :
-            CompilerIssue . OutputError ( 'Expected variable or right paren in action declaration' , self . EXIT_ON_ERROR , TokenObject )
+            CompilerIssue . OutputError ( 'Expected variable or right paren in action declaration' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessActionParamName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
