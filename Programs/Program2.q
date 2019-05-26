@@ -85,14 +85,15 @@ end
 
 class ClassScopeTest
     Byte B2
+    Byte B3
     
     action on create
-        B2 = 65
+        Me : B2 = 65
     end
     
-    action RunTest
+    action RunTest ( Byte B3 )
         Byte B1 = 5
-        B2 = 66
+        Me : B2 = 66
     end
 end
 
@@ -364,19 +365,25 @@ action Main
     OutputByte ( c : B1 )
     c : B1 = c : B1 + c : B2
     OutputByte ( c : B1 )
+    OutputByte ( c : B1 )
     
     CapTest2 ct
     ct : C1 : B1 = c : B1
+    OutputByte ( c : B1 )
     OutputByte ( ct : C1 : B1 )
     ct : C1 : B1 = ct : C1 : B1 + c : B2
     OutputByte ( ct : C1 : B1 )
+    OutputByte ( c : B1 )
     ct : C2 : B2 = ct : C1 : B1 + c : B2
     OutputByte ( ct : C2 : B2 )
+    OutputByte ( ct : C2 : B2 )
+    OutputByte ( c : B1 )
+    
     
     ClassScopeTest CST
+    OutputByte ( CST : B2 )
+    OutputByte ( c : B1 )
     
-    OutputByte ( CST : B2 )
-    OutputByte ( CST : B2 )
     
     
     if S6 == 65
