@@ -529,9 +529,10 @@ class Parser ( ) :
                 NewSymbol = MySymbol(NewName, NewType)
                 LeftObjectOffset = 0
                 if CurrentObject . IsReference == True :
-                    OutputText = OutputText + self.ASM_TEXT['DEFERENCE'].format( CurrentObject . Offset , ObjectTwo . Offset )
+                    OutputText = OutputText + self.ASM_TEXT['DEREFERENCE'].format( CurrentObject . Offset , ObjectTwo . Offset )
                     self.CurrentSTOffset = self.CurrentSTOffset + - self . POINTER_SIZE
                     LeftObjectOffset = self.CurrentSTOffset
+                    NewSymbol . IsReference = True
                 else :
                     LeftObjectOffset = deepcopy(CurrentObject.Offset) + deepcopy(ObjectTwo.Offset)
                 NewSymbol.Offset = LeftObjectOffset

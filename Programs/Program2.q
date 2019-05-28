@@ -88,7 +88,7 @@ class ClassScopeTest
     Byte B3
     
     action on create
-        Me : B2 = 65
+        Me : B2 = 66
     end
     
     action RunTest ( Byte B3 )
@@ -383,6 +383,7 @@ action Main
     ClassScopeTest CST
     OutputByte ( CST : B2 )
     OutputByte ( c : B1 )
+    OutputByte ( 66 )
     
     
     
