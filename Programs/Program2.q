@@ -97,6 +97,14 @@ class ClassScopeTest
     end
 end
 
+class ClassScopeTestTwo
+    CapTest C1
+    
+    action on create
+        Me : C1 : B2 = 67
+    end
+end
+
 action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
     ; load a pointer to the byte in ecx
     mov ecx, ebp
@@ -390,6 +398,8 @@ action Main
     ClassScopeTest CST2
     OutputByte ( CST2:B2 )
     
+    ClassScopeTestTwo CST2_1
+    OutputByte ( CST2_1:C1:B2 )
     
     
     if S6 == 65

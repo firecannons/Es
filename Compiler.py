@@ -855,7 +855,7 @@ class Parser ( ) :
                     OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
             else :
-                CompilerIssue . OutputError ( 'A variable named ' + Token + ' has already been declared' , self . EXIT_ON_ERROR )
+                CompilerIssue . OutputError ( 'A variable named ' + Token . Name + ' has already been declared' , self . EXIT_ON_ERROR , Token )
         else :
             CompilerIssue . OutputError ( 'The type \'' + self . SavedType . Name + '\' is not currently a declared type and is not template start ' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
@@ -1346,7 +1346,7 @@ class Parser ( ) :
 
 class Lexer ( ) :
     WHITE_SPACE_LETTERS = " \t\r"
-    MEANINGFUL_LETTERS = '()[]<>,.\\/'
+    VARIABLE_SPECIAL_LETTERS = '_'
     
     EMPTY_ARRAY = [ ]
     
@@ -1378,7 +1378,7 @@ class Lexer ( ) :
     FIND_NOT_FOUND = NEGATIVE_ONE
     
     TOKEN_KINDS = {
-        'ALPHANUMERIC' : 0 ,
+        'VARIABLE_LETTERS' : 0 ,
         'SPECIAL' : 1
     }
     
@@ -1486,24 +1486,18 @@ class Lexer ( ) :
             Output = True
         return Output
     
-    def DoLetterIsMeaningfulInSetup ( self ,
-        CurrentLetter ) :
-        if self . IsSavedWordExisting ( ) == True and self . SavedWord . isalnum ( ) :
-            self . ProcessAppendWord ( self . SavedWord )
-        self . AddCharacterToSavedWord ( CurrentLetter )
-    
-    def IsLetterAlphaNumeric ( self , CurrentLetter ) :
-        Output = False
-        if CurrentLetter . isalnum ( ) == True :
-            Output = True
-        return Output
-    
     def EraseSavedWord ( self ) :
         self . SavedWord = self . SAVED_WORD_DEFAULT
     
     def IsLetterNewLine ( self , Letter ) :
         Output = False
         if Letter == self . NEWLINE :
+            Output = True
+        return Output
+    
+    def IsVariableAllowedLetter ( self , CurrentLetter ) :
+        Output = False
+        if CurrentLetter . isalnum ( ) == True or CurrentLetter in self . VARIABLE_SPECIAL_LETTERS :
             Output = True
         return Output
 	
@@ -1514,15 +1508,15 @@ class Lexer ( ) :
         self . ProcessAppendWord ( self . SavedWord )
     
     def SetCurrentTokenKind ( self , CurrentLetter ) :
-        self . CurrentTokenKind = self . TOKEN_KINDS [ 'ALPHANUMERIC' ]
-        if CurrentLetter . isalnum ( ) == False :
+        self . CurrentTokenKind = self . TOKEN_KINDS [ 'VARIABLE_LETTERS' ]
+        if self . IsVariableAllowedLetter ( CurrentLetter ) == False :
             self . CurrentTokenKind = self . TOKEN_KINDS [ 'SPECIAL' ]
     
     def IsOfSameTokenKindAsSavedWord ( self , CurrentLetter ) :
         Output = True
-        IsAlphaNumeric = CurrentLetter . isalnum ( )
-        if self . CurrentTokenKind == self . TOKEN_KINDS [ 'ALPHANUMERIC' ] and IsAlphaNumeric == False\
-            or self . CurrentTokenKind == self . TOKEN_KINDS [ 'SPECIAL' ] and IsAlphaNumeric == True :
+        IsVariableLetter = self . IsVariableAllowedLetter ( CurrentLetter )
+        if self . CurrentTokenKind == self . TOKEN_KINDS [ 'VARIABLE_LETTERS' ] and IsVariableLetter == False\
+            or self . CurrentTokenKind == self . TOKEN_KINDS [ 'SPECIAL' ] and IsVariableLetter == True :
             Output = False
         return Output
     
