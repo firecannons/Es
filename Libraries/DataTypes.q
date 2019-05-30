@@ -1,5 +1,5 @@
 // comment test
-/* comment test 2 */
+/* comment test > 2 */
 /* comment
 test 3*/
 class Bool size 1

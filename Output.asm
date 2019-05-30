@@ -873,7 +873,7 @@ mov ebx, [ebx]
 mov [esp], ebx
 add esp, -1
 
-mov byte [esp], 66
+mov byte [esp], 65
 
 ;Declaring [5 -5
 ;Loading [5 -5
@@ -4295,7 +4295,26 @@ add ebx, -130
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;Loading S6 -130
+add esp, -4
+mov ebx, ebp
+add ebx, -64
+mov [esp], ebx
+;Loading a ClassScopeTest object
+add esp, -4
+mov ebx, ebp
+add ebx, -130
+mov [esp], ebx
+call ClassScopeTest__RunTest
+add esp, 8
 ;Loading [211 -130
+add esp, -4
+mov ebx, ebp
+add ebx, -130
+mov [esp], ebx
+call OutputByte
+add esp, 4
+;Loading [212 -130
 add esp, -4
 mov ebx, ebp
 add ebx, -118
@@ -4306,11 +4325,27 @@ add esp, -1
 
 mov byte [esp], 66
 
-;Declaring [212 -131
-;Loading [212 -131
+;Declaring [213 -131
+;Loading [213 -131
 add esp, -4
 mov ebx, ebp
 add ebx, -131
+mov [esp], ebx
+call OutputByte
+add esp, 4
+;Declaring CST2 -133
+add esp, -2
+
+add esp, -4
+mov ebx, ebp
+add ebx, -133
+mov [esp], ebx
+call ClassScopeTest__On_Create
+add esp, 4
+;Loading [214 -133
+add esp, -4
+mov ebx, ebp
+add ebx, -133
 mov [esp], ebx
 call OutputByte
 add esp, 4
@@ -4318,13 +4353,13 @@ add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [213 -132
+;Declaring [215 -134
 ;Adding return value 
 add esp, -1
-;Loading [213 -133
+;Loading [215 -135
 add esp, -4
 mov ebx, ebp
-add ebx, -132
+add ebx, -134
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -4337,12 +4372,12 @@ mov byte cl, [esp]
 test cl, cl
 je S24
 
-;Declaring MeByte -134
+;Declaring MeByte -136
 add esp, -1
 
 add esp, -4
 mov ebx, ebp
-add ebx, -134
+add ebx, -136
 mov [esp], ebx
 call Byte__On_Create
 add esp, 4
@@ -4350,30 +4385,30 @@ add esp, -1
 
 mov byte [esp], 2
 
-;Declaring [215 -135
+;Declaring [217 -137
 ;Adding return value 
 add esp, -1
-;Loading [215 -136
+;Loading [217 -138
 add esp, -4
 mov ebx, ebp
-add ebx, -135
+add ebx, -137
 mov [esp], ebx
 ;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -134
-mov [esp], ebx
-call Byte__On_Plus
-add esp, 8
-;Loading [216 -136
 add esp, -4
 mov ebx, ebp
 add ebx, -136
 mov [esp], ebx
+call Byte__On_Plus
+add esp, 8
+;Loading [218 -138
+add esp, -4
+mov ebx, ebp
+add ebx, -138
+mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
 mov ebx, ebp
-add ebx, -134
+add ebx, -136
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
@@ -4382,12 +4417,12 @@ jmp S25
 S24:
 add esp, 2
 S25:
-;Declaring joe -135
+;Declaring joe -137
 add esp, -4
 
 add esp, -4
 mov ebx, ebp
-add ebx, -135
+add ebx, -137
 mov [esp], ebx
 call Pointer__On_Create
 add esp, 4

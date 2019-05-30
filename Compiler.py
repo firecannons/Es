@@ -1375,16 +1375,21 @@ class Lexer ( ) :
     ACTION_TEXT = 'action'
     END_TEXT = 'end'
     
-    
     FIND_NOT_FOUND = NEGATIVE_ONE
     
+    TOKEN_KINDS = {
+        'ALPHANUMERIC' : 0 ,
+        'SPECIAL' : 1
+    }
+    
     def __init__ ( self ) :
-        self . SavedWord = self . SAVED_WORD_DEFAULT
+        self . SavedWord = deepcopy ( self . SAVED_WORD_DEFAULT )
         self . SavedWordArray = deepcopy ( self . SAVED_WORD_ARRAY_DEFAULT )
         self . State = self . MAIN_STATES [ 'NORMAL' ]
         self . StartingQuotation = self . QUOTATIONS [ 0 ]
         self . LineNumber = 1
         self . FileName = ''
+        self . CurrentTokenKind = None
     
     def AppendWordToSavedArray ( self , Text ) :
         self . SavedWordArray . append ( MyToken ( Text , self . LineNumber , self . FileName ) ) 
@@ -1487,6 +1492,12 @@ class Lexer ( ) :
             self . ProcessAppendWord ( self . SavedWord )
         self . AddCharacterToSavedWord ( CurrentLetter )
     
+    def IsLetterAlphaNumeric ( self , CurrentLetter ) :
+        Output = False
+        if CurrentLetter . isalnum ( ) == True :
+            Output = True
+        return Output
+    
     def EraseSavedWord ( self ) :
         self . SavedWord = self . SAVED_WORD_DEFAULT
     
@@ -1501,18 +1512,40 @@ class Lexer ( ) :
             self . ProcessAppendWord ( self . SavedWord )
         self . AddCharacterToSavedWord ( Letter )
         self . ProcessAppendWord ( self . SavedWord )
+    
+    def SetCurrentTokenKind ( self , CurrentLetter ) :
+        self . CurrentTokenKind = self . TOKEN_KINDS [ 'ALPHANUMERIC' ]
+        if CurrentLetter . isalnum ( ) == False :
+            self . CurrentTokenKind = self . TOKEN_KINDS [ 'SPECIAL' ]
+    
+    def IsOfSameTokenKindAsSavedWord ( self , CurrentLetter ) :
+        Output = True
+        IsAlphaNumeric = CurrentLetter . isalnum ( )
+        if self . CurrentTokenKind == self . TOKEN_KINDS [ 'ALPHANUMERIC' ] and IsAlphaNumeric == False\
+            or self . CurrentTokenKind == self . TOKEN_KINDS [ 'SPECIAL' ] and IsAlphaNumeric == True :
+            Output = False
+        return Output
+    
+    def DoDefaultIfSavedWordExists ( self , CurrentLetter ) :
+        IsOfSameTokenKind = self . IsOfSameTokenKindAsSavedWord ( CurrentLetter )
+        if IsOfSameTokenKind == False :
+            self . ProcessAppendWord ( self . SavedWord )
+    
+    def DoDefault ( self , CurrentLetter ) :
+        if self . IsSavedWordExisting ( ) == True :
+            self . DoDefaultIfSavedWordExists ( CurrentLetter )
+        self . AddCharacterToSavedWord ( CurrentLetter )
+        self . SetCurrentTokenKind ( CurrentLetter )
 
     def ProcessLetterInSetup ( self ,
         CurrentLetter ) :
         if self . IsLetterWhiteSpace ( CurrentLetter ) == True :
             self . DoLetterIsWhiteSpaceInSetup ( CurrentLetter )
-        elif self . IsLetterMeaningful ( CurrentLetter ) :
-            self . DoLetterIsMeaningfulInSetup ( CurrentLetter )
         elif self . IsLetterNewLine ( CurrentLetter ) :
             self . DoLetterIsNewLine ( CurrentLetter )
             self . LineNumber = self . LineNumber + 1
         else :
-            self . AddCharacterToSavedWord ( CurrentLetter )
+            self . DoDefault ( CurrentLetter )
     
     def MakeTokens ( self , InputText , FileName ) :
         self . FileName = FileName
