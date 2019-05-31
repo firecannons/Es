@@ -27,9 +27,11 @@ class MySymbol ( ) :
         self . Name = Name
         self . Type = Type
         self . Offset = 0
+        self . DereferenceOffset = 0
         self . IsFunction = False
         self . Templates = { }
         self . IsReference = False
+        self . IsDereferenced = False
 
 class Function ( ) :
     def __init__ ( self , Name ) :
@@ -212,21 +214,19 @@ class Parser ( ) :
     
     ASM_ROUTINE_LETTER = 'S'
     
+    ZERO_SHIFT = 0
+    
     ASM_TEXT = {
         'LOAD_TEXT' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
             'mov ebx, ebp\n' +\
             'add ebx, {}\n' +\
             'mov [esp], ebx\n' ,
-        'LOAD_TEXT_REFERENCE' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
+        'LOAD_INTO_EBX' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
             'mov ebx, ebp\n' +\
-            'add ebx, {}\n' +\
-            'mov ebx, [ebx]\n' +\
-            'mov [esp], ebx\n' ,
-        'DEREFERENCE' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
-            'mov ebx, ebp\n' +\
-            'add ebx, {}\n' +\
-            'mov ebx, [ebx]\n' +\
-            'mov [esp], ebx\n' ,
+            'add ebx, {}\n' ,
+        'DEREFERENCE_EBX' : 'mov ebx, [ebx]\n' ,
+        'SHIFT_EBX' : 'add ebx, {}\n' ,
+        'INSERT_EBX' : 'mov [esp], ebx\n' ,
         'ALLOC_BYTE' : 'add esp, -1\n' ,
         'SET_CURRENT_BYTE' : 'mov byte [esp], {}\n' ,
         'DEFAULT_CREATE' : 'add esp, {}\n' +\
@@ -419,16 +419,32 @@ class Parser ( ) :
         WordArray[Index] = MyToken ( NewName , WordArray [ Index - 1 ] . LineNumber , WordArray [ Index - 1 ] . FileName )
         return WordArray , Index , OutputText
     
+    def LoadReference ( self , CurrentSymbol ) :
+        OutputText = ''
+        OutputText = OutputText + self.ASM_TEXT['LOAD_INTO_EBX'].format(CurrentSymbol.Offset)
+        if CurrentSymbol . IsDereferenced == False :
+            OutputText = OutputText + self.ASM_TEXT['DEREFERENCE_EBX']
+        if CurrentSymbol . DereferenceOffset != self . ZERO_SHIFT :
+            OutputText = OutputText + self.ASM_TEXT['SHIFT_EBX'].format(CurrentSymbol . DereferenceOffset)
+        OutputText = OutputText + self.ASM_TEXT['INSERT_EBX']
+        OutputText = OutputText + '; loading a reference!\n' 
+        return OutputText
+    
+    def LoadValue ( self , CurrentSymbol ) :
+        OutputText = ''
+        OutputText = OutputText + self.ASM_TEXT['LOAD_INTO_EBX'].format(CurrentSymbol.Offset)
+        OutputText = OutputText + self.ASM_TEXT['INSERT_EBX']
+        return OutputText
+    
     def LoadParameter ( self , CurrentOperand , OutputText ) :
         OperandOffset = 0
         self . CheckIfObjectInTokenValid ( CurrentOperand )
         Found, CurrentSymbol = self.CheckCurrentSTs(CurrentOperand)
         OperandOffset = CurrentSymbol.Offset
         if CurrentSymbol . IsReference == False :
-            OutputText = OutputText + self.ASM_TEXT['LOAD_TEXT'].format(OperandOffset)
+            OutputText = OutputText + self . LoadValue ( CurrentSymbol )
         else :
-            OutputText = OutputText + self.ASM_TEXT['LOAD_TEXT_REFERENCE'].format(OperandOffset)
-            OutputText = OutputText + '; loading a reference!\n' 
+            OutputText = OutputText + self . LoadReference ( CurrentSymbol )
         self.CurrentSTOffset = self.CurrentSTOffset + -self.POINTER_SIZE
         return OutputText
 
@@ -529,13 +545,15 @@ class Parser ( ) :
                 NewSymbol = MySymbol(NewName, NewType)
                 LeftObjectOffset = 0
                 if CurrentObject . IsReference == True :
-                    OutputText = OutputText + self.ASM_TEXT['DEREFERENCE'].format( CurrentObject . Offset , ObjectTwo . Offset )
-                    self.CurrentSTOffset = self.CurrentSTOffset + - self . POINTER_SIZE
-                    LeftObjectOffset = self.CurrentSTOffset
+                    if CurrentObject . IsDereferenced == False :
+                        OutputText = OutputText + self . LoadReference ( CurrentObject )
+                        self.CurrentSTOffset = self.CurrentSTOffset + - self . POINTER_SIZE
+                        NewSymbol.Offset = self.CurrentSTOffset
+                        
                     NewSymbol . IsReference = True
+                    NewSymbol . DereferenceOffset = CurrentObject . DereferenceOffset + ObjectTwo.Offset
                 else :
                     LeftObjectOffset = deepcopy(CurrentObject.Offset) + deepcopy(ObjectTwo.Offset)
-                NewSymbol.Offset = LeftObjectOffset
                 
                 
                 
