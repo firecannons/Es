@@ -4630,17 +4630,37 @@ mov [esp], ebx
 ; loading a reference!BR1
 call OutputByte
 add esp, 4
+;Declaring BR2 -146
+add esp, -4
+
+mov ebx, ebp
+add ebx, -142
+mov ebx, [ebx]
+mov ecx, ebx
+mov ebx, ebp
+add ebx, -146
+mov [ebx], ecx
+;Loading BR2 -146
+add esp, -4
+mov ebx, ebp
+add ebx, -146
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!BR2
+call OutputByte
+add esp, 4
 add esp, -1
 
 mov byte [esp], 65
 
-;Declaring [238 -143
+;Declaring [238 -147
 ;Adding return value 
 add esp, -1
-;Loading [238 -144
+;Loading [238 -148
 add esp, -4
 mov ebx, ebp
-add ebx, -143
+add ebx, -147
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
@@ -4653,12 +4673,12 @@ mov byte cl, [esp]
 test cl, cl
 je S24
 
-;Declaring MeByte -145
+;Declaring MeByte -149
 add esp, -1
 
 add esp, -4
 mov ebx, ebp
-add ebx, -145
+add ebx, -149
 mov [esp], ebx
 call Byte__On_Create
 add esp, 4
@@ -4666,30 +4686,30 @@ add esp, -1
 
 mov byte [esp], 2
 
-;Declaring [240 -146
+;Declaring [240 -150
 ;Adding return value 
 add esp, -1
-;Loading [240 -147
+;Loading [240 -151
 add esp, -4
 mov ebx, ebp
-add ebx, -146
+add ebx, -150
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
 mov ebx, ebp
-add ebx, -145
+add ebx, -149
 mov [esp], ebx
 call Byte__On_Plus
 add esp, 8
-;Loading [241 -147
+;Loading [241 -151
 add esp, -4
 mov ebx, ebp
-add ebx, -147
+add ebx, -151
 mov [esp], ebx
 ;Loading a Byte object
 add esp, -4
 mov ebx, ebp
-add ebx, -145
+add ebx, -149
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
@@ -4698,12 +4718,12 @@ jmp S25
 S24:
 add esp, 2
 S25:
-;Declaring joe -146
+;Declaring joe -150
 add esp, -4
 
 add esp, -4
 mov ebx, ebp
-add ebx, -146
+add ebx, -150
 mov [esp], ebx
 call Pointer__On_Create
 add esp, 4
