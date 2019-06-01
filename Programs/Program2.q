@@ -103,6 +103,10 @@ class ClassScopeTestTwo
     action on create
         Me : C1 : B2 = 68
     end
+    
+    action RunTest ( Byte B3 )
+        Me : C1 : B2 = 72
+    end
 end
 
 action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
@@ -404,6 +408,9 @@ action Main
     OutputByte ( CST2_1:C1:B1 )
     CST2_1:C1:B1 = 70
     OutputByte ( CST2_1:C1:B1 )
+    CST2_1:RunTest ( S6 )
+    OutputByte ( CST2_1:C1:B2 )
+    
     OutputByte ( 66 )
     
     
