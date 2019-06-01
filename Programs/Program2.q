@@ -400,6 +400,7 @@ action Main
     
     ClassScopeTestTwo CST2_1
     OutputByte ( CST2_1:C1:B2 )
+    OutputByte ( 66 )
     
     
     if S6 == 65

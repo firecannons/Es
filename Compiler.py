@@ -422,12 +422,11 @@ class Parser ( ) :
     def LoadReference ( self , CurrentSymbol ) :
         OutputText = ''
         OutputText = OutputText + self.ASM_TEXT['LOAD_INTO_EBX'].format(CurrentSymbol.Offset)
-        if CurrentSymbol . IsDereferenced == False :
-            OutputText = OutputText + self.ASM_TEXT['DEREFERENCE_EBX']
-        if CurrentSymbol . DereferenceOffset != self . ZERO_SHIFT :
+        OutputText = OutputText + self.ASM_TEXT['DEREFERENCE_EBX']
+        if True == True :
             OutputText = OutputText + self.ASM_TEXT['SHIFT_EBX'].format(CurrentSymbol . DereferenceOffset)
         OutputText = OutputText + self.ASM_TEXT['INSERT_EBX']
-        OutputText = OutputText + '; loading a reference!\n' 
+        OutputText = OutputText + '; loading a reference!' + CurrentSymbol . Name + '\n' 
         return OutputText
     
     def LoadValue ( self , CurrentSymbol ) :
@@ -548,12 +547,12 @@ class Parser ( ) :
                     if CurrentObject . IsDereferenced == False :
                         OutputText = OutputText + self . LoadReference ( CurrentObject )
                         self.CurrentSTOffset = self.CurrentSTOffset + - self . POINTER_SIZE
-                        NewSymbol.Offset = self.CurrentSTOffset
-                        
+                        NewSymbol . IsDereferenced = True
+                    NewSymbol.Offset = self.CurrentSTOffset
                     NewSymbol . IsReference = True
                     NewSymbol . DereferenceOffset = CurrentObject . DereferenceOffset + ObjectTwo.Offset
                 else :
-                    LeftObjectOffset = deepcopy(CurrentObject.Offset) + deepcopy(ObjectTwo.Offset)
+                    NewSymbol.Offset = deepcopy(CurrentObject.Offset) + deepcopy(ObjectTwo.Offset)
                 
                 
                 
