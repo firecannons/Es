@@ -223,11 +223,7 @@ class Parser ( ) :
             'mov ebx, ebp\n' +\
             'add ebx, {}\n' +\
             'mov [esp], ebx\n' ,
-        'LOAD_INTO_EBX' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
-            'mov ebx, ebp\n' +\
-            'add ebx, {}\n' ,
-        'LOAD_INTO_ECX' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
-            'mov ebx, ebp\n' +\
+        'MOVE_EBX_TO_LOCATION' : 'mov ebx, ebp\n' +\
             'add ebx, {}\n' ,
         'PLACE_ECX_AT_OFFSET' : 'mov ebx, ebp\n' +\
             'add ebx, {}\n' +\
@@ -430,9 +426,15 @@ class Parser ( ) :
         WordArray[Index] = MyToken ( NewName , WordArray [ Index - 1 ] . LineNumber , WordArray [ Index - 1 ] . FileName )
         return WordArray , Index , OutputText
     
+    def OutputPointerShift ( self ) :
+        OutputText = ''
+        OutputText = OutputText + self.ASM_TEXT['SHIFT_STRING'].format(-self . POINTER_SIZE)
+        return OutputText
+    
     def LoadReference ( self , CurrentSymbol ) :
         OutputText = ''
-        OutputText = OutputText + self.ASM_TEXT['LOAD_INTO_EBX'].format(CurrentSymbol.Offset)
+        OutputText = OutputText + self . OutputPointerShift ( )
+        OutputText = OutputText + self.ASM_TEXT['MOVE_EBX_TO_LOCATION'].format(CurrentSymbol.Offset)
         OutputText = OutputText + self.ASM_TEXT['DEREFERENCE_EBX']
         if True == True :
             OutputText = OutputText + self.ASM_TEXT['SHIFT_EBX'].format(CurrentSymbol . DereferenceOffset)
@@ -442,7 +444,8 @@ class Parser ( ) :
     
     def LoadValue ( self , CurrentSymbol ) :
         OutputText = ''
-        OutputText = OutputText + self.ASM_TEXT['LOAD_INTO_EBX'].format(CurrentSymbol.Offset)
+        OutputText = OutputText + self . OutputPointerShift ( )
+        OutputText = OutputText + self.ASM_TEXT['MOVE_EBX_TO_LOCATION'].format(CurrentSymbol.Offset)
         OutputText = OutputText + self.ASM_TEXT['INSERT_EBX']
         return OutputText
     
@@ -626,8 +629,8 @@ class Parser ( ) :
     
     def CalcRefCopy ( self , LeftRef , RightRef ) :
         OutputText = ''
-        OutputText = OutputText + self . ASM_TEXT [ 'LOAD_INTO_EBX' ] . format ( RightRef . Offset )
-        if LeftRef . IsReference == True :
+        OutputText = OutputText + self . ASM_TEXT [ 'MOVE_EBX_TO_LOCATION' ] . format ( RightRef . Offset )
+        if RightRef . IsReference == True :
             OutputText = OutputText + self . ASM_TEXT [ 'DEREFERENCE_EBX' ]
         OutputText = OutputText + self . ASM_TEXT [ 'EBX_TO_ECX' ]
         OutputText = OutputText + self . ASM_TEXT [ 'PLACE_ECX_AT_OFFSET' ] . format ( LeftRef . Offset )
@@ -914,7 +917,7 @@ class Parser ( ) :
                         NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
                         self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
                         OutputText = OutputText + ';Declaring {} {}\n' . format ( Token . Name , self . CurrentSTOffset )
-                        OutputText = self . CalcDeclarationOutput ( self . SavedType . Name , OutputText )
+                        OutputText = self . CalcDeclarationOutput ( self . SavedType , self . CurrentlyReference , OutputText )
                         LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                         OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
                     self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
@@ -1285,12 +1288,15 @@ class Parser ( ) :
         OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
 
-    def CalcDeclarationOutput ( self , SavedType , OutputText ) :
-
-        OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( -self . TypeTable [ SavedType ] . Size ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
-        OutputText = OutputText + self . ASM_TEXT [ 'DEFAULT_CREATE' ] . format ( -self . POINTER_SIZE , self . CurrentSTOffset )
-        OutputText = self . CalcCallLine ( OutputText , self . ResolveActionToAsm ( Function ( 'create' ) , self . TypeTable [ SavedType ] ) )
-        OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( self . POINTER_SIZE )
+    def CalcDeclarationOutput ( self , SavedType , IsCurrentlyReference , OutputText ) :
+        NewDataSize = SavedType . Size
+        if IsCurrentlyReference == True :
+            NewDataSize = self . POINTER_SIZE
+        OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( -NewDataSize ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        if IsCurrentlyReference == False :
+            OutputText = OutputText + self . ASM_TEXT [ 'DEFAULT_CREATE' ] . format ( -self . POINTER_SIZE , self . CurrentSTOffset )
+            OutputText = self . CalcCallLine ( OutputText , self . ResolveActionToAsm ( Function ( 'create' ) , SavedType ) )
+            OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( self . POINTER_SIZE )
         return OutputText
 
     def OutputActionStartCode ( self , OutputText ) :
