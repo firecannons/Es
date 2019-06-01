@@ -32,6 +32,7 @@ class MySymbol ( ) :
         self . Templates = { }
         self . IsReference = False
         self . IsDereferenced = False
+        self . ActLikeReference = False
 
 class Function ( ) :
     def __init__ ( self , Name ) :
@@ -139,7 +140,8 @@ class Parser ( ) :
         'WHILE' : 'while' ,
         'UNTIL' : 'until' ,
         'ELSE_IF' : 'elseif' ,
-        'ELSE' : 'else'
+        'ELSE' : 'else' ,
+        'REFERENCE' : 'reference'
         
     }
     
@@ -224,9 +226,16 @@ class Parser ( ) :
         'LOAD_INTO_EBX' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
             'mov ebx, ebp\n' +\
             'add ebx, {}\n' ,
+        'LOAD_INTO_ECX' : 'add esp, {}\n' . format ( -POINTER_SIZE ) +\
+            'mov ebx, ebp\n' +\
+            'add ebx, {}\n' ,
+        'PLACE_ECX_AT_OFFSET' : 'mov ebx, ebp\n' +\
+            'add ebx, {}\n' +\
+            'mov [ebx], ecx\n' ,
         'DEREFERENCE_EBX' : 'mov ebx, [ebx]\n' ,
         'SHIFT_EBX' : 'add ebx, {}\n' ,
         'INSERT_EBX' : 'mov [esp], ebx\n' ,
+        'EBX_TO_ECX' : 'mov ecx, ebx\n' ,
         'ALLOC_BYTE' : 'add esp, -1\n' ,
         'SET_CURRENT_BYTE' : 'mov byte [esp], {}\n' ,
         'DEFAULT_CREATE' : 'add esp, {}\n' +\
@@ -297,6 +306,7 @@ class Parser ( ) :
         self . RoutineCounter = 0
         self . CurrentToken = None
         self . CurrentTokenObject = None
+        self . CurrentlyReference = False
     
     def Parse ( self , SavedWordArray , OutputText ) :
         WordIndex = 0
@@ -498,7 +508,6 @@ class Parser ( ) :
         return Type , TypeName , FunctionName
     
     def LoadValues ( self , OutputText , ArrayOfOperands , TypeName , FunctionName , WordArray , Index , Object , Type ) :
-        OutputText , ArrayOfOperands = self . AllocateLiterals ( OutputText , ArrayOfOperands )
         WordArray , Index , OutputText = self . AddReturnValues ( TypeName , FunctionName , WordArray , Index , OutputText )
         AfterReturnOffset = self . CurrentSTOffset
         OutputText = self . LoadParameters ( ArrayOfOperands , OutputText )
@@ -590,6 +599,7 @@ class Parser ( ) :
                 print ( 'ugg' , self . GetObjectTypeName ( CallingObject ) , ActionName )
                 if self . GetTypeTableFromNames ( self . GetObjectTypeName ( CallingObject ) , ActionName ) :
                     self . ParameterArray = self . ParameterArray + [ WordArray [ Index + 2 ] ]
+                    OutputText , self . ParameterArray = self . AllocateLiterals ( OutputText , self . ParameterArray )
                     NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CallingObject , WordArray , Index )
                     OutputText = OutputText + NewOutputText
                     self . ParameterArray = [ ]
@@ -613,6 +623,15 @@ class Parser ( ) :
         WordArray . pop ( Index )
         WordArray . pop ( Index )
         return Index , WordArray , OutputText
+    
+    def CalcRefCopy ( self , LeftRef , RightRef ) :
+        OutputText = ''
+        OutputText = OutputText + self . ASM_TEXT [ 'LOAD_INTO_EBX' ] . format ( RightRef . Offset )
+        if LeftRef . IsReference == True :
+            OutputText = OutputText + self . ASM_TEXT [ 'DEREFERENCE_EBX' ]
+        OutputText = OutputText + self . ASM_TEXT [ 'EBX_TO_ECX' ]
+        OutputText = OutputText + self . ASM_TEXT [ 'PLACE_ECX_AT_OFFSET' ] . format ( LeftRef . Offset )
+        return OutputText
 
     def DoOperatorActionCall ( self , Index , WordArray , OutputText ) :
         RightOperand = WordArray [ Index + 2 ]
@@ -631,15 +650,23 @@ class Parser ( ) :
         if Found == False :
             CompilerIssue . OutputError ( 'No variable named \'' + WordArray [ Index ] . Name + '\' found in current scope.' , self . EXIT_ON_ERROR , WordArray [ Index ] )
         else :
-            if self . IsInTypeTable ( Object . Type . Name , self . ResolveActionToAsm ( WordArray [ Index + 1 ] , Object . Type ) ) == True :
-                NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , [ RightOperand ] , Object , WordArray , Index )
-                OutputText = OutputText + NewOutputText
-
-                WordArray . pop ( Index + 1 )
-                WordArray . pop ( Index + 1 )
+            OutputText , ArrayOfOperands = self . AllocateLiterals ( OutputText , [ RightOperand ] )
+            Found , RightRef = self . CheckCurrentSTs ( ArrayOfOperands [ 0 ] )
+            if Object . ActLikeReference == True and WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'EQUALS' ] :
+                if Object . Type == RightRef . Type :
+                    OutputText = OutputText + self . CalcRefCopy ( Object , RightRef )
+                else :
+                    CompilerIssue . OutputError ( 'Reference ' + Object . Name + ' is of a different type than ' + RightOperand . Name ,
+                        self . EXIT_ON_ERROR , WordArray [ Index ] )
             else :
-                CompilerIssue . OutputError ( 'The class \'' + Object . Type . Name + '\' does not have a function \'' + WordArray [ Index + 1 ] . Name + '\'.' ,
-                    self . EXIT_ON_ERROR , WordArray [ Index ] )
+                if self . IsInTypeTable ( Object . Type . Name , self . ResolveActionToAsm ( WordArray [ Index + 1 ] , Object . Type ) ) == True :
+                    NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , ArrayOfOperands , Object , WordArray , Index )
+                    OutputText = OutputText + NewOutputText
+                else :
+                    CompilerIssue . OutputError ( 'The class \'' + Object . Type . Name + '\' does not have a function \'' + WordArray [ Index + 1 ] . Name + '\'.' ,
+                        self . EXIT_ON_ERROR , WordArray [ Index ] )
+            WordArray . pop ( Index + 1 )
+            WordArray . pop ( Index + 1 )
         return Index , WordArray , OutputText
     
     def CanDropParens ( self , Index , WordArray ) :
@@ -863,23 +890,35 @@ class Parser ( ) :
             self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
         elif self . SavedType . Name in self . TypeTable :
             if Token . Name not in self . GetCurrentST ( ) . Symbols :
-                NewSymbol = MySymbol ( Token . Name , self . TypeTable [ self . SavedType . Name ] )
-                if self . CurrentClass != None and self . CurrentFunction == None :
-                    self . TypeTable [ self . CurrentClass . Name ] . Size = self . TypeTable [ self . CurrentClass . Name ] . Size +\
-                        self . TypeTable [ self . SavedType . Name ] . Size
-                    NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                    self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token . Name ] = NewSymbol
-                    self . CurrentSTOffset = self . CurrentSTOffset + self . TypeTable [ self . SavedType . Name ] . Size
-                    self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
+                if Token . Name == self . KEYWORDS [ 'REFERENCE' ] :
+                    if self . CurrentlyReference == False :
+                        self . CurrentlyReference = True
+                    else :
+                        CompilerIssue . OutputError ( 'References to references are not allowed.' , self . EXIT_ON_ERROR , Token )
                 else :
-                    self . CurrentSTOffset = self . CurrentSTOffset - self . TypeTable [ self . SavedType . Name ] . Size
-                    NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
-                    self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
-                    OutputText = OutputText + ';Declaring {} {}\n' . format ( Token . Name , self . CurrentSTOffset )
-                    OutputText = self . CalcDeclarationOutput ( self . SavedType . Name , OutputText )
-                    LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
-                    OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
-                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+                    NewSymbol = MySymbol ( Token . Name , self . TypeTable [ self . SavedType . Name ] )
+                    AddSize = self . TypeTable [ self . SavedType . Name ] . Size
+                    if self . CurrentlyReference == True :
+                        NewSymbol . ActLikeReference = True
+                        NewSymbol . IsReference = True
+                        AddSize = self . POINTER_SIZE
+                    if self . CurrentClass != None and self . CurrentFunction == None :
+                        self . TypeTable [ self . CurrentClass . Name ] . Size = self . TypeTable [ self . CurrentClass . Name ] . Size +\
+                            AddSize
+                        NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+                        self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ Token . Name ] = NewSymbol
+                        self . CurrentSTOffset = self . CurrentSTOffset + AddSize
+                        self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
+                    else :
+                        self . CurrentSTOffset = self . CurrentSTOffset - AddSize
+                        NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+                        self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
+                        OutputText = OutputText + ';Declaring {} {}\n' . format ( Token . Name , self . CurrentSTOffset )
+                        OutputText = self . CalcDeclarationOutput ( self . SavedType . Name , OutputText )
+                        LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
+                        OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
+                    self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+                    self . CurrentlyReference = False
             else :
                 CompilerIssue . OutputError ( 'A variable named ' + Token . Name + ' has already been declared' , self . EXIT_ON_ERROR , Token )
         else :
@@ -1060,14 +1099,21 @@ class Parser ( ) :
             if Token . Name in self . CurrentTypeTable ( ) :
                 CompilerIssue . OutputError ( 'There is already a \'' + Token . Name + '\' in the current scope' , self . EXIT_ON_ERROR , Token )
             else :
-                NewSymbol = MySymbol ( Token . Name , self . SavedType )
-                NewSymbol . IsReference = True
-                NewSymbol . Offset = deepcopy ( self . CurrentParamOffset )
-                self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
-                self . CurrentTypeTable ( ) . append ( NewSymbol )
-                self . CurrentParamOffset = self . CurrentParamOffset + self . POINTER_SIZE
-                print ( self . GetCurrentST ( ) . Symbols [ Token . Name ] . IsReference , Token . Name , self . CurrentFunction . Name , 'weoisfeife' )
-                self . State = self . MAIN_STATES [ 'ACTION_AFTER_PARAM' ]
+                if Token . Name == self . KEYWORDS [ 'REFERENCE' ] :
+                    self . CurrentlyReference = True
+                else :
+                    NewSymbol = MySymbol ( Token . Name , self . SavedType )
+                    NewSymbol . ActLikeReference = True
+                    NewSymbol . IsReference = True
+                    if self . CurrentlyReference == True :
+                        NewSymbol . ActLikeReference = True
+                    NewSymbol . Offset = deepcopy ( self . CurrentParamOffset )
+                    self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
+                    self . CurrentTypeTable ( ) . append ( NewSymbol )
+                    self . CurrentParamOffset = self . CurrentParamOffset + self . POINTER_SIZE
+                    print ( self . GetCurrentST ( ) . Symbols [ Token . Name ] . IsReference , Token . Name , self . CurrentFunction . Name , 'weoisfeife' )
+                    self . CurrentlyReference = False
+                    self . State = self . MAIN_STATES [ 'ACTION_AFTER_PARAM' ]
         else :
             CompilerIssue . OutputError ( 'Invalid variable name in action declaration' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
