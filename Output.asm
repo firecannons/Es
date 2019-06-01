@@ -4610,20 +4610,12 @@ mov [esp], ebx
 call OutputByte
 add esp, 4
 ;Declaring BR1 -142
-add esp, -1
-
 add esp, -4
-mov ebx, ebp
-add ebx, -142
-mov [esp], ebx
-call Byte__On_Create
-add esp, 4
+
 ;ok-135
 ;ok-134
-add esp, -4
 mov ebx, ebp
 add ebx, -134
-mov ebx, [ebx]
 mov ecx, ebx
 mov ebx, ebp
 add ebx, -142
