@@ -101,7 +101,7 @@ class ClassScopeTestTwo
     CapTest C1
     
     action on create
-        Me : C1 : B2 = 67
+        Me : C1 : B2 = 68
     end
 end
 
