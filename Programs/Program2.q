@@ -422,6 +422,16 @@ action Main
     OutputByte ( BR2 )
     
     
+    
+    ClassScopeTest TestCST
+    ClassScopeTest reference CSTR
+    CSTR = TestCST
+    TestCST : B2 = 100
+    OutputByte ( TestCST : B2 )
+    CSTR : RunTest ( 66 )
+    OutputByte ( TestCST : B2 )
+    
+    
     if S6 == 65
         Byte MeByte
         MeByte = MeByte + 2
