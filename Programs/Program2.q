@@ -417,6 +417,10 @@ action Main
     BR1 = CST2_1:C1:B2
     OutputByte ( BR1 )
     
+    Byte reference BR2
+    BR2 = BR1
+    OutputByte ( BR2 )
+    
     
     if S6 == 65
         Byte MeByte
