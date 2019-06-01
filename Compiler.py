@@ -278,6 +278,7 @@ class Parser ( ) :
     ACTION_DECLARATION_OFFSET = 0
     ACTION_DEFINITION_OFFSET = 0
     ACTION_DECLARATION_PARAM_OFFSET = 8
+    CLASS_DECLARATION_OFFSET = 0
     
     def __init__ ( self ) :
         self . State = deepcopy ( self . MAIN_STATES [ 'START_OF_LINE' ] )
@@ -551,10 +552,13 @@ class Parser ( ) :
                     NewSymbol.Offset = self.CurrentSTOffset
                     NewSymbol . IsReference = True
                     NewSymbol . DereferenceOffset = CurrentObject . DereferenceOffset + ObjectTwo.Offset
+                    OutputText = OutputText + ';Shifting Deref Offset{} = {} + {}\n'.format(NewSymbol . DereferenceOffset , CurrentObject . DereferenceOffset , ObjectTwo.Offset )
+                    OutputText = OutputText + ';Names: {} : {} -> {}\n'.format(CurrentObject . Name , ObjectTwo . Name , ObjectTwo.Offset )
                 else :
                     NewSymbol.Offset = deepcopy(CurrentObject.Offset) + deepcopy(ObjectTwo.Offset)
                 
                 
+                OutputText = OutputText + ';ok{}\n'.format(NewSymbol . Offset)
                 
                 print ( self . TypeTable [ CurrentClass . Name ] . InnerTypes , CurrentClass , CurrentObject , NewType . Name , CurrentObject.Offset , ObjectTwo.Offset , 'sdaf' )
                 self.GetCurrentST().Symbols[NewName] = NewSymbol
@@ -916,6 +920,7 @@ class Parser ( ) :
                 self . TypeTable [ Token . Name ] = Type ( Token . Name )
                 self . CurrentClass = self . TypeTable [ Token . Name ]
                 self . State = self . MAIN_STATES [ 'CLASS_AFTER_NAME' ]
+                self . CurrentSTOffset = self . CLASS_DECLARATION_OFFSET
                 print ( 'declaring' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
 

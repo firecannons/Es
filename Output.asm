@@ -876,6 +876,9 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : B2 -> 0
+;ok-4
 add esp, -1
 
 mov byte [esp], 65
@@ -941,6 +944,9 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : B2 -> 0
+;ok-6
 add esp, -1
 
 mov byte [esp], 66
@@ -980,9 +986,15 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : C1 -> 0
+;ok-4
+;Shifting Deref Offset1 = 0 + 1
+;Names: [9 : B2 -> 1
+;ok-4
 add esp, -1
 
-mov byte [esp], 67
+mov byte [esp], 68
 
 ;Declaring [11 -5
 ;Loading [11 -5
@@ -995,7 +1007,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -4
 mov ebx, [ebx]
-add ebx, -6
+add ebx, 1
 mov [esp], ebx
 ; loading a reference![10
 call Byte__On_Equals
@@ -4035,6 +4047,7 @@ add ebx, -118
 mov [esp], ebx
 call CapTest__On_Create
 add esp, 4
+;ok-118
 add esp, -1
 
 mov byte [esp], 65
@@ -4052,6 +4065,7 @@ add ebx, -118
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
+;ok-118
 ;Loading [165 -119
 add esp, -4
 mov ebx, ebp
@@ -4059,6 +4073,7 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-117
 add esp, -1
 
 mov byte [esp], 4
@@ -4076,6 +4091,9 @@ add ebx, -117
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
+;ok-118
+;ok-118
+;ok-117
 ;Adding return value 
 add esp, -1
 ;Loading [170 -121
@@ -4102,6 +4120,7 @@ add ebx, -118
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
+;ok-118
 ;Loading [172 -121
 add esp, -4
 mov ebx, ebp
@@ -4109,6 +4128,7 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [173 -121
 add esp, -4
 mov ebx, ebp
@@ -4116,6 +4136,7 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [174 -121
 add esp, -4
 mov ebx, ebp
@@ -4123,6 +4144,7 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [175 -121
 add esp, -4
 mov ebx, ebp
@@ -4130,6 +4152,7 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [176 -121
 add esp, -4
 mov ebx, ebp
@@ -4137,6 +4160,7 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [177 -121
 add esp, -4
 mov ebx, ebp
@@ -4144,6 +4168,7 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [178 -121
 add esp, -4
 mov ebx, ebp
@@ -4151,6 +4176,7 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [179 -121
 add esp, -4
 mov ebx, ebp
@@ -4158,6 +4184,7 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [180 -121
 add esp, -4
 mov ebx, ebp
@@ -4165,6 +4192,9 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
+;ok-118
+;ok-117
 ;Adding return value 
 add esp, -1
 ;Loading [183 -122
@@ -4191,6 +4221,7 @@ add ebx, -118
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
+;ok-118
 ;Loading [185 -122
 add esp, -4
 mov ebx, ebp
@@ -4198,6 +4229,7 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [186 -122
 add esp, -4
 mov ebx, ebp
@@ -4214,6 +4246,9 @@ add ebx, -126
 mov [esp], ebx
 call CapTest2__On_Create
 add esp, 4
+;ok-126
+;ok-126
+;ok-118
 ;Loading [189 -126
 add esp, -4
 mov ebx, ebp
@@ -4226,6 +4261,7 @@ add ebx, -126
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
+;ok-118
 ;Loading [190 -126
 add esp, -4
 mov ebx, ebp
@@ -4233,6 +4269,8 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-126
+;ok-126
 ;Loading [192 -126
 add esp, -4
 mov ebx, ebp
@@ -4240,6 +4278,11 @@ add ebx, -126
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-126
+;ok-126
+;ok-126
+;ok-126
+;ok-117
 ;Adding return value 
 add esp, -1
 ;Loading [197 -127
@@ -4266,6 +4309,8 @@ add ebx, -126
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
+;ok-126
+;ok-126
 ;Loading [200 -127
 add esp, -4
 mov ebx, ebp
@@ -4273,6 +4318,7 @@ add ebx, -126
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [201 -127
 add esp, -4
 mov ebx, ebp
@@ -4280,6 +4326,11 @@ add ebx, -118
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-124
+;ok-123
+;ok-126
+;ok-126
+;ok-117
 ;Adding return value 
 add esp, -1
 ;Loading [206 -128
@@ -4306,6 +4357,8 @@ add ebx, -123
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
+;ok-124
+;ok-123
 ;Loading [209 -128
 add esp, -4
 mov ebx, ebp
@@ -4313,6 +4366,8 @@ add ebx, -123
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-124
+;ok-123
 ;Loading [211 -128
 add esp, -4
 mov ebx, ebp
@@ -4320,6 +4375,7 @@ add ebx, -123
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [212 -128
 add esp, -4
 mov ebx, ebp
@@ -4336,6 +4392,7 @@ add ebx, -130
 mov [esp], ebx
 call ClassScopeTest__On_Create
 add esp, 4
+;ok-130
 ;Loading [213 -130
 add esp, -4
 mov ebx, ebp
@@ -4355,6 +4412,7 @@ add ebx, -130
 mov [esp], ebx
 call ClassScopeTest__RunTest
 add esp, 8
+;ok-130
 ;Loading [214 -130
 add esp, -4
 mov ebx, ebp
@@ -4362,6 +4420,7 @@ add ebx, -130
 mov [esp], ebx
 call OutputByte
 add esp, 4
+;ok-118
 ;Loading [215 -130
 add esp, -4
 mov ebx, ebp
@@ -4390,6 +4449,7 @@ add ebx, -133
 mov [esp], ebx
 call ClassScopeTest__On_Create
 add esp, 4
+;ok-133
 ;Loading [217 -133
 add esp, -4
 mov ebx, ebp
@@ -4406,10 +4466,12 @@ add ebx, -135
 mov [esp], ebx
 call ClassScopeTestTwo__On_Create
 add esp, 4
+;ok-135
+;ok-134
 ;Loading [219 -135
 add esp, -4
 mov ebx, ebp
-add ebx, -141
+add ebx, -134
 mov [esp], ebx
 call OutputByte
 add esp, 4
