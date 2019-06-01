@@ -400,6 +400,10 @@ action Main
     
     ClassScopeTestTwo CST2_1
     OutputByte ( CST2_1:C1:B2 )
+    CST2_1:C1:B1 = 69
+    OutputByte ( CST2_1:C1:B1 )
+    CST2_1:C1:B1 = 70
+    OutputByte ( CST2_1:C1:B1 )
     OutputByte ( 66 )
     
     

@@ -521,6 +521,8 @@ class Parser ( ) :
         IsFound , TypeOfScopeIn = self . GetTypeOfScope ( WordArray [ Index ] )
         if TypeOfScopeIn == self . SCOPE_TYPES [ 'CLASS' ] :
             CurrentObject = self . GetCurrentST ( ) [ self . SELF_OBJECT_NAME ]
+        self . PrintWordArray ( WordArray )
+        print ( CurrentObject , WordArray [ Index ] . Name )
         CurrentClass = CurrentObject . Type
         NextToken = WordArray [ Index + 2 ]
         NextName = NextToken . Name
@@ -580,7 +582,7 @@ class Parser ( ) :
             ar . append ( i.Name )
         print ( len ( WordArray ) , ar )
         if WordArray [ Index + 3 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
-            if self . IsValidName ( WordArray [ Index ] . Name ) == True :
+            if Lexer . IsValidName ( WordArray [ Index ] . Name ) == True :
                 self . CheckIfObjectInTokenValid ( CallingObject )
                 ActionName = WordArray [ Index ] . Name
                 if CallingObject != None :
@@ -741,6 +743,7 @@ class Parser ( ) :
 
 
     def ProcessStartOfLine ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        print ( Token . Name )
         if Token . Name == self . KEYWORDS [ 'USING' ] :
             self . State = self . MAIN_STATES [ 'USING_WAITING_FOR_WORD' ]
         elif Token . Name == self . KEYWORDS [ 'CLASS' ] :
@@ -809,7 +812,7 @@ class Parser ( ) :
             self . GetCurrentST ( ) . OffsetAfterComparison = self . CurrentSTOffset
         elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
             OutputText = OutputText + Token . Name
-        elif self . IsValidName ( Token . Name ) == True :
+        elif Lexer . IsValidName ( Token . Name ) == True :
             if Token . Name in self . TypeTable :
                 if self . TypeTable [ Token . Name ] . IsFunction == False :
                     self . SavedType = self . TypeTable [ Token . Name ]
@@ -824,6 +827,8 @@ class Parser ( ) :
                 OutputText = self . Reduce ( Token . Name , LineWordArray , OutputText , False )
             else :
                 CompilerIssue . OutputError ( 'Type or symbol \'' + Token + '\' not found' , self . EXIT_ON_ERROR , TokenObject )
+        else :
+            print ( 'screw up' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessUsingWaitingForWord ( self , Token , SavedWordArray , WordIndex , OutputText ) :
@@ -889,7 +894,7 @@ class Parser ( ) :
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessMakingTemplate ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        if self . IsValidName ( Token ) == True :
+        if Lexer . IsValidName ( Token ) == True :
             if Token in self . TypeTable :
                 if self . TypeTable [ Token ] . IsFunction == False :
                     self . State = self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ]
@@ -911,8 +916,8 @@ class Parser ( ) :
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessClassAfter ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        if self . IsValidName ( Token . Name ) == False :
-            CompilerIssue . OutputError ( Token + ' is in the wrong format for a class name' , self . EXIT_ON_ERROR , TokenObject )
+        if Lexer . IsValidName ( Token . Name ) == False :
+            CompilerIssue . OutputError ( Token . Name + ' is in the wrong format for a class name' , self . EXIT_ON_ERROR , Token )
         else :
             if self . IsInTypeTable ( Token . Name , '' ) == True :
                 CompilerIssue . OutputError ( 'There is already a class named \'' + Token . Name + '\'.' , self . EXIT_ON_ERROR , Token )
@@ -936,7 +941,7 @@ class Parser ( ) :
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessMakingTemplate ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        if self . IsValidName ( Token ) == False :
+        if Lexer . IsValidName ( Token ) == False :
             CompilerIssue . OutputError ( Token + ' is in the wrong format for a template name' , self . EXIT_ON_ERROR , TokenObject )
         else :
             self . TypeTable [ self . CurrentClass . Name ] . Templates [ Token ] = set ( )
@@ -989,7 +994,7 @@ class Parser ( ) :
             else :
                 self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
                 self . ActionTypeDeclared = True
-        elif self . IsValidName ( Token . Name ) == True :
+        elif Lexer . IsValidName ( Token . Name ) == True :
             if self . CurrentClass != None :
                 if Token . Name == self . KEYWORDS [ 'ON' ] :
                     self . State = self . MAIN_STATES [ 'ACTION_AFTER_ON' ]
@@ -1040,7 +1045,7 @@ class Parser ( ) :
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessActionNewParameter ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        if self . IsValidName ( Token . Name ) :
+        if Lexer . IsValidName ( Token . Name ) :
             if Token . Name in self . TypeTable :
                 self . SavedType = self . TypeTable [ Token . Name ]
                 self . State = self . MAIN_STATES [ 'ACTION_PARAM_NAME' ]
@@ -1051,7 +1056,7 @@ class Parser ( ) :
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessActionParamName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        if self . IsValidName ( Token . Name ) :
+        if Lexer . IsValidName ( Token . Name ) :
             if Token . Name in self . CurrentTypeTable ( ) :
                 CompilerIssue . OutputError ( 'There is already a \'' + Token . Name + '\' in the current scope' , self . EXIT_ON_ERROR , Token )
             else :
@@ -1343,13 +1348,6 @@ class Parser ( ) :
     def GetActionReturnValues ( self , Class , Function ) :
         return Function . ReturnValues
     
-    
-    def IsValidName ( self , Name ) :
-        Output = True
-        if Name [ 0 ] . isalpha ( ) == False or Name . isalnum ( ) == False :
-            Output = False
-        return Output
-    
     def ConvertToPath ( self , PathWordArray ) :
         Text = ''
         for Token in PathWordArray :
@@ -1517,9 +1515,26 @@ class Lexer ( ) :
             Output = True
         return Output
     
-    def IsVariableAllowedLetter ( self , CurrentLetter ) :
+    def IsOkVariableStartLetter ( Letter ) :
+        Output = True
+        if Letter == False and Letter not in Lexer . VARIABLE_SPECIAL_LETTERS :
+            Output = False
+        return Output
+    
+    def IsValidName ( Word ) :
+        Output = True
+        if len ( Word ) < 1 :
+            Output = False
+        if Lexer . IsOkVariableStartLetter ( Word [ 0 ] ) == False :
+            Output = False
+        for CurrentLetter in Word :
+            if Lexer . IsVariableAllowedLetter ( CurrentLetter ) == False :
+                Output = False
+        return Output
+    
+    def IsVariableAllowedLetter ( CurrentLetter ) :
         Output = False
-        if CurrentLetter . isalnum ( ) == True or CurrentLetter in self . VARIABLE_SPECIAL_LETTERS :
+        if CurrentLetter . isalnum ( ) == True or CurrentLetter in Lexer . VARIABLE_SPECIAL_LETTERS :
             Output = True
         return Output
 	
@@ -1531,12 +1546,12 @@ class Lexer ( ) :
     
     def SetCurrentTokenKind ( self , CurrentLetter ) :
         self . CurrentTokenKind = self . TOKEN_KINDS [ 'VARIABLE_LETTERS' ]
-        if self . IsVariableAllowedLetter ( CurrentLetter ) == False :
+        if Lexer . IsVariableAllowedLetter ( CurrentLetter ) == False :
             self . CurrentTokenKind = self . TOKEN_KINDS [ 'SPECIAL' ]
     
     def IsOfSameTokenKindAsSavedWord ( self , CurrentLetter ) :
         Output = True
-        IsVariableLetter = self . IsVariableAllowedLetter ( CurrentLetter )
+        IsVariableLetter = Lexer . IsVariableAllowedLetter ( CurrentLetter )
         if self . CurrentTokenKind == self . TOKEN_KINDS [ 'VARIABLE_LETTERS' ] and IsVariableLetter == False\
             or self . CurrentTokenKind == self . TOKEN_KINDS [ 'SPECIAL' ] and IsVariableLetter == True :
             Output = False
