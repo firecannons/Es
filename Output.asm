@@ -1063,6 +1063,18 @@ mov esp, ebp
 pop ebp
 ret
 
+NoParamTest:
+
+push ebp
+mov ebp, esp
+
+
+
+
+mov esp, ebp
+pop ebp
+ret
+
 OutputByte5:
 
 push ebp
@@ -4722,6 +4734,8 @@ add ebx, -148
 mov [esp], ebx
 call OutputByte
 add esp, 4
+call NoParamTest
+add esp, 0
 add esp, -1
 
 mov byte [esp], 65

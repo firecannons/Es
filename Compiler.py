@@ -477,7 +477,7 @@ class Parser ( ) :
         return OutputText
 
     def CheckIfObjectInTokenValid ( self , Token ) :
-        print ( 'testing objet' , Token)
+        print ( 'testing objet' , Token . Name )
         if Token != None :
             if Token . Name . isdigit ( ) == False :
                 Found , Symbol = self . CheckCurrentSTs ( Token )
@@ -595,7 +595,6 @@ class Parser ( ) :
         print ( len ( WordArray ) , ar )
         if WordArray [ Index + 3 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
             if Lexer . IsValidName ( WordArray [ Index ] . Name ) == True :
-                self . CheckIfObjectInTokenValid ( CallingObject )
                 ActionName = WordArray [ Index ] . Name
                 if CallingObject != None :
                     ActionName = self . ResolveActionToAsm ( WordArray [ Index ] , CallingObject . Type )
@@ -672,6 +671,40 @@ class Parser ( ) :
             WordArray . pop ( Index + 1 )
         return Index , WordArray , OutputText
     
+    def DoEmptyActionCall ( self , Index , WordArray , OutputText ) :
+        CallingObject = None
+        if Index >= 2 :
+            if WordArray [ Index - 1 ] . Name == self . OPERATORS [ 'COLON' ] :
+                IsFound , CallingObject = self . CheckCurrentSTs ( WordArray [ Index - 2 ] )
+        ar = []
+        for i in WordArray :
+            ar . append ( i.Name )
+        print ( len ( WordArray ) , ar )
+        if WordArray [ Index + 2 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
+            if Lexer . IsValidName ( WordArray [ Index ] . Name ) == True :
+                ActionName = WordArray [ Index ] . Name
+                if CallingObject != None :
+                    ActionName = self . ResolveActionToAsm ( WordArray [ Index ] , CallingObject . Type )
+                if self . IsInTypeTable ( self . GetObjectTypeName ( CallingObject ) , ActionName ) :
+                    self . ParameterArray = [ ]
+                    OutputText , self . ParameterArray = self . AllocateLiterals ( OutputText , self . ParameterArray )
+                    NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CallingObject , WordArray , Index )
+                    OutputText = OutputText + NewOutputText
+                    print ( type ( OutputText ) , type ( NewOutputText ) )
+                    self . ParameterArray = [ ]
+                    WordArray . pop ( Index )
+                    WordArray . pop ( Index )
+                    WordArray . pop ( Index )
+                else :
+                    CompilerIssue . OutputError ( 'No function named \'' + WordArray [ Index + 1 ] . Name + '\'.' ,
+                        self . EXIT_ON_ERROR , WordArray [ Index ] )
+            else :
+                self . DropParens ( Index , WordArray )
+                Index = Index + 1
+        else :
+            Index = Index + 2
+        return Index , WordArray , OutputText
+    
     def CanDropParens ( self , Index , WordArray ) :
         Output = False
         if WordArray [ Index + 3 ] == self . OPERATORS [ 'RIGHT_PAREN' ] and WordArray [ Index + 1 ] == self . OPERATORS [ 'LEFT_PAREN' ] :
@@ -712,6 +745,20 @@ class Parser ( ) :
         if WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
             Output = True
         return Output
+    
+    def IsParensWithEmpty ( self , Index , WordArray ) :
+        Output = False
+        if WordArray [ Index + 1 ] . Name == self . OPERATORS [ 'LEFT_PAREN' ] and WordArray [ Index + 2 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
+            Output = True
+        print ( 'wersdf' , WordArray [ Index + 1 ] . Name , WordArray [ Index + 2 ] . Name , Output )
+        return Output
+    
+    def FunctionCallParen ( self , Index , WordArray ) :
+        Output = False
+        if len ( WordArray ) - Index >= 4 :
+            if Lexer . IsValidName ( WordArray [ Index + 2 ] . Name ) == True and WordArray [ Index + 3 ] . Name == self . OPERATORS [ 'LEFT_PAREN' ] :
+                Output = True
+        return Output
 
     def Reduce ( self , Token , SavedWordArray , OutputText , IsInIf ) :
         WordIndex = 0
@@ -729,11 +776,15 @@ class Parser ( ) :
                 Token4 = SavedWordArray [ WordIndex + 3 ]
             if len ( SavedWordArray ) - WordIndex > 4 :
                 Token5 = SavedWordArray [ WordIndex + 4 ]
-            print ('testng' , Token1 . Name , Token2 . Name , Token3 . Name , Token4 . Name , Token5 . Name )
+            print ('testng' , Token1 . Name , Token2 . Name , Token3 . Name , Token4 . Name , Token5 . Name , type ( OutputText ) )
             if self . IsParenAheadTwo ( WordIndex , SavedWordArray ) == True :
                 WordIndex = WordIndex + 1
             elif self . IsRightParenNext ( WordIndex , SavedWordArray ) == True :
                 WordIndex = WordIndex - 2
+            elif self . FunctionCallParen ( WordIndex , SavedWordArray ) == True :
+                WordIndex = WordIndex + 2
+            elif self . IsParensWithEmpty ( WordIndex , SavedWordArray ) == True :
+                WordIndex , SavedWordArray , OutputText = self . DoEmptyActionCall ( WordIndex , SavedWordArray , OutputText )
             elif self . OpOneHighestPrecedence ( Token2 , Token4 ) :
                 OutputText , WordIndex ,  SavedWordArray = self . DoOperation ( WordIndex , SavedWordArray , OutputText )
             else :
@@ -1093,6 +1144,8 @@ class Parser ( ) :
                 self . State = self . MAIN_STATES [ 'ACTION_PARAM_NAME' ]
             else :
                 CompilerIssue . OutputError ( 'Unknown type \'' + Token . Name + '\'' , self . EXIT_ON_ERROR , Token )
+        elif Token . Name == self . SPECIAL_CHARS [ 'RIGHT_PAREN' ] :
+            self . State = self . MAIN_STATES [ 'ACTION_AT_END' ]
         else :
             CompilerIssue . OutputError ( 'Expected variable or right paren in action declaration' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
@@ -1141,8 +1194,9 @@ class Parser ( ) :
 
     def ProcessReturnWaitingForParam ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name in self . TypeTable :
-            NewSymbol = MySymbol ( deepcopy ( self . EMPTY_STRING ) , self . GetTypeObjectFromNames ( Token . Name , '' ) )
-            self . CurrentSTOffset = self . CurrentSTOffset - self . CurrentClass . Size
+            CurrentClass = self . GetTypeObjectFromNames ( Token . Name , '' )
+            NewSymbol = MySymbol ( deepcopy ( self . EMPTY_STRING ) , CurrentClass )
+            self . CurrentSTOffset = self . CurrentSTOffset - CurrentClass . Size
             NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
             self . GetActionReturnValues ( self . CurrentClass , self . CurrentFunction ) . append ( NewSymbol )
             self . State = self . MAIN_STATES [ 'RETURN_AT_END' ]
@@ -1349,14 +1403,16 @@ class Parser ( ) :
         return OutTable
     
     def IsInTypeTable ( self , ClassName , FunctionName ) :
-        Output = True
+        Output = False
         OutTable = self . TypeTable
-        if ClassName != '' and ClassName not in OutTable :
-            Output = False
-        else :
-            OutTable = self . TypeTable [ ClassName ] . InnerTypes
-        if FunctionName != '' and FunctionName not in OutTable :
-            Output = False
+        if ClassName != '' :
+            if ClassName in OutTable :
+                if FunctionName == '' :
+                    Output = True
+                OutTable = self . TypeTable [ ClassName ] . InnerTypes
+        if FunctionName != '' :
+            if FunctionName in OutTable :
+                Output = True
         return Output
 
     def GetTypeTableFromNames ( self , ClassName , FunctionName ) :
@@ -1368,16 +1424,6 @@ class Parser ( ) :
         return OutTable
 
     def GetTypeObjectFromNames ( self , ClassName , FunctionName ) :
-        for i in self . TypeTable :
-            print ( i )
-        print ( "asdf" , ClassName )
-        if ClassName != '' :
-            for i in self . TypeTable [ ClassName ] . InnerTypes :
-                print ( i )
-            print ( "asdf2" , FunctionName )
-        if 'Byte' in self . TypeTable :
-            for i in self . TypeTable [ 'Byte' ] . InnerTypes :
-                print ( i )
         OutTable = self . TypeTable
         if ClassName != '' :
             OutTable = self . TypeTable [ ClassName ]
