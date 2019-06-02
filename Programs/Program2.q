@@ -112,6 +112,58 @@ end
 action NoParamTest ( )
 end
 
+/*
+class Array<T>
+    Integer Size
+    Pointer DP
+    
+    action on create
+        Size = 0
+        DP = AllocateHeapMemory(Size)
+    end
+    
+    action Append ( T NewElem )
+        Size = Size + 1
+        DP = AllocateHeapMemory(Size)
+        Me:SetAt(Size - 1, NewElem)
+    end
+    
+    action asm SetAt(Integer Position, T Elem)
+        ; load DP into ebx
+        mov ebx, ebp
+        add ebx, 12
+        mov ebx, [ebx]
+        
+        ; load Position into edx
+        mov edx, ebp
+        add edx, 16
+        mov edx, [edx]
+        
+        ; Perform arithmetic to find correct memory position into ebx
+        mov ecx, SizeOf(T)
+        mul ecx, ecx, edx
+        add ebx, ecx
+        
+        ; Load the ebx position onto the stack
+        add esp, -4
+        mov [esp], ebx
+        
+        ; Load the ebx position onto the stack
+        mov ebx, ebp
+        add ebx, 20
+        add esp, -4
+        mov [esp], ebx
+        
+        call GetTemplateName(T)__On_Equals
+        
+        ; Move the stack pointer back up
+        add esp, 8
+        
+        
+    end
+end
+*/
+
 action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
     ; load a pointer to the byte in ecx
     mov ecx, ebp
