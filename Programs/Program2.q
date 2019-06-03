@@ -112,6 +112,19 @@ end
 action NoParamTest ( )
 end
 
+class DoubleMethodTest
+    action on create
+    end
+    
+    action Method1 ( )
+        OutputByte ( 82 )
+    end
+    
+    action Method2 ( )
+        Me : Method1 ()
+    end
+end
+
 /*
 class Array<T>
     Integer Size
@@ -487,6 +500,9 @@ action Main
     OutputByte ( TestCST : B2 )
     
     NoParamTest ( )
+    
+    DoubleMethodTest DMT
+    DMT : Method2 ( )
     
     if S6 == 65
         Byte MeByte

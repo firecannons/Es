@@ -696,7 +696,7 @@ class Parser ( ) :
                     WordArray . pop ( Index )
                     WordArray . pop ( Index )
                 else :
-                    CompilerIssue . OutputError ( 'No function named \'' + WordArray [ Index + 1 ] . Name + '\'.' ,
+                    CompilerIssue . OutputError ( 'No function named \'' + WordArray [ Index ] . Name + '\'.' ,
                         self . EXIT_ON_ERROR , WordArray [ Index ] )
             else :
                 self . DropParens ( Index , WordArray )
