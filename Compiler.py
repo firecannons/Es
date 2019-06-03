@@ -1492,6 +1492,7 @@ class Lexer ( ) :
     ASM_TEXT = 'asm'
     ACTION_TEXT = 'action'
     END_TEXT = 'end'
+    SEPARATE_LETTERS = '()'
     
     FIND_NOT_FOUND = NEGATIVE_ONE
     
@@ -1665,6 +1666,17 @@ class Lexer ( ) :
             self . DoDefaultIfSavedWordExists ( CurrentLetter )
         self . AddCharacterToSavedWord ( CurrentLetter )
         self . SetCurrentTokenKind ( CurrentLetter )
+    
+    def IsLetterSeparateLetter ( self , CurrentLetter ) :
+        Output = False
+        if CurrentLetter in self . SEPARATE_LETTERS :
+            Output = True
+        return Output
+    
+    def ProcessSeparateLetter ( self , CurrentLetter ) :
+        if self . IsSavedWordExisting ( ) == True :
+            self . ProcessAppendWord ( self . SavedWord )
+        self . AddCharacterToSavedWord ( CurrentLetter )
 
     def ProcessLetterInSetup ( self ,
         CurrentLetter ) :
@@ -1673,6 +1685,8 @@ class Lexer ( ) :
         elif self . IsLetterNewLine ( CurrentLetter ) :
             self . DoLetterIsNewLine ( CurrentLetter )
             self . LineNumber = self . LineNumber + 1
+        elif self . IsLetterSeparateLetter ( CurrentLetter ) :
+            self . ProcessSeparateLetter ( CurrentLetter )
         else :
             self . DoDefault ( CurrentLetter )
     
