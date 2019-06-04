@@ -125,6 +125,11 @@ class DoubleMethodTest
     end
 end
 
+action ReturnTest ( ) returns Byte
+    Byte B = 69
+    return B
+end
+
 /*
 class Array<T>
     Integer Size
@@ -503,6 +508,10 @@ action Main
     
     DoubleMethodTest DMT
     DMT : Method2 ( )
+    
+    Byte RetTest
+    RetTest = ReturnTest ( )
+    OutputByte ( RetTest )
     
     if S6 == 65
         Byte MeByte
