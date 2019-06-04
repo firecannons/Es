@@ -141,7 +141,8 @@ class Parser ( ) :
         'UNTIL' : 'until' ,
         'ELSE_IF' : 'elseif' ,
         'ELSE' : 'else' ,
-        'REFERENCE' : 'reference'
+        'REFERENCE' : 'reference' ,
+        'RETURN' : 'return'
         
     }
     
@@ -891,6 +892,8 @@ class Parser ( ) :
             CurrentST . RoutineNumber = self . RoutineCounter
             self . RoutineCounter = self . RoutineCounter + 1
             self . GetCurrentST ( ) . OffsetAfterComparison = self . CurrentSTOffset
+        elif Token . Name == self . KEYWORDS [ 'RETURN' ] :
+            OutputText , SavedWordArray , WordIndex = self . DoReturnStatement ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
             OutputText = OutputText + Token . Name
         elif Lexer . IsValidName ( Token . Name ) == True :
@@ -911,6 +914,20 @@ class Parser ( ) :
         else :
             print ( 'screw up' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
+    
+    def DoReturnStatement ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        PrevIndex = WordIndex
+        LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
+        OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
+        Found , RetObject = self . CheckCurrentSTs ( SavedWordArray [ PrevIndex + 1 ] )
+        DestinationOffset = self . CurrentFunction . ReturnValues [ 0 ] . Offset
+        OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( RetObject . Offset )
+        OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( DestinationOffset )
+        self . CurrentSTOffset = self . CurrentSTOffset - self . POINTER_SIZE
+        ActionName = self . ResolveActionNameToAsm ( self . OPERATORS [ 'EQUALS' ] , RetObject . Type )
+        OutputText = self . OutputCallFunction ( ActionName , self . CurrentSTOffset + 8 , OutputText )
+        return OutputText , SavedWordArray , WordIndex
+        
 
     def ProcessUsingWaitingForWord ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name . isalnum ( ) == False :
@@ -1197,7 +1214,7 @@ class Parser ( ) :
             CurrentClass = self . GetTypeObjectFromNames ( Token . Name , '' )
             NewSymbol = MySymbol ( deepcopy ( self . EMPTY_STRING ) , CurrentClass )
             self . CurrentSTOffset = self . CurrentSTOffset - CurrentClass . Size
-            NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
+            NewSymbol . Offset = deepcopy ( self . ACTION_DECLARATION_PARAM_OFFSET + self . POINTER_SIZE * len ( self . CurrentFunction . Parameters ) )
             self . GetActionReturnValues ( self . CurrentClass , self . CurrentFunction ) . append ( NewSymbol )
             self . State = self . MAIN_STATES [ 'RETURN_AT_END' ]
         else :
@@ -1304,6 +1321,21 @@ class Parser ( ) :
             SavedWordArray , WordIndex , OutputText = self . ProcessAfterRepeat ( Token , SavedWordArray , WordIndex , OutputText )
         return SavedWordArray , WordIndex , OutputText
 
+    def ResolveActionNameToFull ( self , ActionName ) :
+        Output = ''
+        if ActionName in self . MAIN_METHOD_NAMES :
+            Output = Output + self . MAIN_METHOD_NAMES [ ActionName ]
+        else :
+            Output = Output + ActionName
+        return Output
+        
+    def ResolveActionNameToAsm ( self , ActionName , Class ) :
+        Output = ''
+        if Class != None :
+            Output = Output + Class . Name + self . FUNCTION_OUTPUT_DELIMITER
+        Output = Output + self . ResolveActionNameToFull ( ActionName )
+        return Output
+    
     def ResolveActionToName ( self , Action , Class ) :
         Output = ''
         if Action . Name in self . MAIN_METHOD_NAMES :
