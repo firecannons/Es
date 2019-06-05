@@ -606,10 +606,11 @@ class Parser ( ) :
                     NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index ] , self . ParameterArray , CallingObject , WordArray , Index )
                     OutputText = OutputText + NewOutputText
                     self . ParameterArray = [ ]
-                    WordArray . pop ( Index )
-                    WordArray . pop ( Index )
-                    WordArray . pop ( Index )
-                    WordArray . pop ( Index )
+                    self . PrintWordArray ( WordArray )
+                    WordArray . pop ( Index + 1 )
+                    WordArray . pop ( Index + 1 )
+                    WordArray . pop ( Index + 1 )
+                    Index = self . RemoveWordIndexIfNoReturn ( Index , WordArray , CallingObject , ActionName )
                 else :
                     CompilerIssue . OutputError ( 'The class \'' + Object . Type . Name + '\' does not have a function \'' + WordArray [ Index + 1 ] . Name + '\'.' ,
                         self . EXIT_ON_ERROR , WordArray [ Index ] )
@@ -693,9 +694,10 @@ class Parser ( ) :
                     OutputText = OutputText + NewOutputText
                     print ( type ( OutputText ) , type ( NewOutputText ) )
                     self . ParameterArray = [ ]
-                    WordArray . pop ( Index )
-                    WordArray . pop ( Index )
-                    WordArray . pop ( Index )
+                    WordArray . pop ( Index + 1 )
+                    WordArray . pop ( Index + 1 )
+                    Index = self . RemoveWordIndexIfNoReturn ( Index , WordArray , CallingObject , ActionName )
+                    self . PrintWordArray ( WordArray )
                 else :
                     CompilerIssue . OutputError ( 'No function named \'' + WordArray [ Index ] . Name + '\'.' ,
                         self . EXIT_ON_ERROR , WordArray [ Index ] )
@@ -705,6 +707,20 @@ class Parser ( ) :
         else :
             Index = Index + 2
         return Index , WordArray , OutputText
+    
+    def RemoveWordIndexIfNoReturn ( self , Index , WordArray , CallingObject , ActionName ) :
+        Class = None
+        ClassName = ''
+        if CallingObject != None :
+            Class = CallingObject . Type
+            ClassName = Class . Name
+        print ( ClassName , ActionName )
+        ActionSymbol = self . GetTypeObjectFromNames ( ClassName , ActionName )
+        Table = self . GetTypeTableFromNames ( ClassName , ActionName )
+        print ( 'return values' , ActionSymbol . ReturnValues , Table , ActionSymbol , ActionSymbol . Name )
+        if len ( ActionSymbol . ReturnValues ) == 0 :
+            WordArray . pop ( Index )
+        return Index
     
     def CanDropParens ( self , Index , WordArray ) :
         Output = False
