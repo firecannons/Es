@@ -130,6 +130,16 @@ action ReturnTest ( ) returns Byte
     return B
 end
 
+class RetTestCls
+    action on create
+    end
+    
+    action RetTe ( ) returns Byte
+        Byte B = 101
+        return B
+    end
+end
+
 /*
 class Array<T>
     Integer Size
@@ -511,6 +521,10 @@ action Main
     
     Byte RetTest
     RetTest = ReturnTest ( )
+    OutputByte ( RetTest )
+    
+    RetTestCls RTC
+    RetTest = RTC : RetTe ( )
     OutputByte ( RetTest )
     
     if S6 == 65

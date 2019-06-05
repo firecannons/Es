@@ -590,6 +590,9 @@ class Parser ( ) :
         if Index >= 2 :
             if WordArray [ Index - 1 ] . Name == self . OPERATORS [ 'COLON' ] :
                 IsFound , CallingObject = self . CheckCurrentSTs ( WordArray [ Index - 2 ] )
+                WordArray . pop ( Index - 2 )
+                WordArray . pop ( Index - 2 )
+                Index = Index - 2
         ar = []
         for i in WordArray :
             ar . append ( i.Name )
@@ -678,6 +681,9 @@ class Parser ( ) :
         if Index >= 2 :
             if WordArray [ Index - 1 ] . Name == self . OPERATORS [ 'COLON' ] :
                 IsFound , CallingObject = self . CheckCurrentSTs ( WordArray [ Index - 2 ] )
+                WordArray . pop ( Index - 2 )
+                WordArray . pop ( Index - 2 )
+                Index = Index - 2
         ar = []
         for i in WordArray :
             ar . append ( i.Name )
