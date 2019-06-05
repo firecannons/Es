@@ -126,7 +126,7 @@ class DoubleMethodTest
 end
 
 action ReturnTest ( ) returns Byte
-    Byte B = 69
+    Byte B = 70
     return B
 end
 

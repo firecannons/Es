@@ -1150,7 +1150,7 @@ call Byte__On_Create
 add esp, 4
 add esp, -1
 
-mov byte [esp], 69
+mov byte [esp], 70
 
 ;Declaring [16 -2
 ;Loading [16 -2
@@ -4871,6 +4871,18 @@ add esp, 4
 add esp, -1
 call ReturnTest
 add esp, 0
+;Loading [245 -156
+add esp, -4
+mov ebx, ebp
+add ebx, -156
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -155
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
 ;Loading RetTest -156
 add esp, -4
 mov ebx, ebp
