@@ -140,8 +140,8 @@ class RetTestCls
     end
 end
 
-action ReturnTest2 ( ) returns Byte
-    Byte B = 70
+action ReturnTest2 ( Byte B2 ) returns Byte
+    Byte B = B2
     return B
 end
 
@@ -533,7 +533,7 @@ action Main
     OutputByte ( RetTest )
     
     Byte RetTest2
-    RetTest2 = ReturnTest2 ( )
+    RetTest2 = ReturnTest2 ( 72 )
     OutputByte ( RetTest2 )
     
     if S6 == 65
