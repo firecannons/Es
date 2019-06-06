@@ -938,12 +938,20 @@ class Parser ( ) :
             print ( 'screw up' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
     
+    def GetSizeOfSymbol ( self , TestSymbol ) :
+        Size = TestSymbol . Type . Size
+        if TestSymbol . IsReference == True :
+            Size = self . POINTER_SIZE
+        return Size
+            
+    
     def SumUpParameterSizes ( self , CurrentClass , CurrentFunction ) :
         Sum = 0
         if CurrentClass != None :
             Sum = Sum + self . POINTER_SIZE
         for Param in self . CurrentFunction . Parameters :
-            Sum = Sum + Param . Size
+            self . GetSizeOfSymbol ( Param )
+            Sum = Sum + self . GetSizeOfSymbol ( Param )
         return Sum
     
     def DoReturnStatement ( self , Token , SavedWordArray , WordIndex , OutputText ) :
