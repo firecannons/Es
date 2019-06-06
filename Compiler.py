@@ -304,6 +304,7 @@ class Parser ( ) :
         self . CurrentToken = None
         self . CurrentTokenObject = None
         self . CurrentlyReference = False
+        self . AfterReturnOffset = 0
     
     def Parse ( self , SavedWordArray , OutputText ) :
         WordIndex = 0
@@ -472,9 +473,9 @@ class Parser ( ) :
         OutputText = self . LoadParameter ( Object , OutputText )
         return OutputText
 
-    def OutputCallFunction ( self , FunctionName , AfterReturnOffset , OutputText ) :
+    def OutputCallFunction ( self , FunctionName , OutputText ) :
         OutputText = OutputText + self.ASM_COMMANDS['CALL'] + self.SPACE + FunctionName + self.SPECIAL_CHARS['NEWLINE']
-        OutputText = OutputText + self.ASM_TEXT['SHIFT_STRING'].format(AfterReturnOffset - self.CurrentSTOffset)
+        OutputText = OutputText + self.ASM_TEXT['SHIFT_STRING'].format(self . AfterReturnOffset - self.CurrentSTOffset)
         return OutputText
 
     def CheckIfObjectInTokenValid ( self , Token ) :
@@ -513,18 +514,18 @@ class Parser ( ) :
     
     def LoadValues ( self , OutputText , ArrayOfOperands , TypeName , FunctionName , WordArray , Index , Object , Type ) :
         WordArray , Index , OutputText = self . AddReturnValues ( TypeName , FunctionName , WordArray , Index , OutputText )
-        AfterReturnOffset = self . CurrentSTOffset
+        self . AfterReturnOffset = self . CurrentSTOffset
         OutputText = self . LoadParameters ( ArrayOfOperands , OutputText )
         if Type != None :
             OutputText = self . LoadCallingObject ( Object , OutputText )
-        return OutputText , ArrayOfOperands , WordArray , Index , AfterReturnOffset
+        return OutputText , ArrayOfOperands , WordArray , Index
     
     def CalcFunctionCall ( self , Operator , ArrayOfOperands , Object , WordArray , Index ) :
         OutputText = ''
         Type , TypeName , FunctionName = self . ResolveActionDetails ( Operator , Object )
-        OutputText , ArrayOfOperands , WordArray , Index , AfterReturnOffset = self . LoadValues ( OutputText , ArrayOfOperands , TypeName , FunctionName , WordArray , Index , Object , Type )
-        OutputText = self . OutputCallFunction ( FunctionName , AfterReturnOffset , OutputText )
-        self . CurrentSTOffset = AfterReturnOffset
+        OutputText , ArrayOfOperands , WordArray , Index = self . LoadValues ( OutputText , ArrayOfOperands , TypeName , FunctionName , WordArray , Index , Object , Type )
+        OutputText = self . OutputCallFunction ( FunctionName , OutputText )
+        self . CurrentSTOffset = self . AfterReturnOffset
         return OutputText , WordArray
 
     def DoColonOperation ( self , Index , WordArray , OutputText ) :
@@ -937,17 +938,25 @@ class Parser ( ) :
             print ( 'screw up' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
     
+    def SumUpParameterSizes ( self , CurrentClass , CurrentFunction ) :
+        Sum = 0
+        if CurrentClass != None :
+            Sum = Sum + self . POINTER_SIZE
+        for Param in self . CurrentFunction . Parameters :
+            Sum = Sum + Param . Size
+        return Sum
+    
     def DoReturnStatement ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         PrevIndex = WordIndex
         LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex + 1 )
         OutputText = self . Reduce ( Token , LineWordArray , OutputText , True )
         Found , RetObject = self . CheckCurrentSTs ( SavedWordArray [ PrevIndex + 1 ] )
-        DestinationOffset = self . CurrentFunction . ReturnValues [ 0 ] . Offset
+        DestinationOffset = self . ACTION_DECLARATION_PARAM_OFFSET + self . SumUpParameterSizes ( self . CurrentClass , self . CurrentFunction )
         OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( RetObject . Offset )
         OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( DestinationOffset )
         self . CurrentSTOffset = self . CurrentSTOffset - self . POINTER_SIZE
         ActionName = self . ResolveActionNameToAsm ( self . OPERATORS [ 'EQUALS' ] , RetObject . Type )
-        OutputText = self . OutputCallFunction ( ActionName , self . CurrentSTOffset + 8 , OutputText )
+        OutputText = self . OutputCallFunction ( ActionName , OutputText )
         return OutputText , SavedWordArray , WordIndex
         
 
