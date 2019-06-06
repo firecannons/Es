@@ -135,9 +135,14 @@ class RetTestCls
     end
     
     action RetTe ( ) returns Byte
-        Byte B = 101
+        Byte B = 66
         return B
     end
+end
+
+action ReturnTest2 ( ) returns Byte
+    Byte B = 70
+    return B
 end
 
 /*
@@ -526,6 +531,10 @@ action Main
     RetTestCls RTC
     RetTest = RTC : RetTe ( )
     OutputByte ( RetTest )
+    
+    Byte RetTest2
+    RetTest2 = ReturnTest2 ( )
+    OutputByte ( RetTest2 )
     
     if S6 == 65
         Byte MeByte
