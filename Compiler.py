@@ -29,7 +29,7 @@ class MySymbol ( ) :
         self . Offset = 0
         self . DereferenceOffset = 0
         self . IsFunction = False
-        self . Templates = { }
+        self . Templates = [ ]
         self . IsReference = False
         self . IsDereferenced = False
         self . ActLikeReference = False
@@ -40,7 +40,7 @@ class Function ( ) :
         self . Parameters = [ ]
         self . ReturnValues = [ ]
         self . IsFunction = True
-        self . Templates = { }
+        self . Templates = [ ]
         self . TemplatedCode = [ ]
 
 class Type ( ) :
@@ -50,7 +50,7 @@ class Type ( ) :
         self . InnerTypes = { }
         self . Size = 0
         self . IsFunction = False
-        self . Templates = { }
+        self . Templates = [ ]
 
 class TemplateElem ( ) :
     def __init__ ( self , Name ) :
@@ -123,7 +123,8 @@ class Parser ( ) :
         'RETURN_WAITING_FOR_PARAM' : 26 ,
         'RETURN_AT_END' : 27 ,
         'REDUCING_IF' : 28 ,
-        'AFTER_REPEAT' : 29
+        'AFTER_REPEAT' : 29 ,
+        'TEMPLATED_CODE' : 30
         
     }
     
@@ -1100,7 +1101,7 @@ class Parser ( ) :
             CompilerIssue . OutputError ( Token + ' is in the wrong format for a template name' , self . EXIT_ON_ERROR , TokenObject )
         else :
             Table = self . GetTypeObject ( self . CurrentClass , self . CurrentFunction )
-            Table . Templates [ Token . Name ] = TemplateElem ( Token . Name )
+            Table . Templates . append ( Token . Name )
             self . State = self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATE_NAME' ]
         return SavedWordArray , WordIndex , OutputText
 
@@ -1163,6 +1164,7 @@ class Parser ( ) :
                     else :
                         self . CurrentTypeTable ( ) [ ActionName ] = Function ( ActionName )
                         self . CurrentFunction = self . CurrentTypeTable ( ) [ ActionName ]
+                        self . CurrentFunction . Templates = self . CurrentFunction . Templates + self . CurrentClass . Templates
                         self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
             else :
                 Found , OutSymbol = self . CheckCurrentSTs ( Token )
@@ -1185,6 +1187,7 @@ class Parser ( ) :
                 Name = self . ResolveActionToAsm ( Token , self . CurrentClass )
                 self . CurrentFunction = Function ( Name )
                 self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ self . CurrentFunction . Name ] = self . CurrentFunction
+                self . CurrentFunction . Templates = self . CurrentFunction . Templates + self . CurrentClass . Templates
                 self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
         else :
             CompilerIssue . OutputError ( 'Cannot overload operator \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
@@ -1271,7 +1274,10 @@ class Parser ( ) :
         if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
             self . CurrentSTOffset = deepcopy ( self . ACTION_DEFINITION_OFFSET )
             OutputText = self . OutputActionStartCode ( OutputText )
-            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            if len ( self . CurrentFunction . Templates ) != 0 :
+                self . State = self . MAIN_STATES [ 'TEMPLATED_CODE' ]
+            else :
+                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
         else :
             CompilerIssue . OutputError ( 'Expected NEWLINE after return values' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
@@ -1303,6 +1309,24 @@ class Parser ( ) :
             self . GetCurrentST ( ) . OffsetAfterComparison = self . CurrentSTOffset
             self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
         return SavedWordArray , WordIndex , OutputText
+    
+    def ProcessTemplatedCode ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        if Token . Name != self . KEYWORDS [ 'END' ] :
+            self . CurrentFunction . TemplatedCode . append ( Token )
+        else :
+            if self . CurrentFunction != None :
+                self . CurrentFunction = None
+                self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
+            elif self . CurrentClass != None :
+                self . CurrentClass = None
+            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+        return SavedWordArray , WordIndex , OutputText
+    
+    def IsScopeTemplated ( self , Object ) :
+        Output = False
+        if len ( Object . Templates ) > 0 :
+            Output = True
+        return Output
 
     def PrintParsingStatus ( self , Token ) :
         ClassName = ''
@@ -1365,6 +1389,8 @@ class Parser ( ) :
             SavedWordArray , WordIndex , OutputText = self . ProcessWaitingForOperator ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'AFTER_REPEAT' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessAfterRepeat ( Token , SavedWordArray , WordIndex , OutputText )
+        elif self . State == self . MAIN_STATES [ 'TEMPLATED_CODE' ] :
+            SavedWordArray , WordIndex , OutputText = self . ProcessTemplatedCode ( Token , SavedWordArray , WordIndex , OutputText )
         return SavedWordArray , WordIndex , OutputText
 
     def ResolveActionNameToFull ( self , ActionName ) :
