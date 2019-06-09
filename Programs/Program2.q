@@ -1,4 +1,5 @@
-using Libraries . DataTypes
+using Libraries.DataTypes
+using Libraries.DynamicMemory
 
 action asm OutputByte ( Byte L )
     ; load a pointer to the byte in ecx
@@ -145,16 +146,17 @@ action ReturnTest2 ( Byte B2 ) returns Byte
     return B
 end
 
-/*
-class Array<T>
+
+class Array
     Integer Size
     Pointer DP
     
     action on create
-        Size = 0
-        DP = AllocateHeapMemory(Size)
+        Me : Size = 0
+        Me : DP = AllocateHeapMemory ( Me : Size )
     end
-    
+    end
+    /*
     action Append ( T NewElem )
         Size = Size + 1
         DP = AllocateHeapMemory(Size)
@@ -194,8 +196,8 @@ class Array<T>
         
         
     end
-end
-*/
+end*/
+
 
 action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
     ; load a pointer to the byte in ecx
@@ -541,5 +543,8 @@ action Main
         MeByte = MeByte + 2
     end
     Pointer joe
+    
+    Byte Size = 0
+    Pointer DB = AllocateHeapMemory ( Size )
     
 end

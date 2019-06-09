@@ -41,6 +41,7 @@ class Function ( ) :
         self . ReturnValues = [ ]
         self . IsFunction = True
         self . Templates = { }
+        self . TemplatedCode = [ ]
 
 class Type ( ) :
     
@@ -50,6 +51,10 @@ class Type ( ) :
         self . Size = 0
         self . IsFunction = False
         self . Templates = { }
+
+class TemplateElem ( ) :
+    def __init__ ( self , Name ) :
+        self . Name = Name
 
 class ScopeAdder ( ) :
     def __init__ ( self , Type ) :
@@ -1041,16 +1046,17 @@ class Parser ( ) :
         else :
             CompilerIssue . OutputError ( 'Expected newline encountered \'' + Token . Name + '\'' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
-
+    
+    # The template functions with "class" in the name are for instantiating templates, like Array<Letter>
     def ProcessMakingTemplate ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        if Lexer . IsValidName ( Token ) == True :
+        if Lexer . IsValidName ( Token . Name ) == True :
             if Token in self . TypeTable :
-                if self . TypeTable [ Token ] . IsFunction == False :
+                if self . TypeTable [ Token . Name ] . IsFunction == False :
                     self . State = self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ]
                 else :
-                   CompilerIssue . OutputError ( 'Template type \'' + Token + '\' was found to be a function not class', self . EXIT_ON_ERROR , TokenObject )
+                   CompilerIssue . OutputError ( 'Template type \'' + Token . Name + '\' was found to be a function not class', self . EXIT_ON_ERROR , TokenObject )
             else :
-                CompilerIssue . OutputError ( 'Template type \'' + Token + '\' not found in type table', self . EXIT_ON_ERROR , TokenObject )
+                CompilerIssue . OutputError ( 'Template type \'' + Token . Name + '\' not found in type table', self . EXIT_ON_ERROR , TokenObject )
         else :
             CompilerIssue . OutputError ( 'Expected valid type for template instead of \'' + Token + '\'', self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
@@ -1089,11 +1095,12 @@ class Parser ( ) :
             CompilerIssue . OutputError ( 'Expected \'' + self . KEYWORDS [ 'SIZE' ] + '\' or newline or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_START' ] + '\'' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
 
-    def ProcessMakingTemplate ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        if Lexer . IsValidName ( Token ) == False :
+    def ProcessClassMakingTemplate ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        if Lexer . IsValidName ( Token . Name ) == False :
             CompilerIssue . OutputError ( Token + ' is in the wrong format for a template name' , self . EXIT_ON_ERROR , TokenObject )
         else :
-            self . TypeTable [ self . CurrentClass . Name ] . Templates [ Token ] = set ( )
+            Table = self . GetTypeObject ( self . CurrentClass , self . CurrentFunction )
+            Table . Templates [ Token . Name ] = TemplateElem ( Token . Name )
             self . State = self . MAIN_STATES [ 'CLASS_AFTER_TEMPLATE_NAME' ]
         return SavedWordArray , WordIndex , OutputText
 

@@ -436,6 +436,10 @@ class Pointer
     
     action on create
     end
+    
+    action on = ( Pointer Source )
+        Me : Position = Source : Position
+    end
 end
 
 class CapTest
