@@ -5365,33 +5365,42 @@ add ebx, -165
 mov [esp], ebx
 call Byte__On_Equals
 add esp, 8
-;Declaring DB -170
+;Declaring TestSize -170
 add esp, -4
 
 add esp, -4
 mov ebx, ebp
 add ebx, -170
 mov [esp], ebx
-call Pointer__On_Create
+call Integer__On_Create
 add esp, 4
-;Adding return value 
+;Declaring DB -174
 add esp, -4
-;Loading Size -174
-add esp, -4
-mov ebx, ebp
-add ebx, -165
-mov [esp], ebx
-call AllocateHeapMemory
-add esp, 4
-;Loading [262 -174
+
 add esp, -4
 mov ebx, ebp
 add ebx, -174
 mov [esp], ebx
-;Loading a Pointer object
+call Pointer__On_Create
+add esp, 4
+;Adding return value 
+add esp, -4
+;Loading TestSize -178
 add esp, -4
 mov ebx, ebp
 add ebx, -170
+mov [esp], ebx
+call AllocateHeapMemory
+add esp, 4
+;Loading [262 -178
+add esp, -4
+mov ebx, ebp
+add ebx, -178
+mov [esp], ebx
+;Loading a Pointer object
+add esp, -4
+mov ebx, ebp
+add ebx, -174
 mov [esp], ebx
 call Pointer__On_Equals
 add esp, 8

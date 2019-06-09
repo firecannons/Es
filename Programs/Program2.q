@@ -147,7 +147,7 @@ action ReturnTest2 ( Byte B2 ) returns Byte
 end
 
 
-class Array
+class Array<T>
     Integer Size
     Pointer DP
     
@@ -545,6 +545,7 @@ action Main
     Pointer joe
     
     Byte Size = 0
-    Pointer DB = AllocateHeapMemory ( Size )
+    Integer TestSize
+    Pointer DB = AllocateHeapMemory ( TestSize )
     
 end

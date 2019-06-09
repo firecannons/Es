@@ -1,4 +1,4 @@
-action asm AllocateHeapMemory ( Byte Size ) returns Pointer
+action asm AllocateHeapMemory ( Integer Size ) returns Pointer
     ; addr
     add esp, -4
     mov dword [esp], 0
