@@ -311,6 +311,8 @@ class Parser ( ) :
         self . CurrentTokenObject = None
         self . CurrentlyReference = False
         self . AfterReturnOffset = 0
+        self . SavedTemplates = [ ]
+        self . TempTemplateClass = None
     
     def Parse ( self , SavedWordArray , OutputText ) :
         WordIndex = 0
@@ -1051,13 +1053,14 @@ class Parser ( ) :
     # The template functions with "class" in the name are for instantiating templates, like Array<Letter>
     def ProcessMakingTemplate ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Lexer . IsValidName ( Token . Name ) == True :
-            if Token in self . TypeTable :
+            if Token . Name in self . TypeTable :
                 if self . TypeTable [ Token . Name ] . IsFunction == False :
                     self . State = self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ]
+                    self . SavedTemplates . append ( Token . Name )
                 else :
                    CompilerIssue . OutputError ( 'Template type \'' + Token . Name + '\' was found to be a function not class', self . EXIT_ON_ERROR , TokenObject )
             else :
-                CompilerIssue . OutputError ( 'Template type \'' + Token . Name + '\' not found in type table', self . EXIT_ON_ERROR , TokenObject )
+                CompilerIssue . OutputError ( 'Template type \'' + Token . Name + '\' not found in type table', self . EXIT_ON_ERROR , Token )
         else :
             CompilerIssue . OutputError ( 'Expected valid type for template instead of \'' + Token + '\'', self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
@@ -1066,6 +1069,8 @@ class Parser ( ) :
         if Token . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
             self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
         elif Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_END' ] :
+            self . CompileTemplatedClass ( self . SavedType )
+            self . SavedTemplates = [ ]
             self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
         else :
             CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\' instead of \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
@@ -1322,6 +1327,45 @@ class Parser ( ) :
             self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
         return SavedWordArray , WordIndex , OutputText
     
+    def CompileTemplatedClass ( self , Class ) :
+        self . TempTemplateClass = self . AdjustForTemplates ( Class , self . SavedTemplates )
+    
+    def AdjustForTemplates ( self , Class , Templates ) :
+        NewClass = deepcopy ( Class )
+        NewClass = self . ReplaceTypes ( NewClass , Templates )
+        NewClass . Size = self . RecalculateSize ( NewClass )
+        return NewClass
+    
+    def RecalculateSize ( self , Class ) :
+        Sum = 0
+        for InnerType in self . GetElementsOfType ( Class ) :
+            Sum = Sum + InnerType . Type . Size
+        return Sum
+    
+    def GetElementsOfType ( self , Type ) :
+        Elements = [ ]
+        for ElemName in Type . InnerTypes :
+            if Type . InnerTypes [ ElemName ] . IsFunction == False :
+                Elements . append ( Type . InnerTypes [ ElemName ] )
+        return Elements
+    
+    def ReplaceTypes ( self , NewClass , Templates ) :
+        for Elem in self . GetElementsOfType ( NewClass ) :
+            Position = self . FindInTemplates ( NewClass , Elem . Type )
+            if Position >= 0 :
+                NewClass . InnerTypes [ ElemName ] . Type = self . TypeTable [ Templates [ Position ] ]
+                NewClass . InnerTypes [ Templates [ Position ] ] = NewClass . InnerTypes . pop ( Elem . Name )
+        return NewClass
+    
+    def FindInTemplates ( self , Class , NewType ) :
+        Position = -1
+        Index = 0
+        for Template in Class . Templates :
+            if Template == NewType . Name :
+                Position = Index
+            Index = Index + 1
+        return Position
+    
     def IsScopeTemplated ( self , Object ) :
         Output = False
         if len ( Object . Templates ) > 0 :
@@ -1348,7 +1392,7 @@ class Parser ( ) :
         elif self . State == self . MAIN_STATES [ 'MAKING_TEMPLATE' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessMakingTemplate ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ] :
-            SavedWordArray , WordIndex , OutputText = self . ProcessAfterTemplateName ( self , Token , SavedWordArray , WordIndex , OutputText )
+            SavedWordArray , WordIndex , OutputText = self . ProcessAfterTemplateName ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'USING_WAITING_FOR_WORD' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessUsingWaitingForWord ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . State == self . MAIN_STATES [ 'USING_AFTER_WORD' ] :

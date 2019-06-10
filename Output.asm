@@ -5404,6 +5404,15 @@ add ebx, -174
 mov [esp], ebx
 call Pointer__On_Equals
 add esp, 8
+;Declaring MyAr -186
+add esp, -8
+
+add esp, -4
+mov ebx, ebp
+add ebx, -186
+mov [esp], ebx
+call Array__On_Create
+add esp, 4
 
 
 mov esp, ebp
