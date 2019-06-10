@@ -548,4 +548,6 @@ action Main
     Integer TestSize
     Pointer DB = AllocateHeapMemory ( TestSize )
     
+    Array<Byte> MyAr
+    
 end
