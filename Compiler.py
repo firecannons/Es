@@ -1202,8 +1202,7 @@ class Parser ( ) :
         if Token . Name == self . SPECIAL_CHARS [ 'LEFT_PAREN' ] :
             self . State = self . MAIN_STATES [ 'ACTION_NEW_PARAMETER' ]
         elif Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-            OutputText = self . OutputActionStartCode ( OutputText )
-            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            OutputText = self . OutputFunctionEnd ( OutputText )
         else :
             CompilerIssue . OutputError ( 'Expected left paren or newline in action declaration' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
@@ -1254,9 +1253,7 @@ class Parser ( ) :
 
     def ProcessActionAtEnd ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-            self . CurrentSTOffset = deepcopy ( self . ACTION_DEFINITION_OFFSET )
-            OutputText = self . OutputActionStartCode ( OutputText )
-            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            OutputText = self . OutputFunctionEnd ( OutputText )
         elif Token . Name == self . KEYWORDS [ 'RETURNS' ] :
             self . State = self . MAIN_STATES [ 'RETURN_WAITING_FOR_PARAM' ]
         else :
@@ -1274,15 +1271,19 @@ class Parser ( ) :
         else :
             CompilerIssue . OutputError ( 'The type {} is not a currently valid type' . format ( Token ) , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
+    
+    def OutputFunctionEnd ( self , OutputText ) :
+        self . CurrentSTOffset = deepcopy ( self . ACTION_DEFINITION_OFFSET )
+        if len ( self . CurrentFunction . Templates ) != 0 :
+            self . State = self . MAIN_STATES [ 'TEMPLATED_CODE' ]
+        else :
+            OutputText = self . OutputActionStartCode ( OutputText )
+            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+        return OutputText
 
     def ProcessReturnAtEnd ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-            self . CurrentSTOffset = deepcopy ( self . ACTION_DEFINITION_OFFSET )
-            OutputText = self . OutputActionStartCode ( OutputText )
-            if len ( self . CurrentFunction . Templates ) != 0 :
-                self . State = self . MAIN_STATES [ 'TEMPLATED_CODE' ]
-            else :
-                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            OutputText = self . OutputFunctionEnd ( OutputText )
         else :
             CompilerIssue . OutputError ( 'Expected NEWLINE after return values' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
@@ -1436,6 +1437,12 @@ class Parser ( ) :
         elif self . State == self . MAIN_STATES [ 'TEMPLATED_CODE' ] :
             SavedWordArray , WordIndex , OutputText = self . ProcessTemplatedCode ( Token , SavedWordArray , WordIndex , OutputText )
         return SavedWordArray , WordIndex , OutputText
+    
+    def AddTemplatesToOutput ( self , Templates ) :
+        Output = ''
+        for Index in range ( len ( Templates ) ) :
+            Output = Output + self . FUNCTION_OUTPUT_DELIMITER + Templates [ Index ]
+        return Output
 
     def ResolveActionNameToFull ( self , ActionName ) :
         Output = ''
@@ -1443,6 +1450,7 @@ class Parser ( ) :
             Output = Output + self . MAIN_METHOD_NAMES [ ActionName ]
         else :
             Output = Output + ActionName
+        Output = Output + self . AddTemplatesToOutput ( self . SavedTemplates )
         return Output
         
     def ResolveActionNameToAsm ( self , ActionName , Class ) :
@@ -1458,6 +1466,7 @@ class Parser ( ) :
             Output = Output + self . MAIN_METHOD_NAMES [ Action . Name ]
         else :
             Output = Output + Action . Name
+        Output = Output + self . AddTemplatesToOutput ( self . SavedTemplates )
         return Output
 
     def ResolveActionToAsm ( self , Action , Class ) :
