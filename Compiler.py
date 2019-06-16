@@ -75,6 +75,10 @@ class MyToken ( ) :
         self . LineNumber = LineNumber
         self . FileName = FileName
 
+class CodeFunction ( ) :
+    def __init__ ( self , Code ) :
+        self . Code = Code
+
 class CompilerIssue :
     
     FAIL_COLOR_TEXT = '\033[91m'
@@ -296,7 +300,7 @@ class Parser ( ) :
         self . State = deepcopy ( self . MAIN_STATES [ 'START_OF_LINE' ] )
         self . SavedLine = [ ]
         self . TypeTable = { }
-        self . STStack = [ Scope ( self . SCOPE_TYPES [ 'GLOBAL' ] , 0 ) ]
+        self . STStack = self . GetStartingScopeStack ( )
         self . CurrentClass = None
         self . CurrentFunction = None
         self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
@@ -313,6 +317,11 @@ class Parser ( ) :
         self . AfterReturnOffset = 0
         self . SavedTemplates = [ ]
         self . TempTemplateClass = None
+        self . CodeArray = [ ]
+    
+    def GetStartingScopeStack ( self ) :
+        STStack = [ Scope ( self . SCOPE_TYPES [ 'GLOBAL' ] , 0 ) ]
+        return STStack
     
     def Parse ( self , SavedWordArray , OutputText ) :
         WordIndex = 0
@@ -322,9 +331,16 @@ class Parser ( ) :
             self . CurrentToken = Token
             SavedWordArray , WordIndex , OutputText = self . ParseToken ( Token , SavedWordArray , WordIndex , OutputText )
             WordIndex = WordIndex + 1
+        OutputText = self . CombineCodeArray ( self . CodeArray ) + OutputText
         print ( self . TypeTable , self . TypeTable [ 'Pointer' ] )
         print ( self . TypeTable [ 'Pointer' ] . InnerTypes )
         return OutputText , SavedWordArray
+    
+    def CombineCodeArray ( self , CodeArray ) :
+        OutputText = ''
+        for Temp in CodeArray :
+            OutputText = OutputText + Temp . Code
+        return OutputText
     
     def GetOperatorDepth ( self , Token ) :
         Depth = -1
@@ -847,12 +863,6 @@ class Parser ( ) :
         self . CurrentParamOffset = deepcopy ( self . ACTION_DECLARATION_PARAM_OFFSET )
         self . ActionTypeDeclared = False
         self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'ACTION' ] , self . CurrentSTOffset ) )
-        if self . CurrentClass != None :
-            SelfSymbol = MySymbol ( self . SELF_OBJECT_NAME , self . CurrentClass )
-            SelfSymbol . Offset = self . CurrentParamOffset
-            SelfSymbol . IsReference = True
-            self . GetCurrentST ( ) . Symbols [ self . SELF_OBJECT_NAME ] = SelfSymbol
-            self . CurrentParamOffset = self . CurrentParamOffset - self . POINTER_SIZE
 
 
     def ProcessStartOfLine ( self , Token , SavedWordArray , WordIndex , OutputText ) :
@@ -886,6 +896,9 @@ class Parser ( ) :
                 self . CurrentFunction = None
                 self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
                 OutputText = self . CalcActionReturnOutput ( OutputText )
+                NewCodeFunction = CodeFunction ( OutputText )
+                self . CodeArray . append ( NewCodeFunction )
+                OutputText = deepcopy ( self . EMPTY_STRING )
             elif self . CurrentClass != None :
                 self . CurrentClass = None
             self . STStack . pop ( len ( self . STStack ) - 1 )
@@ -1142,6 +1155,14 @@ class Parser ( ) :
         else :
             CompilerIssue . OutputError ( 'Expected newline after declaring class size' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
+    
+    def AddSelfParameterToCurrentFunction ( self ) :
+        SelfSymbol = MySymbol ( self . SELF_OBJECT_NAME , self . CurrentClass )
+        SelfSymbol . Offset = self . CurrentParamOffset
+        SelfSymbol . IsReference = True
+        self . GetCurrentST ( ) . Symbols [ self . SELF_OBJECT_NAME ] = SelfSymbol
+        self . CurrentTypeTable ( ) . append ( SelfSymbol )
+        self . CurrentParamOffset = self . CurrentParamOffset - self . POINTER_SIZE
 
     def ProcessActionAfter ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . KEYWORDS [ 'ASM' ] :
@@ -1170,6 +1191,7 @@ class Parser ( ) :
                         self . CurrentTypeTable ( ) [ ActionName ] = Function ( ActionName )
                         self . CurrentFunction = self . CurrentTypeTable ( ) [ ActionName ]
                         self . CurrentFunction . Templates = self . CurrentFunction . Templates + self . CurrentClass . Templates
+                        self . AddSelfParameterToCurrentFunction ( )
                         self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
             else :
                 Found , OutSymbol = self . CheckCurrentSTs ( Token )
@@ -1193,6 +1215,7 @@ class Parser ( ) :
                 self . CurrentFunction = Function ( Name )
                 self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ self . CurrentFunction . Name ] = self . CurrentFunction
                 self . CurrentFunction . Templates = self . CurrentFunction . Templates + self . CurrentClass . Templates
+                self . AddSelfParameterToCurrentFunction ( )
                 self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
         else :
             CompilerIssue . OutputError ( 'Cannot overload operator \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
@@ -1328,8 +1351,49 @@ class Parser ( ) :
             self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
         return SavedWordArray , WordIndex , OutputText
     
+    def GetClassStack ( self ) :
+        STStack = self . GetStartingScopeStack ( )
+        STStack . append ( Scope ( self . SCOPE_TYPES [ 'CLASS' ] , 0 ) )
+        return STStack
+    
+    def PrepareToCompileTemplatedClass ( self , TempClass ) :
+        OldState = self . State
+        OldScopeStack = self . STStack
+        OldClass = self . CurrentClass
+        OldFunction = self . CurrentFunction
+        self . STStack = self . GetClassStack ( )
+        self . CurrentClass = TempClass
+        return OldState , OldScopeStack , OldClass , OldFunction
+    
+    def EndCompileTemplatedClass ( OldState , OldScopeStack , OldClass , OldFunction ) :
+        self . State = OldState
+        self . STStack = OldScopeStack
+        self . CurrentClass = OldClass
+        self . CurrentFunction = OldFunction
+    
+    def CopyFunctionParametersToScope ( self , InnerType ) :
+        print ( 'testing' , InnerType . Name , InnerType . Parameters )
+        for Param in InnerType . Parameters :
+            self . GetCurrentST ( ) . Symbols [ Param . Name ] = Param
+    
+    def CompileClass ( self , TempClass ) :
+        OldState , OldScopeStack , OldClass , OldFunction = self . PrepareToCompileTemplatedClass ( TempClass )
+        for InnerName in TempClass . InnerTypes :
+            InnerType = TempClass . InnerTypes [ InnerName ]
+            if InnerType . IsFunction == True :
+                print ( 'okok' )
+                self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'ACTION' ] , 0 ) )
+                self . CopyFunctionParametersToScope ( InnerType )
+                print ( self . GetCurrentST ( ) . Symbols , 'fire' )
+                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+                self . CurrentFunction = InnerType
+                OutputText , SavedWordArray = self . Parse ( InnerType . TemplatedCode , '' )
+                self . CodeArray . append ( CodeFunction ( OutputText ) )
+        self . EndCompileTemplateClass ( OldState , OldScopeStack , OldClass , OldFunction )
+    
     def CompileTemplatedClass ( self , Class ) :
         self . TempTemplateClass = self . AdjustForTemplates ( Class , self . SavedTemplates )
+        self . CompileClass ( Class )
     
     def AdjustForTemplates ( self , Class , Templates ) :
         NewClass = deepcopy ( Class )
