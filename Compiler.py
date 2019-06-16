@@ -691,10 +691,11 @@ class Parser ( ) :
                     CompilerIssue . OutputError ( 'Reference ' + Object . Name + ' is of a different type than ' + RightOperand . Name ,
                         self . EXIT_ON_ERROR , WordArray [ Index ] )
             else :
-                if self . IsInTypeTable ( Object . Type . Name , self . ResolveActionToAsm ( WordArray [ Index + 1 ] , Object . Type ) ) == True :
+                if self . IsInTypeTable ( Object . Type . Name , self . ResolveActionToAsm ( WordArray [ Index + 1 ] , Object . Type , Object . Templates ) ) == True :
                     NewOutputText , WordArray = self . CalcFunctionCall ( WordArray [ Index + 1 ] , ArrayOfOperands , Object , WordArray , Index )
                     OutputText = OutputText + NewOutputText
                 else :
+                    print ( self . TypeTable [ 'Integer' ] , self . TypeTable [ 'Integer' ] . InnerTypes , self . ResolveActionToAsm ( WordArray [ Index + 1 ] , Object . Type , Object . Templates ) )
                     CompilerIssue . OutputError ( 'The class \'' + Object . Type . Name + '\' does not have a function \'' + WordArray [ Index + 1 ] . Name + '\'.' ,
                         self . EXIT_ON_ERROR , WordArray [ Index ] )
             WordArray . pop ( Index + 1 )
@@ -1029,6 +1030,7 @@ class Parser ( ) :
                 else :
                     NewSymbol = MySymbol ( Token . Name , self . TypeTable [ self . SavedType . Name ] )
                     AddSize = self . TypeTable [ self . SavedType . Name ] . Size
+                    NewSymbol . Templates = self . SavedTemplates
                     if self . CurrentlyReference == True :
                         NewSymbol . ActLikeReference = True
                         NewSymbol . IsReference = True
@@ -1045,11 +1047,12 @@ class Parser ( ) :
                         NewSymbol . Offset = deepcopy ( self . CurrentSTOffset )
                         self . GetCurrentST ( ) . Symbols [ Token . Name ] = NewSymbol
                         OutputText = OutputText + ';Declaring {} {}\n' . format ( Token . Name , self . CurrentSTOffset )
-                        OutputText = self . CalcDeclarationOutput ( self . SavedType , self . CurrentlyReference , OutputText )
+                        OutputText = self . CalcDeclarationOutput ( NewSymbol , self . CurrentlyReference , OutputText )
                         LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                         OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
                     self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
                     self . CurrentlyReference = False
+                self . SavedTemplates = [ ]
             else :
                 CompilerIssue . OutputError ( 'A variable named ' + Token . Name + ' has already been declared' , self . EXIT_ON_ERROR , Token )
         else :
@@ -1083,7 +1086,6 @@ class Parser ( ) :
             self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
         elif Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_END' ] :
             self . CompileTemplatedClass ( self . SavedType )
-            self . SavedTemplates = [ ]
             self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
         else :
             CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\' instead of \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
@@ -1365,7 +1367,7 @@ class Parser ( ) :
         self . CurrentClass = TempClass
         return OldState , OldScopeStack , OldClass , OldFunction
     
-    def EndCompileTemplatedClass ( OldState , OldScopeStack , OldClass , OldFunction ) :
+    def EndCompileTemplatedClass ( self , OldState , OldScopeStack , OldClass , OldFunction ) :
         self . State = OldState
         self . STStack = OldScopeStack
         self . CurrentClass = OldClass
@@ -1388,8 +1390,9 @@ class Parser ( ) :
                 self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
                 self . CurrentFunction = InnerType
                 OutputText , SavedWordArray = self . Parse ( InnerType . TemplatedCode , '' )
+                print ( OutputText , InnerType . TemplatedCode )
                 self . CodeArray . append ( CodeFunction ( OutputText ) )
-        self . EndCompileTemplateClass ( OldState , OldScopeStack , OldClass , OldFunction )
+        self . EndCompileTemplatedClass ( OldState , OldScopeStack , OldClass , OldFunction )
     
     def CompileTemplatedClass ( self , Class ) :
         self . TempTemplateClass = self . AdjustForTemplates ( Class , self . SavedTemplates )
@@ -1524,20 +1527,20 @@ class Parser ( ) :
         Output = Output + self . ResolveActionNameToFull ( ActionName )
         return Output
     
-    def ResolveActionToName ( self , Action , Class ) :
+    def ResolveActionToName ( self , Action , Class , Templates = [ ] ) :
         Output = ''
         if Action . Name in self . MAIN_METHOD_NAMES :
             Output = Output + self . MAIN_METHOD_NAMES [ Action . Name ]
         else :
             Output = Output + Action . Name
-        Output = Output + self . AddTemplatesToOutput ( self . SavedTemplates )
+        Output = Output + self . AddTemplatesToOutput ( Templates )
         return Output
 
-    def ResolveActionToAsm ( self , Action , Class ) :
+    def ResolveActionToAsm ( self , Action , Class , Templates = [ ] ) :
         Output = ''
         if Class != None :
             Output = Output + Class . Name + self . FUNCTION_OUTPUT_DELIMITER
-        Output = Output + self . ResolveActionToName ( Action , Class )
+        Output = Output + self . ResolveActionToName ( Action , Class , Templates )
         return Output
 
 
@@ -1563,14 +1566,14 @@ class Parser ( ) :
         OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
 
-    def CalcDeclarationOutput ( self , SavedType , IsCurrentlyReference , OutputText ) :
-        NewDataSize = SavedType . Size
+    def CalcDeclarationOutput ( self , NewSymbol , IsCurrentlyReference , OutputText ) :
+        NewDataSize = NewSymbol . Type . Size
         if IsCurrentlyReference == True :
             NewDataSize = self . POINTER_SIZE
         OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( -NewDataSize ) + self . SPECIAL_CHARS [ 'NEWLINE' ]
         if IsCurrentlyReference == False :
             OutputText = OutputText + self . ASM_TEXT [ 'DEFAULT_CREATE' ] . format ( -self . POINTER_SIZE , self . CurrentSTOffset )
-            OutputText = self . CalcCallLine ( OutputText , self . ResolveActionToAsm ( Function ( 'create' ) , SavedType ) )
+            OutputText = self . CalcCallLine ( OutputText , self . ResolveActionToAsm ( Function ( 'create' ) , NewSymbol . Type , NewSymbol . Templates ) )
             OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( self . POINTER_SIZE )
         return OutputText
 
