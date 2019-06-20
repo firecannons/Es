@@ -146,6 +146,14 @@ action ReturnTest2 ( Byte B2 ) returns Byte
     return B
 end
 
+class TemplateTest<T>
+    T MyT
+    
+    action on create
+        Me : MyT = 65
+        OutputByte ( MyT )
+    end
+end
 
 class Array<T>
     Integer Size
@@ -549,5 +557,7 @@ action Main
     Pointer DB = AllocateHeapMemory ( TestSize )
     
     Array<Byte> MyAr
+    
+    TemplateTest<Byte> TeTe
     
 end

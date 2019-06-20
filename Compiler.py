@@ -41,7 +41,6 @@ class Function ( ) :
         self . ReturnValues = [ ]
         self . IsFunction = True
         self . Templates = [ ]
-        self . TemplatedCode = [ ]
 
 class Type ( ) :
     
@@ -51,6 +50,7 @@ class Type ( ) :
         self . Size = 0
         self . IsFunction = False
         self . Templates = [ ]
+        self . TemplatedCode = [ ]
 
 class TemplateElem ( ) :
     def __init__ ( self , Name ) :
@@ -269,6 +269,7 @@ class Parser ( ) :
     EMPTY_ARRAY = [ ]
     
     FUNCTION_OUTPUT_DELIMITER = '__'
+    TEMPLATE_DELIMITER = '__'
     
     REGISTERS = {
         'STACK_TOP' : 'esp'
@@ -323,7 +324,7 @@ class Parser ( ) :
         STStack = [ Scope ( self . SCOPE_TYPES [ 'GLOBAL' ] , 0 ) ]
         return STStack
     
-    def Parse ( self , SavedWordArray , OutputText ) :
+    def ParseTokens ( self , SavedWordArray , OutputText ) :
         WordIndex = 0
         while WordIndex < len ( SavedWordArray ) :
             self . CurrentTokenObject = SavedWordArray [ WordIndex ]
@@ -331,6 +332,10 @@ class Parser ( ) :
             self . CurrentToken = Token
             SavedWordArray , WordIndex , OutputText = self . ParseToken ( Token , SavedWordArray , WordIndex , OutputText )
             WordIndex = WordIndex + 1
+        return OutputText , SavedWordArray
+    
+    def Parse ( self , SavedWordArray , OutputText ) :
+        OutputText , SavedWordArray = self . ParseTokens ( SavedWordArray , OutputText )
         OutputText = self . CombineCodeArray ( self . CodeArray ) + OutputText
         print ( self . TypeTable , self . TypeTable [ 'Pointer' ] )
         print ( self . TypeTable [ 'Pointer' ] . InnerTypes )
@@ -569,7 +574,7 @@ class Parser ( ) :
         print ( 'wer' , NextToken . Name )
         if NextToken . Name not in self . TypeTable [ CurrentClass . Name ] . InnerTypes :
             NextName = self . ResolveActionToAsm ( NextToken , CurrentClass )
-        print ( 'metest' , WordArray [ Index + 2 ] , CurrentClass , CurrentClass . Name , NextName )
+        print ( 'metest' , WordArray [ Index + 2 ] , CurrentClass , CurrentClass . Name , NextName , self . TypeTable [ CurrentClass . Name ] . InnerTypes )
         ObjectTwo = self . TypeTable [ CurrentClass . Name ] . InnerTypes [ NextName ]
         if ObjectTwo . IsFunction == True :
             IsFunction = True
@@ -1019,6 +1024,7 @@ class Parser ( ) :
 
     def ProcessDeclaringVariable ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
+            self . AppendToSavedTemplates ( )
             self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
         elif self . SavedType . Name in self . TypeTable :
             if Token . Name not in self . GetCurrentST ( ) . Symbols :
@@ -1058,6 +1064,9 @@ class Parser ( ) :
         else :
             CompilerIssue . OutputError ( 'The type \'' + self . SavedType . Name + '\' is not currently a declared type and is not template start ' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
+        
+    def AppendToSavedTemplates ( self ) :
+        self . SavedTemplates . append ( )
 
     def ProcessAfterDeclaringVariable ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
@@ -1072,7 +1081,7 @@ class Parser ( ) :
             if Token . Name in self . TypeTable :
                 if self . TypeTable [ Token . Name ] . IsFunction == False :
                     self . State = self . MAIN_STATES [ 'AFTER_TEMPLATE_NAME' ]
-                    self . SavedTemplates . append ( Token . Name )
+                    self . AppendToLastSavedTemplateArray ( Token . Name )
                 else :
                    CompilerIssue . OutputError ( 'Template type \'' + Token . Name + '\' was found to be a function not class', self . EXIT_ON_ERROR , TokenObject )
             else :
@@ -1080,6 +1089,9 @@ class Parser ( ) :
         else :
             CompilerIssue . OutputError ( 'Expected valid type for template instead of \'' + Token + '\'', self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
+    
+    def AppendToLastSavedTemplateArray ( self , Token ) :
+        self . SavedTemplates [ len ( self . SavedTemplates ) - 1 ] . append ( Token . Name )
 
     def ProcessAfterTemplateName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
@@ -1365,7 +1377,23 @@ class Parser ( ) :
         OldFunction = self . CurrentFunction
         self . STStack = self . GetClassStack ( )
         self . CurrentClass = TempClass
+        self . CreateNewTemplateClass ( TempClass )
+        self . CurrentClass = TempClass
         return OldState , OldScopeStack , OldClass , OldFunction
+    
+    def GetLatestSavedTemplate ( self ) :
+        return self . SavedTemplates [ len ( self . SavedTemplates ) - 1 ]
+    
+    def GetNameWithSavedTemplates ( self , TempClass ) :
+        Latest = self . GetLatestSavedTemplate ( )
+        Name = TempClass . Name
+        for Template in Latest :
+            Name = Name + TEMPLATE_DELIMITER + Template
+        return Name
+    
+    def CreateNewTemplateClass ( self , TempClass ) :
+        TempClass . Name = self . GetNameWithSavedTemplates ( TempClass )
+        self . TypeTable [ TempClass . Name ] = TempClass
     
     def EndCompileTemplatedClass ( self , OldState , OldScopeStack , OldClass , OldFunction ) :
         self . State = OldState
@@ -1380,22 +1408,15 @@ class Parser ( ) :
     
     def CompileClass ( self , TempClass ) :
         OldState , OldScopeStack , OldClass , OldFunction = self . PrepareToCompileTemplatedClass ( TempClass )
-        for InnerName in TempClass . InnerTypes :
-            InnerType = TempClass . InnerTypes [ InnerName ]
-            if InnerType . IsFunction == True :
-                print ( 'okok' )
-                self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'ACTION' ] , 0 ) )
-                self . CopyFunctionParametersToScope ( InnerType )
-                print ( self . GetCurrentST ( ) . Symbols , 'fire' )
-                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
-                self . CurrentFunction = InnerType
-                OutputText , SavedWordArray = self . Parse ( InnerType . TemplatedCode , '' )
-                print ( OutputText , InnerType . TemplatedCode )
-                self . CodeArray . append ( CodeFunction ( OutputText ) )
+        NewText , SavedWordArray = self . ParseTokens ( TempClass . TemplatedCode , '' )
         self . EndCompileTemplatedClass ( OldState , OldScopeStack , OldClass , OldFunction )
     
+    def PrintNewlines ( self , Number ) :
+        for i in range ( Number ) :
+            print ( '' )
+    
     def CompileTemplatedClass ( self , Class ) :
-        self . TempTemplateClass = self . AdjustForTemplates ( Class , self . SavedTemplates )
+        #self . TempTemplateClass = self . AdjustForTemplates ( Class , self . SavedTemplates )
         self . CompileClass ( Class )
     
     def AdjustForTemplates ( self , Class , Templates ) :
@@ -1557,7 +1578,7 @@ class Parser ( ) :
 
     def CalcFunctionName ( self , Class , Function ) :
         OutputText = ''
-        OutputText = OutputText + self . ResolveActionToName ( Function , Class )
+        OutputText = OutputText + self . ResolveActionToName ( Function , Class , self . SavedTemplates )
         OutputText = OutputText + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_BEGIN' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
