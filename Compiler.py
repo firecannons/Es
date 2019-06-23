@@ -947,7 +947,8 @@ class Parser ( ) :
         elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
             OutputText = OutputText + Token . Name
         elif Lexer . IsValidName ( Token . Name ) == True :
-            if self . IsCurrentlyValidType ( Token . Name ) == True :
+            if self . IsCurrentlyValidType ( Token ) == True :
+                Token = self . PossibleTemplateConvert ( Token )
                 if self . TypeTable [ Token . Name ] . IsFunction == False :
                     self . SavedType = self . TypeTable [ Token . Name ]
                     self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
@@ -965,12 +966,27 @@ class Parser ( ) :
             print ( 'screw up' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
     
-    def IsCurrentlyValidType ( self , Name ) :
+    def PossibleTemplateConvert ( self , Token ) :
+        if self . IsValidTemplateElem ( self . CurrentClass , Token ) == True :
+            Position = self . FindInTemplates ( self . CurrentClass , Token )
+            Token . Name = self . GetLatestSavedTemplate ( ) [ Position ]
+        return Token
+    
+    def IsValidTemplateElem ( self , Class , Token ) :
         Output = False
-        if Name in self . TypeTable :
+        if Class != None :
+            if self . HasTemplates ( self . CurrentClass ) == True :
+                if Token . Name in self . CurrentClass . Templates :
+                    Output = True
+        return Output
+    
+    def IsCurrentlyValidType ( self , Token ) :
+        Output = False
+        if Token . Name in self . TypeTable :
             Output = True
-        elif self . CurrentClass  self . HasTemplates :
-            
+        if self . IsValidTemplateElem ( self . CurrentClass , Token ) == True :
+            Output = True
+        return Output
             
     
     def GetSizeOfSymbol ( self , TestSymbol ) :
@@ -1407,12 +1423,17 @@ class Parser ( ) :
         OldScopeStack = self . STStack
         OldClass = self . CurrentClass
         OldFunction = self . CurrentFunction
-        TempClass = self . CreateNewTemplateClass ( TempClass )
         self . STStack = self . GetClassStack ( )
         self . CurrentClass = TempClass
         self . CurrentFunction = None
         self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
         return OldState , OldScopeStack , OldClass , OldFunction
+    
+    def IsSavedTemplatesExisting ( self ) :
+        Output = False
+        if len ( self . SavedTemplates ) > 0 :
+            Output = True
+        return Output
     
     def GetLatestSavedTemplate ( self ) :
         Result = [ ]
@@ -1595,6 +1616,8 @@ class Parser ( ) :
             Output = Output + self . MAIN_METHOD_NAMES [ Action . Name ]
         else :
             Output = Output + Action . Name
+        if Templates == [ ] and self . IsSavedTemplatesExisting ( ) == True :
+            Templates = self . GetLatestSavedTemplate ( )
         Output = Output + self . AddTemplatesToOutput ( Templates )
         return Output
 
@@ -1602,6 +1625,8 @@ class Parser ( ) :
         Output = ''
         if Class != None :
             Output = Output + Class . Name + self . FUNCTION_OUTPUT_DELIMITER
+        if Templates == [ ] and self . IsSavedTemplatesExisting ( ) == True :
+            Templates = self . GetLatestSavedTemplate ( )
         Output = Output + self . ResolveActionToName ( Action , Class , Templates )
         return Output
 
