@@ -1448,7 +1448,7 @@ mov esp, ebp
 pop ebp
 ret
 
-Array__On_Create__Byte:
+Array__Byte__On_Create:
 
 push ebp
 mov ebp, esp
@@ -1461,25 +1461,25 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!Me
-;Shifting Deref Offset0 = 0 + 0
-;Names: Me : Size -> 0
-;ok-182
+;Shifting Deref Offset-178 = 0 + -178
+;Names: Me : Size -> -178
+;ok-4
 add esp, -1
 
 mov byte [esp], 0
 
-;Declaring [259 -183
-;Loading [259 -183
+;Declaring [259 -5
+;Loading [259 -5
 add esp, -4
 mov ebx, ebp
-add ebx, -183
+add ebx, -5
 mov [esp], ebx
 ;Loading a Integer object
 add esp, -4
 mov ebx, ebp
-add ebx, -182
+add ebx, -4
 mov ebx, [ebx]
-add ebx, 0
+add ebx, -178
 mov [esp], ebx
 ; loading a reference![258
 call Integer__On_Equals
@@ -1491,9 +1491,9 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!Me
-;Shifting Deref Offset4 = 0 + 4
-;Names: Me : DP -> 4
-;ok-187
+;Shifting Deref Offset-174 = 0 + -174
+;Names: Me : DP -> -174
+;ok-9
 add esp, -4
 mov ebx, ebp
 add ebx, 8
@@ -1501,36 +1501,85 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!Me
-;Shifting Deref Offset0 = 0 + 0
-;Names: Me : Size -> 0
-;ok-191
+;Shifting Deref Offset-178 = 0 + -178
+;Names: Me : Size -> -178
+;ok-13
 ;Adding return value 
 add esp, -4
-;Loading [261 -195
+;Loading [261 -17
 add esp, -4
 mov ebx, ebp
-add ebx, -191
+add ebx, -13
 mov ebx, [ebx]
-add ebx, 0
+add ebx, -178
 mov [esp], ebx
 ; loading a reference![261
 call AllocateHeapMemory
 add esp, 4
-;Loading [262 -195
+;Loading [262 -17
 add esp, -4
 mov ebx, ebp
-add ebx, -195
+add ebx, -17
 mov [esp], ebx
 ;Loading a Pointer object
 add esp, -4
 mov ebx, ebp
-add ebx, -187
+add ebx, -9
 mov ebx, [ebx]
-add ebx, 4
+add ebx, -174
 mov [esp], ebx
 ; loading a reference![260
 call Pointer__On_Equals
 add esp, 8
+
+
+mov esp, ebp
+pop ebp
+ret
+
+TemplateTest__Byte__On_Create:
+
+push ebp
+mov ebp, esp
+
+
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset-21 = 0 + -21
+;Names: Me : MyT -> -21
+;ok-4
+add esp, -1
+
+mov byte [esp], 65
+
+;Declaring [264 -5
+;Loading [264 -5
+add esp, -4
+mov ebx, ebp
+add ebx, -5
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -4
+mov ebx, [ebx]
+add ebx, -21
+mov [esp], ebx
+; loading a reference![263
+call Byte__On_Equals
+add esp, 8
+;Loading MyT -5
+add esp, -4
+mov ebx, ebp
+add ebx, -21
+mov [esp], ebx
+call OutputByte
+add esp, 4
 
 
 mov esp, ebp
@@ -5404,14 +5453,23 @@ add ebx, -174
 mov [esp], ebx
 call Pointer__On_Equals
 add esp, 8
-;Declaring MyAr -203
-add esp, -8
+;Declaring MyAr -21
+add esp, -4
 
 add esp, -4
 mov ebx, ebp
-add ebx, -203
+add ebx, -21
 mov [esp], ebx
-call Array__On_Create__Byte
+call Pointer__On_Create
+add esp, 4
+;Declaring TeTe -6
+add esp, -1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -6
+mov [esp], ebx
+call Byte__On_Create
 add esp, 4
 
 

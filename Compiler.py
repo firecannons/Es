@@ -947,7 +947,7 @@ class Parser ( ) :
         elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
             OutputText = OutputText + Token . Name
         elif Lexer . IsValidName ( Token . Name ) == True :
-            if Token . Name in self . TypeTable :
+            if self . IsCurrentlyValidType ( Token . Name ) == True :
                 if self . TypeTable [ Token . Name ] . IsFunction == False :
                     self . SavedType = self . TypeTable [ Token . Name ]
                     self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
@@ -964,6 +964,14 @@ class Parser ( ) :
         else :
             print ( 'screw up' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
+    
+    def IsCurrentlyValidType ( self , Name ) :
+        Output = False
+        if Name in self . TypeTable :
+            Output = True
+        elif self . CurrentClass  self . HasTemplates :
+            
+            
     
     def GetSizeOfSymbol ( self , TestSymbol ) :
         Size = TestSymbol . Type . Size
@@ -1024,7 +1032,7 @@ class Parser ( ) :
 
     def ProcessDeclaringVariable ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
-            self . AppendToSavedTemplates ( )
+            self . AppendToSavedTemplates ( Token )
             self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
         elif self . SavedType . Name in self . TypeTable :
             if Token . Name not in self . GetCurrentST ( ) . Symbols :
@@ -1065,8 +1073,8 @@ class Parser ( ) :
             CompilerIssue . OutputError ( 'The type \'' + self . SavedType . Name + '\' is not currently a declared type and is not template start ' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
         
-    def AppendToSavedTemplates ( self ) :
-        self . SavedTemplates . append ( )
+    def AppendToSavedTemplates ( self , Token ) :
+        self . SavedTemplates . append ( [ ] )
 
     def ProcessAfterDeclaringVariable ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
@@ -1090,8 +1098,8 @@ class Parser ( ) :
             CompilerIssue . OutputError ( 'Expected valid type for template instead of \'' + Token + '\'', self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
     
-    def AppendToLastSavedTemplateArray ( self , Token ) :
-        self . SavedTemplates [ len ( self . SavedTemplates ) - 1 ] . append ( Token . Name )
+    def AppendToLastSavedTemplateArray ( self , Name ) :
+        self . SavedTemplates [ len ( self . SavedTemplates ) - 1 ] . append ( Name )
 
     def ProcessAfterTemplateName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
@@ -1100,7 +1108,8 @@ class Parser ( ) :
             self . CompileTemplatedClass ( self . SavedType )
             self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
         else :
-            CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' + self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\' instead of \'' + Token + '\'' , self . EXIT_ON_ERROR , TokenObject )
+            CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' +
+                self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\' instead of \'' + Token . Name + '\'' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessClassAfter ( self , Token , SavedWordArray , WordIndex , OutputText ) :
@@ -1148,7 +1157,10 @@ class Parser ( ) :
 
     def ProcessClassAfterTemplates ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            if self . HasTemplates ( self . GetInnerMostObject ( ) ) == True :
+                self . State = self . MAIN_STATES [ 'TEMPLATED_CODE' ]
+            else :
+                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
         elif Token . Name == self . KEYWORDS [ 'SIZE' ] :
             self . State = self . MAIN_STATES [ 'CLASS_DECLARING_SIZE' ]
         else :
@@ -1162,10 +1174,24 @@ class Parser ( ) :
         else :
             CompilerIssue . OutputError ( 'Expected number to go after' + self . KEYWORDS [ 'SIZE' ] , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
+    
+    def HasTemplates ( self , Object ) :
+        Output = False
+        if Object . Templates != None :
+            if len ( Object . Templates ) > 0 :
+                Output = True
+        return Output
+    
+    def GetInnerMostObject ( self ) :
+        Object = self . GetTypeObject ( self . CurrentClass , self . CurrentFunction )
+        return Object
 
     def ProcessClassAfterDeclaringSize ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            if self . HasTemplates ( self . GetInnerMostObject ( ) ) == True :
+                self . State = self . MAIN_STATES [ 'TEMPLATED_CODE' ]
+            else :
+                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
         else :
             CompilerIssue . OutputError ( 'Expected newline after declaring class size' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
@@ -1311,11 +1337,8 @@ class Parser ( ) :
     
     def OutputFunctionEnd ( self , OutputText ) :
         self . CurrentSTOffset = deepcopy ( self . ACTION_DEFINITION_OFFSET )
-        if len ( self . CurrentFunction . Templates ) != 0 :
-            self . State = self . MAIN_STATES [ 'TEMPLATED_CODE' ]
-        else :
-            OutputText = self . OutputActionStartCode ( OutputText )
-            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+        OutputText = self . OutputActionStartCode ( OutputText )
+        self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
         return OutputText
 
     def ProcessReturnAtEnd ( self , Token , SavedWordArray , WordIndex , OutputText ) :
@@ -1353,16 +1376,25 @@ class Parser ( ) :
             self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
         return SavedWordArray , WordIndex , OutputText
     
-    def ProcessTemplatedCode ( self , Token , SavedWordArray , WordIndex , OutputText ) :
-        if Token . Name != self . KEYWORDS [ 'END' ] :
-            self . CurrentFunction . TemplatedCode . append ( Token )
-        else :
-            if self . CurrentFunction != None :
-                self . CurrentFunction = None
-                self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
-            elif self . CurrentClass != None :
+    def DoScopeSwitch ( self , Token ) :
+        if Token . Name == self . KEYWORDS [ 'CLASS' ] :
+            self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'CLASS' ] , self . CurrentSTOffset ) )
+        elif Token . Name == self . KEYWORDS [ 'ACTION' ] :
+            self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'ACTION' ] , self . CurrentSTOffset ) )
+        elif Token . Name == self . KEYWORDS [ 'IF' ] :
+            self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'IF' ] , self . CurrentSTOffset ) )
+        elif Token . Name == self . KEYWORDS [ 'REPEAT' ] :
+            self . STStack . append ( Scope ( self . SCOPE_TYPES [ 'REPEAT' ] , self . CurrentSTOffset , self . RoutineCounter ) )
+        if Token . Name == self . KEYWORDS [ 'END' ] :
+            CurrentST = self . GetCurrentST ( )
+            if CurrentST . Type == self . SCOPE_TYPES [ 'CLASS' ] :
                 self . CurrentClass = None
-            self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+                self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
+            self . STStack . pop ( len ( self . STStack ) - 1 )
+    
+    def ProcessTemplatedCode ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        self . CurrentClass . TemplatedCode . append ( Token )
+        self . DoScopeSwitch ( Token )
         return SavedWordArray , WordIndex , OutputText
     
     def GetClassStack ( self ) :
@@ -1375,25 +1407,30 @@ class Parser ( ) :
         OldScopeStack = self . STStack
         OldClass = self . CurrentClass
         OldFunction = self . CurrentFunction
+        TempClass = self . CreateNewTemplateClass ( TempClass )
         self . STStack = self . GetClassStack ( )
         self . CurrentClass = TempClass
-        self . CreateNewTemplateClass ( TempClass )
-        self . CurrentClass = TempClass
+        self . CurrentFunction = None
+        self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
         return OldState , OldScopeStack , OldClass , OldFunction
     
     def GetLatestSavedTemplate ( self ) :
-        return self . SavedTemplates [ len ( self . SavedTemplates ) - 1 ]
+        Result = [ ]
+        if len ( self . SavedTemplates ) > 0 :
+            Result = self . SavedTemplates [ len ( self . SavedTemplates ) - 1 ]
+        return Result
     
     def GetNameWithSavedTemplates ( self , TempClass ) :
         Latest = self . GetLatestSavedTemplate ( )
         Name = TempClass . Name
         for Template in Latest :
-            Name = Name + TEMPLATE_DELIMITER + Template
+            Name = Name + self . TEMPLATE_DELIMITER + Template
         return Name
     
     def CreateNewTemplateClass ( self , TempClass ) :
         TempClass . Name = self . GetNameWithSavedTemplates ( TempClass )
         self . TypeTable [ TempClass . Name ] = TempClass
+        return TempClass
     
     def EndCompileTemplatedClass ( self , OldState , OldScopeStack , OldClass , OldFunction ) :
         self . State = OldState
@@ -1408,6 +1445,8 @@ class Parser ( ) :
     
     def CompileClass ( self , TempClass ) :
         OldState , OldScopeStack , OldClass , OldFunction = self . PrepareToCompileTemplatedClass ( TempClass )
+        self . PrintWordArray ( TempClass . TemplatedCode )
+        print ( 'hit 1' )
         NewText , SavedWordArray = self . ParseTokens ( TempClass . TemplatedCode , '' )
         self . EndCompileTemplatedClass ( OldState , OldScopeStack , OldClass , OldFunction )
     
@@ -1417,7 +1456,9 @@ class Parser ( ) :
     
     def CompileTemplatedClass ( self , Class ) :
         #self . TempTemplateClass = self . AdjustForTemplates ( Class , self . SavedTemplates )
+        print ( 'going in' , Class . Name , self . GetLatestSavedTemplate ( ) )
         self . CompileClass ( Class )
+        print ( 'going out' )
     
     def AdjustForTemplates ( self , Class , Templates ) :
         NewClass = deepcopy ( Class )
@@ -1538,7 +1579,7 @@ class Parser ( ) :
             Output = Output + self . MAIN_METHOD_NAMES [ ActionName ]
         else :
             Output = Output + ActionName
-        Output = Output + self . AddTemplatesToOutput ( self . SavedTemplates )
+        Output = Output + self . AddTemplatesToOutput ( self . GetLatestSavedTemplate ( ) )
         return Output
         
     def ResolveActionNameToAsm ( self , ActionName , Class ) :
@@ -1578,7 +1619,7 @@ class Parser ( ) :
 
     def CalcFunctionName ( self , Class , Function ) :
         OutputText = ''
-        OutputText = OutputText + self . ResolveActionToName ( Function , Class , self . SavedTemplates )
+        OutputText = OutputText + self . ResolveActionToName ( Function , Class , self . GetLatestSavedTemplate ( ) )
         OutputText = OutputText + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_BEGIN' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
