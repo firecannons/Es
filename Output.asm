@@ -1448,7 +1448,7 @@ mov esp, ebp
 pop ebp
 ret
 
-Array__Byte__On_Create:
+Array__On_Create:
 
 push ebp
 mov ebp, esp
@@ -1537,7 +1537,7 @@ mov esp, ebp
 pop ebp
 ret
 
-TemplateTest__Byte__On_Create:
+TemplateTest__On_Create:
 
 push ebp
 mov ebp, esp
