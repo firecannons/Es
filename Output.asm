@@ -1448,7 +1448,7 @@ mov esp, ebp
 pop ebp
 ret
 
-Array__On_Create:
+Array__On_Create__Byte__Byte:
 
 push ebp
 mov ebp, esp
@@ -1461,8 +1461,8 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!Me
-;Shifting Deref Offset-178 = 0 + -178
-;Names: Me : Size -> -178
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : Size -> 0
 ;ok-4
 add esp, -1
 
@@ -1479,7 +1479,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -4
 mov ebx, [ebx]
-add ebx, -178
+add ebx, 0
 mov [esp], ebx
 ; loading a reference![258
 call Integer__On_Equals
@@ -1491,8 +1491,8 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!Me
-;Shifting Deref Offset-174 = 0 + -174
-;Names: Me : DP -> -174
+;Shifting Deref Offset4 = 0 + 4
+;Names: Me : DP -> 4
 ;ok-9
 add esp, -4
 mov ebx, ebp
@@ -1501,8 +1501,8 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!Me
-;Shifting Deref Offset-178 = 0 + -178
-;Names: Me : Size -> -178
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : Size -> 0
 ;ok-13
 ;Adding return value 
 add esp, -4
@@ -1511,7 +1511,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -13
 mov ebx, [ebx]
-add ebx, -178
+add ebx, 0
 mov [esp], ebx
 ; loading a reference![261
 call AllocateHeapMemory
@@ -1526,7 +1526,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -9
 mov ebx, [ebx]
-add ebx, -174
+add ebx, 4
 mov [esp], ebx
 ; loading a reference![260
 call Pointer__On_Equals
@@ -1537,7 +1537,7 @@ mov esp, ebp
 pop ebp
 ret
 
-TemplateTest__On_Create:
+TemplateTest__On_Create__Byte__Byte:
 
 push ebp
 mov ebp, esp
@@ -1550,8 +1550,8 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!Me
-;Shifting Deref Offset-21 = 0 + -21
-;Names: Me : MyT -> -21
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : MyT -> 0
 ;ok-4
 add esp, -1
 
@@ -1568,15 +1568,41 @@ add esp, -4
 mov ebx, ebp
 add ebx, -4
 mov ebx, [ebx]
-add ebx, -21
+add ebx, 0
 mov [esp], ebx
 ; loading a reference![263
 call Byte__On_Equals
 add esp, 8
-;Loading MyT -5
+;Declaring Test -6
+add esp, -1
+
 add esp, -4
 mov ebx, ebp
-add ebx, -21
+add ebx, -6
+mov [esp], ebx
+call Byte__On_Create
+add esp, 4
+add esp, -1
+
+mov byte [esp], 65
+
+;Declaring [265 -7
+;Loading [265 -7
+add esp, -4
+mov ebx, ebp
+add ebx, -7
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -6
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Loading Test -7
+add esp, -4
+mov ebx, ebp
+add ebx, -6
 mov [esp], ebx
 call OutputByte
 add esp, 4
@@ -5453,23 +5479,23 @@ add ebx, -174
 mov [esp], ebx
 call Pointer__On_Equals
 add esp, 8
-;Declaring MyAr -21
-add esp, -4
+;Declaring MyAr -186
+add esp, -8
 
 add esp, -4
 mov ebx, ebp
-add ebx, -21
+add ebx, -186
 mov [esp], ebx
-call Pointer__On_Create
+call Array__On_Create__Byte
 add esp, 4
-;Declaring TeTe -6
+;Declaring TeTe -187
 add esp, -1
 
 add esp, -4
 mov ebx, ebp
-add ebx, -6
+add ebx, -187
 mov [esp], ebx
-call Byte__On_Create
+call TemplateTest__On_Create__Byte
 add esp, 4
 
 

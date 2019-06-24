@@ -151,7 +151,8 @@ class TemplateTest<T>
     
     action on create
         Me : MyT = 65
-        OutputByte ( MyT )
+        Byte Test = 65
+        OutputByte ( Test )
     end
 end
 
