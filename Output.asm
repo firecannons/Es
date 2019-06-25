@@ -1448,7 +1448,7 @@ mov esp, ebp
 pop ebp
 ret
 
-Array__On_Create__Byte__Byte:
+Array__Byte__On_Create:
 
 push ebp
 mov ebp, esp
@@ -1537,7 +1537,7 @@ mov esp, ebp
 pop ebp
 ret
 
-TemplateTest__On_Create__Byte__Byte:
+TemplateTest__Byte__On_Create:
 
 push ebp
 mov ebp, esp
@@ -5486,7 +5486,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -186
 mov [esp], ebx
-call Array__On_Create__Byte
+call Array__Byte__On_Create
 add esp, 4
 ;Declaring TeTe -187
 add esp, -1
@@ -5495,7 +5495,7 @@ add esp, -4
 mov ebx, ebp
 add ebx, -187
 mov [esp], ebx
-call TemplateTest__On_Create__Byte
+call TemplateTest__Byte__On_Create
 add esp, 4
 
 
