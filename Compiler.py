@@ -1297,7 +1297,7 @@ class Parser ( ) :
         if Token . Name == self . SPECIAL_CHARS [ 'LEFT_PAREN' ] :
             self . State = self . MAIN_STATES [ 'ACTION_NEW_PARAMETER' ]
         elif Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-            OutputText = self . OutputFunctionEnd ( OutputText )
+            OutputText = self . OutputFunctionDeclarationEnd ( OutputText )
         else :
             CompilerIssue . OutputError ( 'Expected left paren or newline in action declaration' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
@@ -1349,7 +1349,7 @@ class Parser ( ) :
 
     def ProcessActionAtEnd ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-            OutputText = self . OutputFunctionEnd ( OutputText )
+            OutputText = self . OutputFunctionDeclarationEnd ( OutputText )
         elif Token . Name == self . KEYWORDS [ 'RETURNS' ] :
             self . State = self . MAIN_STATES [ 'RETURN_WAITING_FOR_PARAM' ]
         else :
@@ -1369,7 +1369,7 @@ class Parser ( ) :
             CompilerIssue . OutputError ( 'The type {} is not a currently valid type' . format ( Token ) , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
     
-    def OutputFunctionEnd ( self , OutputText ) :
+    def OutputFunctionDeclarationEnd ( self , OutputText ) :
         self . CurrentSTOffset = deepcopy ( self . ACTION_DEFINITION_OFFSET )
         OutputText = self . OutputActionStartCode ( OutputText )
         self . State = self . MAIN_STATES [ 'START_OF_LINE' ]
@@ -1377,7 +1377,7 @@ class Parser ( ) :
 
     def ProcessReturnAtEnd ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
-            OutputText = self . OutputFunctionEnd ( OutputText )
+            OutputText = self . OutputFunctionDeclarationEnd ( OutputText )
         else :
             CompilerIssue . OutputError ( 'Expected NEWLINE after return values' , self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
@@ -1620,7 +1620,7 @@ class Parser ( ) :
         Output = ''
         if Templates != None :
             for Index in range ( len ( Templates ) ) :
-                Output = Output + self . FUNCTION_OUTPUT_DELIMITER + Templates [ Index ]
+                Output = Output + Templates [ Index ] + self . FUNCTION_OUTPUT_DELIMITER
         return Output
 
     def ResolveActionNameToFull ( self , ActionName ) :
@@ -1641,23 +1641,19 @@ class Parser ( ) :
     
     def ResolveActionToName ( self , Action , Class , Templates = None ) :
         Output = ''
+        if Templates == None and self . IsSavedTemplatesExisting ( ) == True :
+            Templates = self . GetLatestSavedTemplate ( )
+        Output = Output + self . AddTemplatesToOutput ( Templates )
         if Action . Name in self . MAIN_METHOD_NAMES :
             Output = Output + self . MAIN_METHOD_NAMES [ Action . Name ]
         else :
             Output = Output + Action . Name
-        if Templates == None and self . IsSavedTemplatesExisting ( ) == True :
-            Templates = self . GetLatestSavedTemplate ( )
-        Output = Output + self . AddTemplatesToOutput ( Templates )
         return Output
 
     def ResolveActionToAsm ( self , Action , Class , Templates = None ) :
         Output = ''
         if Class != None :
             Output = Output + Class . Name + self . FUNCTION_OUTPUT_DELIMITER
-        print ( Templates , self . SavedTemplates )
-        if Templates == None and self . IsSavedTemplatesExisting ( ) == True :
-            Templates = self . GetLatestSavedTemplate ( )
-        print ( Templates )
         Output = Output + self . ResolveActionToName ( Action , Class , Templates )
         return Output
 
@@ -1675,7 +1671,7 @@ class Parser ( ) :
 
     def CalcFunctionName ( self , Class , Function ) :
         OutputText = ''
-        OutputText = OutputText + self . ResolveActionToName ( Function , Class , self . GetLatestSavedTemplate ( ) )
+        OutputText = OutputText + self . ResolveActionToName ( Function , Class , [ ] )
         OutputText = OutputText + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_BEGIN' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
