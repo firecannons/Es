@@ -150,9 +150,8 @@ class TemplateTest<T>
     T MyT
     
     action on create
-        Me : MyT = 65
-        Byte Test = 65
-        OutputByte ( Test )
+        Me : MyT = 67
+        OutputByte ( Me : MyT )
     end
 end
 
@@ -206,6 +205,18 @@ class Array<T>
         
     end
 end*/
+
+class MultiTemplateTest<T, T2, T3>
+    T MyT
+    T2 MyT2
+    T3 MyT3
+    
+    action on create
+        Me : MyT = 67
+        Me : MyT2 = 68
+        OutputByte ( Me : MyT2 )
+    end
+end
 
 
 action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
@@ -560,5 +571,7 @@ action Main
     Array<Byte> MyAr
     
     TemplateTest<Byte> TeTe
+    
+    MultiTemplateTest<Byte,Byte,Integer> MuTeTe
     
 end
