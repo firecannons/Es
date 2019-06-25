@@ -956,7 +956,7 @@ class Parser ( ) :
             OutputText = OutputText + Token . Name
         elif Lexer . IsValidName ( Token . Name ) == True :
             if self . IsCurrentlyValidType ( Token ) == True :
-                Token = self . PossibleTemplateConvert ( Token )
+                Token , WordIndex , SavedWordArray = self . PossibleTemplateConvert ( Token , WordIndex , SavedWordArray )
                 if self . TypeTable [ Token . Name ] . IsFunction == False :
                     self . SavedType = self . TypeTable [ Token . Name ]
                     self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
@@ -974,12 +974,15 @@ class Parser ( ) :
             print ( 'screw up' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
     
-    def PossibleTemplateConvert ( self , Token ) :
+    def PossibleTemplateConvert ( self , Token , Index , WordArray ) :
         if self . IsValidTemplateElem ( self . CurrentClass , Token ) == True :
+            TemplateParts = Token . Name . split ( )
+            if len ( TemplateParts ) > 0 :
+                WordArray . insert ( Index + 1 , MyToken ( self . KEYWORDS [ 'REFERENCE' ] , Token . LineNumber , Token . FileName ) )
             Position = self . FindInTemplates ( self . CurrentClass , Token )
             print ( 'Code: 1000' , Position , self . CurrentClass . Name , Token . Name , self . GetLatestSavedTemplate ( ) , self . SavedTemplates )
             Token . Name = self . GetLatestSavedTemplate ( ) [ Position ]
-        return Token
+        return Token , Index , WordArray
     
     def IsValidTemplateElem ( self , Class , Token ) :
         Output = False
@@ -1139,10 +1142,22 @@ class Parser ( ) :
             self . CompileTemplatedClass ( self . SavedType )
             print ( 'Code: 1231' , self . SavedTemplates )
             self . State = self . MAIN_STATES [ 'DECLARING_VARIABLE' ]
+        elif Token . Name == self . KEYWORDS [ 'REFERENCE' ] :
+            self . SetLatestTempSavedTemplateToReference ( )
         else :
             CompilerIssue . OutputError ( 'Expected \'' + self . SPECIAL_CHARS [ 'COMMA' ] + '\' or \'' +
                 self . SPECIAL_CHARS [ 'TEMPLATE_END' ] + '\' instead of \'' + Token . Name + '\'' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
+    
+    def SetLatestTempSavedTemplateToReference ( self ) :
+        Element = self . GetLatestTempSavedTemplateElement ( )
+        Element = Element + self . SPACE + self . KEYWORDS [ 'REFERENCE' ]
+    
+    def GetLatestTempSavedTemplateElement ( self ) :
+        Element = None
+        if len ( self . TempSavedTemplate ) > 0 :
+            Element = self . TempSavedTemplate [ len ( self . TempSavedTemplate ) - 1 ]
+        return Element
 
     def ProcessClassAfter ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Lexer . IsValidName ( Token . Name ) == False :
@@ -1305,7 +1320,7 @@ class Parser ( ) :
     def ProcessActionNewParameter ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Lexer . IsValidName ( Token . Name ) :
             if self . IsCurrentlyValidType ( Token ) == True :
-                Token = self . PossibleTemplateConvert ( Token )
+                Token , WordIndex , SavedWordArray = self . PossibleTemplateConvert ( Token , WordIndex , SavedWordArray )
                 self . SavedType = self . TypeTable [ Token . Name ]
                 self . State = self . MAIN_STATES [ 'ACTION_PARAM_NAME' ]
             else :
@@ -1358,7 +1373,7 @@ class Parser ( ) :
 
     def ProcessReturnWaitingForParam ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if self . IsCurrentlyValidType ( Token ) == True :
-            Token = self . PossibleTemplateConvert ( Token )
+            Token , WordIndex , SavedWordArray = self . PossibleTemplateConvert ( Token , WordIndex , SavedWordArray )
             CurrentClass = self . GetTypeObjectFromNames ( Token . Name , '' )
             NewSymbol = MySymbol ( deepcopy ( self . EMPTY_STRING ) , CurrentClass )
             self . CurrentSTOffset = self . CurrentSTOffset - CurrentClass . Size
