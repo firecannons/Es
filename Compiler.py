@@ -152,9 +152,14 @@ class Parser ( ) :
         'ELSE_IF' : 'elseif' ,
         'ELSE' : 'else' ,
         'REFERENCE' : 'reference' ,
-        'RETURN' : 'return'
+        'RETURN' : 'return' ,
+        'SIZE_OF' : 'SizeOf' ,
+        'GET_CLASS_NAME' : 'GetClassName' ,
+        'GET_RESOLVED_TEMPLATE_NAME' : 'GetResolvedTemplateName'
         
     }
+    
+    ASM_REPLACE_STRINGS = [ KEYWORDS [ 'SIZE_OF' ] , KEYWORDS [ 'GET_CLASS_NAME' ] , KEYWORDS [ 'GET_RESOLVED_TEMPLATE_NAME' ] ]
     
     SPECIAL_CHARS = {
         'NEWLINE' : '\n' ,
@@ -953,6 +958,7 @@ class Parser ( ) :
         elif Token . Name == self . KEYWORDS [ 'RETURN' ] :
             OutputText , SavedWordArray , WordIndex = self . DoReturnStatement ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
+            Token = self . PossibleTemplateASMReplace ( Token )
             OutputText = OutputText + Token . Name
         elif Lexer . IsValidName ( Token . Name ) == True :
             if self . IsCurrentlyValidType ( Token ) == True :
@@ -973,6 +979,59 @@ class Parser ( ) :
         else :
             print ( 'screw up' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
+    
+    def PossibleTemplateASMReplace ( self , Token ) :
+        if self . IsSavedTemplatesExisting ( ) == True :
+            Token = self . DoAsmTemplateReplace ( Token )
+        return Token
+    
+    def DoAsmTemplateReplace ( self , Token ) :
+        StartPosition = 0
+        for Item in self . ASM_REPLACE_STRINGS :
+            while StartPosition != Lexer . FIND_NOT_FOUND :
+                FoundPosition = Token . Name . find ( Item , StartPosition )
+                AfterNamePosition = FoundPosition + len ( Item )
+                LeftParenPosition = self . GoUntilNotSpace ( Token . Name , AfterNamePosition )
+                self . AsmNextCheck ( LeftParenPosition , Item , Token )
+                self . AsmLetterCheck ( Token . Name [ LeftParenPosition ] , self .  OPERATORS [ 'LEFT_PAREN' ] , Item , Token )
+                NameStartPosition = LeftParenPosition + 1
+                NameEndPosition = self . GetNameEndPosition ( Token . Name , NameStartPosition )
+                RightParenPosition = self . GoUntilNotSpace ( Token . Name , NameEndPosition )
+                self . AsmNextCheck ( RightParenPosition , Item , Token )
+                self . AsmLetterCheck ( Token . Name [ RightParenPosition ] , self .  OPERATORS [ 'RIGHT_PAREN' ] , Item , Token )
+                VariableName = Token . Name [ NameStartPosition : NameEndPosition ]
+                ResultString = self . PerformOperation ( Item , VariableName )
+                Token . Name = Token . Name [ 0 : NameStartPosition ] + ResultString + Token . Name [ NameStartPosition : ]
+                StartPosition = FoundPosition + 1
+        return Token
+    
+    def PerformOperation ( self , Function , VariableName ) :
+        ResultString = ''
+        if Function == self . KEYWORDS [ 'SIZE_OF' ] :
+            Var = self . CheckCurrentSTsByName ( VariableName )
+            ResultString = str ( Var . Size )
+        return ResultString
+    
+    def GetNameEndPosition ( self , Name , StartPosition ) :
+        EndPosition = StartPosition
+        while Lexer . IsVariableAllowedLetter ( Name [ EndPosition ] ) == True :
+            EndPosition = EndPosition + 1
+        return EndPosition
+    
+    def GoUntilNotWhiteSpace ( self , Text , Position ) :
+        while Text [ Position ]  . isspace ( ) == True :
+            Position = Position + 1
+            if Position >= len ( Text ) :
+                Position = self . FIND_NOT_FOUND
+        return Position
+    
+    def AsmNextCheck ( self , Position , Name , Token ) :
+        if Position == self . FIND_NOT_FOUND :
+            CompilerIssue . OutputError ( 'Non-space character required next to ' + Name + ' in assembly code.' , self . EXIT_ON_ERROR , Token )
+    
+    def AsmLetterCheck ( self , Letter , TestLetter , Name , Token ) :
+        if Letter != TestLetter :
+            CompilerIssue . OutputError ( 'Expected ' + TestLetter + ' found ' + Letter + ' next to ' + Name + ' in assembly code.' , self . EXIT_ON_ERROR , Token )
     
     def PossibleTemplateConvert ( self , Token , Index , WordArray ) :
         if self . IsValidTemplateElem ( self . CurrentClass , Token ) == True :
@@ -1736,6 +1795,18 @@ class Parser ( ) :
             Index = Index + 1
         return Found , OutSymbol
     
+    def CheckCurrentSTsByName ( self , Name ) :
+        Found = False
+        OutSymbol = None
+        Index = 0
+        StackHeight = len ( self . STStack ) - 1
+        while Found == False and Index <= StackHeight :
+            if Symbol . Name in self . STStack [ StackHeight - Index ] . Symbols :
+                Found = True
+                OutSymbol = self . STStack [ StackHeight - Index ] . Symbols [ Symbol . Name ]
+            Index = Index + 1
+        return Found , OutSymbol
+    
     def GetTypeOfScope ( self , Symbol ) :
         Found = False
         OutType = None
@@ -1852,7 +1923,8 @@ class Lexer ( ) :
     
     TOKEN_KINDS = {
         'VARIABLE_LETTERS' : 0 ,
-        'SPECIAL' : 1
+        'SPECIAL' : 1 ,
+        'SEPARATE' : 2
     }
     
     def __init__ ( self ) :
@@ -1999,15 +2071,25 @@ class Lexer ( ) :
     
     def SetCurrentTokenKind ( self , CurrentLetter ) :
         self . CurrentTokenKind = self . TOKEN_KINDS [ 'VARIABLE_LETTERS' ]
+        if self . IsLetterSeparateLetter ( CurrentLetter ) == True :
+            self . CurrentTokenKind = self . TOKEN_KINDS [ 'SEPARATE' ]
         if Lexer . IsVariableAllowedLetter ( CurrentLetter ) == False :
             self . CurrentTokenKind = self . TOKEN_KINDS [ 'SPECIAL' ]
     
+    def GetTokenKind ( self , CurrentLetter ) :
+        Type = self . TOKEN_KINDS [ 'VARIABLE_LETTERS' ]
+        if Lexer . IsVariableAllowedLetter ( CurrentLetter ) == False  :
+            if self . IsLetterSeparateLetter ( CurrentLetter ) == True :
+                Type = self . TOKEN_KINDS [ 'SEPARATE' ]
+            else :
+                Type = self . TOKEN_KINDS [ 'SPECIAL' ]
+        return Type
+    
     def IsOfSameTokenKindAsSavedWord ( self , CurrentLetter ) :
-        Output = True
-        IsVariableLetter = Lexer . IsVariableAllowedLetter ( CurrentLetter )
-        if self . CurrentTokenKind == self . TOKEN_KINDS [ 'VARIABLE_LETTERS' ] and IsVariableLetter == False\
-            or self . CurrentTokenKind == self . TOKEN_KINDS [ 'SPECIAL' ] and IsVariableLetter == True :
-            Output = False
+        Output = False
+        Kind = self . GetTokenKind ( CurrentLetter )
+        if Kind == self . CurrentTokenKind :
+            Output = True
         return Output
     
     def DoDefaultIfSavedWordExists ( self , CurrentLetter ) :
@@ -2031,6 +2113,7 @@ class Lexer ( ) :
         if self . IsSavedWordExisting ( ) == True :
             self . ProcessAppendWord ( self . SavedWord )
         self . AddCharacterToSavedWord ( CurrentLetter )
+        self . SetCurrentTokenKind ( CurrentLetter )
 
     def ProcessLetterInSetup ( self ,
         CurrentLetter ) :
