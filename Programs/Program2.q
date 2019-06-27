@@ -163,12 +163,11 @@ class Array<T>
         Me : Size = 0
         Me : DP = AllocateHeapMemory ( Me : Size )
     end
-    end
-    /*
+    
     action Append ( T NewElem )
-        Size = Size + 1
-        DP = AllocateHeapMemory(Size)
-        Me:SetAt(Size - 1, NewElem)
+        Me : Size = Me : Size + 1
+        Me : DP = AllocateHeapMemory( Me:Size)
+        Me:SetAt(Me:Size - 1, NewElem)
     end
     
     action asm SetAt(Integer Position, T Elem)
@@ -197,14 +196,14 @@ class Array<T>
         add esp, -4
         mov [esp], ebx
         
-        call GetTemplateName(T)__On_Equals
+        call GetResolvedTemplateName(T)__On_Equals
         
         ; Move the stack pointer back up
         add esp, 8
         
         
     end
-end*/
+end
 
 class MultiTemplateTest<T, T2, T3>
     T MyT
