@@ -551,6 +551,7 @@ class Parser ( ) :
         Type = self . GetObjectType ( Object )
         TypeName = self . GetTypeName ( Type )
         Templates = self . SetTemplatesIfObjectExists ( Object , [ ] )
+        print ( 'Code: 992' , Object , Templates )
         FunctionName = self . ResolveActionToAsm ( Operator , Type , Templates )
         return Type , TypeName , FunctionName
     
@@ -639,7 +640,7 @@ class Parser ( ) :
         ar = []
         for i in WordArray :
             ar . append ( i.Name )
-        print ( len ( WordArray ) , ar )
+        print ( len ( WordArray ) , ar , CallingObject )
         if WordArray [ Index + 3 ] . Name == self . OPERATORS [ 'RIGHT_PAREN' ] :
             if Lexer . IsValidName ( WordArray [ Index ] . Name ) == True :
                 ActionName = WordArray [ Index ] . Name
@@ -844,6 +845,7 @@ class Parser ( ) :
             if len ( SavedWordArray ) - WordIndex > 4 :
                 Token5 = SavedWordArray [ WordIndex + 4 ]
             print ('testng' , Token1 . Name , Token2 . Name , Token3 . Name , Token4 . Name , Token5 . Name , type ( OutputText ) )
+            self . PrintWordArray ( SavedWordArray )
             if self . IsParenAheadTwo ( WordIndex , SavedWordArray ) == True :
                 WordIndex = WordIndex + 1
             elif self . IsRightParenNext ( WordIndex , SavedWordArray ) == True :
@@ -988,28 +990,32 @@ class Parser ( ) :
     def DoAsmTemplateReplace ( self , Token ) :
         StartPosition = 0
         for Item in self . ASM_REPLACE_STRINGS :
-            while StartPosition != Lexer . FIND_NOT_FOUND :
-                FoundPosition = Token . Name . find ( Item , StartPosition )
+            FoundPosition = Token . Name . find ( Item , StartPosition )
+            while FoundPosition != Lexer . FIND_NOT_FOUND :
                 AfterNamePosition = FoundPosition + len ( Item )
-                LeftParenPosition = self . GoUntilNotSpace ( Token . Name , AfterNamePosition )
+                LeftParenPosition = self . GoUntilNotWhiteSpace ( Token . Name , AfterNamePosition )
+                print ( 'Code: 993' , FoundPosition , AfterNamePosition , LeftParenPosition )
                 self . AsmNextCheck ( LeftParenPosition , Item , Token )
                 self . AsmLetterCheck ( Token . Name [ LeftParenPosition ] , self .  OPERATORS [ 'LEFT_PAREN' ] , Item , Token )
                 NameStartPosition = LeftParenPosition + 1
                 NameEndPosition = self . GetNameEndPosition ( Token . Name , NameStartPosition )
-                RightParenPosition = self . GoUntilNotSpace ( Token . Name , NameEndPosition )
+                RightParenPosition = self . GoUntilNotWhiteSpace ( Token . Name , NameEndPosition )
                 self . AsmNextCheck ( RightParenPosition , Item , Token )
                 self . AsmLetterCheck ( Token . Name [ RightParenPosition ] , self .  OPERATORS [ 'RIGHT_PAREN' ] , Item , Token )
                 VariableName = Token . Name [ NameStartPosition : NameEndPosition ]
                 ResultString = self . PerformOperation ( Item , VariableName )
-                Token . Name = Token . Name [ 0 : NameStartPosition ] + ResultString + Token . Name [ NameStartPosition : ]
+                Token . Name = Token . Name [ 0 : FoundPosition ] + ResultString + Token . Name [ RightParenPosition + 1 : ]
                 StartPosition = FoundPosition + 1
+                FoundPosition = Token . Name . find ( Item , StartPosition )
+            StartPosition = 0
         return Token
     
     def PerformOperation ( self , Function , VariableName ) :
         ResultString = ''
         if Function == self . KEYWORDS [ 'SIZE_OF' ] :
-            Var = self . CheckCurrentSTsByName ( VariableName )
-            ResultString = str ( Var . Size )
+            Found , Symbol = self . CheckCurrentSTsByName ( VariableName )
+            print ( 'Code: 994' , Symbol , VariableName , self . STStack , self . GetCurrentST ( ) . Symbols )
+            ResultString = str ( Symbol . Type . Size )
         return ResultString
     
     def GetNameEndPosition ( self , Name , StartPosition ) :
@@ -1022,11 +1028,11 @@ class Parser ( ) :
         while Text [ Position ]  . isspace ( ) == True :
             Position = Position + 1
             if Position >= len ( Text ) :
-                Position = self . FIND_NOT_FOUND
+                Position = Lexer . FIND_NOT_FOUND
         return Position
     
     def AsmNextCheck ( self , Position , Name , Token ) :
-        if Position == self . FIND_NOT_FOUND :
+        if Position == Lexer . FIND_NOT_FOUND :
             CompilerIssue . OutputError ( 'Non-space character required next to ' + Name + ' in assembly code.' , self . EXIT_ON_ERROR , Token )
     
     def AsmLetterCheck ( self , Letter , TestLetter , Name , Token ) :
@@ -1304,6 +1310,7 @@ class Parser ( ) :
     
     def AddSelfParameterToCurrentFunction ( self ) :
         SelfSymbol = MySymbol ( self . SELF_OBJECT_NAME , self . CurrentClass )
+        SelfSymbol . Templates = self . GetLatestSavedTemplate ( )
         SelfSymbol . Offset = self . CurrentParamOffset
         SelfSymbol . IsReference = True
         self . GetCurrentST ( ) . Symbols [ self . SELF_OBJECT_NAME ] = SelfSymbol
@@ -1801,9 +1808,9 @@ class Parser ( ) :
         Index = 0
         StackHeight = len ( self . STStack ) - 1
         while Found == False and Index <= StackHeight :
-            if Symbol . Name in self . STStack [ StackHeight - Index ] . Symbols :
+            if Name in self . STStack [ StackHeight - Index ] . Symbols :
                 Found = True
-                OutSymbol = self . STStack [ StackHeight - Index ] . Symbols [ Symbol . Name ]
+                OutSymbol = self . STStack [ StackHeight - Index ] . Symbols [ Name ]
             Index = Index + 1
         return Found , OutSymbol
     
@@ -1935,10 +1942,12 @@ class Lexer ( ) :
         self . LineNumber = 1
         self . FileName = ''
         self . CurrentTokenKind = None
+        self . SavedTokenLineNumber = self . LineNumber
     
     def AppendWordToSavedArray ( self , Text ) :
-        self . SavedWordArray . append ( MyToken ( Text , self . LineNumber , self . FileName ) ) 
+        self . SavedWordArray . append ( MyToken ( Text , self . SavedTokenLineNumber , self . FileName ) ) 
         self . EraseSavedWord ( )
+        self . SavedTokenLineNumber = self . LineNumber
 
     def PrintLexingState ( self , Text , State ) :
         print ('Lexing \'' + Text + '\'', 'self . State = ' + str(self.State))

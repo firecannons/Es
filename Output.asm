@@ -1537,6 +1537,220 @@ mov esp, ebp
 pop ebp
 ret
 
+Array__Byte__SetAt:
+
+push ebp
+mov ebp, esp
+
+
+        ; load DP into ebx
+        mov ebx, ebp
+        add ebx, 12
+        mov ebx, [ebx]
+        
+        ; load Position into edx
+        mov edx, ebp
+        add edx, 16
+        mov edx, [edx]
+        
+        ; Perform arithmetic to find correct memory position into ebx
+        mov eax, 1
+        mul edx
+        add ebx, eax
+        
+        ; Load the ebx position onto the stack
+        add esp, -4
+        mov [esp], ebx
+        
+        ; Load the ebx position onto the stack
+        mov ebx, ebp
+        add ebx, 20
+        add esp, -4
+        mov [esp], ebx
+        
+        call __On_Equals
+        
+        ; Move the stack pointer back up
+        add esp, 8
+        
+        
+    
+
+mov esp, ebp
+pop ebp
+ret
+
+Array__Byte__Append:
+
+push ebp
+mov ebp, esp
+
+
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : Size -> 0
+;ok-4
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : Size -> 0
+;ok-8
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [265 -9
+;Adding return value 
+add esp, -4
+;Loading [265 -13
+add esp, -4
+mov ebx, ebp
+add ebx, -9
+mov [esp], ebx
+;Loading a Integer object
+add esp, -4
+mov ebx, ebp
+add ebx, -8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference![264
+call Integer__On_Plus
+add esp, 8
+;Loading [266 -13
+add esp, -4
+mov ebx, ebp
+add ebx, -13
+mov [esp], ebx
+;Loading a Integer object
+add esp, -4
+mov ebx, ebp
+add ebx, -4
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference![263
+call Integer__On_Equals
+add esp, 8
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset4 = 0 + 4
+;Names: Me : DP -> 4
+;ok-17
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : Size -> 0
+;ok-21
+;Adding return value 
+add esp, -4
+;Loading [268 -25
+add esp, -4
+mov ebx, ebp
+add ebx, -21
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference![268
+call AllocateHeapMemory
+add esp, 4
+;Loading [269 -25
+add esp, -4
+mov ebx, ebp
+add ebx, -25
+mov [esp], ebx
+;Loading a Pointer object
+add esp, -4
+mov ebx, ebp
+add ebx, -17
+mov ebx, [ebx]
+add ebx, 4
+mov [esp], ebx
+; loading a reference![267
+call Pointer__On_Equals
+add esp, 8
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : Size -> 0
+;ok-29
+add esp, -1
+
+mov byte [esp], 1
+
+;Declaring [271 -30
+;Adding return value 
+add esp, -4
+;Loading [271 -34
+add esp, -4
+mov ebx, ebp
+add ebx, -30
+mov [esp], ebx
+;Loading a Integer object
+add esp, -4
+mov ebx, ebp
+add ebx, -29
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference![270
+call Integer__On_Minus
+add esp, 8
+;Loading NewElem -34
+add esp, -4
+mov ebx, ebp
+add ebx, 4
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!NewElem
+;Loading [272 -38
+add esp, -4
+mov ebx, ebp
+add ebx, -34
+mov [esp], ebx
+;Loading a Array object
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+call Array__Byte__SetAt
+add esp, 12
+
+
+mov esp, ebp
+pop ebp
+ret
+
 TemplateTest__Byte__On_Create:
 
 push ebp
@@ -1557,8 +1771,8 @@ add esp, -1
 
 mov byte [esp], 67
 
-;Declaring [264 -5
-;Loading [264 -5
+;Declaring [274 -5
+;Loading [274 -5
 add esp, -4
 mov ebx, ebp
 add ebx, -5
@@ -1570,7 +1784,7 @@ add ebx, -4
 mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
-; loading a reference![263
+; loading a reference![273
 call Byte__On_Equals
 add esp, 8
 add esp, -4
@@ -1583,14 +1797,14 @@ mov [esp], ebx
 ;Shifting Deref Offset0 = 0 + 0
 ;Names: Me : MyT -> 0
 ;ok-9
-;Loading [265 -9
+;Loading [275 -9
 add esp, -4
 mov ebx, ebp
 add ebx, -9
 mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
-; loading a reference![265
+; loading a reference![275
 call OutputByte
 add esp, 4
 
@@ -1619,8 +1833,8 @@ add esp, -1
 
 mov byte [esp], 67
 
-;Declaring [267 -5
-;Loading [267 -5
+;Declaring [277 -5
+;Loading [277 -5
 add esp, -4
 mov ebx, ebp
 add ebx, -5
@@ -1632,7 +1846,7 @@ add ebx, -4
 mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
-; loading a reference![266
+; loading a reference![276
 call Byte__On_Equals
 add esp, 8
 add esp, -4
@@ -1649,8 +1863,8 @@ add esp, -1
 
 mov byte [esp], 68
 
-;Declaring [269 -10
-;Loading [269 -10
+;Declaring [279 -10
+;Loading [279 -10
 add esp, -4
 mov ebx, ebp
 add ebx, -10
@@ -1662,7 +1876,7 @@ add ebx, -9
 mov ebx, [ebx]
 add ebx, 4
 mov [esp], ebx
-; loading a reference![268
+; loading a reference![278
 call Byte__On_Equals
 add esp, 8
 add esp, -4
@@ -1675,14 +1889,14 @@ mov [esp], ebx
 ;Shifting Deref Offset4 = 0 + 4
 ;Names: Me : MyT2 -> 4
 ;ok-14
-;Loading [270 -14
+;Loading [280 -14
 add esp, -4
 mov ebx, ebp
 add ebx, -14
 mov ebx, [ebx]
 add ebx, 4
 mov [esp], ebx
-; loading a reference![270
+; loading a reference![280
 call OutputByte
 add esp, 4
 
@@ -1711,8 +1925,8 @@ add esp, -1
 
 mov byte [esp], 67
 
-;Declaring [272 -5
-;Loading [272 -5
+;Declaring [282 -5
+;Loading [282 -5
 add esp, -4
 mov ebx, ebp
 add ebx, -5
@@ -1724,7 +1938,7 @@ add ebx, -4
 mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
-; loading a reference![271
+; loading a reference![281
 call Byte__On_Equals
 add esp, 8
 add esp, -4
@@ -1741,8 +1955,8 @@ add esp, -1
 
 mov byte [esp], 68
 
-;Declaring [274 -10
-;Loading [274 -10
+;Declaring [284 -10
+;Loading [284 -10
 add esp, -4
 mov ebx, ebp
 add ebx, -10
@@ -1754,7 +1968,7 @@ add ebx, -9
 mov ebx, [ebx]
 add ebx, 4
 mov [esp], ebx
-; loading a reference![273
+; loading a reference![283
 call Byte__On_Equals
 add esp, 8
 add esp, -4
@@ -1767,14 +1981,14 @@ mov [esp], ebx
 ;Shifting Deref Offset4 = 0 + 4
 ;Names: Me : MyT2 -> 4
 ;ok-14
-;Loading [275 -14
+;Loading [285 -14
 add esp, -4
 mov ebx, ebp
 add ebx, -14
 mov ebx, [ebx]
 add ebx, 4
 mov [esp], ebx
-; loading a reference![275
+; loading a reference![285
 call OutputByte
 add esp, 4
 
