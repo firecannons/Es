@@ -164,12 +164,6 @@ class Array<T>
         Me : DP = AllocateHeapMemory ( Me : Size )
     end
     
-    action Append ( T NewElem )
-        Me : Size = Me : Size + 1
-        Me : DP = AllocateHeapMemory( Me:Size)
-        Me:SetAt(Me:Size - 1, NewElem)
-    end
-    
     action asm SetAt(Integer Position, T Elem)
         ; load DP into ebx
         mov ebx, ebp
@@ -182,9 +176,9 @@ class Array<T>
         mov edx, [edx]
         
         ; Perform arithmetic to find correct memory position into ebx
-        mov ecx, SizeOf(T)
-        mul ecx, ecx, edx
-        add ebx, ecx
+        mov eax, SizeOf(Elem)
+        mul edx
+        add ebx, eax
         
         ; Load the ebx position onto the stack
         add esp, -4
@@ -196,12 +190,18 @@ class Array<T>
         add esp, -4
         mov [esp], ebx
         
-        call GetResolvedTemplateName(T)__On_Equals
+        call GetResolvedTemplateName(Elem)__On_Equals
         
         ; Move the stack pointer back up
         add esp, 8
         
         
+    end
+    
+    action Append ( T NewElem )
+        Me : Size = Me : Size + 1
+        Me : DP = AllocateHeapMemory( Me:Size)
+        Me : SetAt(Me:Size - 1, NewElem)
     end
 end
 
