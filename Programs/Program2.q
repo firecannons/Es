@@ -190,7 +190,7 @@ class Array<T>
         add esp, -4
         mov [esp], ebx
         
-        call GetResolvedTemplateName(Elem)__On_Equals
+        call GetResolvedClassName(Elem)On_Equals
         
         ; Move the stack pointer back up
         add esp, 8

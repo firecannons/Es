@@ -155,11 +155,11 @@ class Parser ( ) :
         'RETURN' : 'return' ,
         'SIZE_OF' : 'SizeOf' ,
         'GET_CLASS_NAME' : 'GetClassName' ,
-        'GET_RESOLVED_TEMPLATE_NAME' : 'GetResolvedTemplateName'
+        'GET_RESOLVED_CLASS_NAME' : 'GetResolvedClassName'
         
     }
     
-    ASM_REPLACE_STRINGS = [ KEYWORDS [ 'SIZE_OF' ] , KEYWORDS [ 'GET_CLASS_NAME' ] , KEYWORDS [ 'GET_RESOLVED_TEMPLATE_NAME' ] ]
+    ASM_REPLACE_STRINGS = [ KEYWORDS [ 'SIZE_OF' ] , KEYWORDS [ 'GET_CLASS_NAME' ] , KEYWORDS [ 'GET_RESOLVED_CLASS_NAME' ] ]
     
     SPECIAL_CHARS = {
         'NEWLINE' : '\n' ,
@@ -1016,6 +1016,12 @@ class Parser ( ) :
             Found , Symbol = self . CheckCurrentSTsByName ( VariableName )
             print ( 'Code: 994' , Symbol , VariableName , self . STStack , self . GetCurrentST ( ) . Symbols )
             ResultString = str ( Symbol . Type . Size )
+        elif Function == self . KEYWORDS [ 'GET_CLASS_NAME' ] :
+            Found , Symbol = self . CheckCurrentSTsByName ( VariableName )
+            ResultString = Symbol . Type
+        elif Function == self . KEYWORDS [ 'GET_RESOLVED_CLASS_NAME' ] :
+            Found , Symbol = self . CheckCurrentSTsByName ( VariableName )
+            ResultString = self . GetResolvedClassNameFromClass ( Symbol . Type , Symbol . Templates )
         return ResultString
     
     def GetNameEndPosition ( self , Name , StartPosition ) :
@@ -1703,41 +1709,41 @@ class Parser ( ) :
             for Index in range ( len ( Templates ) ) :
                 Output = Output + Templates [ Index ] + self . FUNCTION_OUTPUT_DELIMITER
         return Output
-
-    def ResolveActionNameToFull ( self , ActionName ) :
+        
+    def ResolveActionNameToAsm ( self , ActionName , Class , Templates = None ) :
+        Output = ''
+        Output = Output + self . GetResolvedClassNameFromClass ( Class , Templates )
+        Output = Output + self . ResolveActionNameToName ( ActionName , Templates )
+        return Output
+    
+    def ResolveActionNameToName ( self , ActionName , Templates = None ) :
         Output = ''
         if ActionName in self . MAIN_METHOD_NAMES :
             Output = Output + self . MAIN_METHOD_NAMES [ ActionName ]
         else :
             Output = Output + ActionName
-        Output = Output + self . AddTemplatesToOutput ( self . GetLatestSavedTemplate ( ) )
-        return Output
-        
-    def ResolveActionNameToAsm ( self , ActionName , Class ) :
-        Output = ''
-        if Class != None :
-            Output = Output + Class . Name + self . FUNCTION_OUTPUT_DELIMITER
-        Output = Output + self . ResolveActionNameToFull ( ActionName )
-        return Output
-    
-    def ResolveActionToName ( self , Action , Class , Templates = None ) :
-        Output = ''
-        if Templates == None and self . IsSavedTemplatesExisting ( ) == True :
-            Templates = self . GetLatestSavedTemplate ( )
-        Output = Output + self . AddTemplatesToOutput ( Templates )
-        if Action . Name in self . MAIN_METHOD_NAMES :
-            Output = Output + self . MAIN_METHOD_NAMES [ Action . Name ]
-        else :
-            Output = Output + Action . Name
         return Output
 
     def ResolveActionToAsm ( self , Action , Class , Templates = None ) :
         Output = ''
-        if Class != None :
-            Output = Output + Class . Name + self . FUNCTION_OUTPUT_DELIMITER
-        Output = Output + self . ResolveActionToName ( Action , Class , Templates )
+        Output = Output + self . GetResolvedClassNameFromClass ( Class , Templates )
+        Output = Output + self . ResolveActionNameToName ( Action . Name , Templates )
         return Output
-
+    
+    def GetResolvedClassNameFromClass ( self , Class , Templates = None ) :
+        Output = ''
+        if Class != None :
+            Output = Output + self . GetResolvedClassName ( Class . Name , Templates )
+        return Output
+    
+    def GetResolvedClassName ( self , ClassName , Templates = None ) :
+        Output = ''
+        if ClassName != None :
+            Output = Output + ClassName + self . FUNCTION_OUTPUT_DELIMITER
+        if Templates == None and self . IsSavedTemplatesExisting ( ) == True :
+            Templates = self . GetLatestSavedTemplate ( )
+        Output = Output + self . AddTemplatesToOutput ( Templates )
+        return Output
 
     def CanResolveSymbolAction ( self , ActionSymbol ) :
         Output = True
@@ -1752,7 +1758,7 @@ class Parser ( ) :
 
     def CalcFunctionName ( self , Class , Function ) :
         OutputText = ''
-        OutputText = OutputText + self . ResolveActionToName ( Function , Class , [ ] )
+        OutputText = OutputText + self . ResolveActionNameToName ( Function . Name , [ ] )
         OutputText = OutputText + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_BEGIN' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
