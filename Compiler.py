@@ -301,6 +301,7 @@ class Parser ( ) :
     ACTION_DEFINITION_OFFSET = 0
     ACTION_DECLARATION_PARAM_OFFSET = 8
     CLASS_DECLARATION_OFFSET = 0
+    NORMAL_TOKEN_SIZE = 1
     
     def __init__ ( self ) :
         self . State = deepcopy ( self . MAIN_STATES [ 'START_OF_LINE' ] )
@@ -645,7 +646,7 @@ class Parser ( ) :
             if Lexer . IsValidName ( WordArray [ Index ] . Name ) == True :
                 ActionName = WordArray [ Index ] . Name
                 if CallingObject != None :
-                    ActionName = self . ResolveActionToAsm ( WordArray [ Index ] , CallingObject . Type )
+                    ActionName = self . ResolveActionToAsm ( WordArray [ Index ] , CallingObject . Type , CallingObject . Templates )
                 print ( 'ugg' , self . GetObjectTypeName ( CallingObject ) , ActionName )
                 if self . GetTypeTableFromNames ( self . GetObjectTypeName ( CallingObject ) , ActionName ) :
                     self . ParameterArray = self . ParameterArray + [ WordArray [ Index + 2 ] ]
@@ -960,7 +961,7 @@ class Parser ( ) :
         elif Token . Name == self . KEYWORDS [ 'RETURN' ] :
             OutputText , SavedWordArray , WordIndex = self . DoReturnStatement ( Token , SavedWordArray , WordIndex , OutputText )
         elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
-            Token = self . PossibleTemplateASMReplace ( Token )
+            Token = self . PossibleTemplateASMReplace ( Token , WordIndex , SavedWordArray )
             OutputText = OutputText + Token . Name
         elif Lexer . IsValidName ( Token . Name ) == True :
             if self . IsCurrentlyValidType ( Token ) == True :
@@ -982,12 +983,12 @@ class Parser ( ) :
             print ( 'screw up' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
     
-    def PossibleTemplateASMReplace ( self , Token ) :
+    def PossibleTemplateASMReplace ( self , Token , Index , WordArray ) :
         if self . IsSavedTemplatesExisting ( ) == True :
-            Token = self . DoAsmTemplateReplace ( Token )
+            Token = self . DoAsmTemplateReplace ( Token , Index , WordArray )
         return Token
     
-    def DoAsmTemplateReplace ( self , Token ) :
+    def DoAsmTemplateReplace ( self , Token , Index , WordArray ) :
         StartPosition = 0
         for Item in self . ASM_REPLACE_STRINGS :
             FoundPosition = Token . Name . find ( Item , StartPosition )
@@ -1002,26 +1003,27 @@ class Parser ( ) :
                 RightParenPosition = self . GoUntilNotWhiteSpace ( Token . Name , NameEndPosition )
                 self . AsmNextCheck ( RightParenPosition , Item , Token )
                 self . AsmLetterCheck ( Token . Name [ RightParenPosition ] , self .  OPERATORS [ 'RIGHT_PAREN' ] , Item , Token )
-                VariableName = Token . Name [ NameStartPosition : NameEndPosition ]
-                ResultString = self . PerformOperation ( Item , VariableName )
+                TypeName = Token . Name [ NameStartPosition : NameEndPosition ]
+                ResultString = self . CalcNewAsmString ( Item , TypeName , Token , Index , WordArray )
                 Token . Name = Token . Name [ 0 : FoundPosition ] + ResultString + Token . Name [ RightParenPosition + 1 : ]
                 StartPosition = FoundPosition + 1
                 FoundPosition = Token . Name . find ( Item , StartPosition )
             StartPosition = 0
         return Token
     
-    def PerformOperation ( self , Function , VariableName ) :
+    def CalcNewAsmString ( self , FunctionName , TypeName , Token , Index , WordArray ) :
         ResultString = ''
-        if Function == self . KEYWORDS [ 'SIZE_OF' ] :
-            Found , Symbol = self . CheckCurrentSTsByName ( VariableName )
-            print ( 'Code: 994' , Symbol , VariableName , self . STStack , self . GetCurrentST ( ) . Symbols )
-            ResultString = str ( Symbol . Type . Size )
-        elif Function == self . KEYWORDS [ 'GET_CLASS_NAME' ] :
-            Found , Symbol = self . CheckCurrentSTsByName ( VariableName )
-            ResultString = Symbol . Type
-        elif Function == self . KEYWORDS [ 'GET_RESOLVED_CLASS_NAME' ] :
-            Found , Symbol = self . CheckCurrentSTsByName ( VariableName )
-            ResultString = self . GetResolvedClassNameFromClass ( Symbol . Type , Symbol . Templates )
+        if FunctionName == self . KEYWORDS [ 'SIZE_OF' ] :
+            TypeName = self . PossibleTemplateConvertFromName ( TypeName , Token , Index , WordArray )
+            print ( 'Code: 991' , TypeName , FunctionName )
+            Type = self . GetTypeObjectFromNames ( TypeName , '' )
+            ResultString = str ( Type . Size )
+        elif FunctionName == self . KEYWORDS [ 'GET_CLASS_NAME' ] :
+            TypeName = self . PossibleTemplateConvertFromName ( TypeName , Token , Index , WordArray )
+            ResultString = TypeName
+        elif FunctionName == self . KEYWORDS [ 'GET_RESOLVED_CLASS_NAME' ] :
+            TypeName = self . PossibleTemplateConvertFromName ( TypeName , Token , Index , WordArray )
+            ResultString = self . GetResolvedClassName ( TypeName , [] )
         return ResultString
     
     def GetNameEndPosition ( self , Name , StartPosition ) :
@@ -1046,20 +1048,29 @@ class Parser ( ) :
             CompilerIssue . OutputError ( 'Expected ' + TestLetter + ' found ' + Letter + ' next to ' + Name + ' in assembly code.' , self . EXIT_ON_ERROR , Token )
     
     def PossibleTemplateConvert ( self , Token , Index , WordArray ) :
-        if self . IsValidTemplateElem ( self . CurrentClass , Token ) == True :
-            TemplateParts = Token . Name . split ( )
-            if len ( TemplateParts ) > 0 :
-                WordArray . insert ( Index + 1 , MyToken ( self . KEYWORDS [ 'REFERENCE' ] , Token . LineNumber , Token . FileName ) )
-            Position = self . FindInTemplates ( self . CurrentClass , Token )
-            print ( 'Code: 1000' , Position , self . CurrentClass . Name , Token . Name , self . GetLatestSavedTemplate ( ) , self . SavedTemplates )
-            Token . Name = self . GetLatestSavedTemplate ( ) [ Position ]
+        Token . Name = self . PossibleTemplateConvertFromName ( Token . Name , Token , Index , WordArray )
         return Token , Index , WordArray
     
+    def PossibleTemplateConvertFromName ( self , Name , Token , Index , WordArray ) :
+        if self . IsValidTemplateElemName ( self . CurrentClass , Name ) == True :
+            TemplateParts = Name . split ( )
+            if len ( TemplateParts ) > self . NORMAL_TOKEN_SIZE :
+                WordArray . insert ( Index + 1 , MyToken ( self . KEYWORDS [ 'REFERENCE' ] , Token . LineNumber , Token . FileName ) )
+            Position = self . FindNameInTemplates ( self . CurrentClass , Name )
+            print ( 'Code: 1000' , Position , self . CurrentClass . Name , Name , self . GetLatestSavedTemplate ( ) , self . SavedTemplates )
+            Name = self . GetLatestSavedTemplate ( ) [ Position ]
+            print ( 'te' , Name )
+        return Name
+    
     def IsValidTemplateElem ( self , Class , Token ) :
+        Output = self . IsValidTemplateElemName ( Class , Token . Name )
+        return Output
+    
+    def IsValidTemplateElemName ( self , Class , Name ) :
         Output = False
         if Class != None :
             if self . HasTemplates ( self . CurrentClass ) == True :
-                if Token . Name in self . CurrentClass . Templates :
+                if Name in self . CurrentClass . Templates :
                     Output = True
         return Output
     
@@ -1466,7 +1477,10 @@ class Parser ( ) :
         if Token . Name == self . SPECIAL_CHARS [ 'NEWLINE' ] :
             OutputText = self . OutputFunctionDeclarationEnd ( OutputText )
         else :
-            CompilerIssue . OutputError ( 'Expected NEWLINE after return values' , self . EXIT_ON_ERROR , TokenObject )
+            print ( 'Code: 990' , SavedWordArray [ WordIndex ] . Name , SavedWordArray [ WordIndex - 3 ] . Name , SavedWordArray [ WordIndex - 2 ] . Name , SavedWordArray [ WordIndex - 1 ] . Name ,
+                SavedWordArray [ WordIndex ] . Name , SavedWordArray [ WordIndex+ 1 ] . Name , SavedWordArray [ WordIndex + 2 ] . Name , SavedWordArray [ WordIndex + 3 ] . Name )
+            print ( self . SavedTemplates )
+            CompilerIssue . OutputError ( 'Expected NEWLINE after return values' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
 
     def ProcessWaitingForOperator ( self , Token , SavedWordArray , WordIndex , OutputText ) :
@@ -1624,10 +1638,14 @@ class Parser ( ) :
         return NewClass
     
     def FindInTemplates ( self , Class , NewType ) :
+        Position = self . FindNameInTemplates ( self , Class , NewType )
+        return Position
+    
+    def FindNameInTemplates ( self , Class , TemplateName ) :
         Position = -1
         Index = 0
         for Template in Class . Templates :
-            if Template == NewType . Name :
+            if Template == TemplateName :
                 Position = Index
             Index = Index + 1
         return Position

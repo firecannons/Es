@@ -1448,6 +1448,252 @@ mov esp, ebp
 pop ebp
 ret
 
+TemplateTest__Byte__On_Create:
+
+push ebp
+mov ebp, esp
+
+
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : MyT -> 0
+;ok-4
+add esp, -1
+
+mov byte [esp], 67
+
+;Declaring [259 -5
+;Loading [259 -5
+add esp, -4
+mov ebx, ebp
+add ebx, -5
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -4
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference![258
+call Byte__On_Equals
+add esp, 8
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : MyT -> 0
+;ok-9
+;Loading [260 -9
+add esp, -4
+mov ebx, ebp
+add ebx, -9
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference![260
+call OutputByte
+add esp, 4
+
+
+mov esp, ebp
+pop ebp
+ret
+
+MultiTemplateTest__Byte__Byte__Integer__On_Create:
+
+push ebp
+mov ebp, esp
+
+
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : MyT -> 0
+;ok-4
+add esp, -1
+
+mov byte [esp], 67
+
+;Declaring [262 -5
+;Loading [262 -5
+add esp, -4
+mov ebx, ebp
+add ebx, -5
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -4
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference![261
+call Byte__On_Equals
+add esp, 8
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset1 = 0 + 1
+;Names: Me : MyT2 -> 1
+;ok-9
+add esp, -1
+
+mov byte [esp], 68
+
+;Declaring [264 -10
+;Loading [264 -10
+add esp, -4
+mov ebx, ebp
+add ebx, -10
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -9
+mov ebx, [ebx]
+add ebx, 1
+mov [esp], ebx
+; loading a reference![263
+call Byte__On_Equals
+add esp, 8
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset1 = 0 + 1
+;Names: Me : MyT2 -> 1
+;ok-14
+;Loading [265 -14
+add esp, -4
+mov ebx, ebp
+add ebx, -14
+mov ebx, [ebx]
+add ebx, 1
+mov [esp], ebx
+; loading a reference![265
+call OutputByte
+add esp, 4
+
+
+mov esp, ebp
+pop ebp
+ret
+
+RefTemplateTest__Byte__Byte__Integer__On_Create:
+
+push ebp
+mov ebp, esp
+
+
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset0 = 0 + 0
+;Names: Me : MyT -> 0
+;ok-4
+add esp, -1
+
+mov byte [esp], 67
+
+;Declaring [267 -5
+;Loading [267 -5
+add esp, -4
+mov ebx, ebp
+add ebx, -5
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -4
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference![266
+call Byte__On_Equals
+add esp, 8
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset1 = 0 + 1
+;Names: Me : MyT2 -> 1
+;ok-9
+add esp, -1
+
+mov byte [esp], 68
+
+;Declaring [269 -10
+;Loading [269 -10
+add esp, -4
+mov ebx, ebp
+add ebx, -10
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -9
+mov ebx, [ebx]
+add ebx, 1
+mov [esp], ebx
+; loading a reference![268
+call Byte__On_Equals
+add esp, 8
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov ebx, [ebx]
+add ebx, 0
+mov [esp], ebx
+; loading a reference!Me
+;Shifting Deref Offset1 = 0 + 1
+;Names: Me : MyT2 -> 1
+;ok-14
+;Loading [270 -14
+add esp, -4
+mov ebx, ebp
+add ebx, -14
+mov ebx, [ebx]
+add ebx, 1
+mov [esp], ebx
+; loading a reference![270
+call OutputByte
+add esp, 4
+
+
+mov esp, ebp
+pop ebp
+ret
+
 Array__Byte__On_Create:
 
 push ebp
@@ -1468,8 +1714,8 @@ add esp, -1
 
 mov byte [esp], 0
 
-;Declaring [259 -5
-;Loading [259 -5
+;Declaring [273 -5
+;Loading [273 -5
 add esp, -4
 mov ebx, ebp
 add ebx, -5
@@ -1481,7 +1727,7 @@ add ebx, -4
 mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
-; loading a reference![258
+; loading a reference![272
 call Integer__On_Equals
 add esp, 8
 add esp, -4
@@ -1506,17 +1752,17 @@ mov [esp], ebx
 ;ok-13
 ;Adding return value 
 add esp, -4
-;Loading [261 -17
+;Loading [275 -17
 add esp, -4
 mov ebx, ebp
 add ebx, -13
 mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
-; loading a reference![261
+; loading a reference![275
 call AllocateHeapMemory
 add esp, 4
-;Loading [262 -17
+;Loading [276 -17
 add esp, -4
 mov ebx, ebp
 add ebx, -17
@@ -1528,7 +1774,7 @@ add ebx, -9
 mov ebx, [ebx]
 add ebx, 4
 mov [esp], ebx
-; loading a reference![260
+; loading a reference![274
 call Pointer__On_Equals
 add esp, 8
 
@@ -1547,10 +1793,13 @@ mov ebp, esp
         mov ebx, ebp
         add ebx, 12
         mov ebx, [ebx]
+        add ebx, 4
+        mov ebx, [ebx]
         
         ; load Position into edx
         mov edx, ebp
         add edx, 16
+        mov edx, [edx]
         mov edx, [edx]
         
         ; Perform arithmetic to find correct memory position into ebx
@@ -1565,6 +1814,53 @@ mov ebp, esp
         ; Load the ebx position onto the stack
         mov ebx, ebp
         add ebx, 20
+        add esp, -4
+        mov [esp], ebx
+        
+        call Byte__On_Equals
+        
+        ; Move the stack pointer back up
+        add esp, 8
+        
+        
+    
+
+mov esp, ebp
+pop ebp
+ret
+
+Array__Byte__GetAt:
+
+push ebp
+mov ebp, esp
+
+
+        ; load DP into ebx
+        mov ebx, ebp
+        add ebx, 12
+        mov ebx, [ebx]
+        add ebx, 4
+        mov ebx, [ebx]
+        
+        ; load Position into edx
+        mov edx, ebp
+        add edx, 12
+        mov edx, [edx]
+        mov edx, [edx]
+        
+        ; Perform arithmetic to find correct memory position into ebx
+        mov eax, 1
+        mul edx
+        add ebx, eax
+        
+        ; Load the ebx position onto the stack
+        mov ebx, ebp
+        add ebx, 16
+        add ebx, 1
+        add esp, -4
+        mov [esp], ebx
+        
+        ; Load the ebx position onto the stack
         add esp, -4
         mov [esp], ebx
         
@@ -1610,10 +1906,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [265 -9
+;Declaring [279 -9
 ;Adding return value 
 add esp, -4
-;Loading [265 -13
+;Loading [279 -13
 add esp, -4
 mov ebx, ebp
 add ebx, -9
@@ -1625,10 +1921,10 @@ add ebx, -8
 mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
-; loading a reference![264
+; loading a reference![278
 call Integer__On_Plus
 add esp, 8
-;Loading [266 -13
+;Loading [280 -13
 add esp, -4
 mov ebx, ebp
 add ebx, -13
@@ -1640,7 +1936,7 @@ add ebx, -4
 mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
-; loading a reference![263
+; loading a reference![277
 call Integer__On_Equals
 add esp, 8
 add esp, -4
@@ -1665,17 +1961,17 @@ mov [esp], ebx
 ;ok-21
 ;Adding return value 
 add esp, -4
-;Loading [268 -25
+;Loading [282 -25
 add esp, -4
 mov ebx, ebp
 add ebx, -21
 mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
-; loading a reference![268
+; loading a reference![282
 call AllocateHeapMemory
 add esp, 4
-;Loading [269 -25
+;Loading [283 -25
 add esp, -4
 mov ebx, ebp
 add ebx, -25
@@ -1687,7 +1983,7 @@ add ebx, -17
 mov ebx, [ebx]
 add ebx, 4
 mov [esp], ebx
-; loading a reference![267
+; loading a reference![281
 call Pointer__On_Equals
 add esp, 8
 add esp, -4
@@ -1704,10 +2000,10 @@ add esp, -1
 
 mov byte [esp], 1
 
-;Declaring [271 -30
+;Declaring [285 -30
 ;Adding return value 
 add esp, -4
-;Loading [271 -34
+;Loading [285 -34
 add esp, -4
 mov ebx, ebp
 add ebx, -30
@@ -1719,7 +2015,7 @@ add ebx, -29
 mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
-; loading a reference![270
+; loading a reference![284
 call Integer__On_Minus
 add esp, 8
 ;Loading NewElem -34
@@ -1730,7 +2026,7 @@ mov ebx, [ebx]
 add ebx, 0
 mov [esp], ebx
 ; loading a reference!NewElem
-;Loading [272 -38
+;Loading [286 -38
 add esp, -4
 mov ebx, ebp
 add ebx, -34
@@ -1745,252 +2041,6 @@ mov [esp], ebx
 ; loading a reference!Me
 call Array__Byte__SetAt
 add esp, 12
-
-
-mov esp, ebp
-pop ebp
-ret
-
-TemplateTest__Byte__On_Create:
-
-push ebp
-mov ebp, esp
-
-
-add esp, -4
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference!Me
-;Shifting Deref Offset0 = 0 + 0
-;Names: Me : MyT -> 0
-;ok-4
-add esp, -1
-
-mov byte [esp], 67
-
-;Declaring [274 -5
-;Loading [274 -5
-add esp, -4
-mov ebx, ebp
-add ebx, -5
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -4
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference![273
-call Byte__On_Equals
-add esp, 8
-add esp, -4
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference!Me
-;Shifting Deref Offset0 = 0 + 0
-;Names: Me : MyT -> 0
-;ok-9
-;Loading [275 -9
-add esp, -4
-mov ebx, ebp
-add ebx, -9
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference![275
-call OutputByte
-add esp, 4
-
-
-mov esp, ebp
-pop ebp
-ret
-
-MultiTemplateTest__Byte__Byte__Integer__On_Create:
-
-push ebp
-mov ebp, esp
-
-
-add esp, -4
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference!Me
-;Shifting Deref Offset0 = 0 + 0
-;Names: Me : MyT -> 0
-;ok-4
-add esp, -1
-
-mov byte [esp], 67
-
-;Declaring [277 -5
-;Loading [277 -5
-add esp, -4
-mov ebx, ebp
-add ebx, -5
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -4
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference![276
-call Byte__On_Equals
-add esp, 8
-add esp, -4
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference!Me
-;Shifting Deref Offset4 = 0 + 4
-;Names: Me : MyT2 -> 4
-;ok-9
-add esp, -1
-
-mov byte [esp], 68
-
-;Declaring [279 -10
-;Loading [279 -10
-add esp, -4
-mov ebx, ebp
-add ebx, -10
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -9
-mov ebx, [ebx]
-add ebx, 4
-mov [esp], ebx
-; loading a reference![278
-call Byte__On_Equals
-add esp, 8
-add esp, -4
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference!Me
-;Shifting Deref Offset4 = 0 + 4
-;Names: Me : MyT2 -> 4
-;ok-14
-;Loading [280 -14
-add esp, -4
-mov ebx, ebp
-add ebx, -14
-mov ebx, [ebx]
-add ebx, 4
-mov [esp], ebx
-; loading a reference![280
-call OutputByte
-add esp, 4
-
-
-mov esp, ebp
-pop ebp
-ret
-
-RefTemplateTest__Byte__Byte__Integer__On_Create:
-
-push ebp
-mov ebp, esp
-
-
-add esp, -4
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference!Me
-;Shifting Deref Offset0 = 0 + 0
-;Names: Me : MyT -> 0
-;ok-4
-add esp, -1
-
-mov byte [esp], 67
-
-;Declaring [282 -5
-;Loading [282 -5
-add esp, -4
-mov ebx, ebp
-add ebx, -5
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -4
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference![281
-call Byte__On_Equals
-add esp, 8
-add esp, -4
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference!Me
-;Shifting Deref Offset4 = 0 + 4
-;Names: Me : MyT2 -> 4
-;ok-9
-add esp, -1
-
-mov byte [esp], 68
-
-;Declaring [284 -10
-;Loading [284 -10
-add esp, -4
-mov ebx, ebp
-add ebx, -10
-mov [esp], ebx
-;Loading a Byte object
-add esp, -4
-mov ebx, ebp
-add ebx, -9
-mov ebx, [ebx]
-add ebx, 4
-mov [esp], ebx
-; loading a reference![283
-call Byte__On_Equals
-add esp, 8
-add esp, -4
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx]
-add ebx, 0
-mov [esp], ebx
-; loading a reference!Me
-;Shifting Deref Offset4 = 0 + 4
-;Names: Me : MyT2 -> 4
-;ok-14
-;Loading [285 -14
-add esp, -4
-mov ebx, ebp
-add ebx, -14
-mov ebx, [ebx]
-add ebx, 4
-mov [esp], ebx
-; loading a reference![285
-call OutputByte
-add esp, 4
 
 
 mov esp, ebp
@@ -5864,42 +5914,80 @@ add ebx, -174
 mov [esp], ebx
 call Pointer__On_Equals
 add esp, 8
-;Declaring MyAr -186
+;Declaring TeTe -179
+add esp, -1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -179
+mov [esp], ebx
+call TemplateTest__Byte__On_Create
+add esp, 4
+;Declaring MuTeTe -185
+add esp, -6
+
+add esp, -4
+mov ebx, ebp
+add ebx, -185
+mov [esp], ebx
+call MultiTemplateTest__Byte__Byte__Integer__On_Create
+add esp, 4
+;Declaring RefTeTe -191
+add esp, -6
+
+add esp, -4
+mov ebx, ebp
+add ebx, -191
+mov [esp], ebx
+call RefTemplateTest__Byte__Byte__Integer__On_Create
+add esp, 4
+;Declaring MyByte -192
+add esp, -1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -192
+mov [esp], ebx
+call Byte__On_Create
+add esp, 4
+add esp, -1
+
+mov byte [esp], 66
+
+;Declaring [271 -193
+;Loading [271 -193
+add esp, -4
+mov ebx, ebp
+add ebx, -193
+mov [esp], ebx
+;Loading a Byte object
+add esp, -4
+mov ebx, ebp
+add ebx, -192
+mov [esp], ebx
+call Byte__On_Equals
+add esp, 8
+;Declaring MyByteArray -201
 add esp, -8
 
 add esp, -4
 mov ebx, ebp
-add ebx, -186
+add ebx, -201
 mov [esp], ebx
 call Array__Byte__On_Create
 add esp, 4
-;Declaring TeTe -190
-add esp, -4
-
+;Loading MyByte -201
 add esp, -4
 mov ebx, ebp
-add ebx, -190
+add ebx, -192
 mov [esp], ebx
-call TemplateTest__Byte__On_Create
-add esp, 4
-;Declaring MuTeTe -202
-add esp, -12
-
+;Loading a Array object
 add esp, -4
 mov ebx, ebp
-add ebx, -202
+add ebx, -201
 mov [esp], ebx
-call MultiTemplateTest__Byte__Byte__Integer__On_Create
-add esp, 4
-;Declaring RefTeTe -214
-add esp, -12
-
-add esp, -4
-mov ebx, ebp
-add ebx, -214
-mov [esp], ebx
-call RefTemplateTest__Byte__Byte__Integer__On_Create
-add esp, 4
+call Array__Byte__Append
+add esp, 8
 
 
 mov esp, ebp

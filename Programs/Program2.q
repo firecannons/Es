@@ -169,14 +169,17 @@ class Array<T>
         mov ebx, ebp
         add ebx, 12
         mov ebx, [ebx]
+        add ebx, 4
+        mov ebx, [ebx]
         
         ; load Position into edx
         mov edx, ebp
         add edx, 16
         mov edx, [edx]
+        mov edx, [edx]
         
         ; Perform arithmetic to find correct memory position into ebx
-        mov eax, SizeOf(Elem)
+        mov eax, SizeOf(T)
         mul edx
         add ebx, eax
         
@@ -190,7 +193,45 @@ class Array<T>
         add esp, -4
         mov [esp], ebx
         
-        call GetResolvedClassName(Elem)On_Equals
+        call GetResolvedClassName(T)On_Equals
+        
+        ; Move the stack pointer back up
+        add esp, 8
+        
+        
+    end
+    
+    action asm GetAt(Integer Position) returns T
+        ; load DP into ebx
+        mov ebx, ebp
+        add ebx, 12
+        mov ebx, [ebx]
+        add ebx, 4
+        mov ebx, [ebx]
+        
+        ; load Position into edx
+        mov edx, ebp
+        add edx, 12
+        mov edx, [edx]
+        mov edx, [edx]
+        
+        ; Perform arithmetic to find correct memory position into ebx
+        mov eax, SizeOf(T)
+        mul edx
+        add ebx, eax
+        
+        ; Load the ebx position onto the stack
+        mov ebx, ebp
+        add ebx, 16
+        add ebx, SizeOf(T)
+        add esp, -4
+        mov [esp], ebx
+        
+        ; Load the ebx position onto the stack
+        add esp, -4
+        mov [esp], ebx
+        
+        call GetResolvedClassName(T)On_Equals
         
         ; Move the stack pointer back up
         add esp, 8
@@ -579,12 +620,16 @@ action Main
     Integer TestSize
     Pointer DB = AllocateHeapMemory ( TestSize )
     
-    Array<Byte> MyAr
+    //Array<Byte> MyAr
     
     TemplateTest<Byte> TeTe
     
     MultiTemplateTest<Byte,Byte,Integer> MuTeTe
     
     RefTemplateTest<Byte reference,Byte,Integer> RefTeTe
+    
+    Byte MyByte = 66
+    Array<Byte> MyByteArray
+    MyByteArray:Append(MyByte)
     
 end
