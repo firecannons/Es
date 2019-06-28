@@ -1568,7 +1568,7 @@ mov ebp, esp
         add esp, -4
         mov [esp], ebx
         
-        call __On_Equals
+        call Byte__On_Equals
         
         ; Move the stack pointer back up
         add esp, 8
