@@ -156,25 +156,27 @@ class TemplateTest<T>
 end
 
 class Array<T>
-    Integer Size
+    Byte Size
     Pointer DP
+    Byte MemorySize
     
     action on create
         Me : Size = 0
-        Me : DP = AllocateHeapMemory ( Me : Size )
+        Me : MemorySize = 0
+        Me : DP = AllocateHeapMemory ( Me : MemorySize )
     end
     
-    action asm SetAt(Integer Position, T Elem)
+    action asm SetAt(Byte Position, T Elem)
         ; load DP into ebx
         mov ebx, ebp
-        add ebx, 12
+        add ebx, 8
         mov ebx, [ebx]
         add ebx, 4
         mov ebx, [ebx]
         
         ; load Position into edx
         mov edx, ebp
-        add edx, 16
+        add edx, 12
         mov edx, [edx]
         mov edx, [edx]
         
@@ -189,7 +191,7 @@ class Array<T>
         
         ; Load the ebx position onto the stack
         mov ebx, ebp
-        add ebx, 20
+        add ebx, 16
         add esp, -4
         mov [esp], ebx
         
@@ -201,7 +203,7 @@ class Array<T>
         
     end
     
-    action asm GetAt(Integer Position) returns T
+    action asm GetAt(Byte Position) returns T
         ; load DP into ebx
         mov ebx, ebp
         add ebx, 12
@@ -241,7 +243,11 @@ class Array<T>
     
     action Append ( T NewElem )
         Me : Size = Me : Size + 1
-        Me : DP = AllocateHeapMemory( Me:Size)
+        if Me : Size > Me : MemorySize
+            //Me : MemorySize = Me : Size * 2
+            Me : MemorySize = Me : Size
+            Me : DP = AllocateHeapMemory( Me:MemorySize )
+        end
         Me : SetAt(Me:Size - 1, NewElem)
     end
 end
@@ -616,9 +622,9 @@ action Main
     end
     Pointer joe
     
-    Byte Size = 0
+    Byte Size = 128
     Integer TestSize
-    Pointer DB = AllocateHeapMemory ( TestSize )
+    Pointer DB = AllocateHeapMemory ( Size )
     
     //Array<Byte> MyAr
     
@@ -629,7 +635,12 @@ action Main
     RefTemplateTest<Byte reference,Byte,Integer> RefTeTe
     
     Byte MyByte = 66
+    OutputByte ( MyByte )
     Array<Byte> MyByteArray
+    OutputByte ( MyByte )
     MyByteArray:Append(MyByte)
+    OutputByte ( MyByte )
+    MyByte = MyByteArray:GetAt(0)
+    OutputByte ( MyByte )
     
 end
