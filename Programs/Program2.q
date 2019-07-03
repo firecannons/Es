@@ -185,6 +185,14 @@ class Array<T>
         mul edx
         add ebx, eax
         
+        push ebx
+        add esp, -1
+        add eax, 67
+        mov byte [esp], al
+        push esp
+        call OutputByte
+        pop ebx
+        
         ; Load the ebx position onto the stack
         add esp, -4
         mov [esp], ebx
@@ -192,10 +200,17 @@ class Array<T>
         ; Load the ebx position onto the stack
         mov ebx, ebp
         add ebx, 16
+        mov ebx, [ebx]
         add esp, -4
         mov [esp], ebx
         
         call GetResolvedClassName(T)On_Equals
+        
+        add esp, -1
+        add eax, 68
+        mov byte [esp], al
+        push esp
+        call OutputByte
         
         ; Move the stack pointer back up
         add esp, 8
@@ -242,6 +257,8 @@ class Array<T>
     end
     
     action Append ( T NewElem )
+        Byte testy = 70
+        OutputByte ( NewElem )
         Me : Size = Me : Size + 1
         if Me : Size > Me : MemorySize
             //Me : MemorySize = Me : Size * 2
