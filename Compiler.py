@@ -1332,7 +1332,7 @@ class Parser ( ) :
         SelfSymbol . IsReference = True
         self . GetCurrentST ( ) . Symbols [ self . SELF_OBJECT_NAME ] = SelfSymbol
         self . CurrentTypeTable ( ) . append ( SelfSymbol )
-        self . CurrentParamOffset = self . CurrentParamOffset - self . POINTER_SIZE
+        self . CurrentParamOffset = self . CurrentParamOffset + self . POINTER_SIZE
 
     def ProcessActionAfter ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . KEYWORDS [ 'ASM' ] :
