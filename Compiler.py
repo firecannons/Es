@@ -221,7 +221,8 @@ class Parser ( ) :
         { OPERATORS [ 'PLUS' ] , OPERATORS [ 'MINUS' ] , OPERATORS [ 'MULT' ] , OPERATORS [ 'DIVIDE' ] } ,
         { OPERATORS [ 'IS_EQUAL' ] , OPERATORS [ 'NOT_EQUAL' ] , OPERATORS [ 'GREATER_THAN' ] , OPERATORS [ 'GREATER_OR_EQUAL' ] , OPERATORS [ 'LESS_OR_EQUAL' ] , OPERATORS [ 'LESS_THAN' ] } ,
         { OPERATORS [ 'EQUALS' ] } ,
-        { SPECIAL_CHARS [ 'COMMA' ] , OPERATORS [ 'LEFT_PAREN' ] , OPERATORS [ 'RIGHT_PAREN' ] }
+        { SPECIAL_CHARS [ 'COMMA' ] } ,
+        { OPERATORS [ 'LEFT_PAREN' ] , OPERATORS [ 'RIGHT_PAREN' ] }
     ]
     
     ASM_COMMANDS = {
@@ -632,8 +633,10 @@ class Parser ( ) :
 
     def DoLeftParenOperation ( self , Index , WordArray , OutputText ) :
         CallingObject = None
+        self . PrintWordArray ( WordArray )
         if Index >= 2 :
             if WordArray [ Index - 1 ] . Name == self . OPERATORS [ 'COLON' ] :
+                print ( 'booya' )
                 IsFound , CallingObject = self . CheckCurrentSTs ( WordArray [ Index - 2 ] )
                 WordArray . pop ( Index - 2 )
                 WordArray . pop ( Index - 2 )
@@ -647,7 +650,7 @@ class Parser ( ) :
                 ActionName = WordArray [ Index ] . Name
                 if CallingObject != None :
                     ActionName = self . ResolveActionToAsm ( WordArray [ Index ] , CallingObject . Type , CallingObject . Templates )
-                print ( 'ugg' , self . GetObjectTypeName ( CallingObject ) , ActionName )
+                    print ( 'ugg' , self . GetObjectTypeName ( CallingObject ) , ActionName , CallingObject . Name , CallingObject.Templates )
                 if self . GetTypeTableFromNames ( self . GetObjectTypeName ( CallingObject ) , ActionName ) :
                     self . ParameterArray = self . ParameterArray + [ WordArray [ Index + 2 ] ]
                     OutputText , self . ParameterArray = self . AllocateLiterals ( OutputText , self . ParameterArray )
