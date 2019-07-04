@@ -185,13 +185,13 @@ class Array<T>
         mul edx
         add ebx, eax
         
-        push ebx
         add esp, -1
-        add eax, 67
-        mov byte [esp], al
-        push esp
+        mov byte [esp], 70
+        mov eax, esp
+        add esp, -4
+        mov [esp], eax
         call OutputByte
-        pop ebx
+        add esp, 5
         
         ; Load the ebx position onto the stack
         add esp, -4
@@ -207,10 +207,12 @@ class Array<T>
         call GetResolvedClassName(T)On_Equals
         
         add esp, -1
-        add eax, 68
-        mov byte [esp], al
-        push esp
+        mov byte [esp], 67
+        mov eax, esp
+        add esp, -4
+        mov [esp], eax
         call OutputByte
+        add esp, 5
         
         ; Move the stack pointer back up
         add esp, 8
@@ -258,17 +260,41 @@ class Array<T>
     
     action Append ( T NewElem )
         Byte testy = 70
-        OutputByte ( NewElem )
+        OutputByte ( testy )
+        OutputByte ( testy )
         Me : Size = Me : Size + 1
         if Me : Size > Me : MemorySize
             //Me : MemorySize = Me : Size * 2
             Me : MemorySize = Me : Size
             Me : DP = AllocateHeapMemory( Me:MemorySize )
         end
-        Me : SetAt(Me:Size - 1, NewElem)
+        Byte NewSize = Me:Size - 1
+        Byte PrintSize = NewSize + 90
+        OutputByte ( PrintSize )
+        Me : SetAt(NewSize, NewElem)
     end
 end
+/*
+class Game
+    List<List<Tile>> World
+    List<Unit> Units
+end
 
+class Tile
+    Unit Reference MyUnit
+    Coord2D Position
+end
+
+class Unit
+    Tile Reference MyTile
+    Number Health
+    
+    action Move ( Tile InTile )
+        MyTile : MyUnit = None
+        InTile : MyUnit = Me
+    end
+end
+*/
 class MultiTemplateTest<T, T2, T3>
     T MyT
     T2 MyT2
