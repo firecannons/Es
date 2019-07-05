@@ -14,6 +14,20 @@ action asm OutputByte ( Byte L )
 	int	0x80
 end
 
+action asm OutputByteReference ( Byte Reference L )
+    ; load a pointer to the byte in ecx
+    mov ecx, ebp
+    add ecx, 8
+    mov ecx, [ecx]
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+end
+
 action asm OutputByte3 ( Byte L , Byte L2 , Byte L3 )
     ; load a pointer to the byte in ecx
     mov ecx, ebp
@@ -167,35 +181,38 @@ class Array<T>
     end
     
     action asm SetAt(Byte Position, T Elem)
-        ; load DP into ebx
+        ; load DP into edx
         mov ebx, ebp
         add ebx, 8
         mov ebx, [ebx]
-        add ebx, 4
-        mov ebx, [ebx]
+        add ebx, 1
+        mov edx, [ebx]
+        
+        ;push edx
+        ;add esp, -4
+        ;mov [esp], edx
+        ;call OutputByte
+        ;add esp, 4
+        ;pop edx
         
         ; load Position into edx
         mov edx, ebp
         add edx, 12
         mov edx, [edx]
-        mov edx, [edx]
+        mov byte dl, [edx]
         
         ; Perform arithmetic to find correct memory position into ebx
         mov eax, SizeOf(T)
-        mul edx
-        add ebx, eax
+        mul dl
+        add edx, eax
         
-        add esp, -1
-        mov byte [esp], 70
-        mov eax, esp
-        add esp, -4
-        mov [esp], eax
-        call OutputByte
-        add esp, 5
+        ;push edx
+        ;add esp, -4
+        ;mov [esp], ebx
+        ;call OutputByte
+        ;add esp, 4
+        ;pop edx
         
-        ; Load the ebx position onto the stack
-        add esp, -4
-        mov [esp], ebx
         
         ; Load the ebx position onto the stack
         mov ebx, ebp
@@ -204,49 +221,42 @@ class Array<T>
         add esp, -4
         mov [esp], ebx
         
-        call GetResolvedClassName(T)On_Equals
-        
-        add esp, -1
-        mov byte [esp], 67
-        mov eax, esp
+        ; Load the ebx position onto the stack
         add esp, -4
-        mov [esp], eax
-        call OutputByte
-        add esp, 5
+        mov [esp], edx
+        call GetResolvedClassName(T)On_Equals
         
         ; Move the stack pointer back up
         add esp, 8
         
-        
     end
     
     action asm GetAt(Byte Position) returns T
-        ; load DP into ebx
+        ; load DP into edx
         mov ebx, ebp
-        add ebx, 12
+        add ebx, 8
         mov ebx, [ebx]
-        add ebx, 4
-        mov ebx, [ebx]
+        add ebx, 1
+        mov edx, [ebx]
         
         ; load Position into edx
         mov edx, ebp
         add edx, 12
         mov edx, [edx]
-        mov edx, [edx]
+        mov byte dl, [edx]
         
         ; Perform arithmetic to find correct memory position into ebx
         mov eax, SizeOf(T)
-        mul edx
-        add ebx, eax
+        mul dl
+        add edx, eax
         
         ; Load the ebx position onto the stack
+        add esp, -4
+        mov [esp], edx
+        
+        ; Load the return position
         mov ebx, ebp
         add ebx, 16
-        add ebx, SizeOf(T)
-        add esp, -4
-        mov [esp], ebx
-        
-        ; Load the ebx position onto the stack
         add esp, -4
         mov [esp], ebx
         
@@ -263,14 +273,18 @@ class Array<T>
         OutputByte ( testy )
         OutputByte ( testy )
         Me : Size = Me : Size + 1
+        OutputByte ( Me : Size + 65 )
         if Me : Size > Me : MemorySize
             //Me : MemorySize = Me : Size * 2
             Me : MemorySize = Me : Size
+            //OutputByte ( Me : MemorySize + 65 )
             Me : DP = AllocateHeapMemory( Me:MemorySize )
+            //OutputByteReference ( Me : DP )
         end
         Byte NewSize = Me:Size - 1
-        Byte PrintSize = NewSize + 90
-        OutputByte ( PrintSize )
+        Byte PrintSize = NewSize + 65
+        //OutputByte ( PrintSize )
+        //OutputByteReference ( Me : DP )
         Me : SetAt(NewSize, NewElem)
     end
 end
@@ -677,13 +691,17 @@ action Main
     
     RefTemplateTest<Byte reference,Byte,Integer> RefTeTe
     
-    Byte MyByte = 66
+    Byte MyByte = 67
     OutputByte ( MyByte )
     Array<Byte> MyByteArray
     OutputByte ( MyByte )
     MyByteArray:Append(MyByte)
     OutputByte ( MyByte )
     MyByte = MyByteArray:GetAt(0)
+    OutputByte ( MyByte )
+    MyByte = MyByte + 1
+    MyByteArray:Append(MyByte)
+    MyByte = MyByteArray:GetAt(1)
     OutputByte ( MyByte )
     
 end

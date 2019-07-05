@@ -1,16 +1,4 @@
 action asm AllocateHeapMemory ( Byte Size ) returns Pointer
-jmp next
-
-mmap_arg:  ; ugly
-  .addr:   dd 0
-  .len:    dd 512
-  .prot:   dd 3
-  .flags:  dd 34
-  .fd:     dd -1
-  .offset: dd 0
-  
-next:
-
     push ebp
     mov ebp, esp
     
@@ -49,15 +37,7 @@ next:
     ;lea ebx, [mmap_arg]
     int	0x80
     
-    test eax, eax
-    jnz cont
-    
-    mov	eax,1
-	xor	ebx,ebx
-	int	0x80
-    
-    cont:
-    
+    ; move new memory location to return position
     mov ebx, ebp
     add ebx, 12
     mov [ebx], eax
