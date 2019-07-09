@@ -186,14 +186,16 @@ class Array<T>
         add ebx, 8
         mov ebx, [ebx]
         add ebx, 1
-        mov edx, [ebx]
+        mov ecx, ebx
         
-        ;push edx
+        mov byte [ecx], 85
+        
+        ;push ecx
         ;add esp, -4
-        ;mov [esp], edx
+        ;mov [esp], ecx
         ;call OutputByte
         ;add esp, 4
-        ;pop edx
+        ;pop ecx
         
         ; load Position into edx
         mov edx, ebp
@@ -204,14 +206,14 @@ class Array<T>
         ; Perform arithmetic to find correct memory position into ebx
         mov eax, SizeOf(T)
         mul dl
-        add edx, eax
+        add ecx, eax
         
-        ;push edx
+        ;push ecx
         ;add esp, -4
         ;mov [esp], ebx
         ;call OutputByte
         ;add esp, 4
-        ;pop edx
+        ;pop ecx
         
         
         ; Load the ebx position onto the stack
@@ -223,11 +225,18 @@ class Array<T>
         
         ; Load the ebx position onto the stack
         add esp, -4
-        mov [esp], edx
+        mov [esp], ecx
         call GetResolvedClassName(T)On_Equals
         
         ; Move the stack pointer back up
         add esp, 8
+        
+        ;push ecx
+        ;add esp, -4
+        ;mov [esp], ebx
+        ;call OutputByte
+        ;add esp, 4
+        ;pop ecx
         
     end
     
@@ -237,7 +246,12 @@ class Array<T>
         add ebx, 8
         mov ebx, [ebx]
         add ebx, 1
-        mov edx, [ebx]
+        mov ecx, ebx
+        
+        ;add esp, -4
+        ;mov [esp], ecx
+        ;call OutputByte
+        ;add esp, 4
         
         ; load Position into edx
         mov edx, ebp
@@ -248,11 +262,16 @@ class Array<T>
         ; Perform arithmetic to find correct memory position into ebx
         mov eax, SizeOf(T)
         mul dl
-        add edx, eax
+        add ecx, eax
+        
+        ;add esp, -4
+        ;mov [esp], ecx
+        ;call OutputByte
+        ;add esp, 4
         
         ; Load the ebx position onto the stack
         add esp, -4
-        mov [esp], edx
+        mov [esp], ecx
         
         ; Load the return position
         mov ebx, ebp
@@ -286,6 +305,20 @@ class Array<T>
         //OutputByte ( PrintSize )
         //OutputByteReference ( Me : DP )
         Me : SetAt(NewSize, NewElem)
+    end
+    
+    action Resize ( Byte Size )
+        Me : Size = Size
+        Me : MemorySize = Size
+        Me : DP = AllocateHeapMemory ( Me : MemorySize )
+        Byte B = 0
+        OutputByte ( 90 )
+        SetFirstByteInDynam ( Me : DP )
+        SetByteInDynam ( Me : DP , B , 78 )
+        GetFirstByteInDynam ( Me : DP )
+        Byte test
+        test = Me : GetAt ( 0 )
+        OutputByte ( test )
     end
 end
 /*
@@ -386,6 +419,133 @@ action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
 	mov	edx, 1
 	int	0x80
     
+end
+
+action asm SetByteInDynam ( Pointer DB , Byte Position , Byte NewByte )
+    ; load DP into edx
+    mov ebx, ebp
+    add ebx, 8
+    mov ecx, [ebx]
+        
+    ; load Position into edx
+    mov edx, ebp
+    add edx, 12
+    mov edx, [edx]
+    mov byte dl, [edx]
+    
+    ; Perform arithmetic to find correct memory position into ebx
+    mov eax, 1
+    mul dl
+    add ecx, eax
+    
+    ; Load the return position
+    mov ebx, ebp
+    add ebx, 16
+    mov ebx, [ebx]
+    add esp, -4
+    mov [esp], ebx
+    
+    ; Load the ebx position onto the stack
+    add esp, -4
+    mov [esp], ecx
+    
+    call Byte__On_Equals
+    
+    ; Move the stack pointer back up
+    add esp, 8
+end
+
+action asm SetFirstByteInDynam ( Pointer DB )
+    ; load DP into edx
+    mov ebx, ebp
+    add ebx, 8
+    mov ebx, [ebx]
+    
+    mov byte [ebx], 86
+    
+    add esp, -4
+    mov [esp], ebx
+    call OutputByte
+    add esp, 4
+    
+    ; Move the stack pointer back up
+    add esp, 8
+end
+
+action asm GetFirstByteInDynam ( Pointer DB )
+    ; load DP into edx
+    mov ebx, ebp
+    add ebx, 8
+    mov ebx, [ebx]
+    
+    add esp, -4
+    mov [esp], ebx
+    call OutputByte
+    add esp, 4
+    
+    ; Move the stack pointer back up
+    add esp, 8
+end
+
+action asm GetPointerPart ( Pointer I , Byte Index ) returns Byte
+    ; load I into ebx
+    mov ebx, ebp
+    add ebx, 8
+    mov ebx, [ebx]
+    mov ebx, ebx
+    
+    ; load Index into ecx
+    xor ecx, ecx
+    mov eax, ebp
+    add eax, 12
+    mov eax, [eax]
+    mov byte cl, [eax]
+    
+    ; Do shifting arithmetic
+    mov byte dl, 7
+    sub byte dl, cl
+    xor eax, eax
+    mov byte al, dl
+    mov dl, 4
+    mul dl
+    
+    ; Do shift
+    mov cl, al
+    shr ebx, cl
+    
+    ; Perform modulus by 16 to get lower 4 bits and edx has the remainder
+    xor edx, edx
+    mov eax, ebx
+    mov ebx, 16
+    div ebx
+    
+    ; Move result in bl into return location
+    mov eax, ebp
+    add eax, 16
+    mov [eax], dl
+    
+end
+
+action OutputAsHex ( Byte InByte )
+    Byte NewByte = InByte
+    if NewByte < 10
+        NewByte = NewByte + 48
+    else
+        NewByte = NewByte + 55
+    end
+    OutputByte ( NewByte )
+end
+
+action PrintPointer ( Pointer I )
+    OutputByte ( 48 )
+    OutputByte ( 120 )
+    Byte Index = 0
+    repeat while Index < 8
+        Byte TempByte
+        TempByte = GetPointerPart ( I , Index )
+        OutputAsHex ( TempByte )
+        Index = Index + 1
+    end
 end
 
 
@@ -681,7 +841,15 @@ action Main
     
     Byte Size = 128
     Integer TestSize
+    OutputByte ( 85 )
     Pointer DB = AllocateHeapMemory ( Size )
+    S6 = 0
+    repeat while S6 < 10
+        Byte NewByte = 65
+        SetByteInDynam ( DB , S6 , NewByte )
+        OutputByte ( NewByte )
+        S6 = S6 + 1
+    end
     
     //Array<Byte> MyAr
     
@@ -692,16 +860,47 @@ action Main
     RefTemplateTest<Byte reference,Byte,Integer> RefTeTe
     
     Byte MyByte = 67
-    OutputByte ( MyByte )
     Array<Byte> MyByteArray
     OutputByte ( MyByte )
-    MyByteArray:Append(MyByte)
+    MyByteArray : Resize ( 10 )
+    MyByte = 70
     OutputByte ( MyByte )
-    MyByte = MyByteArray:GetAt(0)
     OutputByte ( MyByte )
-    MyByte = MyByte + 1
-    MyByteArray:Append(MyByte)
-    MyByte = MyByteArray:GetAt(1)
     OutputByte ( MyByte )
+    MyByteArray : SetAt ( 0 , 68 )
+    OutputByte ( MyByte )
+    MyByteArray : SetAt ( 1 , 69 )
+    MyByteArray : SetAt ( 2 , 70 )
+    
+    MyByteArray : SetAt ( 3 , 68 )
+    MyByteArray : SetAt ( 4 , 65 )
+    MyByteArray : SetAt ( 5 , 68 )
+    
+    MyByte = MyByteArray : GetAt ( 0 )
+    OutputByte ( MyByte )
+    MyByte = MyByteArray : GetAt ( 1 )
+    OutputByte ( MyByte )
+    MyByte = MyByteArray : GetAt ( 2 )
+    OutputByte ( MyByte )
+    
+    MyByte = MyByteArray : GetAt ( 3 )
+    OutputByte ( MyByte )
+    MyByte = MyByteArray : GetAt ( 4 )
+    OutputByte ( MyByte )
+    MyByte = MyByteArray : GetAt ( 5 )
+    OutputByte ( MyByte )
+    
+    PrintPointer ( MyByteArray : DP )
+    
+    S6 = 0
+    repeat while S6 < 10
+        MyByteArray:Resize(S6 + 1)
+        MyByteArray : SetAt ( S6 , 65 )
+        GetFirstByteInDynam ( MyByteArray : DP )
+        Byte NewByte
+        NewByte = MyByteArray : GetAt ( S6 )
+        OutputByte ( NewByte )
+        S6 = S6 + 1
+    end
     
 end
