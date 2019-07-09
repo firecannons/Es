@@ -369,6 +369,7 @@ class Parser ( ) :
         return Depth
     
     def OpOneHighestPrecedence ( self , Op1 , Op2 ) :
+        print ( self . State , 'self . State' )
         Output = True
         Depth1 = self . GetOperatorDepth ( Op1 )
         Depth2 = self . GetOperatorDepth ( Op2 )
@@ -445,8 +446,10 @@ class Parser ( ) :
         return TypeName
     
     def PrintWordArray ( self , WordArray ) :
+        Ar = [ ]
         for el in WordArray :
-            print ( el . Name )
+            Ar . append ( el . Name )
+        print ( Ar )
 
     def AddReturnValue ( self , ReturnObject , WordArray , Index , OutputText ) :
         OutputText = OutputText + ';Adding return value {}\n'.format(ReturnObject.Name)
@@ -509,10 +512,10 @@ class Parser ( ) :
         OutputText = OutputText + ';Loading a {} object\n'.format( Object . Type . Name )
         OutputText = self . LoadParameter ( Object , OutputText )
         return OutputText
-
-    def OutputCallFunction ( self , FunctionName , OutputText ) :
+    
+    def OutputCallFunction ( self , FunctionName , OutputText , ShiftAmount ) :
         OutputText = OutputText + self.ASM_COMMANDS['CALL'] + self.SPACE + FunctionName + self.SPECIAL_CHARS['NEWLINE']
-        OutputText = OutputText + self.ASM_TEXT['SHIFT_STRING'].format(self . AfterReturnOffset - self.CurrentSTOffset)
+        OutputText = OutputText + self.ASM_TEXT['SHIFT_STRING'].format(ShiftAmount)
         return OutputText
 
     def CheckIfObjectInTokenValid ( self , Token ) :
@@ -569,7 +572,8 @@ class Parser ( ) :
         OutputText = ''
         Type , TypeName , FunctionName = self . ResolveActionDetails ( Operator , Object )
         OutputText , ArrayOfOperands , WordArray , Index = self . LoadValues ( OutputText , ArrayOfOperands , TypeName , FunctionName , WordArray , Index , Object , Type )
-        OutputText = self . OutputCallFunction ( FunctionName , OutputText )
+        self . PrintWordArray ( ArrayOfOperands )
+        OutputText = self . OutputCallFunction ( FunctionName , OutputText , self . AfterReturnOffset - self.CurrentSTOffset )
         self . CurrentSTOffset = self . AfterReturnOffset
         return OutputText , WordArray
 
@@ -674,7 +678,7 @@ class Parser ( ) :
 
     def DoCommaOperation ( self , Index , WordArray , OutputText ) :
         CallingFunction = True
-        self . ParameterArray = [ WordArray [ Index ] ] + self . ParameterArray
+        self . ParameterArray = self . ParameterArray + [ WordArray [ Index ] ]
         WordArray . pop ( Index )
         WordArray . pop ( Index )
         return Index , WordArray , OutputText
@@ -850,6 +854,7 @@ class Parser ( ) :
                 Token5 = SavedWordArray [ WordIndex + 4 ]
             print ('testng' , Token1 . Name , Token2 . Name , Token3 . Name , Token4 . Name , Token5 . Name , type ( OutputText ) )
             self . PrintWordArray ( SavedWordArray )
+            self . PrintWordArray ( self . ParameterArray )
             if self . IsParenAheadTwo ( WordIndex , SavedWordArray ) == True :
                 WordIndex = WordIndex + 1
             elif self . IsRightParenNext ( WordIndex , SavedWordArray ) == True :
@@ -1112,7 +1117,7 @@ class Parser ( ) :
         OutputText = OutputText + self . ASM_TEXT [ 'LOAD_TEXT' ] . format ( DestinationOffset )
         self . CurrentSTOffset = self . CurrentSTOffset - self . POINTER_SIZE
         ActionName = self . ResolveActionNameToAsm ( self . OPERATORS [ 'EQUALS' ] , RetObject . Type )
-        OutputText = self . OutputCallFunction ( ActionName , OutputText )
+        OutputText = self . OutputCallFunction ( ActionName , OutputText , self . AfterReturnOffset - self.CurrentSTOffset )
         return OutputText , SavedWordArray , WordIndex
         
 
@@ -1467,7 +1472,7 @@ class Parser ( ) :
             self . GetActionReturnValues ( self . CurrentClass , self . CurrentFunction ) . append ( NewSymbol )
             self . State = self . MAIN_STATES [ 'RETURN_AT_END' ]
         else :
-            CompilerIssue . OutputError ( 'The type {} is not a currently valid type' . format ( Token ) , self . EXIT_ON_ERROR , Token )
+            CompilerIssue . OutputError ( 'The type {} is not a currently valid type' . format ( Token . Name ) , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
     
     def OutputFunctionDeclarationEnd ( self , OutputText ) :
@@ -1784,10 +1789,6 @@ class Parser ( ) :
         OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_BEGIN' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
 
-    def CalcCallLine ( self , OutputText , FunctionName ) :
-        OutputText = OutputText + self . ASM_COMMANDS [ 'CALL' ] + self . SPACE + FunctionName + self . SPECIAL_CHARS [ 'NEWLINE' ]
-        return OutputText
-
     def CalcDeclarationOutput ( self , NewSymbol , IsCurrentlyReference , OutputText ) :
         NewDataSize = NewSymbol . Type . Size
         if IsCurrentlyReference == True :
@@ -1796,8 +1797,7 @@ class Parser ( ) :
         if IsCurrentlyReference == False :
             OutputText = OutputText + self . ASM_TEXT [ 'DEFAULT_CREATE' ] . format ( -self . POINTER_SIZE , self . CurrentSTOffset )
             print ( 'Code: 1234' , NewSymbol . Name , NewSymbol . Templates )
-            OutputText = self . CalcCallLine ( OutputText , self . ResolveActionToAsm ( Function ( 'create' ) , NewSymbol . Type , NewSymbol . Templates ) )
-            OutputText = OutputText + self . ASM_TEXT [ 'SHIFT_STRING' ] . format ( self . POINTER_SIZE )
+            OutputText = self . OutputCallFunction ( self . ResolveActionToAsm ( Function ( 'create' ) , NewSymbol . Type , NewSymbol . Templates ) , OutputText , self . POINTER_SIZE )
         return OutputText
 
     def OutputActionStartCode ( self , OutputText ) :
