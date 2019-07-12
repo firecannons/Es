@@ -41,6 +41,7 @@ class Function ( ) :
         self . ReturnValues = [ ]
         self . IsFunction = True
         self . Templates = [ ]
+        self . TypeOfCode = Parser . FUNCTION_TYPES [ 'NORMAL' ]
 
 class Type ( ) :
     
@@ -311,7 +312,6 @@ class Parser ( ) :
         self . STStack = self . GetStartingScopeStack ( )
         self . CurrentClass = None
         self . CurrentFunction = None
-        self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
         self . SavedType = ''
         self . CurrentSTOffset = 0
         self . SavedLeftOperand = ''
@@ -888,7 +888,7 @@ class Parser ( ) :
     
     def DoActionOnStartOfLine ( self ) :
         self . State = self . MAIN_STATES [ 'ACTION_AFTER' ]
-        self.  CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
+        self . SavedFunctionCodeType = self . FUNCTION_TYPES [ 'NORMAL' ]
         self . CurrentSTOffset = deepcopy ( self . ACTION_DECLARATION_OFFSET )
         self . CurrentParamOffset = deepcopy ( self . ACTION_DECLARATION_PARAM_OFFSET )
         self . ActionTypeDeclared = False
@@ -923,9 +923,8 @@ class Parser ( ) :
                 if CurrentST . Type == self . SCOPE_TYPES [ 'IF' ] :
                     OutputText = self . OutputAsmRoutine ( OutputText , CurrentST . EndRoutineNumber )
             elif self . CurrentFunction != None :
+                OutputText = self . CalcActionReturnOutput ( OutputText , self . CurrentFunction )
                 self . CurrentFunction = None
-                self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
-                OutputText = self . CalcActionReturnOutput ( OutputText )
                 NewCodeFunction = CodeFunction ( OutputText )
                 self . CodeArray . append ( NewCodeFunction )
                 OutputText = deepcopy ( self . EMPTY_STRING )
@@ -968,7 +967,7 @@ class Parser ( ) :
             self . GetCurrentST ( ) . OffsetAfterComparison = self . CurrentSTOffset
         elif Token . Name == self . KEYWORDS [ 'RETURN' ] :
             OutputText , SavedWordArray , WordIndex = self . DoReturnStatement ( Token , SavedWordArray , WordIndex , OutputText )
-        elif self . CurrentFunction != None and self . CurrentFunctionType == self . FUNCTION_TYPES [ 'ASM' ] :
+        elif self . CurrentFunction != None and self . CurrentFunction . TypeOfCode == self . FUNCTION_TYPES [ 'ASM' ] :
             Token = self . PossibleTemplateASMReplace ( Token , WordIndex , SavedWordArray )
             OutputText = OutputText + Token . Name
         elif Lexer . IsValidName ( Token . Name ) == True :
@@ -1347,13 +1346,13 @@ class Parser ( ) :
             if self . ActionTypeDeclared == True :
                 CompilerIssue . OutputError ( '\'' + self . KEYWORDS [ 'ASM' ] + '\' declared twice on function' , self . EXIT_ON_ERROR , TokenObject )
             else :
-                self . CurrentFunctionType = self . FUNCTION_TYPES [ 'ASM' ]
+                self . SavedFunctionCodeType = self . FUNCTION_TYPES [ 'ASM' ]
                 self . ActionTypeDeclared = True
         elif Token . Name == self . KEYWORDS [ 'NORMAL' ] :
             if self . ActionTypeDeclared == True :
                 CompilerIssue . OutputError ( '\'' + self . KEYWORDS [ 'NORMAL' ] + '\' declared twice on function' , self . EXIT_ON_ERROR , TokenObject )
             else :
-                self . CurrentFunctionType = self . FUNCTION_TYPES [ 'NORMAL' ]
+                self . SavedFunctionCodeType = self . FUNCTION_TYPES [ 'NORMAL' ]
                 self . ActionTypeDeclared = True
         elif Lexer . IsValidName ( Token . Name ) == True :
             if self . CurrentClass != None :
@@ -1369,6 +1368,7 @@ class Parser ( ) :
                         self . CurrentTypeTable ( ) [ ActionName ] = Function ( ActionName )
                         self . CurrentFunction = self . CurrentTypeTable ( ) [ ActionName ]
                         self . CurrentFunction . Templates = self . CurrentFunction . Templates + self . CurrentClass . Templates
+                        self . CurrentFunction . TypeOfCode = self . SavedFunctionCodeType
                         self . AddSelfParameterToCurrentFunction ( )
                         self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
             else :
@@ -1378,6 +1378,7 @@ class Parser ( ) :
                     CompilerIssue . OutputError ( self . CurrentClass . Name + ' already has a action named ' + Token . Name , self . EXIT_ON_ERROR , TokenObject )
                 else :
                     self . CurrentFunction = Function ( ActionName )
+                    self . CurrentFunction . TypeOfCode = self . SavedFunctionCodeType
                     self . TypeTable [ ActionName ] = self . CurrentFunction
                     self . State = self . MAIN_STATES [ 'ACTION_AFTER_NAME' ]
         else :
@@ -1391,6 +1392,7 @@ class Parser ( ) :
             else :
                 Name = self . ResolveActionToAsm ( Token , self . CurrentClass )
                 self . CurrentFunction = Function ( Name )
+                self . CurrentFunction . TypeOfCode = self . SavedFunctionCodeType
                 self . TypeTable [ self . CurrentClass . Name ] . InnerTypes [ self . CurrentFunction . Name ] = self . CurrentFunction
                 self . CurrentFunction . Templates = self . CurrentFunction . Templates + self . CurrentClass . Templates
                 self . AddSelfParameterToCurrentFunction ( )
@@ -1777,8 +1779,10 @@ class Parser ( ) :
             Output = True
         return Output
 
-    def CalcActionReturnOutput ( self , OutputText ) :
-        OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_END' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
+    def CalcActionReturnOutput ( self , OutputText , Function ) :
+        print ( Function )
+        if Function . TypeOfCode == self . FUNCTION_TYPES [ 'NORMAL' ] :
+            OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_END' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         OutputText = OutputText + 'ret' + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
 
@@ -1786,7 +1790,11 @@ class Parser ( ) :
         OutputText = ''
         OutputText = OutputText + self . ResolveActionNameToName ( Function . Name , [ ] )
         OutputText = OutputText + self . SPECIAL_CHARS [ 'COLON' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
-        OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_BEGIN' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
+        print ( type ( Function ) )
+        print ( Function )
+        print ( Function . __dict__ )
+        if Function . TypeOfCode == self . FUNCTION_TYPES [ 'NORMAL' ] :
+            OutputText = OutputText + self . SPECIAL_CHARS [ 'NEWLINE' ] + self . ASM_TEXT [ 'STACK_FRAME_BEGIN' ] + self . SPECIAL_CHARS [ 'NEWLINE' ]
         return OutputText
 
     def CalcDeclarationOutput ( self , NewSymbol , IsCurrentlyReference , OutputText ) :
