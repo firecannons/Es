@@ -1,0 +1,4 @@
+log:
+7/7/2019: mistake by forgetting to dereference ebx when doing Array : GetAt and other functions similarly
+
+7/10/2019: mistake is putting stack frame in AllocateDynamicMemory, and it is already put in by compiler.

@@ -39,6 +39,18 @@ action asm AllocateHeapMemory ( Byte Size ) returns Pointer
     
     add esp, 24
     
+    push eax
+    
+    add esp, -4
+    mov [esp], eax
+    mov ebx, esp
+    push ebx
+    call PrintPointerWithNewLine
+    add esp, 4
+    add esp, 4
+    
+    pop eax
+    
     ;ope:
     ;
     ;push eax
@@ -54,14 +66,14 @@ action asm AllocateHeapMemory ( Byte Size ) returns Pointer
     ;
     ;jmp ope
     
-    test eax, eax
-    jnz cont
+    ;test eax, eax
+    ;jnz cont
     
-    mov	eax,1
-	xor	ebx,ebx
-	int	0x80
+    ;mov	eax,1
+	;xor	ebx,ebx
+	;int	0x80
     
-    cont:
+    ;cont:
 
     
     ; move new memory location to return position
@@ -69,10 +81,103 @@ action asm AllocateHeapMemory ( Byte Size ) returns Pointer
     add ebx, 12
     mov [ebx], eax
     
+    push eax
+    push eax
+    
+    add esp, -4
+    mov [esp], eax
+    mov ebx, esp
+    push ebx
+    call PrintPointerWithNewLine
+    add esp, 4
+    add esp, 4
+    
+    pop eax
+    
     ; --- Testing OutputByte ---
-    ;mov [esp], eax
-    ;mov byte [eax], 122
-    ;call OutputByte
+    mov byte [eax], 122
+    add esp, -4
+    mov [esp], eax
+    call OutputByte
+    add esp, 4
+    
+    pop eax
+    
+    add esp, -4
+    mov [esp], eax
+    mov ebx, esp
+    push ebx
+    call PrintPointerWithNewLine
+    add esp, 4
+    add esp, 4
+    
+    add esp, -4
+    mov ebx, ebp
+    add ebx, 12
+    mov eax, [ebx]
+    mov [esp], eax
+    mov ebx, esp
+    push ebx
+    call PrintPointerWithNewLine
+    add esp, 4
+    add esp, 4
+    
+    add esp, -4
+    mov ebx, ebp
+    add ebx, -4
+    mov eax, [ebx]
+    mov [esp], eax
+    mov ebx, esp
+    push ebx
+    call PrintPointerWithNewLine
+    add esp, 4
+    add esp, 4
+    
+    add esp, -4
+    mov ebx, ebp
+    add ebx, 0
+    mov eax, [ebx]
+    mov [esp], eax
+    mov ebx, esp
+    push ebx
+    call PrintPointerWithNewLine
+    add esp, 4
+    add esp, 4
+    
+    add esp, -4
+    mov ebx, ebp
+    add ebx, 4
+    mov eax, [ebx]
+    mov [esp], eax
+    mov ebx, esp
+    push ebx
+    call PrintPointerWithNewLine
+    add esp, 4
+    add esp, 4
+    
+    add esp, -4
+    mov ebx, ebp
+    add ebx, 8
+    mov eax, [ebx]
+    mov [esp], eax
+    mov ebx, esp
+    push ebx
+    call PrintPointerWithNewLine
+    add esp, 4
+    add esp, 4
+    
+    add esp, -4
+    mov ebx, ebp
+    add ebx, 12
+    mov eax, [ebx]
+    mov [esp], eax
+    push eax
+    mov ebx, esp
+    push ebx
+    call PrintPointerWithNewLine
+    add esp, 4
+    pop eax
+    add esp, 4
     
     mov esp, ebp
     pop ebp

@@ -2,6 +2,9 @@ using Libraries.DataTypes
 using Libraries.DynamicMemory
 
 action asm OutputByte ( Byte L )
+    push ebp
+    mov ebp, esp
+    
     ; load a pointer to the byte in ecx
     mov ecx, ebp
     add ecx, 8
@@ -12,9 +15,15 @@ action asm OutputByte ( Byte L )
     mov	ebx, 1
 	mov	edx, 1
 	int	0x80
+    
+    mov esp, ebp
+    pop ebp
 end
 
 action asm OutputByteReference ( Byte Reference L )
+    push ebp
+    mov ebp, esp
+    
     ; load a pointer to the byte in ecx
     mov ecx, ebp
     add ecx, 8
@@ -26,9 +35,15 @@ action asm OutputByteReference ( Byte Reference L )
     mov	ebx, 1
 	mov	edx, 1
 	int	0x80
+    
+    mov esp, ebp
+    pop ebp
 end
 
 action asm OutputByte3 ( Byte L , Byte L2 , Byte L3 )
+    push ebp
+    mov ebp, esp
+    
     ; load a pointer to the byte in ecx
     mov ecx, ebp
     add ecx, 8
@@ -60,6 +75,9 @@ action asm OutputByte3 ( Byte L , Byte L2 , Byte L3 )
 	mov	edx, 1
 	int	0x80
     
+    mov esp, ebp
+    pop ebp
+    
 end
 
 action IndirectionOutput ( Byte L )
@@ -75,6 +93,9 @@ action IndirectionAddTwoOutput ( Byte L )
 end
 
 action asm OutputByte2 ( Byte L , Byte L2 )
+    push ebp
+    mov ebp, esp
+    
     ; load a pointer to the byte in ecx
     mov ecx, ebp
     add ecx, 8
@@ -95,6 +116,9 @@ action asm OutputByte2 ( Byte L , Byte L2 )
     mov	ebx, 1
 	mov	edx, 1
 	int	0x80
+    
+    mov esp, ebp
+    pop ebp
     
 end
 
@@ -178,9 +202,14 @@ class Array<T>
         Me : Size = 0
         Me : MemorySize = 0
         Me : DP = AllocateHeapMemory ( Me : MemorySize )
+        OutputByte ( 69 )
+        PrintPointerWithNewLine ( Me : DP )
     end
     
     action asm SetAt(Byte Position, T Elem)
+        push ebp
+        mov ebp, esp
+        
         ; load DP into edx
         mov ebx, ebp
         add ebx, 8
@@ -238,15 +267,26 @@ class Array<T>
         ;add esp, 4
         ;pop ecx
         
+        mov esp, ebp
+        pop ebp
+        
     end
     
     action asm GetAt(Byte Position) returns T
+        push ebp
+        mov ebp, esp
+        
         ; load DP into edx
         mov ebx, ebp
         add ebx, 8
         mov ebx, [ebx]
         add ebx, 1
         mov ecx, ebx
+        
+        add esp, -4
+        mov [esp], ecx
+        call PrintPointerWithNewLine
+        add esp, 4
         
         ;add esp, -4
         ;mov [esp], ecx
@@ -284,7 +324,8 @@ class Array<T>
         ; Move the stack pointer back up
         add esp, 8
         
-        
+        mov esp, ebp
+        pop ebp
     end
     
     action Append ( T NewElem )
@@ -311,11 +352,16 @@ class Array<T>
         Me : Size = Size
         Me : MemorySize = Size
         Me : DP = AllocateHeapMemory ( Me : MemorySize )
+        PrintPointerWithNewLine ( AllocateHeapMemory ( Me : MemorySize ) )
+        Pointer MyP = AllocateHeapMemory ( Me : MemorySize )
+        PrintPointerWithNewLine ( MyP )
         Byte B = 0
         OutputByte ( 90 )
         SetFirstByteInDynam ( Me : DP )
         SetByteInDynam ( Me : DP , B , 78 )
         GetFirstByteInDynam ( Me : DP )
+        PrintPointerWithNewLine ( Me )
+        PrintPointerWithNewLine ( Me : DP )
         Byte test
         test = Me : GetAt ( 0 )
         OutputByte ( test )
@@ -368,6 +414,9 @@ end
 
 
 action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
+    push ebp
+    mov ebp, esp
+    
     ; load a pointer to the byte in ecx
     mov ecx, ebp
     add ecx, 8
@@ -419,9 +468,14 @@ action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
 	mov	edx, 1
 	int	0x80
     
+    mov esp, ebp
+    pop ebp
 end
 
 action asm SetByteInDynam ( Pointer DB , Byte Position , Byte NewByte )
+    push ebp
+    mov ebp, esp
+    
     ; load DP into edx
     mov ebx, ebp
     add ebx, 8
@@ -453,9 +507,15 @@ action asm SetByteInDynam ( Pointer DB , Byte Position , Byte NewByte )
     
     ; Move the stack pointer back up
     add esp, 8
+    
+    mov esp, ebp
+    pop ebp
 end
 
 action asm SetFirstByteInDynam ( Pointer DB )
+    push ebp
+    mov ebp, esp
+    
     ; load DP into edx
     mov ebx, ebp
     add ebx, 8
@@ -470,9 +530,15 @@ action asm SetFirstByteInDynam ( Pointer DB )
     
     ; Move the stack pointer back up
     add esp, 8
+    
+    mov esp, ebp
+    pop ebp
 end
 
 action asm GetFirstByteInDynam ( Pointer DB )
+    push ebp
+    mov ebp, esp
+    
     ; load DP into edx
     mov ebx, ebp
     add ebx, 8
@@ -485,14 +551,20 @@ action asm GetFirstByteInDynam ( Pointer DB )
     
     ; Move the stack pointer back up
     add esp, 8
+    
+    mov esp, ebp
+    pop ebp
 end
 
 action asm GetPointerPart ( Pointer I , Byte Index ) returns Byte
+    push ebp
+    mov ebp, esp
+    
     ; load I into ebx
     mov ebx, ebp
     add ebx, 8
     mov ebx, [ebx]
-    mov ebx, ebx
+    mov ebx, [ebx]
     
     ; load Index into ecx
     xor ecx, ecx
@@ -524,6 +596,8 @@ action asm GetPointerPart ( Pointer I , Byte Index ) returns Byte
     add eax, 16
     mov [eax], dl
     
+    mov esp, ebp
+    pop ebp
 end
 
 action OutputAsHex ( Byte InByte )
@@ -537,6 +611,19 @@ action OutputAsHex ( Byte InByte )
 end
 
 action PrintPointer ( Pointer I )
+    OutputByte ( 48 )
+    OutputByte ( 120 )
+    Byte Index = 0
+    repeat while Index < 8
+        Byte TempByte
+        TempByte = GetPointerPart ( I , Index )
+        OutputAsHex ( TempByte )
+        Index = Index + 1
+    end
+end
+
+action PrintPointerWithNewLine ( Pointer I )
+    OutputByte ( 10 )
     OutputByte ( 48 )
     OutputByte ( 120 )
     Byte Index = 0
@@ -843,6 +930,7 @@ action Main
     Integer TestSize
     OutputByte ( 85 )
     Pointer DB = AllocateHeapMemory ( Size )
+    PrintPointerWithNewLine ( DB )
     S6 = 0
     repeat while S6 < 10
         Byte NewByte = 65
@@ -890,7 +978,7 @@ action Main
     MyByte = MyByteArray : GetAt ( 5 )
     OutputByte ( MyByte )
     
-    PrintPointer ( MyByteArray : DP )
+    PrintPointerWithNewLine ( MyByteArray : DP )
     
     S6 = 0
     repeat while S6 < 10

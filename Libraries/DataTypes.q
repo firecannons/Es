@@ -4,6 +4,9 @@
 test 3*/
 class Bool size 1
     action asm on create
+        push ebp
+        mov ebp, esp
+    
         ; asm comment
         ; mov address of the object into
         mov ebx, ebp
@@ -12,6 +15,9 @@ class Bool size 1
         
         ; Automatically assign true
         mov byte [eax], 1
+        
+        mov esp, ebp
+        pop ebp
         
     end
 end
@@ -23,6 +29,8 @@ class Integer size 4
         end
         
         action asm on = ( Integer Source )
+            push ebp
+            mov ebp, esp
             
             ; mov value of Source into eax
             mov ebx, ebp
@@ -47,9 +55,15 @@ class Integer size 4
             ;mov	ebx, 1
             ;mov	edx, 1
             ;int	0x80
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on + ( Integer Rhs ) returns Integer
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -67,9 +81,15 @@ class Integer size 4
             ; mov value into return area
             add ebx, 8
             mov dword [ebx], ecx
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on - ( Integer Rhs ) returns Integer
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -87,9 +107,15 @@ class Integer size 4
             ; mov value into return area
             add ebx, 8
             mov dword [ebx], ecx
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on > ( Integer Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -109,9 +135,15 @@ class Integer size 4
             add ebx, 8
             mov byte [ebx], al
             
+            mov esp, ebp
+            pop ebp
+            
         end
         
         action asm on >= ( Integer Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -131,9 +163,15 @@ class Integer size 4
             add ebx, 8
             mov byte [ebx], al
             
+            mov esp, ebp
+            pop ebp
+            
         end
         
         action asm on == ( Integer Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -152,9 +190,15 @@ class Integer size 4
             ; move result onto stack
             add ebx, 8
             mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on < ( Integer Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -174,9 +218,14 @@ class Integer size 4
             add ebx, 8
             mov byte [ebx], al
             
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on <= ( Integer Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -195,9 +244,15 @@ class Integer size 4
             ; move result onto stack
             add ebx, 8
             mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on != ( Integer Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -217,12 +272,17 @@ class Integer size 4
             add ebx, 8
             mov byte [ebx], al
             
+            mov esp, ebp
+            pop ebp
         end
 end
 
 class Byte size 1
         
         action asm on create
+            push ebp
+            mov ebp, esp
+            
             ; asm comment
             ; mov address of the object into
             mov ebx, ebp
@@ -231,9 +291,13 @@ class Byte size 1
             
             mov byte [eax], 101
             
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on = ( Byte Source )
+            push ebp
+            mov ebp, esp
             
             ; mov value of Source into eax
             mov ebx, ebp
@@ -258,9 +322,15 @@ class Byte size 1
             ;mov	ebx, 1
             ;mov	edx, 1
             ;int	0x80
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on + ( Byte Rhs ) returns Byte
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -278,9 +348,15 @@ class Byte size 1
             ; mov value into return area
             add ebx, 8
             mov byte [ebx], cl
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on - ( Byte Rhs ) returns Byte
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -298,9 +374,15 @@ class Byte size 1
             ; mov value into return area
             add ebx, 8
             mov byte [ebx], cl
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on > ( Byte Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -320,9 +402,15 @@ class Byte size 1
             add ebx, 8
             mov byte [ebx], al
             
+            mov esp, ebp
+            pop ebp
+            
         end
         
         action asm on >= ( Byte Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -342,9 +430,14 @@ class Byte size 1
             add ebx, 8
             mov byte [ebx], al
             
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on == ( Byte Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -363,9 +456,15 @@ class Byte size 1
             ; move result onto stack
             add ebx, 8
             mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on < ( Byte Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -385,9 +484,15 @@ class Byte size 1
             add ebx, 8
             mov byte [ebx], al
             
+            mov esp, ebp
+            pop ebp
+            
         end
         
         action asm on <= ( Byte Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -406,9 +511,15 @@ class Byte size 1
             ; move result onto stack
             add ebx, 8
             mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm on != ( Byte Rhs ) returns Bool
+            push ebp
+            mov ebp, esp
+            
             ; mov value of Source into eax
             mov ebx, ebp
             add ebx, 12
@@ -427,6 +538,9 @@ class Byte size 1
             ; move result onto stack
             add ebx, 8
             mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
             
         end
 end

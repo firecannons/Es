@@ -1,6 +1,9 @@
 using Libraries . DataTypes
 
 action asm OutputByte ( Byte L )
+    push ebp
+    mov ebp, esp
+    
     ; load a pointer to the byte in ecx
     mov ecx, ebp
     add ecx, 8
@@ -11,9 +14,15 @@ action asm OutputByte ( Byte L )
     mov	ebx, 1
 	mov	edx, 1
 	int	0x80
+    
+    mov esp, ebp
+    pop ebp
 end
 
 action asm OutputByte2 ( Byte L , Byte L2 )
+    push ebp
+    mov ebp, esp
+    
     ; load a pointer to the byte in ecx
     mov ecx, ebp
     add ecx, 8
@@ -35,9 +44,15 @@ action asm OutputByte2 ( Byte L , Byte L2 )
 	mov	edx, 1
 	int	0x80
     
+    mov esp, ebp
+    pop ebp
+    
 end
 
 action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
+    push ebp
+    mov ebp, esp
+    
     ; load a pointer to the byte in ecx
     mov ecx, ebp
     add ecx, 8
@@ -88,6 +103,9 @@ action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
     mov	ebx, 1
 	mov	edx, 1
 	int	0x80
+    
+    mov esp, ebp
+    pop ebp
     
 end
 
