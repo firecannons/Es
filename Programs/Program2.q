@@ -1,4 +1,4 @@
-using Libraries.DataTypes
+using Libraries.Letter
 using Libraries.DynamicMemory
 
 action asm OutputByte ( Byte L )
@@ -202,8 +202,6 @@ class Array<T>
         Me : Size = 0
         Me : MemorySize = 0
         Me : DP = AllocateHeapMemory ( Me : MemorySize )
-        OutputByte ( 69 )
-        PrintPointerWithNewLine ( Me : DP )
     end
     
     action asm SetAt(Byte Position, T Elem)
@@ -283,11 +281,6 @@ class Array<T>
         add ebx, 1
         mov ecx, ebx
         
-        add esp, -4
-        mov [esp], ecx
-        call PrintPointerWithNewLine
-        add esp, 4
-        
         ;add esp, -4
         ;mov [esp], ecx
         ;call OutputByte
@@ -352,21 +345,37 @@ class Array<T>
         Me : Size = Size
         Me : MemorySize = Size
         Me : DP = AllocateHeapMemory ( Me : MemorySize )
-        PrintPointerWithNewLine ( AllocateHeapMemory ( Me : MemorySize ) )
-        Pointer MyP = AllocateHeapMemory ( Me : MemorySize )
-        PrintPointerWithNewLine ( MyP )
-        Byte B = 0
-        OutputByte ( 90 )
-        SetFirstByteInDynam ( Me : DP )
-        SetByteInDynam ( Me : DP , B , 78 )
-        GetFirstByteInDynam ( Me : DP )
-        PrintPointerWithNewLine ( Me )
-        PrintPointerWithNewLine ( Me : DP )
-        Byte test
-        test = Me : GetAt ( 0 )
-        OutputByte ( test )
     end
 end
+
+class Text
+    Array<Letter> Data
+    
+    action on create
+    end
+    
+    action SetAt ( Byte Position , Letter L )
+        Me : Data : SetAt ( Position , L )
+    end
+    
+    action GetAt ( Byte Position ) returns Letter
+        Letter Temp = Me : Data : GetAt ( Position )
+        return Temp
+    end
+    
+    action Append ( Letter L )
+        Data : Append ( L )
+    end
+    
+    action Output
+        Byte Index = 0
+        repeat until Index > Data : Size
+            OutputByte ( Data : GetAt ( Index ) )
+            Index = Index + 1
+        end
+    end
+end
+
 /*
 class Game
     List<List<Tile>> World
@@ -930,7 +939,6 @@ action Main
     Integer TestSize
     OutputByte ( 85 )
     Pointer DB = AllocateHeapMemory ( Size )
-    PrintPointerWithNewLine ( DB )
     S6 = 0
     repeat while S6 < 10
         Byte NewByte = 65
@@ -945,7 +953,7 @@ action Main
     
     MultiTemplateTest<Byte,Byte,Integer> MuTeTe
     
-    RefTemplateTest<Byte reference,Byte,Integer> RefTeTe
+    //RefTemplateTest<Byte reference,Byte,Integer> RefTeTe
     
     Byte MyByte = 67
     Array<Byte> MyByteArray
@@ -977,8 +985,6 @@ action Main
     OutputByte ( MyByte )
     MyByte = MyByteArray : GetAt ( 5 )
     OutputByte ( MyByte )
-    
-    PrintPointerWithNewLine ( MyByteArray : DP )
     
     S6 = 0
     repeat while S6 < 10
