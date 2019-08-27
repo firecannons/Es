@@ -39,18 +39,6 @@ action asm AllocateHeapMemory ( Byte Size ) returns Pointer
     
     add esp, 24
     
-    push eax
-    
-    add esp, -4
-    mov [esp], eax
-    mov ebx, esp
-    push ebx
-    call PrintPointerWithNewLine
-    add esp, 4
-    add esp, 4
-    
-    pop eax
-    
     ;ope:
     ;
     ;push eax
@@ -80,104 +68,6 @@ action asm AllocateHeapMemory ( Byte Size ) returns Pointer
     mov ebx, ebp
     add ebx, 12
     mov [ebx], eax
-    
-    push eax
-    push eax
-    
-    add esp, -4
-    mov [esp], eax
-    mov ebx, esp
-    push ebx
-    call PrintPointerWithNewLine
-    add esp, 4
-    add esp, 4
-    
-    pop eax
-    
-    ; --- Testing OutputByte ---
-    mov byte [eax], 122
-    add esp, -4
-    mov [esp], eax
-    call OutputByte
-    add esp, 4
-    
-    pop eax
-    
-    add esp, -4
-    mov [esp], eax
-    mov ebx, esp
-    push ebx
-    call PrintPointerWithNewLine
-    add esp, 4
-    add esp, 4
-    
-    add esp, -4
-    mov ebx, ebp
-    add ebx, 12
-    mov eax, [ebx]
-    mov [esp], eax
-    mov ebx, esp
-    push ebx
-    call PrintPointerWithNewLine
-    add esp, 4
-    add esp, 4
-    
-    add esp, -4
-    mov ebx, ebp
-    add ebx, -4
-    mov eax, [ebx]
-    mov [esp], eax
-    mov ebx, esp
-    push ebx
-    call PrintPointerWithNewLine
-    add esp, 4
-    add esp, 4
-    
-    add esp, -4
-    mov ebx, ebp
-    add ebx, 0
-    mov eax, [ebx]
-    mov [esp], eax
-    mov ebx, esp
-    push ebx
-    call PrintPointerWithNewLine
-    add esp, 4
-    add esp, 4
-    
-    add esp, -4
-    mov ebx, ebp
-    add ebx, 4
-    mov eax, [ebx]
-    mov [esp], eax
-    mov ebx, esp
-    push ebx
-    call PrintPointerWithNewLine
-    add esp, 4
-    add esp, 4
-    
-    add esp, -4
-    mov ebx, ebp
-    add ebx, 8
-    mov eax, [ebx]
-    mov [esp], eax
-    mov ebx, esp
-    push ebx
-    call PrintPointerWithNewLine
-    add esp, 4
-    add esp, 4
-    
-    add esp, -4
-    mov ebx, ebp
-    add ebx, 12
-    mov eax, [ebx]
-    mov [esp], eax
-    push eax
-    mov ebx, esp
-    push ebx
-    call PrintPointerWithNewLine
-    add esp, 4
-    pop eax
-    add esp, 4
     
     mov esp, ebp
     pop ebp

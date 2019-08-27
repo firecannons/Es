@@ -7,6 +7,6 @@ class Letter
         end
         
         action on = ( Letter Source )
-            c = Source : c
+            Me : c = Source : c
         end
 end

@@ -287,6 +287,7 @@ class Parser ( ) :
     SPACE = ' '
     
     RETURN_TEMP_LETTER = '['
+    TEMPLATE_VARIABLE_BEGIN = '[T'
     
     SCOPE_TYPES = {
         'IF' : 0 ,
@@ -327,6 +328,7 @@ class Parser ( ) :
         self . TempTemplateClass = None
         self . CodeArray = [ ]
         self . TempSavedTemplate = [ ]
+        self . TemplateTempIndex = 0
     
     def GetStartingScopeStack ( self ) :
         STStack = [ Scope ( self . SCOPE_TYPES [ 'GLOBAL' ] , 0 ) ]
@@ -971,6 +973,7 @@ class Parser ( ) :
             Token = self . PossibleTemplateASMReplace ( Token , WordIndex , SavedWordArray )
             OutputText = OutputText + Token . Name
         elif Lexer . IsValidName ( Token . Name ) == True :
+            Found , OutSymbol = self . CheckCurrentSTs ( Token )
             if self . IsCurrentlyValidType ( Token ) == True :
                 Token , WordIndex , SavedWordArray = self . PossibleTemplateConvert ( Token , WordIndex , SavedWordArray )
                 if self . TypeTable [ Token . Name ] . IsFunction == False :
@@ -980,12 +983,12 @@ class Parser ( ) :
                     Found = self . CheckCurrentSTs ( Token )
                     LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                     OutputText = self . Reduce ( Token , LineWordArray , OutputText , False )
-            elif self . CheckCurrentSTs ( Token ) :
-                Found = self . CheckCurrentSTs ( Token )
+            elif Found == True :
+                Found , OutSymbol = self . CheckCurrentSTs ( Token )
                 LineWordArray , WordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
                 OutputText = self . Reduce ( Token . Name , LineWordArray , OutputText , False )
             else :
-                CompilerIssue . OutputError ( 'Type or symbol \'' + Token + '\' not found' , self . EXIT_ON_ERROR , TokenObject )
+                CompilerIssue . OutputError ( 'Type or symbol \'' + Token . Name + '\' not found' , self . EXIT_ON_ERROR , Token )
         else :
             print ( 'screw up' , Token . Name )
         return SavedWordArray , WordIndex , OutputText
@@ -1146,11 +1149,97 @@ class Parser ( ) :
         else :
             CompilerIssue . OutputError ( '\'' + Token . Name + '\' is not a period or newline' , self . EXIT_ON_ERROR , Token )
         return SavedWordArray , WordIndex , OutputText
+    
+    def AddVariableToTemplateLine ( self , SavedWordArray , WordIndex , LatestTemplate , ClassName ) :
+        NewName = self.TEMPLATE_VARIABLE_BEGIN + str(self.TemplateTempIndex)
+        NewSymbol = MySymbol(NewName, self . TypeTable [ ClassName ] )
+        NewSymbol . Templates = LatestTemplate
+        self.GetCurrentST().Symbols[NewName] = NewSymbol
+        self . TemplateTempIndex = self . TemplateTempIndex + 1
+        SavedWordArray [ WordIndex ] = NewSymbol
+        return SavedWordArray , WordIndex
+    
+    def ConvertTemplatesToStructure ( self , Templates , ClassName , SavedWordArray , WordIndex ) :
+        self . TypeTable [ ClassName ] . Templates . append ( [ ] )
+        LatestTemplate = self . TypeTable [ ClassName ] . Templates [ len ( self . TypeTable [ ClassName ] . Templates ) - 1 ]
+        LatestTemplate = [ None ] * len ( Templates )
+        for Index in range ( len ( Templates ) ) :
+            T = Templates [ Index ]
+            Found , OutSymbol = self . CheckCurrentSTsByName ( T )
+            if Found == True :
+                LatestTemplate [ Index ] = MySymbol ( T , OutSymbol . Type )
+                LatestTemplate [ Index ] . Templates = OutSymbol . Templates
+            else :
+                LatestTemplate [ Index ] = MySymbol ( T , self . TypeTable [ T ] )
+                LatestTemplate [ Index ] . Templates = None
+            Index = Index + 1
+            SavedWordArray , WordIndex = self . AddVariableToTemplateLine ( SavedWordArray , WordIndex , LatestTemplate , ClassName )
+        return SavedWordArray , WordIndex
+                
+    
+    def TemplateEndReduce ( self , SavedWordArray , WordIndex ) :
+        print ( 'safd' )
+        OnToken = SavedWordArray [ WordIndex ]
+        BeforeToken = SavedWordArray [ WordIndex - 1 ]
+        if OnToken . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
+            self . TempSavedTemplate . append ( OnToken . Name )
+            SavedWordArray . pop ( WordIndex )
+            SavedWordArray . pop ( WordIndex )
+        elif BeforeToken . Name == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
+            self . TempSavedTemplate . append ( OnToken . Name )
+            WordIndex = WordIndex - 2
+            ClassToken = SavedWordArray [ WordIndex ]
+            SavedWordArray . pop ( WordIndex )
+            SavedWordArray . pop ( WordIndex )
+            SavedWordArray . pop ( WordIndex )
+            SavedWordArray , WordIndex = self . ConvertTemplatesToStructure ( self . TempSavedTemplate , ClassToken . Name , SavedWordArray , WordIndex )
+            self . TempSavedTemplate = [ ]
+        return SavedWordArray , WordIndex
+    
+    def TemplateReduce ( self , SavedWordArray ) :
+        WordIndex = 0
+        while len ( SavedWordArray ) > 2 :
+            Token1 = SavedWordArray [ WordIndex ]
+            Token2 = SavedWordArray [ WordIndex + 1 ]
+            Token3 = MyToken ( '' , -1 , '' )
+            Token4 = MyToken ( '' , -1 , '' )
+            Token5 = MyToken ( '' , -1 , '' )
+            if len ( SavedWordArray ) - WordIndex > 2 :
+                Token3 = SavedWordArray [ WordIndex + 2 ]
+            if len ( SavedWordArray ) - WordIndex > 3 :
+                Token4 = SavedWordArray [ WordIndex + 3 ]
+            if len ( SavedWordArray ) - WordIndex > 4 :
+                Token5 = SavedWordArray [ WordIndex + 4 ]
+            self . PrintWordArray ( SavedWordArray )
+            print ( WordIndex )
+            print (  Token2 . Name , self . SPECIAL_CHARS [ 'TEMPLATE_END' ])
+            if Token2 . Name == self . SPECIAL_CHARS [ 'TEMPLATE_END' ] :
+                SavedWordArray , WordIndex = self . TemplateEndReduce ( SavedWordArray , WordIndex )
+            else :
+                WordIndex = WordIndex + 2
+
+            if len ( SavedWordArray ) - WordIndex < 2 :
+                WordIndex = WordIndex - 2
+        return SavedWordArray
+    
+    def PopLastElement ( self , NewWordArray ) :
+        NewWordArray . pop ( len ( NewWordArray ) - 1 )
+        return NewWordArray
 
     def ProcessDeclaringVariable ( self , Token , SavedWordArray , WordIndex , OutputText ) :
+        Found , OutSymbol = self . CheckCurrentSTs ( self . SavedType )
         if Token . Name == self . SPECIAL_CHARS [ 'TEMPLATE_START' ] :
-            self . State = self . MAIN_STATES [ 'MAKING_TEMPLATE' ]
-        elif self . SavedType . Name in self . TypeTable :
+            print ( 'were' , SavedWordArray [ WordIndex ] . Name , SavedWordArray [ WordIndex + 1 ] . Name , SavedWordArray [ WordIndex + 2 ] . Name )
+            WordIndex = WordIndex - 1
+            NewWordArray , NewWordIndex = self . GetUntilNewline ( SavedWordArray , WordIndex )
+            NewWordArray = self . PopLastElement ( NewWordArray )
+            ResultArray = self . TemplateReduce ( NewWordArray )
+            print ( 'were' , SavedWordArray [ WordIndex ] . Name , SavedWordArray [ WordIndex + 1 ] . Name , SavedWordArray [ WordIndex + 2 ] . Name , ResultArray )
+            FirstWordArray = SavedWordArray [ 0 : WordIndex ]
+            SecondWordArray = SavedWordArray [ NewWordIndex - 1 : len ( SavedWordArray ) ]
+            SavedWordArray = FirstWordArray + ResultArray + SecondWordArray
+            print ( 'were2' , SavedWordArray [ WordIndex ] . Name , SavedWordArray [ WordIndex + 1 ] . Name , SavedWordArray [ WordIndex + 2 ] . Name , SavedWordArray [ WordIndex + 3 ] . Name , SavedWordArray [ WordIndex + 4 ] . Name )
+        elif self . SavedType . Name in self . TypeTable or Found == True :
             if Token . Name not in self . GetCurrentST ( ) . Symbols :
                 if Token . Name == self . KEYWORDS [ 'REFERENCE' ] :
                     if self . CurrentlyReference == False :
@@ -1159,6 +1248,9 @@ class Parser ( ) :
                         CompilerIssue . OutputError ( 'References to references are not allowed.' , self . EXIT_ON_ERROR , Token )
                 else :
                     NewSymbol = MySymbol ( Token . Name , self . TypeTable [ self . SavedType . Name ] )
+                    if Found == True :
+                        NewSymbol . Type = OutSymbol . Type
+                        NewSymbol . Templates = OutSymbol . Templates
                     AddSize = self . TypeTable [ self . SavedType . Name ] . Size
                     NewSymbol . Templates = deepcopy ( self . TempSavedTemplate )
                     print ( 'Code: 1233' , NewSymbol . Name , NewSymbol . Templates , self . SavedTemplates )
@@ -1886,6 +1978,7 @@ class Parser ( ) :
         OutTable = self . TypeTable
         if ClassName != '' :
             OutTable = self . TypeTable [ ClassName ] . InnerTypes
+            print ( OutTable , self . TypeTable [ ClassName ] . InnerTypes , self . TypeTable [ ClassName ] , ClassName , self . TypeTable )
         if FunctionName != '' :
             OutTable = OutTable [ FunctionName ] . Parameters
         return OutTable
@@ -2106,7 +2199,7 @@ class Lexer ( ) :
         if CurrentLetter . isalnum ( ) == True or CurrentLetter in Lexer . VARIABLE_SPECIAL_LETTERS :
             Output = True
         return Output
-	
+    
     def DoLetterIsNewLine ( self , Letter ) :
         if self . IsSavedWordExisting ( ) == True :
             self . ProcessAppendWord ( self . SavedWord )
