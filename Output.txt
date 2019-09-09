@@ -1,0 +1,3102 @@
+using
+using
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring Bool
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704188d0>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'Bool__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f2270418908>]}
+        push ebp
+        mov ebp, esp
+    
+        ; asm comment
+        ; mov address of the object into
+        mov ebx, ebp
+        add ebx, 8
+        mov eax, [ebx]
+        
+        ; Automatically assign true
+        mov byte [eax], 1
+        
+        mov esp, ebp
+        pop ebp
+        
+    
+end
+<__main__.Function object at 0x7f22704188d0>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring Integer
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704189b0>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'Integer__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f22704189e8>]}
+            
+        
+end
+<__main__.Function object at 0x7f22704189b0>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Source Integer__On_Equals weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270418a90>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'Integer__On_Equals', 'Parameters': [<__main__.MySymbol object at 0x7f2270418ac8>, <__main__.MySymbol object at 0x7f2270418b00>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov eax, [eax]
+            
+            ; mov address of return dword into ebx
+            sub ebx, 4
+            mov ebx, [ebx]
+            
+            ; mov value of eax into position of [ebx]
+            mov dword [ebx], eax
+            
+            
+            
+            
+            
+            ;mov ecx, ebx
+            ; Set other values
+            ;mov	eax, 4
+            ;mov	ebx, 1
+            ;mov	edx, 1
+            ;int	0x80
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270418a90>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Integer__On_Plus weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270418ba8>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270418c88>], 'Templates': [], 'IsFunction': True, 'Name': 'Integer__On_Plus', 'Parameters': [<__main__.MySymbol object at 0x7f2270418be0>, <__main__.MySymbol object at 0x7f2270418c18>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov dword eax, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov dword ecx, [ecx]
+            
+            ; perform addition
+            add dword ecx, eax
+            
+            ; mov value into return area
+            add ebx, 8
+            mov dword [ebx], ecx
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270418ba8>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Integer__On_Minus weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270418cf8>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270418dd8>], 'Templates': [], 'IsFunction': True, 'Name': 'Integer__On_Minus', 'Parameters': [<__main__.MySymbol object at 0x7f2270418d30>, <__main__.MySymbol object at 0x7f2270418d68>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov dword eax, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov dword ecx, [ecx]
+            
+            ; perform addition
+            sub dword ecx, eax
+            
+            ; mov value into return area
+            add ebx, 8
+            mov dword [ebx], ecx
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270418cf8>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Integer__On_Greater_Than weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270418e48>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270418ef0>], 'Templates': [], 'IsFunction': True, 'Name': 'Integer__On_Greater_Than', 'Parameters': [<__main__.MySymbol object at 0x7f2270418e80>, <__main__.MySymbol object at 0x7f2270418eb8>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov dword eax, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov dword ecx, [ecx]
+            
+            ; perform comparison
+            cmp dword ecx, eax
+            setg byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+            
+        
+end
+<__main__.Function object at 0x7f2270418e48>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Integer__On_Greater_Equal weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270418f60>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420048>], 'Templates': [], 'IsFunction': True, 'Name': 'Integer__On_Greater_Equal', 'Parameters': [<__main__.MySymbol object at 0x7f2270418f98>, <__main__.MySymbol object at 0x7f2270418fd0>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov dword eax, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov dword ecx, [ecx]
+            
+            ; perform comparison
+            cmp dword ecx, eax
+            setge byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+            
+        
+end
+<__main__.Function object at 0x7f2270418f60>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Integer__On_If_Equal weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704200b8>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420198>], 'Templates': [], 'IsFunction': True, 'Name': 'Integer__On_If_Equal', 'Parameters': [<__main__.MySymbol object at 0x7f22704200f0>, <__main__.MySymbol object at 0x7f2270420128>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov dword eax, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov dword ecx, [ecx]
+            
+            ; perform comparison
+            cmp dword ecx, eax
+            sete byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f22704200b8>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Integer__On_Less_Than weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270420208>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f22704202e8>], 'Templates': [], 'IsFunction': True, 'Name': 'Integer__On_Less_Than', 'Parameters': [<__main__.MySymbol object at 0x7f2270420240>, <__main__.MySymbol object at 0x7f2270420278>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov dword eax, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov dword ecx, [ecx]
+            
+            ; perform comparison
+            cmp dword ecx, eax
+            setl byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270420208>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Integer__On_Less_Or_Equal weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270418c50>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f22704202b0>], 'Templates': [], 'IsFunction': True, 'Name': 'Integer__On_Less_Or_Equal', 'Parameters': [<__main__.MySymbol object at 0x7f2270418da0>, <__main__.MySymbol object at 0x7f2270420160>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov dword eax, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov dword ecx, [ecx]
+            
+            ; perform comparison
+            cmp dword ecx, eax
+            setle byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270418c50>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Integer__On_Not_Equal weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270420358>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420438>], 'Templates': [], 'IsFunction': True, 'Name': 'Integer__On_Not_Equal', 'Parameters': [<__main__.MySymbol object at 0x7f2270420390>, <__main__.MySymbol object at 0x7f22704203c8>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov dword eax, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov dword ecx, [ecx]
+            
+            ; perform comparison
+            cmp dword ecx, eax
+            setne byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270420358>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring Byte
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704204e0>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'Byte__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f2270420518>]}
+            push ebp
+            mov ebp, esp
+            
+            ; asm comment
+            ; mov address of the object into
+            mov ebx, ebp
+            add ebx, 8
+            mov eax, [ebx]
+            
+            mov byte [eax], 101
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f22704204e0>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Source Byte__On_Equals weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270420588>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'Byte__On_Equals', 'Parameters': [<__main__.MySymbol object at 0x7f22704205c0>, <__main__.MySymbol object at 0x7f22704205f8>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov eax, [eax]
+            
+            ; mov address of return byte into ebx
+            sub ebx, 4
+            mov ebx, [ebx]
+            
+            ; mov value of eax into position of [ebx]
+            mov byte [ebx], al
+            
+            
+            
+            
+            
+            ;mov ecx, ebx
+            ; Set other values
+            ;mov	eax, 4
+            ;mov	ebx, 1
+            ;mov	edx, 1
+            ;int	0x80
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270420588>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Byte__On_Plus weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270420668>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420710>], 'Templates': [], 'IsFunction': True, 'Name': 'Byte__On_Plus', 'Parameters': [<__main__.MySymbol object at 0x7f22704206a0>, <__main__.MySymbol object at 0x7f22704206d8>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform addition
+            add byte cl, al
+            
+            ; mov value into return area
+            add ebx, 8
+            mov byte [ebx], cl
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270420668>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Byte__On_Minus weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270420780>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420828>], 'Templates': [], 'IsFunction': True, 'Name': 'Byte__On_Minus', 'Parameters': [<__main__.MySymbol object at 0x7f22704207b8>, <__main__.MySymbol object at 0x7f22704207f0>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform addition
+            sub byte cl, al
+            
+            ; mov value into return area
+            add ebx, 8
+            mov byte [ebx], cl
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270420780>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Byte__On_Greater_Than weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270420898>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420978>], 'Templates': [], 'IsFunction': True, 'Name': 'Byte__On_Greater_Than', 'Parameters': [<__main__.MySymbol object at 0x7f22704208d0>, <__main__.MySymbol object at 0x7f2270420908>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            setg byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+            
+        
+end
+<__main__.Function object at 0x7f2270420898>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Byte__On_Greater_Equal weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704209e8>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420ac8>], 'Templates': [], 'IsFunction': True, 'Name': 'Byte__On_Greater_Equal', 'Parameters': [<__main__.MySymbol object at 0x7f2270420a20>, <__main__.MySymbol object at 0x7f2270420a58>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            setge byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f22704209e8>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Byte__On_If_Equal weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270420940>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420b70>], 'Templates': [], 'IsFunction': True, 'Name': 'Byte__On_If_Equal', 'Parameters': [<__main__.MySymbol object at 0x7f2270420a90>, <__main__.MySymbol object at 0x7f2270420b00>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            sete byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270420940>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Byte__On_Less_Than weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270420be0>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420cc0>], 'Templates': [], 'IsFunction': True, 'Name': 'Byte__On_Less_Than', 'Parameters': [<__main__.MySymbol object at 0x7f2270420c18>, <__main__.MySymbol object at 0x7f2270420c50>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            setl byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+            
+        
+end
+<__main__.Function object at 0x7f2270420be0>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Byte__On_Less_Or_Equal weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270420d30>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420e10>], 'Templates': [], 'IsFunction': True, 'Name': 'Byte__On_Less_Or_Equal', 'Parameters': [<__main__.MySymbol object at 0x7f2270420d68>, <__main__.MySymbol object at 0x7f2270420da0>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            setle byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+        
+end
+<__main__.Function object at 0x7f2270420d30>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Rhs Byte__On_Not_Equal weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270420e80>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270420f60>], 'Templates': [], 'IsFunction': True, 'Name': 'Byte__On_Not_Equal', 'Parameters': [<__main__.MySymbol object at 0x7f2270420eb8>, <__main__.MySymbol object at 0x7f2270420ef0>]}
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform comparison
+            cmp byte cl, al
+            setne byte al
+            
+            ; move result onto stack
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+            
+        
+end
+<__main__.Function object at 0x7f2270420e80>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring Pointer
+Integer
+Code: 1233 Position [] []
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270423080>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'Pointer__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f22704230b8>]}
+end
+<__main__.Function object at 0x7f2270423080>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Source Pointer__On_Equals weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270423128>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'Pointer__On_Equals', 'Parameters': [<__main__.MySymbol object at 0x7f2270423160>, <__main__.MySymbol object at 0x7f2270423198>]}
+Me
+testng Me : Position = Source <class 'str'>
+['Me', ':', 'Position', '=', 'Source', ':', 'Position']
+[]
+wersdf : Position False
+0 self . State
+['Me', ':', 'Position', '=', 'Source', ':', 'Position']
+<__main__.MySymbol object at 0x7f2270423160> Me
+ope Pointer__On_Create
+ope Pointer__On_Equals
+ope Position
+wer Position
+metest <__main__.MyToken object at 0x7f22704172b0> <__main__.Type object at 0x7f22704204a8> Pointer Position {'Pointer__On_Create': <__main__.Function object at 0x7f2270423080>, 'Pointer__On_Equals': <__main__.Function object at 0x7f2270423128>, 'Position': <__main__.MySymbol object at 0x7f2270420fd0>}
+{'Integer__On_Less_Than': <__main__.Function object at 0x7f2270420208>, 'Integer__On_Not_Equal': <__main__.Function object at 0x7f2270420358>, 'Integer__On_Greater_Equal': <__main__.Function object at 0x7f2270418f60>, 'Integer__On_Equals': <__main__.Function object at 0x7f2270418a90>, 'Integer__On_Greater_Than': <__main__.Function object at 0x7f2270418e48>, 'Integer__On_Create': <__main__.Function object at 0x7f22704189b0>, 'Integer__On_Less_Or_Equal': <__main__.Function object at 0x7f2270418c50>, 'Integer__On_Plus': <__main__.Function object at 0x7f2270418ba8>, 'Integer__On_Minus': <__main__.Function object at 0x7f2270418cf8>, 'Integer__On_If_Equal': <__main__.Function object at 0x7f22704200b8>} <__main__.Type object at 0x7f2270418898> <__main__.MySymbol object at 0x7f2270423160> Integer 8 0 sdaf
+testng [0 = Source : Position <class 'str'>
+['[0', '=', 'Source', ':', 'Position']
+[]
+wersdf = Source False
+0 self . State
+testng Source : Position   <class 'str'>
+['[0', '=', 'Source', ':', 'Position']
+[]
+wersdf : Position False
+0 self . State
+['[0', '=', 'Source', ':', 'Position']
+<__main__.MySymbol object at 0x7f2270423198> Source
+ope Pointer__On_Create
+ope Pointer__On_Equals
+ope Position
+wer Position
+metest <__main__.MyToken object at 0x7f22704173c8> <__main__.Type object at 0x7f22704204a8> Pointer Position {'Pointer__On_Create': <__main__.Function object at 0x7f2270423080>, 'Pointer__On_Equals': <__main__.Function object at 0x7f2270423128>, 'Position': <__main__.MySymbol object at 0x7f2270420fd0>}
+{'Integer__On_Less_Than': <__main__.Function object at 0x7f2270420208>, 'Integer__On_Not_Equal': <__main__.Function object at 0x7f2270420358>, 'Integer__On_Greater_Equal': <__main__.Function object at 0x7f2270418f60>, 'Integer__On_Equals': <__main__.Function object at 0x7f2270418a90>, 'Integer__On_Greater_Than': <__main__.Function object at 0x7f2270418e48>, 'Integer__On_Create': <__main__.Function object at 0x7f22704189b0>, 'Integer__On_Less_Or_Equal': <__main__.Function object at 0x7f2270418c50>, 'Integer__On_Plus': <__main__.Function object at 0x7f2270418ba8>, 'Integer__On_Minus': <__main__.Function object at 0x7f2270418cf8>, 'Integer__On_If_Equal': <__main__.Function object at 0x7f22704200b8>} <__main__.Type object at 0x7f2270418898> <__main__.MySymbol object at 0x7f2270423198> Integer 12 0 sdaf
+testng [0 = [1   <class 'str'>
+['[0', '=', '[1']
+[]
+wersdf = [1 False
+0 self . State
+testing objet [1
+[]
+['Position']
+['Me', '[0', 'Source', '[1']
+True <__main__.MySymbol object at 0x7f2270423208> [0 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270423208> []
+testing objet [1
+testing objet [0
+['[1']
+end
+<__main__.Function object at 0x7f2270423128>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring CapTest
+Byte
+Code: 1233 B1 [] []
+
+
+screw up 
+
+Byte
+Code: 1233 B2 [] []
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270423400>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'CapTest__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f2270423438>]}
+end
+<__main__.Function object at 0x7f2270423400>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring CapTest2
+CapTest
+Code: 1233 C1 [] []
+
+
+screw up 
+
+CapTest
+Code: 1233 C2 [] []
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704234e0>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'CapTest2__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f2270423470>]}
+end
+<__main__.Function object at 0x7f22704234e0>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring CapTest3
+CapTest2
+Code: 1233 C1 [] []
+
+
+screw up 
+
+CapTest2
+Code: 1233 C2 [] []
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704233c8>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'CapTest3__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f22704234a8>]}
+end
+<__main__.Function object at 0x7f22704233c8>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring Letter
+Byte
+Code: 1233 c [] []
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270423588>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'Letter__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f22704235c0>]}
+end
+<__main__.Function object at 0x7f2270423588>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Source Letter__On_Equals weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270423630>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'Letter__On_Equals', 'Parameters': [<__main__.MySymbol object at 0x7f2270423668>, <__main__.MySymbol object at 0x7f22704236a0>]}
+Me
+testng Me : c = Source <class 'str'>
+['Me', ':', 'c', '=', 'Source', ':', 'c']
+[]
+wersdf : c False
+0 self . State
+['Me', ':', 'c', '=', 'Source', ':', 'c']
+<__main__.MySymbol object at 0x7f2270423668> Me
+ope c
+ope Letter__On_Create
+ope Letter__On_Equals
+wer c
+metest <__main__.MyToken object at 0x7f22704879e8> <__main__.Type object at 0x7f2270423390> Letter c {'c': <__main__.MySymbol object at 0x7f2270423518>, 'Letter__On_Create': <__main__.Function object at 0x7f2270423588>, 'Letter__On_Equals': <__main__.Function object at 0x7f2270423630>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270423668> Byte 8 0 sdaf
+testng [2 = Source : c <class 'str'>
+['[2', '=', 'Source', ':', 'c']
+[]
+wersdf = Source False
+0 self . State
+testng Source : c   <class 'str'>
+['[2', '=', 'Source', ':', 'c']
+[]
+wersdf : c False
+0 self . State
+['[2', '=', 'Source', ':', 'c']
+<__main__.MySymbol object at 0x7f22704236a0> Source
+ope c
+ope Letter__On_Create
+ope Letter__On_Equals
+wer c
+metest <__main__.MyToken object at 0x7f2270487b00> <__main__.Type object at 0x7f2270423390> Letter c {'c': <__main__.MySymbol object at 0x7f2270423518>, 'Letter__On_Create': <__main__.Function object at 0x7f2270423588>, 'Letter__On_Equals': <__main__.Function object at 0x7f2270423630>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f22704236a0> Byte 12 0 sdaf
+testng [2 = [3   <class 'str'>
+['[2', '=', '[3']
+[]
+wersdf = [3 False
+0 self . State
+testing objet [3
+[]
+['c']
+['Me', '[3', 'Source', '[2']
+True <__main__.MySymbol object at 0x7f2270423710> [2 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270423710> []
+testing objet [3
+testing objet [2
+['[3']
+end
+<__main__.Function object at 0x7f2270423630>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+using
+action
+True Size AllocateHeapMemory weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042b198>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f227042b240>], 'Templates': [], 'IsFunction': True, 'Name': 'AllocateHeapMemory', 'Parameters': [<__main__.MySymbol object at 0x7f227042b1d0>]}
+    push ebp
+    mov ebp, esp
+    
+    ; Must build the struct in reverse order
+    ; offset
+    add esp, -4
+    mov dword [esp], 0
+    
+    ; fd
+    add esp, -4
+    mov dword [esp], -1
+    
+    ; flags
+    add esp, -4
+    mov dword [esp], 34
+    
+    ; prot
+    add esp, -4
+    mov dword [esp], 3
+    
+    ; len
+    xor ecx, ecx
+    mov ebx, ebp
+    add ebx, 8
+    mov byte cl, [ebx]
+    add esp, -4
+    mov dword [esp], ecx
+    
+    ; addr
+    add esp, -4
+    mov dword [esp], 0
+    
+    ; call mmap
+    mov eax, 90
+    mov ebx, esp
+    ;lea ebx, [mmap_arg]
+    int	0x80
+    
+    add esp, 24
+    
+    ;ope:
+    ;
+    ;push eax
+    ;mov byte [eax], 85
+    ;add esp, -4
+    ;mov [esp], eax
+    ;call OutputByte
+    ;pop eax
+    ;
+    ;add esp, 4
+    ;
+    ;add eax, 1
+    ;
+    ;jmp ope
+    
+    ;test eax, eax
+    ;jnz cont
+    
+    ;mov	eax,1
+	;xor	ebx,ebx
+	;int	0x80
+    
+    ;cont:
+
+    
+    ; move new memory location to return position
+    mov ebx, ebp
+    add ebx, 12
+    mov [ebx], eax
+    
+    mov esp, ebp
+    pop ebp
+
+end
+<__main__.Function object at 0x7f227042b198>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Location DeallocateHeapMemory weoisfeife
+True Size DeallocateHeapMemory weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042b2b0>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'DeallocateHeapMemory', 'Parameters': [<__main__.MySymbol object at 0x7f227042b2e8>, <__main__.MySymbol object at 0x7f227042b358>]}
+    push ebp
+    mov ebp, esp
+    
+    ; len to ecx
+    xor ecx, ecx
+    mov ebx, ebp
+    add ebx, 12
+    mov byte cl, [ebx]
+    
+    ; addr to ebx
+    mov ebx, ebp
+    add ebx, 8
+    mov ebx, [ebx]
+    mov ebx, [ebx]
+    
+    ; call mmap
+    mov eax, 90
+    mov ebx, esp
+    ;lea ebx, [mmap_arg]
+    int	0x80
+    
+    mov esp, ebp
+    pop ebp
+
+end
+<__main__.Function object at 0x7f227042b2b0>
+
+
+screw up 
+
+
+
+screw up 
+
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True L OutputByte weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042b400>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'OutputByte', 'Parameters': [<__main__.MySymbol object at 0x7f227042b438>]}
+    push ebp
+    mov ebp, esp
+    
+    ; load a pointer to the byte in ecx
+    mov ecx, ebp
+    add ecx, 8
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov esp, ebp
+    pop ebp
+
+end
+<__main__.Function object at 0x7f227042b400>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Reference OutputByteReference weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270423780>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'OutputByteReference', 'Parameters': [<__main__.MySymbol object at 0x7f2270423748>]}
+    push ebp
+    mov ebp, esp
+    
+    ; load a pointer to the byte in ecx
+    mov ecx, ebp
+    add ecx, 8
+    mov ecx, [ecx]
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov esp, ebp
+    pop ebp
+
+end
+<__main__.Function object at 0x7f2270423780>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True L OutputByte3 weoisfeife
+True L2 OutputByte3 weoisfeife
+True L3 OutputByte3 weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704239b0>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'OutputByte3', 'Parameters': [<__main__.MySymbol object at 0x7f227042b208>, <__main__.MySymbol object at 0x7f227042b320>, <__main__.MySymbol object at 0x7f227042b390>]}
+    push ebp
+    mov ebp, esp
+    
+    ; load a pointer to the byte in ecx
+    mov ecx, ebp
+    add ecx, 8
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov ecx, ebp
+    add ecx, 12
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov ecx, ebp
+    add ecx, 16
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov esp, ebp
+    pop ebp
+    
+
+end
+<__main__.Function object at 0x7f22704239b0>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True L IndirectionOutput weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042b4a8>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'IndirectionOutput', 'Parameters': [<__main__.MySymbol object at 0x7f227042b4e0>]}
+OutputByte
+testng OutputByte ( L )  <class 'str'>
+['OutputByte', '(', 'L', ')']
+[]
+wersdf ( L False
+0 self . State
+['OutputByte', '(', 'L', ')']
+4 ['OutputByte', '(', 'L', ')'] None
+Code: 992 None []
+testing objet L
+['L']
+['OutputByte', '(', 'L', ')']
+ OutputByte
+return values [] [<__main__.MySymbol object at 0x7f227042b438>] <__main__.Function object at 0x7f227042b400> OutputByte
+end
+<__main__.Function object at 0x7f227042b4a8>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True L IndirectionAddOutput weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042b588>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'IndirectionAddOutput', 'Parameters': [<__main__.MySymbol object at 0x7f227042b550>]}
+OutputByte
+testng OutputByte ( L + 1 <class 'str'>
+['OutputByte', '(', 'L', '+', '1', ')']
+[]
+wersdf ( L False
+0 self . State
+testng L + 1 )  <class 'str'>
+['OutputByte', '(', 'L', '+', '1', ')']
+[]
+wersdf + 1 False
+0 self . State
+testing objet 1
+[]
+['L']
+True <__main__.MySymbol object at 0x7f227042b550> L 2 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f227042b550> []
+testing objet [4
+testing objet L
+['[4']
+testng [5 )    <class 'str'>
+['OutputByte', '(', '[5', ')']
+[]
+testng OutputByte ( [5 )  <class 'str'>
+['OutputByte', '(', '[5', ')']
+[]
+wersdf ( [5 False
+0 self . State
+['OutputByte', '(', '[5', ')']
+4 ['OutputByte', '(', '[5', ')'] None
+Code: 992 None []
+testing objet [5
+['[5']
+['OutputByte', '(', '[5', ')']
+ OutputByte
+return values [] [<__main__.MySymbol object at 0x7f227042b438>] <__main__.Function object at 0x7f227042b400> OutputByte
+end
+<__main__.Function object at 0x7f227042b588>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True L IndirectionAddTwoOutput weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042b710>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'IndirectionAddTwoOutput', 'Parameters': [<__main__.MySymbol object at 0x7f227042b748>]}
+OutputByte
+testng OutputByte ( L + 2 <class 'str'>
+['OutputByte', '(', 'L', '+', '2', ')']
+[]
+wersdf ( L False
+0 self . State
+testng L + 2 )  <class 'str'>
+['OutputByte', '(', 'L', '+', '2', ')']
+[]
+wersdf + 2 False
+0 self . State
+testing objet 2
+[]
+['L']
+True <__main__.MySymbol object at 0x7f227042b748> L 2 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f227042b748> []
+testing objet [6
+testing objet L
+['[6']
+testng [7 )    <class 'str'>
+['OutputByte', '(', '[7', ')']
+[]
+testng OutputByte ( [7 )  <class 'str'>
+['OutputByte', '(', '[7', ')']
+[]
+wersdf ( [7 False
+0 self . State
+['OutputByte', '(', '[7', ')']
+4 ['OutputByte', '(', '[7', ')'] None
+Code: 992 None []
+testing objet [7
+['[7']
+['OutputByte', '(', '[7', ')']
+ OutputByte
+return values [] [<__main__.MySymbol object at 0x7f227042b438>] <__main__.Function object at 0x7f227042b400> OutputByte
+end
+<__main__.Function object at 0x7f227042b710>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True L OutputByte2 weoisfeife
+True L2 OutputByte2 weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042b7f0>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'OutputByte2', 'Parameters': [<__main__.MySymbol object at 0x7f227042b828>, <__main__.MySymbol object at 0x7f227042b668>]}
+    push ebp
+    mov ebp, esp
+    
+    ; load a pointer to the byte in ecx
+    mov ecx, ebp
+    add ecx, 8
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov ecx, ebp
+    add ecx, 12
+    mov ecx, [ecx]
+    
+    ; Set other values
+    mov	eax, 4
+    mov	ebx, 1
+	mov	edx, 1
+	int	0x80
+    
+    mov esp, ebp
+    pop ebp
+    
+
+end
+<__main__.Function object at 0x7f227042b7f0>
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring ClassScopeTest
+Byte
+Code: 1233 B2 [] []
+
+
+screw up 
+
+Byte
+Code: 1233 B3 [] []
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042b908>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'ClassScopeTest__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f227042b940>]}
+Me
+testng Me : B2 = 65 <class 'str'>
+['Me', ':', 'B2', '=', '65']
+[]
+wersdf : B2 False
+0 self . State
+['Me', ':', 'B2', '=', '65']
+<__main__.MySymbol object at 0x7f227042b940> Me
+ope B2
+ope B3
+ope ClassScopeTest__On_Create
+wer B2
+metest <__main__.MyToken object at 0x7f22704a0eb8> <__main__.Type object at 0x7f227042b860> ClassScopeTest B2 {'B2': <__main__.MySymbol object at 0x7f227042b780>, 'B3': <__main__.MySymbol object at 0x7f227042b6d8>, 'ClassScopeTest__On_Create': <__main__.Function object at 0x7f227042b908>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f227042b940> Byte 8 0 sdaf
+testng [8 = 65   <class 'str'>
+['[8', '=', '65']
+[]
+wersdf = 65 False
+0 self . State
+testing objet 65
+[]
+['B2', 'B3']
+['Me', '[8']
+True <__main__.MySymbol object at 0x7f227042b9e8> [8 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f227042b9e8> []
+testing objet [9
+testing objet [8
+['[9']
+end
+<__main__.Function object at 0x7f227042b908>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True B3 ClassScopeTest__RunTest weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042bb00>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'ClassScopeTest__RunTest', 'Parameters': [<__main__.MySymbol object at 0x7f227042bb38>, <__main__.MySymbol object at 0x7f227042b9e8>]}
+Byte
+Code: 1233 B1 [] []
+{'IndirectionOutput': <__main__.Function object at 0x7f227042b4a8>, 'ClassScopeTest': <__main__.Type object at 0x7f227042b860>, 'CapTest3': <__main__.Type object at 0x7f2270423358>, 'IndirectionAddTwoOutput': <__main__.Function object at 0x7f227042b710>, 'CapTest': <__main__.Type object at 0x7f2270420c88>, 'Bool': <__main__.Type object at 0x7f2270418860>, 'Byte': <__main__.Type object at 0x7f2270418978>, 'AllocateHeapMemory': <__main__.Function object at 0x7f227042b198>, 'Letter': <__main__.Type object at 0x7f2270423390>, 'OutputByte3': <__main__.Function object at 0x7f22704239b0>, 'DeallocateHeapMemory': <__main__.Function object at 0x7f227042b2b0>, 'OutputByteReference': <__main__.Function object at 0x7f2270423780>, 'IndirectionAddOutput': <__main__.Function object at 0x7f227042b588>, 'OutputByte': <__main__.Function object at 0x7f227042b400>, 'Integer': <__main__.Type object at 0x7f2270418898>, 'CapTest2': <__main__.Type object at 0x7f2270423048>, 'Pointer': <__main__.Type object at 0x7f22704204a8>, 'OutputByte2': <__main__.Function object at 0x7f227042b7f0>} 
+
+
+
+
+ Byte B1
+Code: 1234 B1 []
+testng B1 = 5   <class 'str'>
+['B1', '=', '5']
+[]
+wersdf = 5 False
+14 self . State
+testing objet 5
+[]
+['B2', 'B3']
+['Me', 'B3', 'B1']
+True <__main__.MySymbol object at 0x7f227042ba90> B1 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f227042ba90> []
+testing objet [10
+testing objet B1
+['[10']
+Me
+testng Me : B2 = 66 <class 'str'>
+['Me', ':', 'B2', '=', '66']
+[]
+wersdf : B2 False
+0 self . State
+['Me', ':', 'B2', '=', '66']
+<__main__.MySymbol object at 0x7f227042bb38> Me
+ope B2
+ope B3
+ope ClassScopeTest__RunTest
+ope ClassScopeTest__On_Create
+wer B2
+metest <__main__.MyToken object at 0x7f22704a35c0> <__main__.Type object at 0x7f227042b860> ClassScopeTest B2 {'B2': <__main__.MySymbol object at 0x7f227042b780>, 'B3': <__main__.MySymbol object at 0x7f227042b6d8>, 'ClassScopeTest__RunTest': <__main__.Function object at 0x7f227042bb00>, 'ClassScopeTest__On_Create': <__main__.Function object at 0x7f227042b908>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f227042bb38> Byte 8 0 sdaf
+testng [11 = 66   <class 'str'>
+['[11', '=', '66']
+[]
+wersdf = 66 False
+0 self . State
+testing objet 66
+[]
+['B2', 'B3']
+['Me', '[10', 'B3', 'B1', '[11']
+True <__main__.MySymbol object at 0x7f227042b518> [11 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f227042b518> []
+testing objet [12
+testing objet [11
+['[12']
+end
+<__main__.Function object at 0x7f227042bb00>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring ClassScopeTestTwo
+CapTest
+Code: 1233 C1 [] []
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042b9b0>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'ClassScopeTestTwo__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f227042ba58>]}
+Me
+testng Me : C1 : B2 <class 'str'>
+['Me', ':', 'C1', ':', 'B2', '=', '68']
+[]
+wersdf : C1 False
+0 self . State
+['Me', ':', 'C1', ':', 'B2', '=', '68']
+<__main__.MySymbol object at 0x7f227042ba58> Me
+ope C1
+ope ClassScopeTestTwo__On_Create
+wer C1
+metest <__main__.MyToken object at 0x7f22704a3cf8> <__main__.Type object at 0x7f227042b8d0> ClassScopeTestTwo C1 {'C1': <__main__.MySymbol object at 0x7f227042bc88>, 'ClassScopeTestTwo__On_Create': <__main__.Function object at 0x7f227042b9b0>}
+{'B2': <__main__.MySymbol object at 0x7f2270420f28>, 'B1': <__main__.MySymbol object at 0x7f2270420dd8>, 'CapTest__On_Create': <__main__.Function object at 0x7f2270423400>} <__main__.Type object at 0x7f2270420c88> <__main__.MySymbol object at 0x7f227042ba58> CapTest 8 0 sdaf
+testng [13 : B2 = 68 <class 'str'>
+['[13', ':', 'B2', '=', '68']
+[]
+wersdf : B2 False
+0 self . State
+['[13', ':', 'B2', '=', '68']
+<__main__.MySymbol object at 0x7f227042b5f8> [13
+ope B2
+ope B1
+ope CapTest__On_Create
+wer B2
+metest <__main__.MyToken object at 0x7f22704a3da0> <__main__.Type object at 0x7f2270420c88> CapTest B2 {'B2': <__main__.MySymbol object at 0x7f2270420f28>, 'B1': <__main__.MySymbol object at 0x7f2270420dd8>, 'CapTest__On_Create': <__main__.Function object at 0x7f2270423400>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f227042b5f8> Byte -4 1 sdaf
+testng [14 = 68   <class 'str'>
+['[14', '=', '68']
+[]
+wersdf = 68 False
+0 self . State
+testing objet 68
+[]
+['C1']
+['Me', '[14', '[13']
+True <__main__.MySymbol object at 0x7f227042bcc0> [14 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f227042bcc0> []
+testing objet [15
+testing objet [14
+['[15']
+end
+<__main__.Function object at 0x7f227042b9b0>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True B3 ClassScopeTestTwo__RunTest weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042b5f8>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'ClassScopeTestTwo__RunTest', 'Parameters': [<__main__.MySymbol object at 0x7f227042b518>, <__main__.MySymbol object at 0x7f227042bcc0>]}
+Me
+testng Me : C1 : B2 <class 'str'>
+['Me', ':', 'C1', ':', 'B2', '=', '72']
+[]
+wersdf : C1 False
+0 self . State
+['Me', ':', 'C1', ':', 'B2', '=', '72']
+<__main__.MySymbol object at 0x7f227042b518> Me
+ope ClassScopeTestTwo__RunTest
+ope C1
+ope ClassScopeTestTwo__On_Create
+wer C1
+metest <__main__.MyToken object at 0x7f22704a5320> <__main__.Type object at 0x7f227042b8d0> ClassScopeTestTwo C1 {'ClassScopeTestTwo__RunTest': <__main__.Function object at 0x7f227042b5f8>, 'C1': <__main__.MySymbol object at 0x7f227042bc88>, 'ClassScopeTestTwo__On_Create': <__main__.Function object at 0x7f227042b9b0>}
+{'B2': <__main__.MySymbol object at 0x7f2270420f28>, 'B1': <__main__.MySymbol object at 0x7f2270420dd8>, 'CapTest__On_Create': <__main__.Function object at 0x7f2270423400>} <__main__.Type object at 0x7f2270420c88> <__main__.MySymbol object at 0x7f227042b518> CapTest 8 0 sdaf
+testng [16 : B2 = 72 <class 'str'>
+['[16', ':', 'B2', '=', '72']
+[]
+wersdf : B2 False
+0 self . State
+['[16', ':', 'B2', '=', '72']
+<__main__.MySymbol object at 0x7f227042be48> [16
+ope B2
+ope B1
+ope CapTest__On_Create
+wer B2
+metest <__main__.MyToken object at 0x7f22704a53c8> <__main__.Type object at 0x7f2270420c88> CapTest B2 {'B2': <__main__.MySymbol object at 0x7f2270420f28>, 'B1': <__main__.MySymbol object at 0x7f2270420dd8>, 'CapTest__On_Create': <__main__.Function object at 0x7f2270423400>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f227042be48> Byte -4 1 sdaf
+testng [17 = 72   <class 'str'>
+['[17', '=', '72']
+[]
+wersdf = 72 False
+0 self . State
+testing objet 72
+[]
+['C1']
+['Me', '[17', 'B3', '[16']
+True <__main__.MySymbol object at 0x7f227042bdd8> [17 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f227042bdd8> []
+testing objet [18
+testing objet [17
+['[18']
+end
+<__main__.Function object at 0x7f227042b5f8>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042ba90>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'NoParamTest', 'Parameters': []}
+end
+<__main__.Function object at 0x7f227042ba90>
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring DoubleMethodTest
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042bd68>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'DoubleMethodTest__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f227042bf60>]}
+end
+<__main__.Function object at 0x7f227042bd68>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042ba20>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'DoubleMethodTest__Method1', 'Parameters': [<__main__.MySymbol object at 0x7f227042b6a0>]}
+OutputByte
+testng OutputByte ( 82 )  <class 'str'>
+['OutputByte', '(', '82', ')']
+[]
+wersdf ( 82 False
+0 self . State
+['OutputByte', '(', '82', ')']
+4 ['OutputByte', '(', '82', ')'] None
+Code: 992 None []
+testing objet [19
+['[19']
+['OutputByte', '(', '82', ')']
+ OutputByte
+return values [] [<__main__.MySymbol object at 0x7f227042b438>] <__main__.Function object at 0x7f227042b400> OutputByte
+end
+<__main__.Function object at 0x7f227042ba20>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042bb70>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'DoubleMethodTest__Method2', 'Parameters': [<__main__.MySymbol object at 0x7f227042bcf8>]}
+Me
+testng Me : Method1 ( ) <class 'str'>
+['Me', ':', 'Method1', '(', ')']
+[]
+testng Method1 ( )   <class 'str'>
+['Me', ':', 'Method1', '(', ')']
+[]
+wersdf ( ) True
+3 ['Method1', '(', ')']
+Code: 992 <__main__.MySymbol object at 0x7f227042bcf8> []
+testing objet Me
+[]
+<class 'str'> <class 'str'>
+DoubleMethodTest DoubleMethodTest__Method1
+{'DoubleMethodTest__Method1': <__main__.Function object at 0x7f227042ba20>, 'DoubleMethodTest__Method2': <__main__.Function object at 0x7f227042bb70>, 'DoubleMethodTest__On_Create': <__main__.Function object at 0x7f227042bd68>} {'DoubleMethodTest__Method1': <__main__.Function object at 0x7f227042ba20>, 'DoubleMethodTest__Method2': <__main__.Function object at 0x7f227042bb70>, 'DoubleMethodTest__On_Create': <__main__.Function object at 0x7f227042bd68>} <__main__.Type object at 0x7f227042be48> DoubleMethodTest {'IndirectionOutput': <__main__.Function object at 0x7f227042b4a8>, 'ClassScopeTest': <__main__.Type object at 0x7f227042b860>, 'CapTest3': <__main__.Type object at 0x7f2270423358>, 'DoubleMethodTest': <__main__.Type object at 0x7f227042be48>, 'IndirectionAddTwoOutput': <__main__.Function object at 0x7f227042b710>, 'CapTest': <__main__.Type object at 0x7f2270420c88>, 'Bool': <__main__.Type object at 0x7f2270418860>, 'NoParamTest': <__main__.Function object at 0x7f227042ba90>, 'Byte': <__main__.Type object at 0x7f2270418978>, 'AllocateHeapMemory': <__main__.Function object at 0x7f227042b198>, 'ClassScopeTestTwo': <__main__.Type object at 0x7f227042b8d0>, 'Letter': <__main__.Type object at 0x7f2270423390>, 'OutputByte3': <__main__.Function object at 0x7f22704239b0>, 'DeallocateHeapMemory': <__main__.Function object at 0x7f227042b2b0>, 'OutputByteReference': <__main__.Function object at 0x7f2270423780>, 'IndirectionAddOutput': <__main__.Function object at 0x7f227042b588>, 'OutputByte': <__main__.Function object at 0x7f227042b400>, 'Integer': <__main__.Type object at 0x7f2270418898>, 'CapTest2': <__main__.Type object at 0x7f2270423048>, 'Pointer': <__main__.Type object at 0x7f22704204a8>, 'OutputByte2': <__main__.Function object at 0x7f227042b7f0>}
+return values [] [<__main__.MySymbol object at 0x7f227042b6a0>] <__main__.Function object at 0x7f227042ba20> DoubleMethodTest__Method1
+[]
+end
+<__main__.Function object at 0x7f227042bb70>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042bdd8>
+{'TypeOfCode': 1, 'ReturnValues': [<__main__.MySymbol object at 0x7f227042bba8>], 'Templates': [], 'IsFunction': True, 'Name': 'ReturnTest', 'Parameters': []}
+Byte
+Code: 1233 B [] []
+{'CapTest3': <__main__.Type object at 0x7f2270423358>, 'ReturnTest': <__main__.Function object at 0x7f227042bdd8>, 'ClassScopeTest': <__main__.Type object at 0x7f227042b860>, 'AllocateHeapMemory': <__main__.Function object at 0x7f227042b198>, 'ClassScopeTestTwo': <__main__.Type object at 0x7f227042b8d0>, 'Letter': <__main__.Type object at 0x7f2270423390>, 'OutputByte3': <__main__.Function object at 0x7f22704239b0>, 'OutputByte2': <__main__.Function object at 0x7f227042b7f0>, 'IndirectionOutput': <__main__.Function object at 0x7f227042b4a8>, 'NoParamTest': <__main__.Function object at 0x7f227042ba90>, 'DoubleMethodTest': <__main__.Type object at 0x7f227042be48>, 'IndirectionAddTwoOutput': <__main__.Function object at 0x7f227042b710>, 'CapTest': <__main__.Type object at 0x7f2270420c88>, 'Bool': <__main__.Type object at 0x7f2270418860>, 'Byte': <__main__.Type object at 0x7f2270418978>, 'DeallocateHeapMemory': <__main__.Function object at 0x7f227042b2b0>, 'OutputByteReference': <__main__.Function object at 0x7f2270423780>, 'IndirectionAddOutput': <__main__.Function object at 0x7f227042b588>, 'OutputByte': <__main__.Function object at 0x7f227042b400>, 'Integer': <__main__.Type object at 0x7f2270418898>, 'CapTest2': <__main__.Type object at 0x7f2270423048>, 'Pointer': <__main__.Type object at 0x7f22704204a8>} 
+
+
+
+
+ Byte B
+Code: 1234 B []
+testng B = 70   <class 'str'>
+['B', '=', '70']
+[]
+wersdf = 70 False
+14 self . State
+testing objet 70
+[]
+['B']
+True <__main__.MySymbol object at 0x7f227042bda0> B 2 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f227042bda0> []
+testing objet [20
+testing objet B
+['[20']
+return
+end
+<__main__.Function object at 0x7f227042bdd8>
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring RetTestCls
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270430080>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': [], 'IsFunction': True, 'Name': 'RetTestCls__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f22704300b8>]}
+end
+<__main__.Function object at 0x7f2270430080>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704300f0>
+{'TypeOfCode': 1, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270430160>], 'Templates': [], 'IsFunction': True, 'Name': 'RetTestCls__RetTe', 'Parameters': [<__main__.MySymbol object at 0x7f2270430128>]}
+Byte
+Code: 1233 B [] []
+{'CapTest3': <__main__.Type object at 0x7f2270423358>, 'ReturnTest': <__main__.Function object at 0x7f227042bdd8>, 'ClassScopeTest': <__main__.Type object at 0x7f227042b860>, 'AllocateHeapMemory': <__main__.Function object at 0x7f227042b198>, 'ClassScopeTestTwo': <__main__.Type object at 0x7f227042b8d0>, 'Letter': <__main__.Type object at 0x7f2270423390>, 'OutputByte3': <__main__.Function object at 0x7f22704239b0>, 'OutputByte2': <__main__.Function object at 0x7f227042b7f0>, 'IndirectionOutput': <__main__.Function object at 0x7f227042b4a8>, 'NoParamTest': <__main__.Function object at 0x7f227042ba90>, 'RetTestCls': <__main__.Type object at 0x7f227042bda0>, 'DoubleMethodTest': <__main__.Type object at 0x7f227042be48>, 'IndirectionAddTwoOutput': <__main__.Function object at 0x7f227042b710>, 'CapTest': <__main__.Type object at 0x7f2270420c88>, 'Bool': <__main__.Type object at 0x7f2270418860>, 'Byte': <__main__.Type object at 0x7f2270418978>, 'DeallocateHeapMemory': <__main__.Function object at 0x7f227042b2b0>, 'OutputByteReference': <__main__.Function object at 0x7f2270423780>, 'IndirectionAddOutput': <__main__.Function object at 0x7f227042b588>, 'OutputByte': <__main__.Function object at 0x7f227042b400>, 'Integer': <__main__.Type object at 0x7f2270418898>, 'CapTest2': <__main__.Type object at 0x7f2270423048>, 'Pointer': <__main__.Type object at 0x7f22704204a8>} 
+
+
+
+
+ Byte B
+Code: 1234 B []
+testng B = 66   <class 'str'>
+['B', '=', '66']
+[]
+wersdf = 66 False
+14 self . State
+testing objet 66
+[]
+[]
+['Me', 'B']
+True <__main__.MySymbol object at 0x7f2270430198> B 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430198> []
+testing objet [21
+testing objet B
+['[21']
+return
+end
+<__main__.Function object at 0x7f22704300f0>
+
+
+screw up 
+
+end
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True B2 ReturnTest2 weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f227042bf28>
+{'TypeOfCode': 1, 'ReturnValues': [<__main__.MySymbol object at 0x7f22704302e8>], 'Templates': [], 'IsFunction': True, 'Name': 'ReturnTest2', 'Parameters': [<__main__.MySymbol object at 0x7f22704302b0>]}
+Byte
+Code: 1233 B [] []
+{'ReturnTest2': <__main__.Function object at 0x7f227042bf28>, 'CapTest3': <__main__.Type object at 0x7f2270423358>, 'ReturnTest': <__main__.Function object at 0x7f227042bdd8>, 'ClassScopeTest': <__main__.Type object at 0x7f227042b860>, 'AllocateHeapMemory': <__main__.Function object at 0x7f227042b198>, 'ClassScopeTestTwo': <__main__.Type object at 0x7f227042b8d0>, 'Letter': <__main__.Type object at 0x7f2270423390>, 'OutputByte3': <__main__.Function object at 0x7f22704239b0>, 'OutputByte2': <__main__.Function object at 0x7f227042b7f0>, 'IndirectionOutput': <__main__.Function object at 0x7f227042b4a8>, 'NoParamTest': <__main__.Function object at 0x7f227042ba90>, 'RetTestCls': <__main__.Type object at 0x7f227042bda0>, 'DoubleMethodTest': <__main__.Type object at 0x7f227042be48>, 'IndirectionAddTwoOutput': <__main__.Function object at 0x7f227042b710>, 'CapTest': <__main__.Type object at 0x7f2270420c88>, 'Bool': <__main__.Type object at 0x7f2270418860>, 'Byte': <__main__.Type object at 0x7f2270418978>, 'DeallocateHeapMemory': <__main__.Function object at 0x7f227042b2b0>, 'OutputByteReference': <__main__.Function object at 0x7f2270423780>, 'IndirectionAddOutput': <__main__.Function object at 0x7f227042b588>, 'OutputByte': <__main__.Function object at 0x7f227042b400>, 'Integer': <__main__.Type object at 0x7f2270418898>, 'CapTest2': <__main__.Type object at 0x7f2270423048>, 'Pointer': <__main__.Type object at 0x7f22704204a8>} 
+
+
+
+
+ Byte B
+Code: 1234 B []
+testng B = B2   <class 'str'>
+['B', '=', 'B2']
+[]
+wersdf = B2 False
+14 self . State
+testing objet B2
+[]
+['B2', 'B']
+True <__main__.MySymbol object at 0x7f2270430198> B 2 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430198> []
+testing objet B2
+testing objet B
+['B2']
+return
+end
+<__main__.Function object at 0x7f227042bf28>
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring TemplateTest
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring Array
+
+
+screw up 
+
+
+
+screw up 
+
+class
+declaring Text
+Array
+were < Letter >
+['Array', '<', 'Letter', '>']
+0
+< >
+['Array', '<', 'Letter', '>']
+2
+> >
+safd
+PARSING TEMPLATED CLASS:  Array with ['Letter']
+going in Array [<__main__.MySymbol object at 0x7f2270430278>]
+['Byte', 'Size', '\n', 'Pointer', 'DP', '\n', 'Byte', 'MemorySize', '\n', '\n', 'action', 'on', 'create', '\n', 'Me', ':', 'Size', '=', '0', '\n', 'Me', ':', 'MemorySize', '=', '0', '\n', 'Me', ':', 'DP', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')', '\n', 'end', '\n', '\n', 'action', 'asm', 'SetAt', '(', 'Byte', 'Position', ',', 'T', 'Elem', ')', '\n', '        push ebp\n        mov ebp, esp\n        \n        ; load DP into edx\n        mov ebx, ebp\n        add ebx, 8\n        mov ebx, [ebx]\n        add ebx, 1\n        mov ecx, ebx\n        \n        mov byte [ecx], 85\n        \n        ;push ecx\n        ;add esp, -4\n        ;mov [esp], ecx\n        ;call OutputByte\n        ;add esp, 4\n        ;pop ecx\n        \n        ; load Position into edx\n        mov edx, ebp\n        add edx, 12\n        mov edx, [edx]\n        mov byte dl, [edx]\n        \n        ; Perform arithmetic to find correct memory position into ebx\n        mov eax, SizeOf(T)\n        mul dl\n        add ecx, eax\n        \n        ;push ecx\n        ;add esp, -4\n        ;mov [esp], ebx\n        ;call OutputByte\n        ;add esp, 4\n        ;pop ecx\n        \n        \n        ; Load the ebx position onto the stack\n        mov ebx, ebp\n        add ebx, 16\n        mov ebx, [ebx]\n        add esp, -4\n        mov [esp], ebx\n        \n        ; Load the ebx position onto the stack\n        add esp, -4\n        mov [esp], ecx\n        call GetResolvedClassName(T)On_Equals\n        \n        ; Move the stack pointer back up\n        add esp, 8\n        \n        ;push ecx\n        ;add esp, -4\n        ;mov [esp], ebx\n        ;call OutputByte\n        ;add esp, 4\n        ;pop ecx\n        \n        mov esp, ebp\n        pop ebp\n        \n    ', 'end', '\n', '\n', 'action', 'asm', 'GetAt', '(', 'Byte', 'Position', ')', 'returns', 'T', '\n', '        push ebp\n        mov ebp, esp\n        \n        ; load DP into edx\n        mov ebx, ebp\n        add ebx, 8\n        mov ebx, [ebx]\n        add ebx, 1\n        mov ecx, ebx\n        \n        ;add esp, -4\n        ;mov [esp], ecx\n        ;call OutputByte\n        ;add esp, 4\n        \n        ; load Position into edx\n        mov edx, ebp\n        add edx, 12\n        mov edx, [edx]\n        mov byte dl, [edx]\n        \n        ; Perform arithmetic to find correct memory position into ebx\n        mov eax, SizeOf(T)\n        mul dl\n        add ecx, eax\n        \n        ;add esp, -4\n        ;mov [esp], ecx\n        ;call OutputByte\n        ;add esp, 4\n        \n        ; Load the ebx position onto the stack\n        add esp, -4\n        mov [esp], ecx\n        \n        ; Load the return position\n        mov ebx, ebp\n        add ebx, 16\n        add esp, -4\n        mov [esp], ebx\n        \n        call GetResolvedClassName(T)On_Equals\n        \n        ; Move the stack pointer back up\n        add esp, 8\n        \n        mov esp, ebp\n        pop ebp\n    ', 'end', '\n', '\n', 'action', 'Append', '(', 'T', 'NewElem', ')', '\n', 'Byte', 'testy', '=', '70', '\n', 'OutputByte', '(', 'testy', ')', '\n', 'OutputByte', '(', 'testy', ')', '\n', 'Me', ':', 'Size', '=', 'Me', ':', 'Size', '+', '1', '\n', 'OutputByte', '(', 'Me', ':', 'Size', '+', '65', ')', '\n', 'if', 'Me', ':', 'Size', '>', 'Me', ':', 'MemorySize', '\n', 'Me', ':', 'MemorySize', '=', 'Me', ':', 'Size', '\n', 'Me', ':', 'DP', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')', '\n', 'end', '\n', 'Byte', 'NewSize', '=', 'Me', ':', 'Size', '-', '1', '\n', 'Byte', 'PrintSize', '=', 'NewSize', '+', '65', '\n', 'Me', ':', 'SetAt', '(', 'NewSize', ',', 'NewElem', ')', '\n', 'end', '\n', '\n', 'action', 'Resize', '(', 'Byte', 'Size', ')', '\n', 'Me', ':', 'Size', '=', 'Size', '\n', 'Me', ':', 'MemorySize', '=', 'Size', '\n', 'Me', ':', 'DP', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')', '\n', 'end', '\n', 'end']
+hit 1
+Byte
+Code: 1233 Size [] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+
+
+screw up 
+
+Pointer
+Code: 1233 DP [] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+
+
+screw up 
+
+Byte
+Code: 1233 MemorySize [] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+
+
+screw up 
+
+
+
+screw up 
+
+action
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704304a8>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': ['T', []], 'IsFunction': True, 'Name': 'Array__Letter__On_Create', 'Parameters': [<__main__.MySymbol object at 0x7f22704304e0>]}
+Me
+testng Me : Size = 0 <class 'str'>
+['Me', ':', 'Size', '=', '0']
+[]
+wersdf : Size False
+0 self . State
+['Me', ':', 'Size', '=', '0']
+<__main__.MySymbol object at 0x7f22704304e0> Me
+ope Size
+ope MemorySize
+ope DP
+ope Array__Letter__On_Create
+wer Size
+metest <__main__.MyToken object at 0x7f22704abba8> <__main__.Type object at 0x7f227042bc18> Array Size {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f22704304e0> Byte 8 0 sdaf
+testng [22 = 0   <class 'str'>
+['[22', '=', '0']
+[]
+wersdf = 0 False
+0 self . State
+testing objet 0
+[]
+['Size', 'MemorySize', 'DP']
+['Me', '[22']
+True <__main__.MySymbol object at 0x7f2270430588> [22 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430588> []
+testing objet [23
+testing objet [22
+['[23']
+Me
+testng Me : MemorySize = 0 <class 'str'>
+['Me', ':', 'MemorySize', '=', '0']
+[]
+wersdf : MemorySize False
+0 self . State
+['Me', ':', 'MemorySize', '=', '0']
+<__main__.MySymbol object at 0x7f22704304e0> Me
+ope Size
+ope MemorySize
+ope DP
+ope Array__Letter__On_Create
+wer MemorySize
+metest <__main__.MyToken object at 0x7f22704abd68> <__main__.Type object at 0x7f227042bc18> Array MemorySize {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f22704304e0> Byte 8 5 sdaf
+testng [24 = 0   <class 'str'>
+['[24', '=', '0']
+[]
+wersdf = 0 False
+0 self . State
+testing objet 0
+[]
+['Size', 'MemorySize', 'DP']
+['Me', '[23', '[22', '[24']
+True <__main__.MySymbol object at 0x7f22704305f8> [24 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f22704305f8> []
+testing objet [25
+testing objet [24
+['[25']
+Me
+testng Me : DP = AllocateHeapMemory <class 'str'>
+['Me', ':', 'DP', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+wersdf : DP False
+0 self . State
+['Me', ':', 'DP', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+<__main__.MySymbol object at 0x7f22704304e0> Me
+ope Size
+ope MemorySize
+ope DP
+ope Array__Letter__On_Create
+wer DP
+metest <__main__.MyToken object at 0x7f22704abef0> <__main__.Type object at 0x7f227042bc18> Array DP {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>}
+{'Pointer__On_Create': <__main__.Function object at 0x7f2270423080>, 'Pointer__On_Equals': <__main__.Function object at 0x7f2270423128>, 'Position': <__main__.MySymbol object at 0x7f2270420fd0>} <__main__.Type object at 0x7f22704204a8> <__main__.MySymbol object at 0x7f22704304e0> Pointer 8 1 sdaf
+testng [26 = AllocateHeapMemory ( Me <class 'str'>
+['[26', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+testng AllocateHeapMemory ( Me : MemorySize <class 'str'>
+['[26', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+wersdf ( Me False
+0 self . State
+testng Me : MemorySize )  <class 'str'>
+['[26', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+wersdf : MemorySize False
+0 self . State
+['[26', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+<__main__.MySymbol object at 0x7f22704304e0> Me
+ope Size
+ope MemorySize
+ope DP
+ope Array__Letter__On_Create
+wer MemorySize
+metest <__main__.MyToken object at 0x7f22704ad0f0> <__main__.Type object at 0x7f227042bc18> Array MemorySize {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f22704304e0> Byte 8 5 sdaf
+testng [27 )    <class 'str'>
+['[26', '=', 'AllocateHeapMemory', '(', '[27', ')']
+[]
+testng AllocateHeapMemory ( [27 )  <class 'str'>
+['[26', '=', 'AllocateHeapMemory', '(', '[27', ')']
+[]
+wersdf ( [27 False
+0 self . State
+['[26', '=', 'AllocateHeapMemory', '(', '[27', ')']
+6 ['[26', '=', 'AllocateHeapMemory', '(', '[27', ')'] None
+Code: 992 None []
+testing objet [27
+['[27']
+['[26', '=', '[28', '(', '[27', ')']
+ AllocateHeapMemory
+return values [<__main__.MySymbol object at 0x7f227042b240>] [<__main__.MySymbol object at 0x7f227042b1d0>] <__main__.Function object at 0x7f227042b198> AllocateHeapMemory
+testng [26 = [28   <class 'str'>
+['[26', '=', '[28']
+[]
+wersdf = [28 False
+0 self . State
+testing objet [28
+[]
+['Size', 'MemorySize', 'DP']
+['[26', '[24', '[25', 'Me', '[23', '[22', '[28', '[27']
+True <__main__.MySymbol object at 0x7f2270430550> [26 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430550> []
+testing objet [28
+testing objet [26
+['[28']
+end
+<__main__.Function object at 0x7f22704304a8>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Position Array__Letter__SetAt weoisfeife
+Code: 1000 0 Array T ['Letter'] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+te Letter
+True Elem Array__Letter__SetAt weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704307f0>
+{'TypeOfCode': 0, 'ReturnValues': [], 'Templates': ['T', []], 'IsFunction': True, 'Name': 'Array__Letter__SetAt', 'Parameters': [<__main__.MySymbol object at 0x7f22704307b8>, <__main__.MySymbol object at 0x7f2270430978>, <__main__.MySymbol object at 0x7f2270430588>]}
+        push ebp
+        mov ebp, esp
+        
+        ; load DP into edx
+        mov ebx, ebp
+        add ebx, 8
+        mov ebx, [ebx]
+        add ebx, 1
+        mov ecx, ebx
+        
+        mov byte [ecx], 85
+        
+        ;push ecx
+        ;add esp, -4
+        ;mov [esp], ecx
+        ;call OutputByte
+        ;add esp, 4
+        ;pop ecx
+        
+        ; load Position into edx
+        mov edx, ebp
+        add edx, 12
+        mov edx, [edx]
+        mov byte dl, [edx]
+        
+        ; Perform arithmetic to find correct memory position into ebx
+        mov eax, SizeOf(T)
+        mul dl
+        add ecx, eax
+        
+        ;push ecx
+        ;add esp, -4
+        ;mov [esp], ebx
+        ;call OutputByte
+        ;add esp, 4
+        ;pop ecx
+        
+        
+        ; Load the ebx position onto the stack
+        mov ebx, ebp
+        add ebx, 16
+        mov ebx, [ebx]
+        add esp, -4
+        mov [esp], ebx
+        
+        ; Load the ebx position onto the stack
+        add esp, -4
+        mov [esp], ecx
+        call GetResolvedClassName(T)On_Equals
+        
+        ; Move the stack pointer back up
+        add esp, 8
+        
+        ;push ecx
+        ;add esp, -4
+        ;mov [esp], ebx
+        ;call OutputByte
+        ;add esp, 4
+        ;pop ecx
+        
+        mov esp, ebp
+        pop ebp
+        
+    
+Code: 993 576 582 582
+Code: 1000 0 Array T ['Letter'] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+te Letter
+Code: 991 Letter SizeOf
+Code: 993 1032 1052 1052
+Code: 1000 0 Array T ['Letter'] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+te Letter
+end
+<__main__.Function object at 0x7f22704307f0>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Position Array__Letter__GetAt weoisfeife
+Code: 1000 0 Array T ['Letter'] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+te Letter
+<class '__main__.Function'>
+<__main__.Function object at 0x7f22704306a0>
+{'TypeOfCode': 0, 'ReturnValues': [<__main__.MySymbol object at 0x7f2270430630>], 'Templates': ['T', []], 'IsFunction': True, 'Name': 'Array__Letter__GetAt', 'Parameters': [<__main__.MySymbol object at 0x7f2270430748>, <__main__.MySymbol object at 0x7f2270430780>]}
+        push ebp
+        mov ebp, esp
+        
+        ; load DP into edx
+        mov ebx, ebp
+        add ebx, 8
+        mov ebx, [ebx]
+        add ebx, 1
+        mov ecx, ebx
+        
+        ;add esp, -4
+        ;mov [esp], ecx
+        ;call OutputByte
+        ;add esp, 4
+        
+        ; load Position into edx
+        mov edx, ebp
+        add edx, 12
+        mov edx, [edx]
+        mov byte dl, [edx]
+        
+        ; Perform arithmetic to find correct memory position into ebx
+        mov eax, SizeOf(T)
+        mul dl
+        add ecx, eax
+        
+        ;add esp, -4
+        ;mov [esp], ecx
+        ;call OutputByte
+        ;add esp, 4
+        
+        ; Load the ebx position onto the stack
+        add esp, -4
+        mov [esp], ecx
+        
+        ; Load the return position
+        mov ebx, ebp
+        add ebx, 16
+        add esp, -4
+        mov [esp], ebx
+        
+        call GetResolvedClassName(T)On_Equals
+        
+        ; Move the stack pointer back up
+        add esp, 8
+        
+        mov esp, ebp
+        pop ebp
+    
+Code: 993 505 511 511
+Code: 1000 0 Array T ['Letter'] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+te Letter
+Code: 991 Letter SizeOf
+Code: 993 891 911 911
+Code: 1000 0 Array T ['Letter'] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+te Letter
+end
+<__main__.Function object at 0x7f22704306a0>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+Code: 1000 0 Array T ['Letter'] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+te Letter
+True NewElem Array__Letter__Append weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270430668>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': ['T', []], 'IsFunction': True, 'Name': 'Array__Letter__Append', 'Parameters': [<__main__.MySymbol object at 0x7f2270430550>, <__main__.MySymbol object at 0x7f22704305c0>]}
+Byte
+Code: 1233 testy [] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+{'ReturnTest2': <__main__.Function object at 0x7f227042bf28>, 'Array': <__main__.Type object at 0x7f227042bc18>, 'CapTest3': <__main__.Type object at 0x7f2270423358>, 'ReturnTest': <__main__.Function object at 0x7f227042bdd8>, 'ClassScopeTest': <__main__.Type object at 0x7f227042b860>, 'AllocateHeapMemory': <__main__.Function object at 0x7f227042b198>, 'ClassScopeTestTwo': <__main__.Type object at 0x7f227042b8d0>, 'Letter': <__main__.Type object at 0x7f2270423390>, 'OutputByte3': <__main__.Function object at 0x7f22704239b0>, 'OutputByte2': <__main__.Function object at 0x7f227042b7f0>, 'TemplateTest': <__main__.Type object at 0x7f227042be80>, 'IndirectionOutput': <__main__.Function object at 0x7f227042b4a8>, 'NoParamTest': <__main__.Function object at 0x7f227042ba90>, 'RetTestCls': <__main__.Type object at 0x7f227042bda0>, 'DoubleMethodTest': <__main__.Type object at 0x7f227042be48>, 'IndirectionAddTwoOutput': <__main__.Function object at 0x7f227042b710>, 'CapTest': <__main__.Type object at 0x7f2270420c88>, 'Bool': <__main__.Type object at 0x7f2270418860>, 'Byte': <__main__.Type object at 0x7f2270418978>, 'Text': <__main__.Type object at 0x7f2270430198>, 'DeallocateHeapMemory': <__main__.Function object at 0x7f227042b2b0>, 'OutputByteReference': <__main__.Function object at 0x7f2270423780>, 'IndirectionAddOutput': <__main__.Function object at 0x7f227042b588>, 'OutputByte': <__main__.Function object at 0x7f227042b400>, 'Integer': <__main__.Type object at 0x7f2270418898>, 'CapTest2': <__main__.Type object at 0x7f2270423048>, 'Pointer': <__main__.Type object at 0x7f22704204a8>} 
+
+
+
+
+ Byte testy
+Code: 1234 testy []
+testng testy = 70   <class 'str'>
+['testy', '=', '70']
+[]
+wersdf = 70 False
+14 self . State
+testing objet 70
+[]
+['Size', 'MemorySize', 'DP']
+['Me', 'testy', 'NewElem']
+True <__main__.MySymbol object at 0x7f2270430908> testy 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430908> []
+testing objet [29
+testing objet testy
+['[29']
+OutputByte
+testng OutputByte ( testy )  <class 'str'>
+['OutputByte', '(', 'testy', ')']
+[]
+wersdf ( testy False
+0 self . State
+['OutputByte', '(', 'testy', ')']
+4 ['OutputByte', '(', 'testy', ')'] None
+Code: 992 None []
+testing objet testy
+['testy']
+['OutputByte', '(', 'testy', ')']
+ OutputByte
+return values [] [<__main__.MySymbol object at 0x7f227042b438>] <__main__.Function object at 0x7f227042b400> OutputByte
+OutputByte
+testng OutputByte ( testy )  <class 'str'>
+['OutputByte', '(', 'testy', ')']
+[]
+wersdf ( testy False
+0 self . State
+['OutputByte', '(', 'testy', ')']
+4 ['OutputByte', '(', 'testy', ')'] None
+Code: 992 None []
+testing objet testy
+['testy']
+['OutputByte', '(', 'testy', ')']
+ OutputByte
+return values [] [<__main__.MySymbol object at 0x7f227042b438>] <__main__.Function object at 0x7f227042b400> OutputByte
+Me
+testng Me : Size = Me <class 'str'>
+['Me', ':', 'Size', '=', 'Me', ':', 'Size', '+', '1']
+[]
+wersdf : Size False
+0 self . State
+['Me', ':', 'Size', '=', 'Me', ':', 'Size', '+', '1']
+<__main__.MySymbol object at 0x7f2270430550> Me
+ope Size
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer Size
+metest <__main__.MyToken object at 0x7f22704af2e8> <__main__.Type object at 0x7f227042bc18> Array Size {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430550> Byte 8 0 sdaf
+testng [30 = Me : Size <class 'str'>
+['[30', '=', 'Me', ':', 'Size', '+', '1']
+[]
+wersdf = Me False
+0 self . State
+testng Me : Size + 1 <class 'str'>
+['[30', '=', 'Me', ':', 'Size', '+', '1']
+[]
+wersdf : Size False
+0 self . State
+['[30', '=', 'Me', ':', 'Size', '+', '1']
+<__main__.MySymbol object at 0x7f2270430550> Me
+ope Size
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer Size
+metest <__main__.MyToken object at 0x7f22704af438> <__main__.Type object at 0x7f227042bc18> Array Size {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430550> Byte 8 0 sdaf
+testng [31 + 1   <class 'str'>
+['[30', '=', '[31', '+', '1']
+[]
+wersdf + 1 False
+0 self . State
+testing objet 1
+[]
+['Size', 'MemorySize', 'DP']
+['[31', 'testy', '[30', 'NewElem', 'Me', '[29']
+True <__main__.MySymbol object at 0x7f2270430b00> [31 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430b00> []
+testing objet [32
+testing objet [31
+['[32']
+testng [30 = [33   <class 'str'>
+['[30', '=', '[33']
+[]
+wersdf = [33 False
+0 self . State
+testing objet [33
+[]
+['Size', 'MemorySize', 'DP']
+['[31', 'testy', '[30', 'NewElem', 'Me', '[33', '[29', '[32']
+True <__main__.MySymbol object at 0x7f22704305f8> [30 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f22704305f8> []
+testing objet [33
+testing objet [30
+['[33']
+OutputByte
+testng OutputByte ( Me : Size <class 'str'>
+['OutputByte', '(', 'Me', ':', 'Size', '+', '65', ')']
+[]
+wersdf ( Me False
+0 self . State
+testng Me : Size + 65 <class 'str'>
+['OutputByte', '(', 'Me', ':', 'Size', '+', '65', ')']
+[]
+wersdf : Size False
+0 self . State
+['OutputByte', '(', 'Me', ':', 'Size', '+', '65', ')']
+<__main__.MySymbol object at 0x7f2270430550> Me
+ope Size
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer Size
+metest <__main__.MyToken object at 0x7f22704af668> <__main__.Type object at 0x7f227042bc18> Array Size {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430550> Byte 8 0 sdaf
+testng [34 + 65 )  <class 'str'>
+['OutputByte', '(', '[34', '+', '65', ')']
+[]
+wersdf + 65 False
+0 self . State
+testing objet 65
+[]
+['Size', 'MemorySize', 'DP']
+['[31', 'testy', '[30', 'NewElem', '[34', 'Me', '[33', '[29', '[32']
+True <__main__.MySymbol object at 0x7f2270430a20> [34 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430a20> []
+testing objet [35
+testing objet [34
+['[35']
+testng [36 )    <class 'str'>
+['OutputByte', '(', '[36', ')']
+[]
+testng OutputByte ( [36 )  <class 'str'>
+['OutputByte', '(', '[36', ')']
+[]
+wersdf ( [36 False
+0 self . State
+['OutputByte', '(', '[36', ')']
+4 ['OutputByte', '(', '[36', ')'] None
+Code: 992 None []
+testing objet [36
+['[36']
+['OutputByte', '(', '[36', ')']
+ OutputByte
+return values [] [<__main__.MySymbol object at 0x7f227042b438>] <__main__.Function object at 0x7f227042b400> OutputByte
+if
+testng Me : Size > Me <class 'str'>
+['Me', ':', 'Size', '>', 'Me', ':', 'MemorySize']
+[]
+wersdf : Size False
+0 self . State
+['Me', ':', 'Size', '>', 'Me', ':', 'MemorySize']
+<__main__.MySymbol object at 0x7f2270430550> Me
+ope Size
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer Size
+metest <__main__.MyToken object at 0x7f22704af908> <__main__.Type object at 0x7f227042bc18> Array Size {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430550> Byte 8 0 sdaf
+testng [37 > Me : MemorySize <class 'str'>
+['[37', '>', 'Me', ':', 'MemorySize']
+[]
+wersdf > Me False
+0 self . State
+testng Me : MemorySize   <class 'str'>
+['[37', '>', 'Me', ':', 'MemorySize']
+[]
+wersdf : MemorySize False
+0 self . State
+['[37', '>', 'Me', ':', 'MemorySize']
+<__main__.MySymbol object at 0x7f2270430550> Me
+ope Size
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer MemorySize
+metest <__main__.MyToken object at 0x7f22704afa58> <__main__.Type object at 0x7f227042bc18> Array MemorySize {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430550> Byte 8 5 sdaf
+testng [37 > [38   <class 'str'>
+['[37', '>', '[38']
+[]
+wersdf > [38 False
+0 self . State
+testing objet [38
+[]
+['Size', 'MemorySize', 'DP']
+['[31', 'testy', '[30', '[36', 'NewElem', '[34', 'Me', '[33', '[29', '[35', '[32']
+['[37', '[38']
+True <__main__.MySymbol object at 0x7f2270430d30> [37 4 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430d30> []
+testing objet [38
+testing objet [37
+['[38']
+Me
+testng Me : MemorySize = Me <class 'str'>
+['Me', ':', 'MemorySize', '=', 'Me', ':', 'Size']
+[]
+wersdf : MemorySize False
+0 self . State
+['Me', ':', 'MemorySize', '=', 'Me', ':', 'Size']
+<__main__.MySymbol object at 0x7f2270430550> Me
+ope Size
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer MemorySize
+metest <__main__.MyToken object at 0x7f22704afb70> <__main__.Type object at 0x7f227042bc18> Array MemorySize {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430550> Byte 8 5 sdaf
+testng [40 = Me : Size <class 'str'>
+['[40', '=', 'Me', ':', 'Size']
+[]
+wersdf = Me False
+0 self . State
+testng Me : Size   <class 'str'>
+['[40', '=', 'Me', ':', 'Size']
+[]
+wersdf : Size False
+0 self . State
+['[40', '=', 'Me', ':', 'Size']
+<__main__.MySymbol object at 0x7f2270430550> Me
+ope Size
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer Size
+metest <__main__.MyToken object at 0x7f22704afc88> <__main__.Type object at 0x7f227042bc18> Array Size {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430550> Byte 8 0 sdaf
+testng [40 = [41   <class 'str'>
+['[40', '=', '[41']
+[]
+wersdf = [41 False
+0 self . State
+testing objet [41
+[]
+['Size', 'MemorySize', 'DP']
+['[31', 'testy', '[30', '[36', 'NewElem', '[34', 'Me', '[33', '[29', '[35', '[32']
+['[41', '[37', '[39', '[40', '[38']
+True <__main__.MySymbol object at 0x7f2270430d68> [40 4 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430d68> []
+testing objet [41
+testing objet [40
+['[41']
+Me
+testng Me : DP = AllocateHeapMemory <class 'str'>
+['Me', ':', 'DP', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+wersdf : DP False
+0 self . State
+['Me', ':', 'DP', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+<__main__.MySymbol object at 0x7f2270430550> Me
+ope Size
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer DP
+metest <__main__.MyToken object at 0x7f22704afdd8> <__main__.Type object at 0x7f227042bc18> Array DP {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Pointer__On_Create': <__main__.Function object at 0x7f2270423080>, 'Pointer__On_Equals': <__main__.Function object at 0x7f2270423128>, 'Position': <__main__.MySymbol object at 0x7f2270420fd0>} <__main__.Type object at 0x7f22704204a8> <__main__.MySymbol object at 0x7f2270430550> Pointer 8 1 sdaf
+testng [42 = AllocateHeapMemory ( Me <class 'str'>
+['[42', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+testng AllocateHeapMemory ( Me : MemorySize <class 'str'>
+['[42', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+wersdf ( Me False
+0 self . State
+testng Me : MemorySize )  <class 'str'>
+['[42', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+wersdf : MemorySize False
+0 self . State
+['[42', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+<__main__.MySymbol object at 0x7f2270430550> Me
+ope Size
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer MemorySize
+metest <__main__.MyToken object at 0x7f22704aff98> <__main__.Type object at 0x7f227042bc18> Array MemorySize {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430550> Byte 8 5 sdaf
+testng [43 )    <class 'str'>
+['[42', '=', 'AllocateHeapMemory', '(', '[43', ')']
+[]
+testng AllocateHeapMemory ( [43 )  <class 'str'>
+['[42', '=', 'AllocateHeapMemory', '(', '[43', ')']
+[]
+wersdf ( [43 False
+0 self . State
+['[42', '=', 'AllocateHeapMemory', '(', '[43', ')']
+6 ['[42', '=', 'AllocateHeapMemory', '(', '[43', ')'] None
+Code: 992 None []
+testing objet [43
+['[43']
+['[42', '=', '[44', '(', '[43', ')']
+ AllocateHeapMemory
+return values [<__main__.MySymbol object at 0x7f227042b240>] [<__main__.MySymbol object at 0x7f227042b1d0>] <__main__.Function object at 0x7f227042b198> AllocateHeapMemory
+testng [42 = [44   <class 'str'>
+['[42', '=', '[44']
+[]
+wersdf = [44 False
+0 self . State
+testing objet [44
+[]
+['Size', 'MemorySize', 'DP']
+['[31', 'testy', '[30', '[36', 'NewElem', '[34', 'Me', '[33', '[29', '[35', '[32']
+['[41', '[44', '[38', '[37', '[39', '[42', '[40', '[43']
+True <__main__.MySymbol object at 0x7f2270430f28> [42 4 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430f28> []
+testing objet [44
+testing objet [42
+['[44']
+end
+
+
+screw up 
+
+Byte
+Code: 1233 NewSize [] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+{'ReturnTest2': <__main__.Function object at 0x7f227042bf28>, 'Array': <__main__.Type object at 0x7f227042bc18>, 'CapTest3': <__main__.Type object at 0x7f2270423358>, 'ReturnTest': <__main__.Function object at 0x7f227042bdd8>, 'ClassScopeTest': <__main__.Type object at 0x7f227042b860>, 'AllocateHeapMemory': <__main__.Function object at 0x7f227042b198>, 'ClassScopeTestTwo': <__main__.Type object at 0x7f227042b8d0>, 'Letter': <__main__.Type object at 0x7f2270423390>, 'OutputByte3': <__main__.Function object at 0x7f22704239b0>, 'OutputByte2': <__main__.Function object at 0x7f227042b7f0>, 'TemplateTest': <__main__.Type object at 0x7f227042be80>, 'IndirectionOutput': <__main__.Function object at 0x7f227042b4a8>, 'NoParamTest': <__main__.Function object at 0x7f227042ba90>, 'RetTestCls': <__main__.Type object at 0x7f227042bda0>, 'DoubleMethodTest': <__main__.Type object at 0x7f227042be48>, 'IndirectionAddTwoOutput': <__main__.Function object at 0x7f227042b710>, 'CapTest': <__main__.Type object at 0x7f2270420c88>, 'Bool': <__main__.Type object at 0x7f2270418860>, 'Byte': <__main__.Type object at 0x7f2270418978>, 'Text': <__main__.Type object at 0x7f2270430198>, 'DeallocateHeapMemory': <__main__.Function object at 0x7f227042b2b0>, 'OutputByteReference': <__main__.Function object at 0x7f2270423780>, 'IndirectionAddOutput': <__main__.Function object at 0x7f227042b588>, 'OutputByte': <__main__.Function object at 0x7f227042b400>, 'Integer': <__main__.Type object at 0x7f2270418898>, 'CapTest2': <__main__.Type object at 0x7f2270423048>, 'Pointer': <__main__.Type object at 0x7f22704204a8>} 
+
+
+
+
+ Byte NewSize
+Code: 1234 NewSize []
+testng NewSize = Me : Size <class 'str'>
+['NewSize', '=', 'Me', ':', 'Size', '-', '1']
+[]
+wersdf = Me False
+14 self . State
+testng Me : Size - 1 <class 'str'>
+['NewSize', '=', 'Me', ':', 'Size', '-', '1']
+[]
+wersdf : Size False
+14 self . State
+['NewSize', '=', 'Me', ':', 'Size', '-', '1']
+<__main__.MySymbol object at 0x7f2270430550> Me
+ope Size
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer Size
+metest <__main__.MyToken object at 0x7f22704b12e8> <__main__.Type object at 0x7f227042bc18> Array Size {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430550> Byte 8 0 sdaf
+testng [45 - 1   <class 'str'>
+['NewSize', '=', '[45', '-', '1']
+[]
+wersdf - 1 False
+14 self . State
+testing objet 1
+[]
+['Size', 'MemorySize', 'DP']
+['[31', '[30', '[45', 'Me', '[33', 'testy', '[36', 'NewElem', '[34', '[29', '[35', '[32', 'NewSize']
+True <__main__.MySymbol object at 0x7f2270430ba8> [45 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430ba8> []
+testing objet [46
+testing objet [45
+['[46']
+testng NewSize = [47   <class 'str'>
+['NewSize', '=', '[47']
+[]
+wersdf = [47 False
+14 self . State
+testing objet [47
+[]
+['Size', 'MemorySize', 'DP']
+['[31', '[30', '[45', '[46', 'Me', '[33', 'testy', '[36', 'NewElem', '[34', '[47', '[29', '[35', '[32', 'NewSize']
+True <__main__.MySymbol object at 0x7f2270430940> NewSize 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430940> []
+testing objet [47
+testing objet NewSize
+['[47']
+Byte
+Code: 1233 PrintSize [] [[<__main__.MySymbol object at 0x7f2270430278>], ['Letter']]
+{'ReturnTest2': <__main__.Function object at 0x7f227042bf28>, 'Array': <__main__.Type object at 0x7f227042bc18>, 'CapTest3': <__main__.Type object at 0x7f2270423358>, 'ReturnTest': <__main__.Function object at 0x7f227042bdd8>, 'ClassScopeTest': <__main__.Type object at 0x7f227042b860>, 'AllocateHeapMemory': <__main__.Function object at 0x7f227042b198>, 'ClassScopeTestTwo': <__main__.Type object at 0x7f227042b8d0>, 'Letter': <__main__.Type object at 0x7f2270423390>, 'OutputByte3': <__main__.Function object at 0x7f22704239b0>, 'OutputByte2': <__main__.Function object at 0x7f227042b7f0>, 'TemplateTest': <__main__.Type object at 0x7f227042be80>, 'IndirectionOutput': <__main__.Function object at 0x7f227042b4a8>, 'NoParamTest': <__main__.Function object at 0x7f227042ba90>, 'RetTestCls': <__main__.Type object at 0x7f227042bda0>, 'DoubleMethodTest': <__main__.Type object at 0x7f227042be48>, 'IndirectionAddTwoOutput': <__main__.Function object at 0x7f227042b710>, 'CapTest': <__main__.Type object at 0x7f2270420c88>, 'Bool': <__main__.Type object at 0x7f2270418860>, 'Byte': <__main__.Type object at 0x7f2270418978>, 'Text': <__main__.Type object at 0x7f2270430198>, 'DeallocateHeapMemory': <__main__.Function object at 0x7f227042b2b0>, 'OutputByteReference': <__main__.Function object at 0x7f2270423780>, 'IndirectionAddOutput': <__main__.Function object at 0x7f227042b588>, 'OutputByte': <__main__.Function object at 0x7f227042b400>, 'Integer': <__main__.Type object at 0x7f2270418898>, 'CapTest2': <__main__.Type object at 0x7f2270423048>, 'Pointer': <__main__.Type object at 0x7f22704204a8>} 
+
+
+
+
+ Byte PrintSize
+Code: 1234 PrintSize []
+testng PrintSize = NewSize + 65 <class 'str'>
+['PrintSize', '=', 'NewSize', '+', '65']
+[]
+wersdf = NewSize False
+14 self . State
+testng NewSize + 65   <class 'str'>
+['PrintSize', '=', 'NewSize', '+', '65']
+[]
+wersdf + 65 False
+14 self . State
+testing objet 65
+[]
+['Size', 'MemorySize', 'DP']
+['[31', '[30', '[45', 'PrintSize', '[46', 'Me', '[33', 'testy', '[36', 'NewElem', '[34', '[47', '[29', '[35', '[32', 'NewSize']
+True <__main__.MySymbol object at 0x7f2270430940> NewSize 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430940> []
+testing objet [48
+testing objet NewSize
+['[48']
+testng PrintSize = [49   <class 'str'>
+['PrintSize', '=', '[49']
+[]
+wersdf = [49 False
+14 self . State
+testing objet [49
+[]
+['Size', 'MemorySize', 'DP']
+['[31', '[49', '[30', '[45', 'PrintSize', '[46', '[48', 'Me', '[33', 'testy', '[36', 'NewElem', '[34', '[47', '[29', '[35', '[32', 'NewSize']
+True <__main__.MySymbol object at 0x7f2270430d68> PrintSize 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430d68> []
+testing objet [49
+testing objet PrintSize
+['[49']
+Me
+testng Me : SetAt ( NewSize <class 'str'>
+['Me', ':', 'SetAt', '(', 'NewSize', ',', 'NewElem', ')']
+[]
+testng SetAt ( NewSize , NewElem <class 'str'>
+['Me', ':', 'SetAt', '(', 'NewSize', ',', 'NewElem', ')']
+[]
+wersdf ( NewSize False
+0 self . State
+testng NewSize , NewElem )  <class 'str'>
+['Me', ':', 'SetAt', '(', 'NewSize', ',', 'NewElem', ')']
+[]
+wersdf , NewElem False
+0 self . State
+testng NewElem )    <class 'str'>
+['Me', ':', 'SetAt', '(', 'NewElem', ')']
+['NewSize']
+testng SetAt ( NewElem )  <class 'str'>
+['Me', ':', 'SetAt', '(', 'NewElem', ')']
+['NewSize']
+wersdf ( NewElem False
+0 self . State
+['Me', ':', 'SetAt', '(', 'NewElem', ')']
+booya
+4 ['SetAt', '(', 'NewElem', ')'] <__main__.MySymbol object at 0x7f2270430550>
+ugg Array Array__Letter__SetAt Me ['Letter']
+{'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>} {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>} <__main__.Type object at 0x7f227042bc18> Array {'ReturnTest2': <__main__.Function object at 0x7f227042bf28>, 'Array': <__main__.Type object at 0x7f227042bc18>, 'CapTest3': <__main__.Type object at 0x7f2270423358>, 'ReturnTest': <__main__.Function object at 0x7f227042bdd8>, 'ClassScopeTest': <__main__.Type object at 0x7f227042b860>, 'AllocateHeapMemory': <__main__.Function object at 0x7f227042b198>, 'ClassScopeTestTwo': <__main__.Type object at 0x7f227042b8d0>, 'Letter': <__main__.Type object at 0x7f2270423390>, 'OutputByte3': <__main__.Function object at 0x7f22704239b0>, 'OutputByte2': <__main__.Function object at 0x7f227042b7f0>, 'TemplateTest': <__main__.Type object at 0x7f227042be80>, 'IndirectionOutput': <__main__.Function object at 0x7f227042b4a8>, 'NoParamTest': <__main__.Function object at 0x7f227042ba90>, 'RetTestCls': <__main__.Type object at 0x7f227042bda0>, 'DoubleMethodTest': <__main__.Type object at 0x7f227042be48>, 'IndirectionAddTwoOutput': <__main__.Function object at 0x7f227042b710>, 'CapTest': <__main__.Type object at 0x7f2270420c88>, 'Bool': <__main__.Type object at 0x7f2270418860>, 'Byte': <__main__.Type object at 0x7f2270418978>, 'Text': <__main__.Type object at 0x7f2270430198>, 'DeallocateHeapMemory': <__main__.Function object at 0x7f227042b2b0>, 'OutputByteReference': <__main__.Function object at 0x7f2270423780>, 'IndirectionAddOutput': <__main__.Function object at 0x7f227042b588>, 'OutputByte': <__main__.Function object at 0x7f227042b400>, 'Integer': <__main__.Type object at 0x7f2270418898>, 'CapTest2': <__main__.Type object at 0x7f2270423048>, 'Pointer': <__main__.Type object at 0x7f22704204a8>}
+Code: 992 <__main__.MySymbol object at 0x7f2270430550> ['Letter']
+testing objet NewElem
+testing objet NewSize
+testing objet Me
+['NewSize', 'NewElem']
+['SetAt', '(', 'NewElem', ')']
+Array Array__Letter__SetAt
+{'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>} {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>} <__main__.Type object at 0x7f227042bc18> Array {'ReturnTest2': <__main__.Function object at 0x7f227042bf28>, 'Array': <__main__.Type object at 0x7f227042bc18>, 'CapTest3': <__main__.Type object at 0x7f2270423358>, 'ReturnTest': <__main__.Function object at 0x7f227042bdd8>, 'ClassScopeTest': <__main__.Type object at 0x7f227042b860>, 'AllocateHeapMemory': <__main__.Function object at 0x7f227042b198>, 'ClassScopeTestTwo': <__main__.Type object at 0x7f227042b8d0>, 'Letter': <__main__.Type object at 0x7f2270423390>, 'OutputByte3': <__main__.Function object at 0x7f22704239b0>, 'OutputByte2': <__main__.Function object at 0x7f227042b7f0>, 'TemplateTest': <__main__.Type object at 0x7f227042be80>, 'IndirectionOutput': <__main__.Function object at 0x7f227042b4a8>, 'NoParamTest': <__main__.Function object at 0x7f227042ba90>, 'RetTestCls': <__main__.Type object at 0x7f227042bda0>, 'DoubleMethodTest': <__main__.Type object at 0x7f227042be48>, 'IndirectionAddTwoOutput': <__main__.Function object at 0x7f227042b710>, 'CapTest': <__main__.Type object at 0x7f2270420c88>, 'Bool': <__main__.Type object at 0x7f2270418860>, 'Byte': <__main__.Type object at 0x7f2270418978>, 'Text': <__main__.Type object at 0x7f2270430198>, 'DeallocateHeapMemory': <__main__.Function object at 0x7f227042b2b0>, 'OutputByteReference': <__main__.Function object at 0x7f2270423780>, 'IndirectionAddOutput': <__main__.Function object at 0x7f227042b588>, 'OutputByte': <__main__.Function object at 0x7f227042b400>, 'Integer': <__main__.Type object at 0x7f2270418898>, 'CapTest2': <__main__.Type object at 0x7f2270423048>, 'Pointer': <__main__.Type object at 0x7f22704204a8>}
+return values [] [<__main__.MySymbol object at 0x7f22704307b8>, <__main__.MySymbol object at 0x7f2270430978>, <__main__.MySymbol object at 0x7f2270430588>] <__main__.Function object at 0x7f22704307f0> Array__Letter__SetAt
+end
+<__main__.Function object at 0x7f2270430668>
+
+
+screw up 
+
+
+
+screw up 
+
+action
+True Size Array__Letter__Resize weoisfeife
+<class '__main__.Function'>
+<__main__.Function object at 0x7f2270430940>
+{'TypeOfCode': 1, 'ReturnValues': [], 'Templates': ['T', []], 'IsFunction': True, 'Name': 'Array__Letter__Resize', 'Parameters': [<__main__.MySymbol object at 0x7f2270430c50>, <__main__.MySymbol object at 0x7f2270430c88>]}
+Me
+testng Me : Size = Size <class 'str'>
+['Me', ':', 'Size', '=', 'Size']
+[]
+wersdf : Size False
+0 self . State
+['Me', ':', 'Size', '=', 'Size']
+<__main__.MySymbol object at 0x7f2270430c50> Me
+ope Size
+ope Array__Letter__Resize
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer Size
+metest <__main__.MyToken object at 0x7f22704b1cf8> <__main__.Type object at 0x7f227042bc18> Array Size {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Resize': <__main__.Function object at 0x7f2270430940>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430c50> Byte 8 0 sdaf
+testng [50 = Size   <class 'str'>
+['[50', '=', 'Size']
+[]
+wersdf = Size False
+0 self . State
+testing objet Size
+[]
+['Size', 'MemorySize', 'DP']
+['Me', 'Size', '[50']
+True <__main__.MySymbol object at 0x7f2270430d30> [50 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430d30> []
+testing objet Size
+testing objet [50
+['Size']
+Me
+testng Me : MemorySize = Size <class 'str'>
+['Me', ':', 'MemorySize', '=', 'Size']
+[]
+wersdf : MemorySize False
+0 self . State
+['Me', ':', 'MemorySize', '=', 'Size']
+<__main__.MySymbol object at 0x7f2270430c50> Me
+ope Size
+ope Array__Letter__Resize
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer MemorySize
+metest <__main__.MyToken object at 0x7f22704b1ef0> <__main__.Type object at 0x7f227042bc18> Array MemorySize {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Resize': <__main__.Function object at 0x7f2270430940>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430c50> Byte 8 5 sdaf
+testng [51 = Size   <class 'str'>
+['[51', '=', 'Size']
+[]
+wersdf = Size False
+0 self . State
+testing objet Size
+[]
+['Size', 'MemorySize', 'DP']
+['Me', 'Size', '[51', '[50']
+True <__main__.MySymbol object at 0x7f2270430cc0> [51 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430cc0> []
+testing objet Size
+testing objet [51
+['Size']
+Me
+testng Me : DP = AllocateHeapMemory <class 'str'>
+['Me', ':', 'DP', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+wersdf : DP False
+0 self . State
+['Me', ':', 'DP', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+<__main__.MySymbol object at 0x7f2270430c50> Me
+ope Size
+ope Array__Letter__Resize
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer DP
+metest <__main__.MyToken object at 0x7f22704b30f0> <__main__.Type object at 0x7f227042bc18> Array DP {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Resize': <__main__.Function object at 0x7f2270430940>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Pointer__On_Create': <__main__.Function object at 0x7f2270423080>, 'Pointer__On_Equals': <__main__.Function object at 0x7f2270423128>, 'Position': <__main__.MySymbol object at 0x7f2270420fd0>} <__main__.Type object at 0x7f22704204a8> <__main__.MySymbol object at 0x7f2270430c50> Pointer 8 1 sdaf
+testng [52 = AllocateHeapMemory ( Me <class 'str'>
+['[52', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+testng AllocateHeapMemory ( Me : MemorySize <class 'str'>
+['[52', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+wersdf ( Me False
+0 self . State
+testng Me : MemorySize )  <class 'str'>
+['[52', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+[]
+wersdf : MemorySize False
+0 self . State
+['[52', '=', 'AllocateHeapMemory', '(', 'Me', ':', 'MemorySize', ')']
+<__main__.MySymbol object at 0x7f2270430c50> Me
+ope Size
+ope Array__Letter__Resize
+ope Array__Letter__Append
+ope Array__Letter__On_Create
+ope MemorySize
+ope Array__Letter__SetAt
+ope DP
+ope Array__Letter__GetAt
+wer MemorySize
+metest <__main__.MyToken object at 0x7f22704b32b0> <__main__.Type object at 0x7f227042bc18> Array MemorySize {'Size': <__main__.MySymbol object at 0x7f22704303c8>, 'Array__Letter__Resize': <__main__.Function object at 0x7f2270430940>, 'Array__Letter__Append': <__main__.Function object at 0x7f2270430668>, 'Array__Letter__On_Create': <__main__.Function object at 0x7f22704304a8>, 'MemorySize': <__main__.MySymbol object at 0x7f2270430438>, 'Array__Letter__SetAt': <__main__.Function object at 0x7f22704307f0>, 'DP': <__main__.MySymbol object at 0x7f2270430400>, 'Array__Letter__GetAt': <__main__.Function object at 0x7f22704306a0>}
+{'Byte__On_If_Equal': <__main__.Function object at 0x7f2270420940>, 'Byte__On_Greater_Equal': <__main__.Function object at 0x7f22704209e8>, 'Byte__On_Plus': <__main__.Function object at 0x7f2270420668>, 'Byte__On_Create': <__main__.Function object at 0x7f22704204e0>, 'Byte__On_Minus': <__main__.Function object at 0x7f2270420780>, 'Byte__On_Greater_Than': <__main__.Function object at 0x7f2270420898>, 'Byte__On_Less_Or_Equal': <__main__.Function object at 0x7f2270420d30>, 'Byte__On_Less_Than': <__main__.Function object at 0x7f2270420be0>, 'Byte__On_Not_Equal': <__main__.Function object at 0x7f2270420e80>, 'Byte__On_Equals': <__main__.Function object at 0x7f2270420588>} <__main__.Type object at 0x7f2270418978> <__main__.MySymbol object at 0x7f2270430c50> Byte 8 5 sdaf
+testng [53 )    <class 'str'>
+['[52', '=', 'AllocateHeapMemory', '(', '[53', ')']
+[]
+testng AllocateHeapMemory ( [53 )  <class 'str'>
+['[52', '=', 'AllocateHeapMemory', '(', '[53', ')']
+[]
+wersdf ( [53 False
+0 self . State
+['[52', '=', 'AllocateHeapMemory', '(', '[53', ')']
+6 ['[52', '=', 'AllocateHeapMemory', '(', '[53', ')'] None
+Code: 992 None []
+testing objet [53
+['[53']
+['[52', '=', '[54', '(', '[53', ')']
+ AllocateHeapMemory
+return values [<__main__.MySymbol object at 0x7f227042b240>] [<__main__.MySymbol object at 0x7f227042b1d0>] <__main__.Function object at 0x7f227042b198> AllocateHeapMemory
+testng [52 = [54   <class 'str'>
+['[52', '=', '[54']
+[]
+wersdf = [54 False
+0 self . State
+testing objet [54
+[]
+['Size', 'MemorySize', 'DP']
+['Size', '[53', '[51', '[54', '[50', 'Me', '[52']
+True <__main__.MySymbol object at 0x7f2270430828> [52 3 asdfwe
+Code: 992 <__main__.MySymbol object at 0x7f2270430828> []
+testing objet [54
+testing objet [52
+['[54']
+end
+<__main__.Function object at 0x7f2270430940>
+
+
+screw up 
+
+end
+going out
+ENDPARSE TEMPLATED CLASS:  Array with ['Letter']
+were Array < Letter [<__main__.MySymbol object at 0x7f2270430358>]
+were2 [T0 Data 
+ 
+ action
+Code: 1233 Data [] [[<__main__.MySymbol object at 0x7f2270430278>]]
+
+
+screw up 
+
+
+
+screw up 
+
+action
