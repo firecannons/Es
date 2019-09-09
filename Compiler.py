@@ -1173,7 +1173,11 @@ class Parser ( ) :
                 LatestTemplate [ Index ] = MySymbol ( T , self . TypeTable [ T ] )
                 LatestTemplate [ Index ] . Templates = None
             Index = Index + 1
-            SavedWordArray , WordIndex = self . AddVariableToTemplateLine ( SavedWordArray , WordIndex , LatestTemplate , ClassName )
+        print('PARSING TEMPLATED CLASS: ', ClassName, 'with', Templates)
+        self . SavedTemplates . append ( LatestTemplate )
+        self . CompileTemplatedClass ( self . TypeTable [ ClassName ] )
+        print('ENDPARSE TEMPLATED CLASS: ', ClassName, 'with', Templates)
+        SavedWordArray , WordIndex = self . AddVariableToTemplateLine ( SavedWordArray , WordIndex , LatestTemplate , ClassName )
         return SavedWordArray , WordIndex
                 
     
