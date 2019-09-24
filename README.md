@@ -12,7 +12,7 @@ To see a video presentation about Quorum and evidence based programming by Dr. S
 ## Running "Es"
 - You must be running a Linux distrobution like Ubuntu.  The compiler will only output FASM assembly for the Linux version of FASM.
 - Install Python3 `sudo apt install python3`
-- Install the Flat Assembler with apt or `sudo apt install fasm`<br>alternatively install FASM from it's [download page](https://www.youtube.com/watch?v=VLBSvWZ5VuQ)
+- Install the Flat Assembler with apt or `sudo apt install fasm`<br>alternatively install FASM from it's [download page](https://flatassembler.net/download.php)
 - Clone the [repository](https://gitlab.com/firecannons/compiler.git)
 - Checkout commit 85bd5457f136e0f769c13c216c1fa1ea7b63306d since it is a relatively recent commit that is working.
 - Run the compiler
