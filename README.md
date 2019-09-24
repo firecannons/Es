@@ -34,4 +34,4 @@ fasm Output.asm Output
 # Now there is an executable named "Output"
 ./Output
 ```
-The will be a segmentation fault but that is simply because the programs don't explitly exit at their end.  They work correctly while running.
+There will be a segmentation fault but that is simply because the programs don't explitly exit at their end.  They work correctly while running.
