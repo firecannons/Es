@@ -3,9 +3,11 @@
 #define COMPILER_H
 
 #include "GlobalFunctions.h"
+#include "Lexer.h"
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 class Compiler

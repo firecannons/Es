@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <vector>
 using namespace std;
 
 const char FAIL_COLOR_TEXT[] = "\033[91m";
@@ -18,6 +19,16 @@ void PrintError(const char ErrorMessage[])
     if(END_ON_ERROR == true)
     {
         exit (EXIT_FAILURE);
+    }
+}
+
+void OutputTokens(const vector<string> & Tokens)
+{
+    unsigned int Index = 0;
+    while(Index < Tokens.size())
+    {
+        cout << Tokens[Index] << endl;
+        Index = Index + 1;
     }
 }
 

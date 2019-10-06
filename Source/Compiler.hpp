@@ -23,7 +23,10 @@ string Compiler::ReadInputFile(const string & SourceProgram)
 
 string Compiler::CompileToOutputText(const string & InputCode)
 {
-    return InputCode;
+    Lexer FirstLex;
+    vector<string> Tokens = FirstLex.Lex(InputCode);
+    OutputTokens(Tokens);
+    return Tokens[0];
 }
 
 
