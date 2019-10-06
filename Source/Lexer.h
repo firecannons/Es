@@ -14,7 +14,8 @@ const unsigned int CHARACTER_LENGTH = 1;
 enum TEXT_TYPE
 {
     ALNUM,
-    SYMBOL
+    SYMBOL,
+    WHITE_SPACE
 };
 
 class Lexer
@@ -22,19 +23,18 @@ class Lexer
     
 public:
     unsigned int Position;
-    unsigned int PrevPosition;
+    string SavedWord;
     vector<string> Tokens;
-    const unordered_set<char> FirstChars = {'<','>','/'};
-    unordered_set<string> MultiCharOps;
+    unordered_set<string> CompleteOps;
+    TEXT_TYPE LexMode;
     
     void Initialize();
     void InitializeMultiCharOps();
     vector<string> Lex(const string & InputCode);
-    void AppendPrevWord(const string & InputCode);
-    void AppendCurrentLetter(const string & InputCode);
-    bool IsPossibleFirstChar(const char & OpChar) const;
-    bool DoMultiCharGroupings(const string & InputCode);
-    bool DoMultiCharGrouping(const string & Op, const string & InputCode);
+    bool IsSavedWordCompleteOp();
+    void AppendToSavedWord(const char NewChar);
+    void AppendSavedWordToTokens();
+    TEXT_TYPE GetTextTypeOfChar(const char InChar);
 };
 
 #include "Lexer.hpp"

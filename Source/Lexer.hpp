@@ -3,110 +3,89 @@
 void Lexer::Initialize()
 {
     Position = STRING_START_POS;
-    PrevPosition = STRING_START_POS;
+    SavedWord = string("");
     Tokens.clear();
+    LexMode = TEXT_TYPE::ALNUM;
     
     InitializeMultiCharOps();
 }
 
 void Lexer::InitializeMultiCharOps()
 {
-    MultiCharOps.emplace(string("<="));
-    MultiCharOps.emplace(string(">="));
-    MultiCharOps.emplace(string("//"));
+    CompleteOps.emplace(string("<="));
+    CompleteOps.emplace(string(">="));
+    CompleteOps.emplace(string("//"));
+    CompleteOps.emplace(string("("));
+    CompleteOps.emplace(string(")"));
+    CompleteOps.emplace(string("<"));
+    CompleteOps.emplace(string(">"));
+    CompleteOps.emplace(string(":"));
+    CompleteOps.emplace(string("="));
+    CompleteOps.emplace(string("//"));
 }
 
 vector<string> Lexer::Lex(const string & InputCode)
 {
     Initialize();
     
-    Position = Position + 1;
     while(Position <= InputCode.size())
     {
-        
-        if(isalpha(InputCode.c_str()[Position - 1]) == false)
+        TEXT_TYPE CharType = GetTextTypeOfChar(InputCode[Position]);
+        if(CharType != LexMode)
         {
-            AppendPrevWord(InputCode);
-            if(isblank(InputCode.c_str()[Position - 1]) == false)
-            {
-                /*if(DoMultiCharGroupings(InputCode) == true)
-                {
-                }
-                else*/
-                {
-                    AppendCurrentLetter(InputCode);
-                }
-            }
-            else
-            {
-                PrevPosition = PrevPosition + 1;
-            }
+            AppendSavedWordToTokens();
+        }
+        LexMode = CharType;
+        if(IsSavedWordCompleteOp() == true)
+        {
+            AppendSavedWordToTokens();
+        }
+        if(CharType != TEXT_TYPE::WHITE_SPACE)
+        {
+            AppendToSavedWord(InputCode[Position]);
         }
         Position = Position + 1;
     }
     return Tokens;
 }
 
-void Lexer::AppendPrevWord(const string & InputCode)
+bool Lexer::IsSavedWordCompleteOp()
 {
-    if(Position - PrevPosition > 1)
+    bool Found = true;
+    unordered_set<string>::const_iterator End = CompleteOps.find(SavedWord);
+    if (End == CompleteOps.end())
     {
-        Tokens.push_back(InputCode.substr(PrevPosition, Position - PrevPosition));
+        Found = false;
     }
-    PrevPosition = Position;
+    return Found;
 }
 
-void Lexer::AppendCurrentLetter(const string & InputCode)
+void Lexer::AppendToSavedWord(const char NewChar)
 {
-    Tokens.push_back(InputCode.substr(PrevPosition, CHARACTER_LENGTH));
+    SavedWord.push_back(NewChar);
 }
 
-bool Lexer::IsPossibleFirstChar(const char & OpChar) const
+void Lexer::AppendSavedWordToTokens()
 {
-    bool Output = false;
-    unordered_set<char>::const_iterator Pos = FirstChars.find(OpChar);
-    if(Pos != FirstChars.end())
+    if(SavedWord.size() > 0)
     {
-        Output = true;
+        Tokens.push_back(SavedWord);
+        SavedWord.clear();
     }
-    return Output;
 }
 
-bool Lexer::DoMultiCharGroupings(const string & InputCode)
+TEXT_TYPE Lexer::GetTextTypeOfChar(const char InChar)
 {
-    bool IsValid = false;
-    for (std::unordered_set<string>::iterator itr = MultiCharOps.begin(); itr != MultiCharOps.end(); ++itr)
+    TEXT_TYPE CharType = TEXT_TYPE::ALNUM;
+    // Do not use "true".  "true" == 1, but these old c functions return 0, or
+    //   some nonzero number.
+    if(isblank(InChar) != false || iscntrl(InChar) != false)
     {
-        string MultiCharOp = *itr;
-        if(DoMultiCharGrouping(MultiCharOp, InputCode) == true)
-        {
-            IsValid = true;
-        }
+        CharType = TEXT_TYPE::WHITE_SPACE;
     }
-    return IsValid;
-}
-
-bool Lexer::DoMultiCharGrouping(const string & Op, const string & InputCode)
-{
-    bool IsValidGrouping = true;
-    if(Op.size() + Position > InputCode.size())
+    else if(isalnum(InChar) == false)
     {
-        IsValidGrouping = false;
+        CharType = TEXT_TYPE::SYMBOL;
     }
-    else
-    {
-        unsigned int Index = 0;
-        while(Index < Op.size())
-        {
-            if(InputCode[Index + Position - 1] != Op[Index])
-            {
-                IsValidGrouping = false;
-            }
-            Index = Index + 1;
-        }
-        Tokens.push_back(InputCode.substr(Position - 1, Op.size()));
-        Position = Position + Op.size();
-        PrevPosition = Position;
-    }
-    return IsValidGrouping;
+    return CharType;
 }
