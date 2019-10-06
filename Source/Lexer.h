@@ -18,6 +18,15 @@ enum TEXT_TYPE
     WHITE_SPACE
 };
 
+enum LEXER_MODE
+{
+    NORMAL,
+    SINGLE_LINE_COMMENT,
+    MULTI_LINE_COMMENT,
+    ASM_BLOCK,
+    STRING_CONSTANT
+};
+
 class Lexer
 {
     
@@ -26,11 +35,15 @@ public:
     string SavedWord;
     vector<string> Tokens;
     unordered_set<string> CompleteOps;
-    TEXT_TYPE LexMode;
+    TEXT_TYPE SavedWordType;
+    LEXER_MODE Mode;
     
     void Initialize();
     void InitializeMultiCharOps();
     vector<string> Lex(const string & InputCode);
+    bool IsEndOfString(const string & Haystack, const string & Needle);
+    void DoSingleLineCommentMode(const char InChar);
+    void DoNormalLexMode(const char InChar);
     bool IsSavedWordCompleteOp();
     void AppendToSavedWord(const char NewChar);
     void AppendSavedWordToTokens();

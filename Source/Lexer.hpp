@@ -5,7 +5,8 @@ void Lexer::Initialize()
     Position = STRING_START_POS;
     SavedWord = string("");
     Tokens.clear();
-    LexMode = TEXT_TYPE::ALNUM;
+    SavedWordType = TEXT_TYPE::ALNUM;
+    Mode = LEXER_MODE::NORMAL;
     
     InitializeMultiCharOps();
 }
@@ -21,7 +22,6 @@ void Lexer::InitializeMultiCharOps()
     CompleteOps.emplace(string(">"));
     CompleteOps.emplace(string(":"));
     CompleteOps.emplace(string("="));
-    CompleteOps.emplace(string("//"));
 }
 
 vector<string> Lexer::Lex(const string & InputCode)
@@ -30,23 +30,62 @@ vector<string> Lexer::Lex(const string & InputCode)
     
     while(Position <= InputCode.size())
     {
-        TEXT_TYPE CharType = GetTextTypeOfChar(InputCode[Position]);
-        if(CharType != LexMode)
+        if(Mode == LEXER_MODE::NORMAL)
         {
-            AppendSavedWordToTokens();
+            DoNormalLexMode(InputCode[Position]);
         }
-        LexMode = CharType;
-        if(IsSavedWordCompleteOp() == true)
+        else if(Mode == LEXER_MODE::SINGLE_LINE_COMMENT)
         {
-            AppendSavedWordToTokens();
-        }
-        if(CharType != TEXT_TYPE::WHITE_SPACE)
-        {
-            AppendToSavedWord(InputCode[Position]);
+            DoSingleLineCommentMode(InputCode[Position]);
         }
         Position = Position + 1;
     }
     return Tokens;
+}
+
+bool Lexer::IsEndOfString(const string & Haystack, const string & Needle)
+{
+    bool Output = false;
+    if(Haystack.size() > 0 && Haystack.size() > Needle.size())
+    {
+        if(Haystack.substr(Haystack.size() - Needle.size(), Needle.size()) == Needle)
+        {
+            Output = true;
+        }
+    }
+    return Output;
+}
+
+void Lexer::DoSingleLineCommentMode(const char InChar)
+{
+    AppendToSavedWord(InChar);
+    if(IsEndOfString(SavedWord, "\n") == true)
+    {
+        Mode = LEXER_MODE::NORMAL;
+        SavedWord.clear();
+    }
+}
+
+void Lexer::DoNormalLexMode(const char InChar)
+{
+    TEXT_TYPE CharType = GetTextTypeOfChar(InChar);
+    if(CharType != SavedWordType)
+    {
+        AppendSavedWordToTokens();
+    }
+    SavedWordType = CharType;
+    if(IsSavedWordCompleteOp() == true)
+    {
+        AppendSavedWordToTokens();
+    }
+    if(CharType != TEXT_TYPE::WHITE_SPACE)
+    {
+        AppendToSavedWord(InChar);
+    }
+    if(SavedWord == "//")
+    {
+        Mode = LEXER_MODE::SINGLE_LINE_COMMENT;
+    }
 }
 
 bool Lexer::IsSavedWordCompleteOp()

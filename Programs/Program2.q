@@ -996,5 +996,5 @@ action Main
         OutputByte ( NewByte )
         S6 = S6 + 1
     end
-    
+    // Test Comment
 end
