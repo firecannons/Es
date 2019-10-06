@@ -30,7 +30,7 @@ vector<string> Lexer::Lex(const string & InputCode)
     
     while(Position <= InputCode.size())
     {
-        if(Mode == LEXER_MODE::NORMAL)
+        if(Mode == LEXER_MODE::NORMAL || Mode == LEXER_MODE::NORMAL_WAITING_FOR_ASM_BLOCK)
         {
             DoNormalLexMode(InputCode[Position]);
         }
@@ -42,9 +42,23 @@ vector<string> Lexer::Lex(const string & InputCode)
         {
             DoMultiLineCommentMode(InputCode[Position]);
         }
+        else if(Mode == LEXER_MODE::ASM_BLOCK)
+        {
+            DoAsmBlockMode(InputCode[Position]);
+        }
         Position = Position + 1;
     }
     return Tokens;
+}
+
+void Lexer::DoAsmBlockMode(const char InChar)
+{
+    AppendToSavedWord(InChar);
+    if(IsEndOfString(SavedWord, "end") == true)
+    {
+        Mode = LEXER_MODE::NORMAL;
+        AppendSavedWordToTokens();
+    }
 }
 
 bool Lexer::IsEndOfString(const string & Haystack, const string & Needle)
@@ -92,7 +106,7 @@ void Lexer::DoNormalLexMode(const char InChar)
     {
         AppendSavedWordToTokens();
     }
-    if(CharType != TEXT_TYPE::WHITE_SPACE)
+    if(CharType != TEXT_TYPE::WHITE_SPACE || InChar == '\n')
     {
         AppendToSavedWord(InChar);
     }
@@ -103,6 +117,14 @@ void Lexer::DoNormalLexMode(const char InChar)
     if(SavedWord == "/*")
     {
         Mode = LEXER_MODE::MULTI_LINE_COMMENT;
+    }
+    if(SavedWord == "asm")
+    {
+        Mode = LEXER_MODE::NORMAL_WAITING_FOR_ASM_BLOCK;
+    }
+    if(SavedWord == "\n" && Mode == LEXER_MODE::NORMAL_WAITING_FOR_ASM_BLOCK)
+    {
+        Mode = LEXER_MODE::ASM_BLOCK;
     }
 }
 

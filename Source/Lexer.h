@@ -21,6 +21,7 @@ enum TEXT_TYPE
 enum LEXER_MODE
 {
     NORMAL,
+    NORMAL_WAITING_FOR_ASM_BLOCK,
     SINGLE_LINE_COMMENT,
     MULTI_LINE_COMMENT,
     ASM_BLOCK,
@@ -38,9 +39,11 @@ public:
     TEXT_TYPE SavedWordType;
     LEXER_MODE Mode;
     
+    
     void Initialize();
     void InitializeMultiCharOps();
     vector<string> Lex(const string & InputCode);
+    void DoAsmBlockMode(const char InChar);
     bool IsEndOfString(const string & Haystack, const string & Needle);
     void DoSingleLineCommentMode(const char InChar);
     void DoMultiLineCommentMode(const char InChar);
