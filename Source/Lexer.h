@@ -43,6 +43,7 @@ public:
     vector<string> Lex(const string & InputCode);
     bool IsEndOfString(const string & Haystack, const string & Needle);
     void DoSingleLineCommentMode(const char InChar);
+    void DoMultiLineCommentMode(const char InChar);
     void DoNormalLexMode(const char InChar);
     bool IsSavedWordCompleteOp();
     void AppendToSavedWord(const char NewChar);

@@ -38,6 +38,10 @@ vector<string> Lexer::Lex(const string & InputCode)
         {
             DoSingleLineCommentMode(InputCode[Position]);
         }
+        else if(Mode == LEXER_MODE::MULTI_LINE_COMMENT)
+        {
+            DoMultiLineCommentMode(InputCode[Position]);
+        }
         Position = Position + 1;
     }
     return Tokens;
@@ -66,6 +70,16 @@ void Lexer::DoSingleLineCommentMode(const char InChar)
     }
 }
 
+void Lexer::DoMultiLineCommentMode(const char InChar)
+{
+    AppendToSavedWord(InChar);
+    if(IsEndOfString(SavedWord, "*/") == true)
+    {
+        Mode = LEXER_MODE::NORMAL;
+        SavedWord.clear();
+    }
+}
+
 void Lexer::DoNormalLexMode(const char InChar)
 {
     TEXT_TYPE CharType = GetTextTypeOfChar(InChar);
@@ -85,6 +99,10 @@ void Lexer::DoNormalLexMode(const char InChar)
     if(SavedWord == "//")
     {
         Mode = LEXER_MODE::SINGLE_LINE_COMMENT;
+    }
+    if(SavedWord == "/*")
+    {
+        Mode = LEXER_MODE::MULTI_LINE_COMMENT;
     }
 }
 

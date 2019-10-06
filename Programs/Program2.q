@@ -997,4 +997,7 @@ action Main
         S6 = S6 + 1
     end
     // Test Comment
+    /* 
+        Multi line comment
+    */
 end
