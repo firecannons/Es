@@ -1315,9 +1315,6 @@ class Parser ( ) :
         else :
             CompilerIssue . OutputError ( 'Expected valid type for template instead of \'' + Token + '\'', self . EXIT_ON_ERROR , TokenObject )
         return SavedWordArray , WordIndex , OutputText
-    
-    def AppendToLastSavedTemplateArray ( self , Name ) :
-        self . SavedTemplates [ len ( self . SavedTemplates ) - 1 ] . append ( Name )
 
     def ProcessAfterTemplateName ( self , Token , SavedWordArray , WordIndex , OutputText ) :
         if Token . Name == self . SPECIAL_CHARS [ 'COMMA' ] :
@@ -1510,6 +1507,11 @@ class Parser ( ) :
         if Lexer . IsValidName ( Token . Name ) :
             if self . IsCurrentlyValidType ( Token ) == True :
                 Token , WordIndex , SavedWordArray = self . PossibleTemplateConvert ( Token , WordIndex , SavedWordArray )
+                print('fire', Token.Name, Token, SavedWordArray[WordIndex-1].Name, SavedWordArray[WordIndex].Name, SavedWordArray[WordIndex+3].Name)
+                for i in range(10):
+                    print(SavedWordArray[WordIndex+i-5].Name)
+                if isinstance(Token.Name, str) == False:
+                    print('fire2', Token.Name.Name, SavedWordArray[WordIndex+1].Name)
                 self . SavedType = self . TypeTable [ Token . Name ]
                 self . State = self . MAIN_STATES [ 'ACTION_PARAM_NAME' ]
             else :
@@ -1644,7 +1646,6 @@ class Parser ( ) :
         return STStack
     
     def PrepareToCompileTemplatedClass ( self , TempClass ) :
-        self . AppendToSavedTemplates ( deepcopy ( self . TempSavedTemplate ) )
         OldState = self . State
         OldScopeStack = self . STStack
         OldClass = self . CurrentClass
@@ -1831,7 +1832,7 @@ class Parser ( ) :
         Output = ''
         if Templates != None :
             for Index in range ( len ( Templates ) ) :
-                Output = Output + Templates [ Index ] + self . FUNCTION_OUTPUT_DELIMITER
+                Output = Output + Templates [ Index ] . Type . Name + self . FUNCTION_OUTPUT_DELIMITER
         return Output
         
     def ResolveActionNameToAsm ( self , ActionName , Class , Templates = None ) :
@@ -1860,12 +1861,20 @@ class Parser ( ) :
             Output = Output + self . GetResolvedClassName ( Class . Name , Templates )
         return Output
     
+    def PrintSavedTemplateArray(self, Ar):
+        for i in Ar:
+            print(len(i))
+            for r in i:
+                print(r)
+    
     def GetResolvedClassName ( self , ClassName , Templates = None ) :
         Output = ''
         if ClassName != None :
             Output = Output + ClassName + self . FUNCTION_OUTPUT_DELIMITER
         if Templates == None and self . IsSavedTemplatesExisting ( ) == True :
             Templates = self . GetLatestSavedTemplate ( )
+        print('Code 194:' , ClassName, Templates, type(Templates) , self . GetLatestSavedTemplate ( ), len(self.SavedTemplates))
+        self.PrintSavedTemplateArray(self.SavedTemplates)
         Output = Output + self . AddTemplatesToOutput ( Templates )
         return Output
 
