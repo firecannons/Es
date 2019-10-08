@@ -119,5 +119,6 @@ action Main
     L = I1
     OutputByte ( I1 )
     OutputByte ( L )
+    Integer CST_1 = I1
     
 end

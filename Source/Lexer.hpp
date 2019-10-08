@@ -162,7 +162,7 @@ TEXT_TYPE Lexer::GetTextTypeOfChar(const char InChar)
     {
         CharType = TEXT_TYPE::WHITE_SPACE;
     }
-    else if(isalnum(InChar) == false)
+    else if(isalnum(InChar) == false && InChar != '_')
     {
         CharType = TEXT_TYPE::SYMBOL;
     }
