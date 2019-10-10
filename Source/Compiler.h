@@ -4,6 +4,7 @@
 
 #include "GlobalFunctions.h"
 #include "Lexer.h"
+#include "Parser.h"
 #include <string>
 #include <fstream>
 #include <sstream>

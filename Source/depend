@@ -1,2 +1,2 @@
-main.o: main.cpp GlobalFunctions.h Compiler.h Lexer.h Lexer.hpp \
- Compiler.hpp
+main.o: main.cpp GlobalFunctions.h Compiler.h Lexer.h Lexer.hpp Parser.h \
+ Parser.hpp Compiler.hpp

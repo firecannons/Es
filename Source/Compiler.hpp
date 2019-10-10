@@ -25,12 +25,16 @@ string Compiler::CompileToOutputText(const string & InputCode)
 {
     Lexer FirstLex;
     vector<string> Tokens = FirstLex.Lex(InputCode);
+    Parser FirstParser;
+    string AsmString = FirstParser.Parse(Tokens);
     OutputTokens(Tokens);
-    return Tokens[0];
+    return AsmString;
 }
 
 
 void Compiler::WriteToOutputFile(const string & OutputCode, const string & OutputFile)
 {
-    cout << OutputCode << OutputFile;
+    std::ofstream out(OutputFile + ".asm");
+    out << OutputCode;
+    out.close();
 }
