@@ -58,5 +58,7 @@ public:
     string ConvertSavedUsingIdentsToPath();
 };
 
+#include "Compiler.h"
+
 #include "Parser.hpp"
 #endif

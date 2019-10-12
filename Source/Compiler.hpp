@@ -33,7 +33,6 @@ string Compiler::CompileToOutputText(const string & InputCode)
     vector<string> Tokens = FirstLex.Lex(InputCode);
     Parser FirstParser;
     string AsmString = FirstParser.Parse(Tokens);
-    OutputTokens(Tokens);
     return AsmString;
 }
 

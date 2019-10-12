@@ -6,7 +6,8 @@ void Parser::InsertKeywords()
     Keywords.insert(pair<string,string>(string("ACTION"), string("action")));
     Keywords.insert(pair<string,string>(string("USING"), string("using")));
     Keywords.insert(pair<string,string>(string("DOT"), string(".")));
-    Keywords.insert(pair<string,string>(string("BACKSLASH"), string("\\")));
+    Keywords.insert(pair<string,string>(string("BACK_SLASH"), string("\\")));
+    Keywords.insert(pair<string,string>(string("FORWARD_SLASH"), string("/")));
     Keywords.insert(pair<string,string>(string("NEW_LINE"), string("\n")));
 }
 
@@ -121,11 +122,12 @@ void Parser::ParserExpectUsingDotOrNewline()
     else if(Token == Keywords["NEW_LINE"])
     {
         string Path = ConvertSavedUsingIdentsToPath();
-        //OutputAsm = OutputAsm + Compiler::CompileToAsm(Path);
+        State = PARSER_STATE::START_OF_LINE;
+        Compiler NextCompiler;
+        OutputAsm = OutputAsm + NextCompiler.CompileToAsm(Path);
     }
     else
     {
-        OutputTokens(Tokens);
         OutputStandardErrorMessage("Expected newline or period at end of 'using' statement" + InsteadErrorMessage(Token));
     }
 }
@@ -154,7 +156,7 @@ string Parser::ConvertSavedUsingIdentsToPath()
     unsigned int Index = 1;
     while(Index < SavedUsingIdents.size())
     {
-        OutputPath = OutputPath + Keywords["BACKSLASH"] + SavedUsingIdents[Index];
+        OutputPath = OutputPath + Keywords["FORWARD_SLASH"] + SavedUsingIdents[Index];
         Index = Index + 1;
     }
     OutputPath = OutputPath + EXTENSION;

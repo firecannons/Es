@@ -4,7 +4,6 @@
 
 #include "GlobalFunctions.h"
 #include "Lexer.h"
-#include "Parser.h"
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -15,16 +14,18 @@ class Compiler
 {
     
 public:
-    void static Compile(const string & SourceFile, const string & OutputFile);
+    void Compile(const string & SourceFile, const string & OutputFile);
 
-    string static CompileToAsm(const string & SourceFile);
+    string CompileToAsm(const string & SourceFile);
     
-    string static ReadInputFile(const string & SourceName);
+    string ReadInputFile(const string & SourceName);
     
-    string static CompileToOutputText(const string & InputCode);
+    string CompileToOutputText(const string & InputCode);
     
-    void static WriteToOutputFile(const string & OutputCode, const string & OutputFile);
+    void WriteToOutputFile(const string & OutputCode, const string & OutputFile);
 };
+
+#include "Parser.h"
 
 #include "Compiler.hpp"
 #endif

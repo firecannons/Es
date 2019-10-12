@@ -106,14 +106,9 @@ void Lexer::DoNormalLexMode(const char InChar)
     {
         AppendSavedWordToTokens();
     }
-    if(CharType != TEXT_TYPE::WHITE_SPACE)
+    if(CharType != TEXT_TYPE::WHITE_SPACE || InChar == '\n')
     {
         AppendToSavedWord(InChar);
-    }
-    if(InChar == '\n')
-    {
-        AppendToSavedWord(InChar);
-        AppendSavedWordToTokens();
     }
     if(SavedWord == "//")
     {
@@ -130,6 +125,10 @@ void Lexer::DoNormalLexMode(const char InChar)
     if(SavedWord == "\n" && Mode == LEXER_MODE::NORMAL_WAITING_FOR_ASM_BLOCK)
     {
         Mode = LEXER_MODE::ASM_BLOCK;
+    }
+    if(InChar == '\n')
+    {
+        AppendSavedWordToTokens();
     }
 }
 

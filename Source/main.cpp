@@ -16,5 +16,6 @@ int main(int argc, char *argv[])
     string SourceProgram = string(argv[1]);
     string OutputProgram = string(argv[2]);
     
-    Compiler::Compile(SourceProgram, OutputProgram);
+    Compiler FirstCompiler;
+    FirstCompiler.Compile(SourceProgram, OutputProgram);
 }
