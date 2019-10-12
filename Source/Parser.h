@@ -3,6 +3,7 @@
 #define PARSER_H
 
 #include "GlobalFunctions.h"
+#include "BaseType.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -39,6 +40,7 @@ public:
     bool HasToken;
     vector<string> SavedUsingIdents;
     unsigned int LineNumber;
+    map<string, BaseType> TypeTable;
     
     void InsertKeywords();
     string Parse(const vector<string> & Tokens);
@@ -56,6 +58,7 @@ public:
     string GetErrorLineNumberText();
     string InsteadErrorMessage(const string & WrongString);
     string ConvertSavedUsingIdentsToPath();
+    void ParserExpectClassName();
 };
 
 #include "Compiler.h"

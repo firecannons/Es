@@ -84,6 +84,10 @@ void Parser::Operate()
     {
         ParserExpectUsingDotOrNewline();
     }
+    else if(State == PARSER_STATE::EXPECT_CLASS_NAME)
+    {
+        ParserExpectClassName();
+    }
     IncreaseLineNumberIfNewline();
 }
 
@@ -161,4 +165,9 @@ string Parser::ConvertSavedUsingIdentsToPath()
     }
     OutputPath = OutputPath + EXTENSION;
     return OutputPath;
+}
+
+void Parser::ParserExpectClassName()
+{
+    
 }
