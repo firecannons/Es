@@ -15,7 +15,9 @@ class Compiler
 {
     
 public:
-    void static Compile(const string & SourceProgram, const string & OutputProgram);
+    void static Compile(const string & SourceFile, const string & OutputFile);
+
+    string static CompileToAsm(const string & SourceFile);
     
     string static ReadInputFile(const string & SourceName);
     

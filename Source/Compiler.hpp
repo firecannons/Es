@@ -1,11 +1,17 @@
 #include "Compiler.h"
 
 
-void Compiler::Compile(const string & SourceProgram, const string & OutputProgram)
+void Compiler::Compile(const string & SourceFile, const string & OutputFile)
 {
-    string InputText = ReadInputFile(SourceProgram);
+    string OutputText = CompileToAsm(SourceFile);
+    WriteToOutputFile(OutputText, OutputFile);
+}
+
+string Compiler::CompileToAsm(const string & SourceFile)
+{
+    string InputText = ReadInputFile(SourceFile);
     string OutputText = CompileToOutputText(InputText);
-    WriteToOutputFile(OutputText, OutputProgram);
+    return OutputText;
 }
 
 string Compiler::ReadInputFile(const string & SourceProgram)

@@ -44,22 +44,22 @@ OBJECTS = $(SOURCES:%.cpp=%.o)
 default: driver
 
 %.o: %.cpp
-	@echo "Compiling $<"
-	@$(CXX) $(CXXFLAGS) -c $< -o $@
+	echo "Compiling $<"
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 driver: $(OBJECTS)
-	@echo "Building $@"
-	@$(CXX) $(CXXFLAGS) $(OBJECTS) -o $@
-	@echo ""
-	@echo "Everything worked :-) "
-	@echo ""
+	echo "Building $@"
+	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $@
+	echo ""
+	echo "Everything worked :-) "
+	echo ""
 
 clean:
-	-@rm -f core
-	-@rm -f driver
-	-@rm -f depend
-	-@rm -f $(OBJECTS)
-	-@rm -rf docs
+	-rm -f core
+	-rm -f driver
+	-rm -f depend
+	-rm -f $(OBJECTS)
+	-rm -rf docs
 
 # Automatically generate dependencies and include them in Makefile
 depend: $(SOURCES) $(HEADERS)

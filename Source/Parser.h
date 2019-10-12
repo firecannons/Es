@@ -2,6 +2,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include "GlobalFunctions.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -22,6 +23,8 @@ enum PARSER_STATE
     EXPECT_NEWLINE_OR_RETURNS,
     EXPECT_RETURN_TYPE
 };
+
+const string EXTENSION = string(".q");
 
 class Parser
 {
@@ -45,9 +48,14 @@ public:
     void GetNextToken();
     bool IsNextToken();
     void Operate();
+    void IncreaseLineNumberIfNewline();
     void ParseStartOfLine();
     void ParserExpectUsingIdent();
-    
+    void ParserExpectUsingDotOrNewline();
+    void OutputStandardErrorMessage(const string & Message);
+    string GetErrorLineNumberText();
+    string InsteadErrorMessage(const string & WrongString);
+    string ConvertSavedUsingIdentsToPath();
 };
 
 #include "Parser.hpp"

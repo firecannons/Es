@@ -112,7 +112,7 @@ void Parser::ParserExpectUsingIdent()
     State = PARSER_STATE::EXPECT_USING_DOT_OR_NEWLINE;
 }
 
-void ParserExpectUsingDotOrNewline()
+void Parser::ParserExpectUsingDotOrNewline()
 {
     if(Token == Keywords["DOT"])
     {
@@ -120,11 +120,43 @@ void ParserExpectUsingDotOrNewline()
     }
     else if(Token == Keywords["NEW_LINE"])
     {
-        cout << "Made it" << endl;
-        exit(1);
+        string Path = ConvertSavedUsingIdentsToPath();
+        //OutputAsm = OutputAsm + Compiler::CompileToAsm(Path);
     }
     else
     {
-        OutputStandardErrorMessage("Expected newline or period at end of 'using' statement.");
+        OutputTokens(Tokens);
+        OutputStandardErrorMessage("Expected newline or period at end of 'using' statement" + InsteadErrorMessage(Token));
     }
+}
+
+void Parser::OutputStandardErrorMessage(const string & Message)
+{
+    PrintError(GetErrorLineNumberText() + Message);
+}
+
+string Parser::GetErrorLineNumberText()
+{
+    string LineNumberError = string("Error on line ") + to_string(LineNumber + 1) + string(": ");
+    return LineNumberError;
+}
+
+string Parser::InsteadErrorMessage(const string & WrongString)
+{
+    string Message = string(" instead of '") + WrongString + string("'");
+    return Message;
+}
+
+string Parser::ConvertSavedUsingIdentsToPath()
+{
+    string OutputPath = "";
+    OutputPath = OutputPath + SavedUsingIdents[0];
+    unsigned int Index = 1;
+    while(Index < SavedUsingIdents.size())
+    {
+        OutputPath = OutputPath + Keywords["BACKSLASH"] + SavedUsingIdents[Index];
+        Index = Index + 1;
+    }
+    OutputPath = OutputPath + EXTENSION;
+    return OutputPath;
 }

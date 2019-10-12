@@ -106,9 +106,14 @@ void Lexer::DoNormalLexMode(const char InChar)
     {
         AppendSavedWordToTokens();
     }
-    if(CharType != TEXT_TYPE::WHITE_SPACE || InChar == '\n')
+    if(CharType != TEXT_TYPE::WHITE_SPACE)
     {
         AppendToSavedWord(InChar);
+    }
+    if(InChar == '\n')
+    {
+        AppendToSavedWord(InChar);
+        AppendSavedWordToTokens();
     }
     if(SavedWord == "//")
     {
