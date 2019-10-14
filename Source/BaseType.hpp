@@ -3,5 +3,5 @@
 void BaseType::InitializeBlankCompiledTemplate()
 {
     CompiledTemplate Temp;
-    //CompiledTemplates.push_back(Temp);
+    CompiledTemplates.push_back(Temp);
 }
