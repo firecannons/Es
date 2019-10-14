@@ -1,3 +1,14 @@
+// Forward-declaring classes to avoid circular dependency problems.
+
+class BaseType;
+class Object;
+class Function;
+class TemplatedType;
+class Lexer;
+class Compiler;
+class Parser;
+class Scope;
+class CompiledTemplate;
 
 #include <string>
 #include "GlobalFunctions.h"

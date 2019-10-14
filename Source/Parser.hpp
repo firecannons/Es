@@ -40,6 +40,7 @@ void Parser::Initialize(const vector<string> & Tokens)
     HasToken = false;
     SavedUsingIdents.clear();
     LineNumber = 0;
+    ScopeStack.push_back(& GlobalScope);
 }
 
 void Parser::GetNextToken()
@@ -132,7 +133,7 @@ void Parser::ParserExpectUsingDotOrNewline()
     }
     else
     {
-        OutputStandardErrorMessage("Expected newline or period at end of 'using' statement" + InsteadErrorMessage(Token));
+        OutputStandardErrorMessage(string("Expected newline or period at end of 'using' statement") + InsteadErrorMessage(Token));
     }
 }
 
@@ -169,5 +170,53 @@ string Parser::ConvertSavedUsingIdentsToPath()
 
 void Parser::ParserExpectClassName()
 {
+    if(IsValidClassName(Token) == false)
+    {
+        OutputStandardErrorMessage(GetNameErrorText(Token) + string(" is not a valid class name."));
+    }
+    else if(TypeTableContains(Token) != false)
+    {
+        OutputStandardErrorMessage(string("A class named ") + Token + string(" has already been declared."));
+    }
+    else
+    {
+        BaseType NewClassBase;
+        NewClassBase.Name = Token;
+        CurrentClass.Type = &NewClassBase;
+        TypeTable.insert(pair<string,BaseType>(Token, NewClassBase));
+    }
     
+    
+}
+
+string Parser::GetNameErrorText(const string & Input)
+{
+    string NameErrorText = string("The name '") + Input + string("'");
+    return NameErrorText;
+}
+
+bool Parser::IsValidClassName(const string & Input)
+{
+    bool Output = true;
+    unsigned int Index = 0;
+    while(Index < Input.size())
+    {
+        if(isalnum(Input[Index]) == false)
+        {
+            Output = false;
+        }
+        Index = Index + 1;
+    }
+    return Output;
+}
+
+bool Parser::TypeTableContains(const string & Input)
+{
+    bool Output = false;
+    map<string,BaseType>::iterator it = TypeTable.find(Input);
+    if(it != TypeTable.end())
+    {
+        Output = true;
+    }
+    return Output;
 }

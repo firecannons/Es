@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <locale>
 using namespace std;
 
 enum PARSER_STATE
@@ -41,6 +42,9 @@ public:
     vector<string> SavedUsingIdents;
     unsigned int LineNumber;
     map<string, BaseType> TypeTable;
+    TemplatedType CurrentClass;
+    Scope GlobalScope;
+    vector<Scope *> ScopeStack;
     
     void InsertKeywords();
     string Parse(const vector<string> & Tokens);
@@ -59,6 +63,9 @@ public:
     string InsteadErrorMessage(const string & WrongString);
     string ConvertSavedUsingIdentsToPath();
     void ParserExpectClassName();
+    string GetNameErrorText(const string & Input);
+    bool IsValidClassName(const string & Input);
+    bool TypeTableContains(const string & Input);
 };
 
 #include "Compiler.h"

@@ -5,6 +5,7 @@
 #include "TemplatedType.h"
 #include "Function.h"
 #include "Object.h"
+#include "Scope.h"
 #include <string>
 #include <vector>
 using namespace std;
