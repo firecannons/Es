@@ -206,8 +206,9 @@ void Parser::ParseExpectClassName()
     {
         BaseType NewClassBase;
         NewClassBase.Name = Token;
-        CurrentClass.Type = &NewClassBase;
+        NewClassBase.InitializeBlankCompiledTemplate();
         TypeTable.insert(pair<string,BaseType>(Token, NewClassBase));
+        CurrentClass.Type = &TypeTable[Token];
         State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE;
     }
 }
@@ -324,10 +325,11 @@ void Parser::ParserExpectClassSizeNumber()
     if(IsNumber(Token) == true)
     {
         CurrentClass.Type->CompiledTemplates[0].Size = stoi(Token);
+        State = PARSER_STATE::START_OF_LINE;
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected a number") + InsteadErrorMessage(Token) + string("."));
+        OutputStandardErrorMessage(string("Expected a number ") + InsteadErrorMessage(Token) + string("."));
     }
 }
 
