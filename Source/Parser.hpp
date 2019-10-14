@@ -9,6 +9,10 @@ void Parser::InsertKeywords()
     Keywords.insert(pair<string,string>(string("BACK_SLASH"), string("\\")));
     Keywords.insert(pair<string,string>(string("FORWARD_SLASH"), string("/")));
     Keywords.insert(pair<string,string>(string("NEW_LINE"), string("\n")));
+    Keywords.insert(pair<string,string>(string("LEFT_BRACKET"), string("<")));
+    Keywords.insert(pair<string,string>(string("RIGHT_BRACKET"), string(">")));
+    Keywords.insert(pair<string,string>(string("COMMA"), string(",")));
+    Keywords.insert(pair<string,string>(string("SIZE"), string("size")));
 }
 
 string Parser::Parse(const vector<string> & Tokens)
@@ -79,15 +83,35 @@ void Parser::Operate()
     }
     else if(State == PARSER_STATE::EXPECT_USING_IDENT)
     {
-        ParserExpectUsingIdent();
+        ParseExpectUsingIdent();
     }
     else if(State == PARSER_STATE::EXPECT_USING_DOT_OR_NEWLINE)
     {
-        ParserExpectUsingDotOrNewline();
+        ParseExpectUsingDotOrNewline();
     }
     else if(State == PARSER_STATE::EXPECT_CLASS_NAME)
     {
-        ParserExpectClassName();
+        ParseExpectClassName();
+    }
+    else if(State == PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE)
+    {
+        ParseExpectTemplateStartOrNewlineOrSize();
+    }
+    else if(State == PARSER_STATE::EXPECT_CLASS_SIZE_NUMBER)
+    {
+        ParserExpectClassSizeNumber();
+    }
+    else if(State == PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME)
+    {
+        ParseExpectClassTemplateName();
+    }
+    else if(State == PARSER_STATE::EXPECT_CLASS_TEMPLATE_END_OR_COMMA)
+    {
+        ParseExpectClassTemplateEndOrComma();
+    }
+    else if(State == PARSER_STATE::EXPECT_NEWLINE)
+    {
+        ParserExpectNewline();
     }
     IncreaseLineNumberIfNewline();
 }
@@ -112,13 +136,13 @@ void Parser::ParseStartOfLine()
     }
 }
 
-void Parser::ParserExpectUsingIdent()
+void Parser::ParseExpectUsingIdent()
 {
     SavedUsingIdents.push_back(Token);
     State = PARSER_STATE::EXPECT_USING_DOT_OR_NEWLINE;
 }
 
-void Parser::ParserExpectUsingDotOrNewline()
+void Parser::ParseExpectUsingDotOrNewline()
 {
     if(Token == Keywords["DOT"])
     {
@@ -133,7 +157,7 @@ void Parser::ParserExpectUsingDotOrNewline()
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected newline or period at end of 'using' statement") + InsteadErrorMessage(Token));
+        OutputStandardErrorMessage(string("Expected newline or period at end of 'using' statement ") + InsteadErrorMessage(Token));
     }
 }
 
@@ -150,7 +174,7 @@ string Parser::GetErrorLineNumberText()
 
 string Parser::InsteadErrorMessage(const string & WrongString)
 {
-    string Message = string(" instead of '") + WrongString + string("'");
+    string Message = string("instead of '") + WrongString + string("'");
     return Message;
 }
 
@@ -168,11 +192,11 @@ string Parser::ConvertSavedUsingIdentsToPath()
     return OutputPath;
 }
 
-void Parser::ParserExpectClassName()
+void Parser::ParseExpectClassName()
 {
     if(IsValidClassName(Token) == false)
     {
-        OutputStandardErrorMessage(GetNameErrorText(Token) + string(" is not a valid class name."));
+        OutputStandardErrorMessage(GetNameErrorText(Token) + string(" is not a valid class name.") + Tokens[Position - 1] + " " + Tokens[Position + 1]);
     }
     else if(TypeTableContains(Token) != false)
     {
@@ -184,9 +208,8 @@ void Parser::ParserExpectClassName()
         NewClassBase.Name = Token;
         CurrentClass.Type = &NewClassBase;
         TypeTable.insert(pair<string,BaseType>(Token, NewClassBase));
+        State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE;
     }
-    
-    
 }
 
 string Parser::GetNameErrorText(const string & Input)
@@ -196,6 +219,58 @@ string Parser::GetNameErrorText(const string & Input)
 }
 
 bool Parser::IsValidClassName(const string & Input)
+{
+    bool Output = IsValidIdent(Input);
+    return Output;
+}
+
+bool Parser::TypeTableContains(const string & Input)
+{
+    bool Output = false;
+    map<string,BaseType>::iterator it = TypeTable.find(Input);
+    if(it != TypeTable.end())
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+void Parser::ParseExpectTemplateStartOrNewlineOrSize()
+{
+    if(Token == Keywords["NEW_LINE"])
+    {
+        CurrentClass.Type->InitializeBlankCompiledTemplate();
+        State = PARSER_STATE::START_OF_LINE;
+    }
+    else if(Token == Keywords["LEFT_BRACKET"])
+    {
+        State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME;
+    }
+    else if(Token == Keywords["SIZE"])
+    {
+        CurrentClass.Type->InitializeBlankCompiledTemplate();
+        State = PARSER_STATE::EXPECT_CLASS_SIZE_NUMBER;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected left bracket or newline ") + InsteadErrorMessage(Token) + string("."));
+    }
+}
+
+void Parser::ParseExpectClassTemplateName()
+{
+    if(IsValidClassTemplateName(Token) == true)
+    {
+        CurrentClass.Type->PossibleTemplates.push_back(Token);
+        State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_END_OR_COMMA;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected valid template name for class ") + InsteadErrorMessage(Token) + string("."));
+    }
+}
+
+bool Parser::IsValidIdent(const string & Input)
 {
     bool Output = true;
     unsigned int Index = 0;
@@ -210,13 +285,63 @@ bool Parser::IsValidClassName(const string & Input)
     return Output;
 }
 
-bool Parser::TypeTableContains(const string & Input)
+bool Parser::IsValidClassTemplateName(const string & Input)
 {
-    bool Output = false;
-    map<string,BaseType>::iterator it = TypeTable.find(Input);
-    if(it != TypeTable.end())
+    bool Output = IsValidIdent(Input);
+    return Output;
+}
+
+void Parser::ParseExpectClassTemplateEndOrComma()
+{
+    if(Token == Keywords["RIGHT_BRACKET"])
     {
-        Output = true;
+        State = PARSER_STATE::EXPECT_NEWLINE;
+    }
+    else if(Token == Keywords["COMMA"])
+    {
+        State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected right bracket or newline ") + InsteadErrorMessage(Token) + string("."));
+    }
+}
+
+void Parser::ParserExpectNewline()
+{
+    if(Token == Keywords["NEW_LINE"])
+    {
+        State = PARSER_STATE::START_OF_LINE;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected newline ") + InsteadErrorMessage(Token) + string("."));
+    }
+}
+
+void Parser::ParserExpectClassSizeNumber()
+{
+    if(IsNumber(Token) == true)
+    {
+        CurrentClass.Type->CompiledTemplates[0].Size = stoi(Token);
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected a number") + InsteadErrorMessage(Token) + string("."));
+    }
+}
+
+bool Parser::IsNumber(const string & Input)
+{
+    bool Output = true;
+    unsigned int Index = 0;
+    while(Index < Input.size())
+    {
+        if(isdigit(Input[Index]) == false)
+        {
+            Output = false;
+        }
+        Index = Index + 1;
     }
     return Output;
 }

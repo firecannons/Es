@@ -15,6 +15,8 @@ public:
     vector<string> PossibleTemplates;
     vector<CompiledTemplate> CompiledTemplates;
     bool IsTemplated;
+    
+    void InitializeBlankCompiledTemplate();
 };
 
 #include "BaseType.hpp"

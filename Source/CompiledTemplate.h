@@ -19,6 +19,11 @@ public:
     vector<CompiledTemplate> CompiledTemplates;
     bool IsTemplated;
     Scope TheScope;
+    
+    CompiledTemplate();
+    CompiledTemplate & operator=(const CompiledTemplate & Src);
+    ~CompiledTemplate();
+    
 };
 
 #include "CompiledTemplate.hpp"

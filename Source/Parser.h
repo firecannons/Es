@@ -16,7 +16,11 @@ enum PARSER_STATE
     EXPECT_USING_IDENT,
     EXPECT_USING_DOT_OR_NEWLINE,
     EXPECT_CLASS_NAME,
-    END_CLASS_NAME,
+    EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE,
+    EXPECT_CLASS_SIZE_NUMBER,
+    EXPECT_CLASS_TEMPLATE_NAME,
+    EXPECT_CLASS_TEMPLATE_END_OR_COMMA,
+    EXPECT_NEWLINE,
     EXPECT_ACTION_NAME,
     EXPECT_RETURN_OR_LPAREN,
     EXPECT_PARAM_TYPE,
@@ -56,16 +60,24 @@ public:
     void Operate();
     void IncreaseLineNumberIfNewline();
     void ParseStartOfLine();
-    void ParserExpectUsingIdent();
-    void ParserExpectUsingDotOrNewline();
+    void ParseExpectUsingIdent();
+    void ParseExpectUsingDotOrNewline();
     void OutputStandardErrorMessage(const string & Message);
     string GetErrorLineNumberText();
     string InsteadErrorMessage(const string & WrongString);
     string ConvertSavedUsingIdentsToPath();
-    void ParserExpectClassName();
+    void ParseExpectClassName();
     string GetNameErrorText(const string & Input);
     bool IsValidClassName(const string & Input);
     bool TypeTableContains(const string & Input);
+    void ParseExpectTemplateStartOrNewlineOrSize();
+    void ParseExpectClassTemplateName();
+    bool IsValidIdent(const string & Input);
+    bool IsValidClassTemplateName(const string & Input);
+    void ParseExpectClassTemplateEndOrComma();
+    void ParserExpectNewline();
+    void ParserExpectClassSizeNumber();
+    bool IsNumber(const string & Input);
 };
 
 #include "Compiler.h"
