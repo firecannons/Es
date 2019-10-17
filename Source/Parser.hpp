@@ -125,6 +125,14 @@ void Parser::Operate()
     {
         ParseExpectReturnOrLParen();
     }
+    else if(State == PARSER_STATE::EXPECT_RETURN_TYPE)
+    {
+        ParseExpectReturnType();
+    }
+    else if(State == PARSER_STATE::EXPECT_PARAM_TYPE)
+    {
+        ParseExpectParamType();
+    }
     IncreaseLineNumberIfNewline();
 }
 
@@ -369,6 +377,9 @@ void Parser::ParseExpectActionName()
     if(IsValidActionName(Token) == false)
     {
         OutputStandardErrorMessage(GetNameErrorText(Token) + string(" is not a valid action name."));
+    }
+    else
+    {
         State = PARSER_STATE::EXPECT_RETURN_OR_LPAREN;
     }
 }
@@ -393,4 +404,12 @@ void Parser::ParseExpectReturnsOrLParen()
     {
         OutputStandardErrorMessage(string("Expected 'returns' or '(' ") + InsteadErrorMessage(Token) + string("."));
     }
+}
+
+void Parser::ParseExpectReturnType()
+{
+}
+
+void Parser::ParseExpectParamType()
+{
 }

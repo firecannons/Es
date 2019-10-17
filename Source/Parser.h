@@ -49,6 +49,7 @@ public:
     TemplatedType CurrentClass;
     Scope GlobalScope;
     vector<Scope *> ScopeStack;
+    Function * CurrentFunction;
     
     void InsertKeywords();
     string Parse(const vector<string> & Tokens);
@@ -81,6 +82,8 @@ public:
     void ParseExpectActionName();
     bool IsValidActionName(const string & Input);
     void ParseExpectReturnsOrLParen();
+    void ParseExpectReturnType();
+    void ParseExpectParamType();
 };
 
 #include "Compiler.h"
