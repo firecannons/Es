@@ -22,7 +22,7 @@ enum PARSER_STATE
     EXPECT_CLASS_TEMPLATE_END_OR_COMMA,
     EXPECT_NEWLINE,
     EXPECT_ACTION_NAME,
-    EXPECT_RETURN_OR_LPAREN,
+    EXPECT_RETURNS_OR_LPAREN,
     EXPECT_PARAM_TYPE,
     EXPECT_PARAM_NAME,
     EXPECT_COMMA_OR_LPAREN,
@@ -75,9 +75,12 @@ public:
     bool IsValidIdent(const string & Input);
     bool IsValidClassTemplateName(const string & Input);
     void ParseExpectClassTemplateEndOrComma();
-    void ParserExpectNewline();
-    void ParserExpectClassSizeNumber();
+    void ParseExpectNewline();
+    void ParseExpectClassSizeNumber();
     bool IsNumber(const string & Input);
+    void ParseExpectActionName();
+    bool IsValidActionName(const string & Input);
+    void ParseExpectReturnsOrLParen();
 };
 
 #include "Compiler.h"

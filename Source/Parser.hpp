@@ -13,6 +13,10 @@ void Parser::InsertKeywords()
     Keywords.insert(pair<string,string>(string("RIGHT_BRACKET"), string(">")));
     Keywords.insert(pair<string,string>(string("COMMA"), string(",")));
     Keywords.insert(pair<string,string>(string("SIZE"), string("size")));
+    Keywords.insert(pair<string,string>(string("RETURNS"), string("returns")));
+    Keywords.insert(pair<string,string>(string("RETURN"), string("return")));
+    Keywords.insert(pair<string,string>(string("LPAREN"), string("(")));
+    Keywords.insert(pair<string,string>(string("RPAREN"), string(")")));
 }
 
 string Parser::Parse(const vector<string> & Tokens)
@@ -99,7 +103,7 @@ void Parser::Operate()
     }
     else if(State == PARSER_STATE::EXPECT_CLASS_SIZE_NUMBER)
     {
-        ParserExpectClassSizeNumber();
+        ParseExpectClassSizeNumber();
     }
     else if(State == PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME)
     {
@@ -111,7 +115,15 @@ void Parser::Operate()
     }
     else if(State == PARSER_STATE::EXPECT_NEWLINE)
     {
-        ParserExpectNewline();
+        ParseExpectNewline();
+    }
+    else if(State == PARSER_STATE::EXPECT_ACTION_NAME)
+    {
+        ParseExpectActionName();
+    }
+    else if(State == PARSER_STATE::EXPECT_RETURN_OR_LPAREN)
+    {
+        ParseExpectReturnOrLParen();
     }
     IncreaseLineNumberIfNewline();
 }
@@ -130,9 +142,13 @@ void Parser::ParseStartOfLine()
     {
         State = PARSER_STATE::EXPECT_USING_IDENT;
     }
-    if(Token == Keywords["CLASS"])
+    else if(Token == Keywords["CLASS"])
     {
         State = PARSER_STATE::EXPECT_CLASS_NAME;
+    }
+    else if(Token == Keywords["ACTION"])
+    {
+        State = PARSER_STATE::EXPECT_ACTION_NAME;
     }
 }
 
@@ -196,7 +212,7 @@ void Parser::ParseExpectClassName()
 {
     if(IsValidClassName(Token) == false)
     {
-        OutputStandardErrorMessage(GetNameErrorText(Token) + string(" is not a valid class name.") + Tokens[Position - 1] + " " + Tokens[Position + 1]);
+        OutputStandardErrorMessage(GetNameErrorText(Token) + string(" is not a valid class name."));
     }
     else if(TypeTableContains(Token) != false)
     {
@@ -308,7 +324,7 @@ void Parser::ParseExpectClassTemplateEndOrComma()
     }
 }
 
-void Parser::ParserExpectNewline()
+void Parser::ParseExpectNewline()
 {
     if(Token == Keywords["NEW_LINE"])
     {
@@ -320,7 +336,7 @@ void Parser::ParserExpectNewline()
     }
 }
 
-void Parser::ParserExpectClassSizeNumber()
+void Parser::ParseExpectClassSizeNumber()
 {
     if(IsNumber(Token) == true)
     {
@@ -346,4 +362,35 @@ bool Parser::IsNumber(const string & Input)
         Index = Index + 1;
     }
     return Output;
+}
+
+void Parser::ParseExpectActionName()
+{
+    if(IsValidActionName(Token) == false)
+    {
+        OutputStandardErrorMessage(GetNameErrorText(Token) + string(" is not a valid action name."));
+        State = PARSER_STATE::EXPECT_RETURN_OR_LPAREN;
+    }
+}
+
+bool Parser::IsValidActionName(const string & Input)
+{
+    bool Output = IsValidIdent(Input);
+    return Output;
+}
+
+void Parser::ParseExpectReturnsOrLParen()
+{
+    if(Token == Keywords["RETURNS"])
+    {
+        State = PARSER_STATE::EXPECT_RETURN_TYPE;
+    }
+    else if(Token == Keywords["LPAREN"])
+    {
+        State = PARSER_STATE::EXPECT_PARAM_TYPE;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected 'returns' or '(' ") + InsteadErrorMessage(Token) + string("."));
+    }
 }
