@@ -5,6 +5,7 @@
 #include "Keywords.h"
 #include "GlobalFunctions.h"
 #include "Lexer.h"
+#include "Token.h"
 #include <string>
 #include <fstream>
 #include <sstream>

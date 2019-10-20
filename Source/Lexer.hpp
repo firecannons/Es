@@ -7,9 +7,10 @@ void Lexer::Initialize()
     Tokens.clear();
     SavedWordType = TEXT_TYPE::ALNUM;
     Mode = LEXER_MODE::NORMAL;
+    LineNumber = 1;
 }
 
-vector<string> Lexer::Lex(const string & InputCode)
+vector<Token> Lexer::Lex(const string & InputCode)
 {
     Initialize();
     
@@ -30,6 +31,10 @@ vector<string> Lexer::Lex(const string & InputCode)
         else if(Mode == LEXER_MODE::ASM_BLOCK)
         {
             DoAsmBlockMode(InputCode[Position]);
+        }
+        if(string(1, InputCode[Position]) == GlobalKeywords.ReservedWords["NEW_LINE"])
+        {
+            LineNumber = LineNumber + 1;
         }
         Position = Position + 1;
     }
@@ -132,7 +137,7 @@ void Lexer::AppendSavedWordToTokens()
 {
     if(SavedWord.size() > 0)
     {
-        Tokens.push_back(SavedWord);
+        Tokens.push_back(Token(SavedWord, LineNumber));
         SavedWord.clear();
     }
 }

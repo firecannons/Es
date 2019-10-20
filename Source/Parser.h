@@ -4,6 +4,7 @@
 
 #include "GlobalFunctions.h"
 #include "BaseType.h"
+#include "Token.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -41,31 +42,29 @@ public:
     string CurrentCodeFileName;
     PARSER_STATE State;
     unsigned int Position;
-    vector<string> Tokens;
-    string Token;
+    vector<Token> Tokens;
+    Token CurrentToken;
     string OutputAsm;
     bool HasToken;
     vector<string> SavedUsingIdents;
-    unsigned int LineNumber;
     map<string, BaseType> TypeTable;
     TemplatedType CurrentClass;
     Scope GlobalScope;
     vector<Scope *> ScopeStack;
     Function * CurrentFunction;
     
-    string Parse(const vector<string> & Tokens, const string & CodeFileName);
+    string Parse(const vector<Token> & Tokens, const string & CodeFileName);
     void RunParse();
-    void Initialize(const vector<string> & Tokens, const string & CodeFileName);
+    void Initialize(const vector<Token> & Tokens, const string & CodeFileName);
     void GetFirstToken();
     void GetNextToken();
     bool IsNextToken();
     void Operate();
-    void IncreaseLineNumberIfNewline();
     void ParseStartOfLine();
     void ParseExpectUsingIdent();
     void ParseExpectUsingDotOrNewline();
-    void OutputStandardErrorMessage(const string & Message);
-    string GetErrorLineNumberText();
+    void OutputStandardErrorMessage(const string & Message, const Token & OutToken);
+    string GetErrorLineNumberText(const Token & OutToken);
     string InsteadErrorMessage(const string & WrongString);
     string ConvertSavedUsingIdentsToPath();
     void ParseExpectClassName();

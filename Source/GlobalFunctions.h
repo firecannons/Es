@@ -1,6 +1,7 @@
 #ifndef GLOBALFUNCTIONS_H
 #define GLOBALFUNCTIONS_H
 
+#include "Token.h"
 #include <iostream>
 #include <stdlib.h>
 #include <vector>
@@ -24,12 +25,12 @@ void PrintError(const string & ErrorMessage)
     }
 }
 
-void OutputTokens(const vector<string> & Tokens)
+void OutputTokens(const vector<Token> & Tokens)
 {
     unsigned int Index = 0;
     while(Index < Tokens.size())
     {
-        cout << "'" << Tokens[Index] << "'" << endl;
+        cout << "'" << Tokens[Index].Contents << "'" << endl;
         Index = Index + 1;
     }
 }

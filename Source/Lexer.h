@@ -3,6 +3,7 @@
 #define LEXER_H
 
 #include "Keywords.h"
+#include "Token.h"
 #include <string>
 #include <vector>
 #include <cctype>
@@ -35,13 +36,14 @@ class Lexer
 public:
     unsigned int Position;
     string SavedWord;
-    vector<string> Tokens;
+    vector<Token> Tokens;
     TEXT_TYPE SavedWordType;
     LEXER_MODE Mode;
+    unsigned int LineNumber;
     
     
     void Initialize();
-    vector<string> Lex(const string & InputCode);
+    vector<Token> Lex(const string & InputCode);
     void DoAsmBlockMode(const char InChar);
     bool IsEndOfString(const string & Haystack, const string & Needle);
     void DoSingleLineCommentMode(const char InChar);

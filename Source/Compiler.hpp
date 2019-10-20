@@ -30,7 +30,7 @@ string Compiler::ReadInputFile(const string & SourceProgram)
 string Compiler::CompileToOutputText(const string & InputCode, const string & SourceFile)
 {
     Lexer FirstLex;
-    vector<string> Tokens = FirstLex.Lex(InputCode);
+    vector<Token> Tokens = FirstLex.Lex(InputCode);
     Parser FirstParser;
     string AsmString = FirstParser.Parse(Tokens, SourceFile);
     return AsmString;

@@ -1,12 +1,12 @@
 #include "Parser.h"
 
-string Parser::Parse(const vector<string> & Tokens, const string & CodeFileName)
+string Parser::Parse(const vector<Token> & Tokens, const string & CodeFileName)
 {
     Initialize(Tokens, CodeFileName);
     
     RunParse();
     
-    return string("asm here ") + Tokens[0] + string(" ") + OutputAsm;
+    return string("asm here ") + Tokens[0].Contents + string(" ") + OutputAsm;
 }
 
 void Parser::RunParse()
@@ -19,7 +19,7 @@ void Parser::RunParse()
     }
 }    
 
-void Parser::Initialize(const vector<string> & Tokens, const string & CodeFileName)
+void Parser::Initialize(const vector<Token> & Tokens, const string & CodeFileName)
 {
     this->Tokens = Tokens;
     State = PARSER_STATE::START_OF_LINE;
@@ -27,7 +27,6 @@ void Parser::Initialize(const vector<string> & Tokens, const string & CodeFileNa
     OutputAsm = string("");
     HasToken = false;
     SavedUsingIdents.clear();
-    LineNumber = 0;
     ScopeStack.push_back(& GlobalScope);
     CurrentCodeFileName = CodeFileName;
 }
@@ -42,7 +41,7 @@ void Parser::GetNextToken()
     {
         HasToken = true;
     }
-    Token = Tokens[Position];
+    CurrentToken = Tokens[Position];
 }
 
 bool Parser::IsNextToken()
@@ -118,28 +117,19 @@ void Parser::Operate()
     {
         ParseExpectParamType();
     }
-    IncreaseLineNumberIfNewline();
-}
-
-void Parser::IncreaseLineNumberIfNewline()
-{
-    if(Token == GlobalKeywords.ReservedWords["NEW_LINE"])
-    {
-        LineNumber = LineNumber + 1;
-    }
 }
 
 void Parser::ParseStartOfLine()
 {
-    if(Token == GlobalKeywords.ReservedWords["USING"])
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["USING"])
     {
         State = PARSER_STATE::EXPECT_USING_IDENT;
     }
-    else if(Token == GlobalKeywords.ReservedWords["CLASS"])
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["CLASS"])
     {
         State = PARSER_STATE::EXPECT_CLASS_NAME;
     }
-    else if(Token == GlobalKeywords.ReservedWords["ACTION"])
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ACTION"])
     {
         State = PARSER_STATE::EXPECT_ACTION_NAME_OR_ACTION_TYPE;
     }
@@ -147,17 +137,17 @@ void Parser::ParseStartOfLine()
 
 void Parser::ParseExpectUsingIdent()
 {
-    SavedUsingIdents.push_back(Token);
+    SavedUsingIdents.push_back(CurrentToken.Contents);
     State = PARSER_STATE::EXPECT_USING_DOT_OR_NEWLINE;
 }
 
 void Parser::ParseExpectUsingDotOrNewline()
 {
-    if(Token == GlobalKeywords.ReservedWords["DOT"])
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["DOT"])
     {
         State = PARSER_STATE::EXPECT_USING_IDENT;
     }
-    else if(Token == GlobalKeywords.ReservedWords["NEW_LINE"])
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         string Path = ConvertSavedUsingIdentsToPath();
         State = PARSER_STATE::START_OF_LINE;
@@ -166,13 +156,13 @@ void Parser::ParseExpectUsingDotOrNewline()
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected newline or period at end of 'using' statement ") + InsteadErrorMessage(Token));
+        OutputStandardErrorMessage(string("Expected newline or period at end of 'using' statement ") + InsteadErrorMessage(CurrentToken.Contents), CurrentToken);
     }
 }
 
-void Parser::OutputStandardErrorMessage(const string & Message)
+void Parser::OutputStandardErrorMessage(const string & Message, const Token & OutToken)
 {
-    PrintError(GetFileNameErrorMessage() + GetErrorLineNumberText() + Message);
+    PrintError(GetFileNameErrorMessage() + GetErrorLineNumberText(OutToken) + Message);
 }
 
 string Parser::GetFileNameErrorMessage()
@@ -181,9 +171,9 @@ string Parser::GetFileNameErrorMessage()
     return FileNameErrorMessage;
 }
 
-string Parser::GetErrorLineNumberText()
+string Parser::GetErrorLineNumberText(const Token & OutToken)
 {
-    string LineNumberError = string("Error on line ") + to_string(LineNumber + 1) + string(": ");
+    string LineNumberError = string("Error on line ") + to_string(OutToken.LineNumber) + string(": ");
     return LineNumberError;
 }
 
@@ -209,21 +199,21 @@ string Parser::ConvertSavedUsingIdentsToPath()
 
 void Parser::ParseExpectClassName()
 {
-    if(IsValidClassName(Token) == false)
+    if(IsValidClassName(CurrentToken.Contents) == false)
     {
-        OutputStandardErrorMessage(GetNameErrorText(Token) + string(" is not a valid class name."));
+        OutputStandardErrorMessage(GetNameErrorText(CurrentToken.Contents) + string(" is not a valid class name."), CurrentToken);
     }
-    else if(TypeTableContains(Token) != false)
+    else if(TypeTableContains(CurrentToken.Contents) != false)
     {
-        OutputStandardErrorMessage(string("A class named ") + Token + string(" has already been declared."));
+        OutputStandardErrorMessage(string("A class named ") + CurrentToken.Contents + string(" has already been declared."), CurrentToken);
     }
     else
     {
         BaseType NewClassBase;
-        NewClassBase.Name = Token;
+        NewClassBase.Name = CurrentToken.Contents;
         NewClassBase.InitializeBlankCompiledTemplate();
-        TypeTable.insert(pair<string,BaseType>(Token, NewClassBase));
-        CurrentClass.Type = &TypeTable[Token];
+        TypeTable.insert(pair<string,BaseType>(CurrentToken.Contents, NewClassBase));
+        CurrentClass.Type = &TypeTable[CurrentToken.Contents];
         State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE;
     }
 }
@@ -253,17 +243,17 @@ bool Parser::TypeTableContains(const string & Input)
 
 void Parser::ParseExpectTemplateStartOrNewlineOrSize()
 {
-    if(Token == GlobalKeywords.ReservedWords["NEW_LINE"])
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         CurrentClass.Type->InitializeBlankCompiledTemplate();
         CurrentClass.Type->IsTemplated = false;
         State = PARSER_STATE::START_OF_LINE;
     }
-    else if(Token == GlobalKeywords.ReservedWords["LEFT_BRACKET"])
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LEFT_BRACKET"])
     {
         State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME;
     }
-    else if(Token == GlobalKeywords.ReservedWords["SIZE"])
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["SIZE"])
     {
         CurrentClass.Type->InitializeBlankCompiledTemplate();
         CurrentClass.Type->IsTemplated = false;
@@ -271,20 +261,20 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected left bracket or newline ") + InsteadErrorMessage(Token) + string("."));
+        OutputStandardErrorMessage(string("Expected left bracket or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
 void Parser::ParseExpectClassTemplateName()
 {
-    if(IsValidClassTemplateName(Token) == true)
+    if(IsValidClassTemplateName(CurrentToken.Contents) == true)
     {
-        CurrentClass.Type->PossibleTemplates.push_back(Token);
+        CurrentClass.Type->PossibleTemplates.push_back(CurrentToken.Contents);
         State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_END_OR_COMMA;
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected valid template name for class ") + InsteadErrorMessage(Token) + string("."));
+        OutputStandardErrorMessage(string("Expected valid template name for class ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
@@ -311,42 +301,42 @@ bool Parser::IsValidClassTemplateName(const string & Input)
 
 void Parser::ParseExpectClassTemplateEndOrComma()
 {
-    if(Token == GlobalKeywords.ReservedWords["RIGHT_BRACKET"])
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RIGHT_BRACKET"])
     {
         State = PARSER_STATE::EXPECT_NEWLINE;
     }
-    else if(Token == GlobalKeywords.ReservedWords["COMMA"])
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["COMMA"])
     {
         State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME;
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected right bracket or newline ") + InsteadErrorMessage(Token) + string("."));
+        OutputStandardErrorMessage(string("Expected right bracket or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
 void Parser::ParseExpectNewline()
 {
-    if(Token == GlobalKeywords.ReservedWords["NEW_LINE"])
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         State = PARSER_STATE::START_OF_LINE;
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected newline ") + InsteadErrorMessage(Token) + string("."));
+        OutputStandardErrorMessage(string("Expected newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
 void Parser::ParseExpectClassSizeNumber()
 {
-    if(IsNumber(Token) == true)
+    if(IsNumber(CurrentToken.Contents) == true)
     {
-        CurrentClass.Type->CompiledTemplates[0].Size = stoi(Token);
+        CurrentClass.Type->CompiledTemplates[0].Size = stoi(CurrentToken.Contents);
         State = PARSER_STATE::START_OF_LINE;
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected a number ") + InsteadErrorMessage(Token) + string("."));
+        OutputStandardErrorMessage(string("Expected a number ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
@@ -367,14 +357,13 @@ bool Parser::IsNumber(const string & Input)
 
 void Parser::ParseExpectActionName()
 {
-    cout << Token << endl;
-    if(DoesSetContain(Token, GlobalKeywords.OverloadableOperators) == true || IsValidActionName(Token) == true)
+    if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.OverloadableOperators) == true || IsValidActionName(CurrentToken.Contents) == true)
     {
         State = PARSER_STATE::EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE;
     }
     else
     {
-        OutputStandardErrorMessage(GetNameErrorText(Token) + string(" is not a valid action name."));
+        OutputStandardErrorMessage(GetNameErrorText(CurrentToken.Contents) + string(" is not a valid action name."), CurrentToken);
     }
 }
 
@@ -386,21 +375,21 @@ bool Parser::IsValidActionName(const string & Input)
 
 void Parser::ParseExpectReturnsOrLParenOrNewline()
 {
-    if(Token == GlobalKeywords.ReservedWords["RETURNS"])
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURNS"])
     {
         State = PARSER_STATE::EXPECT_RETURN_TYPE;
     }
-    else if(Token == GlobalKeywords.ReservedWords["LPAREN"])
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LPAREN"])
     {
         State = PARSER_STATE::EXPECT_PARAM_TYPE;
     }
-    else if(Token == GlobalKeywords.ReservedWords["NEW_LINE"])
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         State = PARSER_STATE::START_OF_LINE;
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected 'returns' or '(' ") + InsteadErrorMessage(Token) + string("."));
+        OutputStandardErrorMessage(string("Expected 'returns' or '(' ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
@@ -414,7 +403,7 @@ void Parser::ParseExpectParamType()
 
 void Parser::ParseExpectActionNameOrActionType()
 {
-    if(Token == GlobalKeywords.ReservedWords["ASM"])
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ASM"])
     {
         State = PARSER_STATE::EXPECT_ACTION_NAME;
     }

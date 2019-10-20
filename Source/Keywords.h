@@ -6,6 +6,7 @@
 #include <map>
 #include <unordered_set>
 #include <iostream>
+using namespace std;
 
 class Keywords
 {
