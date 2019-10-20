@@ -4,6 +4,7 @@
 
 #include "TemplatedType.h"
 #include "Object.h"
+#include "Scope.h"
 #include <string>
 using namespace std;
 
@@ -13,7 +14,8 @@ class Function
 public:
     string Name;
     TemplatedType ReturnType;
-    vector<Object> Parameters;
+    Scope MyScope;
+    vector<Object*> Parameters;
 };
 
 #include "Function.hpp"

@@ -16,7 +16,6 @@ class CompiledTemplate
 public:
     vector<TemplatedType> Templates;
     unsigned int Size;
-    bool IsTemplated;
     Scope TheScope;
     
 };

@@ -7,21 +7,6 @@ void Lexer::Initialize()
     Tokens.clear();
     SavedWordType = TEXT_TYPE::ALNUM;
     Mode = LEXER_MODE::NORMAL;
-    
-    InitializeMultiCharOps();
-}
-
-void Lexer::InitializeMultiCharOps()
-{
-    CompleteOps.emplace(string("<="));
-    CompleteOps.emplace(string(">="));
-    CompleteOps.emplace(string("//"));
-    CompleteOps.emplace(string("("));
-    CompleteOps.emplace(string(")"));
-    CompleteOps.emplace(string("<"));
-    CompleteOps.emplace(string(">"));
-    CompleteOps.emplace(string(":"));
-    CompleteOps.emplace(string("="));
 }
 
 vector<string> Lexer::Lex(const string & InputCode)
@@ -134,12 +119,7 @@ void Lexer::DoNormalLexMode(const char InChar)
 
 bool Lexer::IsSavedWordCompleteOp()
 {
-    bool Found = true;
-    unordered_set<string>::const_iterator End = CompleteOps.find(SavedWord);
-    if (End == CompleteOps.end())
-    {
-        Found = false;
-    }
+    bool Found = DoesSetContain(SavedWord, GlobalKeywords.AllOperators);
     return Found;
 }
 

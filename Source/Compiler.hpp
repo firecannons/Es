@@ -10,7 +10,7 @@ void Compiler::Compile(const string & SourceFile, const string & OutputFile)
 string Compiler::CompileToAsm(const string & SourceFile)
 {
     string InputText = ReadInputFile(SourceFile);
-    string OutputText = CompileToOutputText(InputText);
+    string OutputText = CompileToOutputText(InputText, SourceFile);
     return OutputText;
 }
 
@@ -27,12 +27,12 @@ string Compiler::ReadInputFile(const string & SourceProgram)
 }
 
 
-string Compiler::CompileToOutputText(const string & InputCode)
+string Compiler::CompileToOutputText(const string & InputCode, const string & SourceFile)
 {
     Lexer FirstLex;
     vector<string> Tokens = FirstLex.Lex(InputCode);
     Parser FirstParser;
-    string AsmString = FirstParser.Parse(Tokens);
+    string AsmString = FirstParser.Parse(Tokens, SourceFile);
     return AsmString;
 }
 

@@ -5,6 +5,7 @@
 #include "TemplatedType.h"
 #include "Object.h"
 #include <string>
+#include <map>
 using namespace std;
 
 class Scope
@@ -12,8 +13,8 @@ class Scope
     
 public:
     int Offset;
-    vector<Function> MemberFunctions;
-    vector<Object> MemberObjects;
+    map<string, Function> MemberFunctions;
+    map<string, Object> MemberObjects;
 };
 
 #include "Function.hpp"

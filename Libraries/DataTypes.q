@@ -3,7 +3,7 @@
 /* comment
 test 3*/
 class Bool size 1
-    action asm on create
+    action asm Bool
         push ebp
         mov ebp, esp
     
@@ -24,11 +24,11 @@ end
 
 class Integer size 4
         
-        action asm on create
+        action asm Bool
             
         end
         
-        action asm on = ( Integer Source )
+        action asm = ( Integer Source )
             push ebp
             mov ebp, esp
             
@@ -60,7 +60,7 @@ class Integer size 4
             pop ebp
         end
         
-        action asm on + ( Integer Rhs ) returns Integer
+        action asm + ( Integer Rhs ) returns Integer
             push ebp
             mov ebp, esp
             
@@ -86,7 +86,7 @@ class Integer size 4
             pop ebp
         end
         
-        action asm on - ( Integer Rhs ) returns Integer
+        action asm - ( Integer Rhs ) returns Integer
             push ebp
             mov ebp, esp
             
@@ -112,7 +112,7 @@ class Integer size 4
             pop ebp
         end
         
-        action asm on > ( Integer Rhs ) returns Bool
+        action asm > ( Integer Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -131,7 +131,7 @@ class Integer size 4
             cmp dword ecx, eax
             setg byte al
             
-            ; move result onto stack
+            ; move resultto stack
             add ebx, 8
             mov byte [ebx], al
             
@@ -140,7 +140,7 @@ class Integer size 4
             
         end
         
-        action asm on >= ( Integer Rhs ) returns Bool
+        action asm >= ( Integer Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -159,7 +159,7 @@ class Integer size 4
             cmp dword ecx, eax
             setge byte al
             
-            ; move result onto stack
+            ; move resultto stack
             add ebx, 8
             mov byte [ebx], al
             
@@ -168,7 +168,7 @@ class Integer size 4
             
         end
         
-        action asm on == ( Integer Rhs ) returns Bool
+        action asm == ( Integer Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -187,7 +187,7 @@ class Integer size 4
             cmp dword ecx, eax
             sete byte al
             
-            ; move result onto stack
+            ; move resultto stack
             add ebx, 8
             mov byte [ebx], al
             
@@ -195,7 +195,7 @@ class Integer size 4
             pop ebp
         end
         
-        action asm on < ( Integer Rhs ) returns Bool
+        action asm < ( Integer Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -222,7 +222,7 @@ class Integer size 4
             pop ebp
         end
         
-        action asm on <= ( Integer Rhs ) returns Bool
+        action asm <= ( Integer Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -249,7 +249,7 @@ class Integer size 4
             pop ebp
         end
         
-        action asm on != ( Integer Rhs ) returns Bool
+        action asm != ( Integer Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -268,7 +268,7 @@ class Integer size 4
             cmp dword ecx, eax
             setne byte al
             
-            ; move result onto stack
+            ; move resultto stack
             add ebx, 8
             mov byte [ebx], al
             
@@ -279,7 +279,7 @@ end
 
 class Byte size 1
         
-        action asm on create
+        action asm Byte
             push ebp
             mov ebp, esp
             
@@ -295,7 +295,7 @@ class Byte size 1
             pop ebp
         end
         
-        action asm on = ( Byte Source )
+        action asm = ( Byte Source )
             push ebp
             mov ebp, esp
             
@@ -327,7 +327,7 @@ class Byte size 1
             pop ebp
         end
         
-        action asm on + ( Byte Rhs ) returns Byte
+        action asm + ( Byte Rhs ) returns Byte
             push ebp
             mov ebp, esp
             
@@ -353,7 +353,7 @@ class Byte size 1
             pop ebp
         end
         
-        action asm on - ( Byte Rhs ) returns Byte
+        action asm - ( Byte Rhs ) returns Byte
             push ebp
             mov ebp, esp
             
@@ -379,7 +379,7 @@ class Byte size 1
             pop ebp
         end
         
-        action asm on > ( Byte Rhs ) returns Bool
+        action asm > ( Byte Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -407,7 +407,7 @@ class Byte size 1
             
         end
         
-        action asm on >= ( Byte Rhs ) returns Bool
+        action asm >= ( Byte Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -434,7 +434,7 @@ class Byte size 1
             pop ebp
         end
         
-        action asm on == ( Byte Rhs ) returns Bool
+        action asm == ( Byte Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -461,7 +461,7 @@ class Byte size 1
             pop ebp
         end
         
-        action asm on < ( Byte Rhs ) returns Bool
+        action asm < ( Byte Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -489,7 +489,7 @@ class Byte size 1
             
         end
         
-        action asm on <= ( Byte Rhs ) returns Bool
+        action asm <= ( Byte Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -516,7 +516,7 @@ class Byte size 1
             pop ebp
         end
         
-        action asm on != ( Byte Rhs ) returns Bool
+        action asm != ( Byte Rhs ) returns Bool
             push ebp
             mov ebp, esp
             
@@ -548,10 +548,10 @@ end
 class Pointer
     Integer Position
     
-    action on create
+    action create
     end
     
-    action on = ( Pointer Source )
+    action = ( Pointer Source )
         Me : Position = Source : Position
     end
 end
@@ -560,7 +560,7 @@ class CapTest
     Byte B1
     Byte B2
     
-    action on create
+    action CapTest
     end
 end
 
@@ -568,7 +568,7 @@ class CapTest2
     CapTest C1
     CapTest C2
     
-    action on create
+    action CapTest2
     end
 end
 
@@ -576,6 +576,6 @@ class CapTest3
     CapTest2 C1
     CapTest2 C2
     
-    action on create
+    action CapTest3
     end
 end

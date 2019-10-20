@@ -2,6 +2,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
+#include "Keywords.h"
 #include <string>
 #include <vector>
 #include <cctype>
@@ -35,13 +36,11 @@ public:
     unsigned int Position;
     string SavedWord;
     vector<string> Tokens;
-    unordered_set<string> CompleteOps;
     TEXT_TYPE SavedWordType;
     LEXER_MODE Mode;
     
     
     void Initialize();
-    void InitializeMultiCharOps();
     vector<string> Lex(const string & InputCode);
     void DoAsmBlockMode(const char InChar);
     bool IsEndOfString(const string & Haystack, const string & Needle);

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <vector>
+#include <map>
+#include <unordered_set>
 using namespace std;
 
 const char FAIL_COLOR_TEXT[] = "\033[91m";
@@ -18,7 +20,7 @@ void PrintError(const string & ErrorMessage)
     cout << FAIL_COLOR_TEXT << ErrorMessage << END_COLOR_TEXT << endl;
     if(END_ON_ERROR == true)
     {
-        exit (EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -30,6 +32,26 @@ void OutputTokens(const vector<string> & Tokens)
         cout << "'" << Tokens[Index] << "'" << endl;
         Index = Index + 1;
     }
+}
+
+bool DoesSetContain(const string & SearchWord, const unordered_set<string> & MySet)
+{
+    bool Found = true;
+    if(MySet.count(SearchWord) == 0)
+    {
+        Found = false;
+    }
+    return Found;
+}
+
+bool DoesMapContain(const string & SearchWord, const map<string, string> & MyMap)
+{
+    bool Found = true;
+    if(MyMap.count(SearchWord) == 0)
+    {
+        Found = false;
+    }
+    return Found;
 }
 
 #endif

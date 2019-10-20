@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <locale>
+#include <unordered_set>
 using namespace std;
 
 enum PARSER_STATE
@@ -21,8 +22,9 @@ enum PARSER_STATE
     EXPECT_CLASS_TEMPLATE_NAME,
     EXPECT_CLASS_TEMPLATE_END_OR_COMMA,
     EXPECT_NEWLINE,
+    EXPECT_ACTION_NAME_OR_ACTION_TYPE,
     EXPECT_ACTION_NAME,
-    EXPECT_RETURNS_OR_LPAREN,
+    EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE,
     EXPECT_PARAM_TYPE,
     EXPECT_PARAM_NAME,
     EXPECT_COMMA_OR_LPAREN,
@@ -36,12 +38,12 @@ class Parser
 {
     
 public:
+    string CurrentCodeFileName;
     PARSER_STATE State;
     unsigned int Position;
     vector<string> Tokens;
     string Token;
     string OutputAsm;
-    map<string, string> Keywords;
     bool HasToken;
     vector<string> SavedUsingIdents;
     unsigned int LineNumber;
@@ -51,10 +53,9 @@ public:
     vector<Scope *> ScopeStack;
     Function * CurrentFunction;
     
-    void InsertKeywords();
-    string Parse(const vector<string> & Tokens);
+    string Parse(const vector<string> & Tokens, const string & CodeFileName);
     void RunParse();
-    void Initialize(const vector<string> & Tokens);
+    void Initialize(const vector<string> & Tokens, const string & CodeFileName);
     void GetFirstToken();
     void GetNextToken();
     bool IsNextToken();
@@ -81,9 +82,11 @@ public:
     bool IsNumber(const string & Input);
     void ParseExpectActionName();
     bool IsValidActionName(const string & Input);
-    void ParseExpectReturnsOrLParen();
+    void ParseExpectReturnsOrLParenOrNewline();
     void ParseExpectReturnType();
     void ParseExpectParamType();
+    string GetFileNameErrorMessage();
+    void ParseExpectActionNameOrActionType();
 };
 
 #include "Compiler.h"
