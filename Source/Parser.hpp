@@ -109,13 +109,9 @@ void Parser::Operate()
     {
         ParseExpectReturnsOrLParenOrNewline();
     }
-    else if(State == PARSER_STATE::EXPECT_RETURN_TYPE)
+    else if(State == PARSER_STATE::EXPECT_TYPE)
     {
-        ParseExpectReturnType();
-    }
-    else if(State == PARSER_STATE::EXPECT_PARAM_TYPE)
-    {
-        ParseExpectParamType();
+        ParseExpectType();
     }
 }
 
@@ -249,7 +245,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
         CurrentClass.Type->IsTemplated = false;
         State = PARSER_STATE::START_OF_LINE;
     }
-    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LEFT_BRACKET"])
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME;
     }
@@ -261,7 +257,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected left bracket or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+        OutputStandardErrorMessage(string("Expected '<' or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
@@ -301,7 +297,7 @@ bool Parser::IsValidClassTemplateName(const string & Input)
 
 void Parser::ParseExpectClassTemplateEndOrComma()
 {
-    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RIGHT_BRACKET"])
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
     {
         State = PARSER_STATE::EXPECT_NEWLINE;
     }
@@ -311,7 +307,7 @@ void Parser::ParseExpectClassTemplateEndOrComma()
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected right bracket or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+        OutputStandardErrorMessage(string("Expected '>' or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
@@ -377,11 +373,11 @@ void Parser::ParseExpectReturnsOrLParenOrNewline()
 {
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURNS"])
     {
-        State = PARSER_STATE::EXPECT_RETURN_TYPE;
+        State = PARSER_STATE::EXPECT_TYPE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LPAREN"])
     {
-        State = PARSER_STATE::EXPECT_PARAM_TYPE;
+        State = PARSER_STATE::EXPECT_TYPE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
@@ -393,12 +389,16 @@ void Parser::ParseExpectReturnsOrLParenOrNewline()
     }
 }
 
-void Parser::ParseExpectReturnType()
+void Parser::ParseExpectType()
 {
-}
-
-void Parser::ParseExpectParamType()
-{
+    if(IsValidIdent(CurrentToken.Contents) == true)
+    {
+        State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_IDENT;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected valid type name ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
 }
 
 void Parser::ParseExpectActionNameOrActionType()
@@ -411,5 +411,20 @@ void Parser::ParseExpectActionNameOrActionType()
     {
         ParseExpectActionName();
     }
-    
+}
+
+void Parser::ParseExpectTemplateStartOrIdent()
+{
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
+    {
+        // At this point, parse the template
+    }
+    else if(IsValidIdent(CurrentToken.Contents) == true)
+    {
+        // Go to the next part
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected '<' or valid variable name ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
 }

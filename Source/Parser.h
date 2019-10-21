@@ -26,11 +26,11 @@ enum PARSER_STATE
     EXPECT_ACTION_NAME_OR_ACTION_TYPE,
     EXPECT_ACTION_NAME,
     EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE,
-    EXPECT_PARAM_TYPE,
     EXPECT_PARAM_NAME,
     EXPECT_COMMA_OR_LPAREN,
     EXPECT_NEWLINE_OR_RETURNS,
-    EXPECT_RETURN_TYPE
+    EXPECT_TYPE,
+    EXPECT_TEMPLATE_START_OR_IDENT
 };
 
 const string EXTENSION = string(".q");
@@ -82,10 +82,10 @@ public:
     void ParseExpectActionName();
     bool IsValidActionName(const string & Input);
     void ParseExpectReturnsOrLParenOrNewline();
-    void ParseExpectReturnType();
-    void ParseExpectParamType();
+    void ParseExpectType();
     string GetFileNameErrorMessage();
     void ParseExpectActionNameOrActionType();
+    void ParseExpectTemplateStartOrIdent();
 };
 
 #include "Compiler.h"

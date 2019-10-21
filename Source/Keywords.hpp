@@ -10,8 +10,8 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("BACK_SLASH"), string("\\")));
     ReservedWords.insert(pair<string,string>(string("FORWARD_SLASH"), string("/")));
     ReservedWords.insert(pair<string,string>(string("NEW_LINE"), string("\n")));
-    ReservedWords.insert(pair<string,string>(string("LEFT_BRACKET"), string("<")));
-    ReservedWords.insert(pair<string,string>(string("RIGHT_BRACKET"), string(">")));
+    ReservedWords.insert(pair<string,string>(string("LESS_THAN"), string("<")));
+    ReservedWords.insert(pair<string,string>(string("GREATER_THAN"), string(">")));
     ReservedWords.insert(pair<string,string>(string("COMMA"), string(",")));
     ReservedWords.insert(pair<string,string>(string("SIZE"), string("size")));
     ReservedWords.insert(pair<string,string>(string("RETURNS"), string("returns")));
