@@ -29,6 +29,9 @@ void Parser::Initialize(const vector<Token> & Tokens, const string & CodeFileNam
     SavedUsingIdents.clear();
     ScopeStack.push_back(& GlobalScope);
     CurrentCodeFileName = CodeFileName;
+    CurrentFunction = NULL;
+    CurrentClass.Type = NULL;
+    IsAsmFunction = false;
 }
 
 void Parser::GetNextToken()
@@ -113,6 +116,18 @@ void Parser::Operate()
     {
         ParseExpectType();
     }
+    else if(State == PARSER_STATE::EXPECT_TEMPLATE_START_OR_IDENT)
+    {
+        ParseExpectTemplateStartOrNewline();
+    }
+    else if(State == PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE)
+    {
+        ParseExpectTemplateStartOrNewline();
+    }
+    else if(State == PARSER_STATE::EXPECT_TOKEN_UNTIL_END)
+    {
+        ParseExpectTokenUntilEnd();
+    }
 }
 
 void Parser::ParseStartOfLine()
@@ -127,7 +142,14 @@ void Parser::ParseStartOfLine()
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ACTION"])
     {
-        State = PARSER_STATE::EXPECT_ACTION_NAME_OR_ACTION_TYPE;
+        if(CurrentFunction != NULL)
+        {
+            OutputStandardErrorMessage(string("Cannot create new action while inside another action."), CurrentToken);
+        }
+        else
+        {
+            State = PARSER_STATE::EXPECT_ACTION_NAME_OR_ACTION_TYPE;
+        }
     }
 }
 
@@ -243,16 +265,21 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
     {
         CurrentClass.Type->InitializeBlankCompiledTemplate();
         CurrentClass.Type->IsTemplated = false;
+        CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
+        ScopeStack.push_back(&CurrentClass.Templates->MyScope);
         State = PARSER_STATE::START_OF_LINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
+        CurrentClass.Type->IsTemplated = true;
         State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["SIZE"])
     {
         CurrentClass.Type->InitializeBlankCompiledTemplate();
         CurrentClass.Type->IsTemplated = false;
+        CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
+        ScopeStack.push_back(&CurrentClass.Templates->MyScope);
         State = PARSER_STATE::EXPECT_CLASS_SIZE_NUMBER;
     }
     else
@@ -315,7 +342,14 @@ void Parser::ParseExpectNewline()
 {
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
-        State = PARSER_STATE::START_OF_LINE;
+        if(CurrentClass.Type->IsTemplated == true)
+        {
+            State = PARSER_STATE::EXPECT_TOKEN_UNTIL_END;
+        }
+        else
+        {
+            State = PARSER_STATE::START_OF_LINE;
+        }
     }
     else
     {
@@ -327,7 +361,7 @@ void Parser::ParseExpectClassSizeNumber()
 {
     if(IsNumber(CurrentToken.Contents) == true)
     {
-        CurrentClass.Type->CompiledTemplates[0].Size = stoi(CurrentToken.Contents);
+        CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX].Size = stoi(CurrentToken.Contents);
         State = PARSER_STATE::START_OF_LINE;
     }
     else
@@ -355,6 +389,10 @@ void Parser::ParseExpectActionName()
 {
     if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.OverloadableOperators) == true || IsValidActionName(CurrentToken.Contents) == true)
     {
+        Function NewFunction;
+        NewFunction.IsAsm = IsAsmFunction;
+        CurrentFunction = &NewFunction;
+        GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
         State = PARSER_STATE::EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE;
     }
     else
@@ -374,10 +412,12 @@ void Parser::ParseExpectReturnsOrLParenOrNewline()
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURNS"])
     {
         State = PARSER_STATE::EXPECT_TYPE;
+        TypeMode = TYPE_PARSE_MODE::PARSING_RETURNS;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LPAREN"])
     {
         State = PARSER_STATE::EXPECT_TYPE;
+        TypeMode = TYPE_PARSE_MODE::PARSING_PARAM;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
@@ -393,7 +433,14 @@ void Parser::ParseExpectType()
 {
     if(IsValidIdent(CurrentToken.Contents) == true)
     {
-        State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_IDENT;
+        if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
+        {
+            State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_IDENT;
+        }
+        else if(TypeMode == TYPE_PARSE_MODE::PARSING_RETURNS)
+        {
+            State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE;
+        }
     }
     else
     {
@@ -405,10 +452,12 @@ void Parser::ParseExpectActionNameOrActionType()
 {
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ASM"])
     {
+        IsAsmFunction = true;
         State = PARSER_STATE::EXPECT_ACTION_NAME;
     }
     else
     {
+        IsAsmFunction = false;
         ParseExpectActionName();
     }
 }
@@ -427,4 +476,39 @@ void Parser::ParseExpectTemplateStartOrIdent()
     {
         OutputStandardErrorMessage(string("Expected '<' or valid variable name ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
+}
+
+void Parser::ParseExpectTemplateStartOrNewline()
+{
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
+    {
+        // At this point, parse the template
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
+    {
+        State = PARSER_STATE::START_OF_LINE;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected '<' or valid variable name ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
+}
+
+void Parser::ParseExpectTokenUntilEnd()
+{
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"])
+    {
+        CurrentClass.Type = NULL;
+        State = PARSER_STATE::START_OF_LINE;
+    }
+    else
+    {
+        CurrentClass.Type->Tokens.push_back(CurrentToken);
+    }
+}
+
+Scope * Parser::GetCurrentScope()
+{
+    Scope * CurrentScope = ScopeStack[ScopeStack.size() - 1];
+    return CurrentScope;
 }

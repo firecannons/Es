@@ -19,6 +19,7 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("LPAREN"), string("(")));
     ReservedWords.insert(pair<string,string>(string("RPAREN"), string(")")));
     ReservedWords.insert(pair<string,string>(string("ASM"), string("asm")));
+    ReservedWords.insert(pair<string,string>(string("END"), string("end")));
 
     OverloadableOperators.emplace(string("<="));
     OverloadableOperators.emplace(string(">="));

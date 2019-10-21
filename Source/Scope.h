@@ -13,8 +13,8 @@ class Scope
     
 public:
     int Offset;
-    map<string, Function> MemberFunctions;
-    map<string, Object> MemberObjects;
+    map<string, Function> Functions;
+    map<string, Object> Objects;
 };
 
 #include "Function.hpp"

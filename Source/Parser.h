@@ -30,10 +30,20 @@ enum PARSER_STATE
     EXPECT_COMMA_OR_LPAREN,
     EXPECT_NEWLINE_OR_RETURNS,
     EXPECT_TYPE,
-    EXPECT_TEMPLATE_START_OR_IDENT
+    EXPECT_TEMPLATE_START_OR_IDENT,
+    EXPECT_TEMPLATE_START_OR_NEWLINE,
+    EXPECT_TOKEN_UNTIL_END
+};
+
+enum TYPE_PARSE_MODE
+{
+    PARSING_NEW_VARIABLE,
+    PARSING_PARAM,
+    PARSING_RETURNS
 };
 
 const string EXTENSION = string(".q");
+const unsigned int DEFAULT_COMPILED_TEMPLATE_INDEX = 0;
 
 class Parser
 {
@@ -52,6 +62,8 @@ public:
     Scope GlobalScope;
     vector<Scope *> ScopeStack;
     Function * CurrentFunction;
+    TYPE_PARSE_MODE TypeMode;
+    bool IsAsmFunction;
     
     string Parse(const vector<Token> & Tokens, const string & CodeFileName);
     void RunParse();
@@ -86,6 +98,9 @@ public:
     string GetFileNameErrorMessage();
     void ParseExpectActionNameOrActionType();
     void ParseExpectTemplateStartOrIdent();
+    void ParseExpectTemplateStartOrNewline();
+    void ParseExpectTokenUntilEnd();
+    Scope * GetCurrentScope();
 };
 
 #include "Compiler.h"

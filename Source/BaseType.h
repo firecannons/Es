@@ -15,6 +15,7 @@ public:
     vector<string> PossibleTemplates;
     vector<CompiledTemplate> CompiledTemplates;
     bool IsTemplated;
+    vector<Token> Tokens;
     
     void InitializeBlankCompiledTemplate();
 };

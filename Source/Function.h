@@ -16,6 +16,7 @@ public:
     TemplatedType ReturnType;
     Scope MyScope;
     vector<Object*> Parameters;
+    bool IsAsm;
 };
 
 #include "Function.hpp"
