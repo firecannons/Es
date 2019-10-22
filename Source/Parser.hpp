@@ -483,6 +483,7 @@ void Parser::ParseExpectTemplateStartOrNewline()
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         // At this point, parse the template
+        ParseTemplates();
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
@@ -511,4 +512,41 @@ Scope * Parser::GetCurrentScope()
 {
     Scope * CurrentScope = ScopeStack[ScopeStack.size() - 1];
     return CurrentScope;
+}
+
+void Parser::ParseTemplates()
+{
+    InitializeTemplateTokens();
+    OutputTokens(TemplateTokens);
+    //ParseTemplateTokens();
+}
+
+void Parser::InitializeTemplateTokens()
+{
+    unsigned int TemplateDeepness = 0;
+    TemplateTokens.clear();
+    TemplateTokens.push_back(Tokens[Position - 1]);
+    bool TemplatesFinished = false;
+    unsigned int Index = Position;
+    while(TemplatesFinished == false && Index < Tokens.size())
+    {
+        if(Index >= Tokens.size())
+        {
+            OutputStandardErrorMessage(string("Hit end of input while parsing template."), Tokens[Index - 1]);
+        }
+        TemplateTokens.push_back(Tokens[Index]);
+        if(Tokens[Index].Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
+        {
+            TemplateDeepness = TemplateDeepness + 1;
+        }
+        else if(Tokens[Index].Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
+        {
+            TemplateDeepness = TemplateDeepness - 1;
+            if(TemplateDeepness == 0)
+            {
+                TemplatesFinished = true;
+            }
+        }
+        Index = Index + 1;
+    }
 }

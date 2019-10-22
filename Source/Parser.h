@@ -64,6 +64,7 @@ public:
     Function * CurrentFunction;
     TYPE_PARSE_MODE TypeMode;
     bool IsAsmFunction;
+    vector<Token> TemplateTokens;
     
     string Parse(const vector<Token> & Tokens, const string & CodeFileName);
     void RunParse();
@@ -101,6 +102,8 @@ public:
     void ParseExpectTemplateStartOrNewline();
     void ParseExpectTokenUntilEnd();
     Scope * GetCurrentScope();
+    void ParseTemplates();
+    void InitializeTemplateTokens();
 };
 
 #include "Compiler.h"
