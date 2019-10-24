@@ -499,6 +499,7 @@ void Parser::ParseExpectTemplateStartOrNewline()
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
+        CurrentFunction->ReturnType = CurrentParsingType;
         State = PARSER_STATE::START_OF_LINE;
     }
     else
