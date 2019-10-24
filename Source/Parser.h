@@ -22,7 +22,7 @@ enum PARSER_STATE
     EXPECT_CLASS_SIZE_NUMBER,
     EXPECT_CLASS_TEMPLATE_NAME,
     EXPECT_CLASS_TEMPLATE_END_OR_COMMA,
-    EXPECT_NEWLINE,
+    EXPECT_CLASS_DECL_NEWLINE,
     EXPECT_ACTION_NAME_OR_ACTION_TYPE,
     EXPECT_ACTION_NAME,
     EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE,
@@ -33,7 +33,8 @@ enum PARSER_STATE
     EXPECT_TEMPLATE_START_OR_IDENT,
     EXPECT_TEMPLATE_START_OR_NEWLINE,
     EXPECT_TOKEN_UNTIL_END,
-    EXPECT_PARAMETER_NAME
+    EXPECT_PARAMETER_NAME,
+    EXPECT_RETURNS_NEWLINE
 };
 
 enum TYPE_PARSE_MODE
@@ -96,7 +97,7 @@ public:
     bool IsValidIdent(const string & Input);
     bool IsValidClassTemplateName(const string & Input);
     void ParseExpectClassTemplateEndOrComma();
-    void ParseExpectNewline();
+    void ParseExpectClassDeclNewline();
     void ParseExpectClassSizeNumber();
     bool IsNumber(const string & Input);
     void ParseExpectActionName();
@@ -123,6 +124,7 @@ public:
     TemplatedType GetTemplateFromVariable(const string & VariableName);
     string GetNextTemplateVariable();
     void ParseExpectParameterName();
+    void ParseExpectReturnsNewline();
 };
 
 #include "Compiler.h"

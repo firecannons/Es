@@ -97,9 +97,9 @@ void Parser::Operate()
     {
         ParseExpectClassTemplateEndOrComma();
     }
-    else if(State == PARSER_STATE::EXPECT_NEWLINE)
+    else if(State == PARSER_STATE::EXPECT_CLASS_DECL_NEWLINE)
     {
-        ParseExpectNewline();
+        ParseExpectClassDeclNewline();
     }
     else if(State == PARSER_STATE::EXPECT_ACTION_NAME)
     {
@@ -119,7 +119,7 @@ void Parser::Operate()
     }
     else if(State == PARSER_STATE::EXPECT_TEMPLATE_START_OR_IDENT)
     {
-        ParseExpectTemplateStartOrNewline();
+        ParseExpectTemplateStartOrIdent();
     }
     else if(State == PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE)
     {
@@ -132,6 +132,10 @@ void Parser::Operate()
     else if(State == PARSER_STATE::EXPECT_PARAMETER_NAME)
     {
         ParseExpectParameterName();
+    }
+    else if(State == PARSER_STATE::EXPECT_RETURNS_NEWLINE)
+    {
+        ParseExpectReturnsNewline();
     }
 }
 
@@ -331,7 +335,7 @@ void Parser::ParseExpectClassTemplateEndOrComma()
 {
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
     {
-        State = PARSER_STATE::EXPECT_NEWLINE;
+        State = PARSER_STATE::EXPECT_CLASS_DECL_NEWLINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["COMMA"])
     {
@@ -343,7 +347,7 @@ void Parser::ParseExpectClassTemplateEndOrComma()
     }
 }
 
-void Parser::ParseExpectNewline()
+void Parser::ParseExpectClassDeclNewline()
 {
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
@@ -495,7 +499,7 @@ void Parser::ParseExpectTemplateStartOrNewline()
     {
         // At this point, parse the template
         ParseTemplates();
-        State = PARSER_STATE::EXPECT_NEWLINE;
+        State = PARSER_STATE::EXPECT_RETURNS_NEWLINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
@@ -724,4 +728,16 @@ void Parser::ParseExpectParameterName()
     NewParamObject.Type = CurrentParsingType;
     CurrentFunction->MyScope.Objects.emplace(NewParamObject.Name, NewParamObject);
     CurrentFunction->Parameters.push_back(&NewParamObject);
+}
+
+void Parser::ParseExpectReturnsNewline()
+{
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
+    {
+        State = PARSER_STATE::START_OF_LINE;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
 }
