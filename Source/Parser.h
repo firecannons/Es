@@ -32,7 +32,8 @@ enum PARSER_STATE
     EXPECT_TYPE,
     EXPECT_TEMPLATE_START_OR_IDENT,
     EXPECT_TEMPLATE_START_OR_NEWLINE,
-    EXPECT_TOKEN_UNTIL_END
+    EXPECT_TOKEN_UNTIL_END,
+    EXPECT_PARAMETER_NAME
 };
 
 enum TYPE_PARSE_MODE
@@ -44,6 +45,7 @@ enum TYPE_PARSE_MODE
 
 const string EXTENSION = string(".q");
 const unsigned int DEFAULT_COMPILED_TEMPLATE_INDEX = 0;
+const string TEMPLATE_VARIABLE_NAME_PREFIX = "T";
 
 class Parser
 {
@@ -65,6 +67,11 @@ public:
     TYPE_PARSE_MODE TypeMode;
     bool IsAsmFunction;
     vector<Token> TemplateTokens;
+    unsigned int TemplateTokenIndex;
+    TemplatedType CurrentParsingType;
+    vector<TemplatedType> StoredParsedTemplates;
+    map<string, TemplatedType> TemplateVariableTable;
+    unsigned int TemplateVariableCounter;
     
     string Parse(const vector<Token> & Tokens, const string & CodeFileName);
     void RunParse();
@@ -103,7 +110,19 @@ public:
     void ParseExpectTokenUntilEnd();
     Scope * GetCurrentScope();
     void ParseTemplates();
-    void InitializeTemplateTokens();
+    void InitializeTemplateTokens(); 
+    void ParseTemplateTokens();
+    void InitializeTemplateParse();
+    void OperateTemplateTokens();
+    bool IsInCurrentScope(const string & VariableName);
+    bool IsInAnyScope(const string & VariableName);
+    Object * GetInCurrentScope(const string & VariableName);
+    Object * GetInAnyScope(const string & VariableName);
+    bool IsAType(const string & TypeName);
+    bool IsTemplateVariable(const string & VariableName);
+    TemplatedType GetTemplateFromVariable(const string & VariableName);
+    string GetNextTemplateVariable();
+    void ParseExpectParameterName();
 };
 
 #include "Compiler.h"

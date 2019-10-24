@@ -18,6 +18,8 @@ public:
     vector<Token> Tokens;
     
     void InitializeBlankCompiledTemplate();
+    CompiledTemplate * GetLastCompiledTemplate();
+    CompiledTemplate * GetFirstCompiledTemplate();
 };
 
 #include "BaseType.hpp"

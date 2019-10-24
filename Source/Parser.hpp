@@ -32,6 +32,7 @@ void Parser::Initialize(const vector<Token> & Tokens, const string & CodeFileNam
     CurrentFunction = NULL;
     CurrentClass.Type = NULL;
     IsAsmFunction = false;
+    TemplateVariableCounter = 0;
 }
 
 void Parser::GetNextToken()
@@ -127,6 +128,10 @@ void Parser::Operate()
     else if(State == PARSER_STATE::EXPECT_TOKEN_UNTIL_END)
     {
         ParseExpectTokenUntilEnd();
+    }
+    else if(State == PARSER_STATE::EXPECT_PARAMETER_NAME)
+    {
+        ParseExpectParameterName();
     }
 }
 
@@ -441,6 +446,8 @@ void Parser::ParseExpectType()
         {
             State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE;
         }
+        CurrentParsingType.Type = &TypeTable[CurrentToken.Contents];
+        CurrentParsingType.Templates = CurrentParsingType.Type->GetFirstCompiledTemplate();
     }
     else
     {
@@ -467,10 +474,13 @@ void Parser::ParseExpectTemplateStartOrIdent()
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         // At this point, parse the template
+        ParseTemplates();
+        State = PARSER_STATE::EXPECT_PARAMETER_NAME;
     }
     else if(IsValidIdent(CurrentToken.Contents) == true)
     {
         // Go to the next part
+        ParseExpectParameterName();
     }
     else
     {
@@ -484,6 +494,7 @@ void Parser::ParseExpectTemplateStartOrNewline()
     {
         // At this point, parse the template
         ParseTemplates();
+        State = PARSER_STATE::EXPECT_NEWLINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
@@ -518,7 +529,8 @@ void Parser::ParseTemplates()
 {
     InitializeTemplateTokens();
     OutputTokens(TemplateTokens);
-    //ParseTemplateTokens();
+    InitializeTemplateParse();
+    ParseTemplateTokens();
 }
 
 void Parser::InitializeTemplateTokens()
@@ -549,4 +561,165 @@ void Parser::InitializeTemplateTokens()
         }
         Index = Index + 1;
     }
+    Position = Index - 1;
+}
+
+void Parser::ParseTemplateTokens()
+{
+    while(TemplateTokens.size() > 3)
+    {
+        OperateTemplateTokens();
+    }
+}
+
+void Parser::InitializeTemplateParse()
+{
+    TemplateTokenIndex = 0;
+    CurrentParsingType.Type->InitializeBlankCompiledTemplate();
+    CurrentParsingType.Templates = CurrentParsingType.Type->GetLastCompiledTemplate();
+}
+
+void Parser::OperateTemplateTokens()
+{
+    if(TemplateTokens[TemplateTokenIndex + 1].Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
+    {
+        if(IsTemplateVariable(TemplateTokens[TemplateTokenIndex].Contents) == true)
+        {
+            StoredParsedTemplates.push_back(GetTemplateFromVariable(TemplateTokens[TemplateTokenIndex].Contents));
+            TemplateTokens.erase(TemplateTokens.begin() + TemplateTokenIndex);
+            TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex - 1));
+        }
+        else if(IsAType(TemplateTokens[TemplateTokenIndex].Contents) == true)
+        {
+            TemplatedType NewType;
+            NewType.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
+            NewType.Templates = NewType.Type->GetLastCompiledTemplate();
+            StoredParsedTemplates.push_back(NewType);
+            TemplateTokens.erase(TemplateTokens.begin() + TemplateTokenIndex);
+            TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex - 1));
+        }
+        else
+        {
+            OutputStandardErrorMessage(string("Unknown type name ") + TemplateTokens[TemplateTokenIndex].Contents, TemplateTokens[TemplateTokenIndex]);
+        }
+        TemplateTokenIndex = TemplateTokenIndex - 2;
+        
+    }
+    else if(TemplateTokens[TemplateTokenIndex + 1].Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
+    {
+        if(TemplateTokens[TemplateTokenIndex + 2].Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
+        {
+            TypeTable[TemplateTokens[TemplateTokenIndex].Contents].InitializeBlankCompiledTemplate();
+            CurrentParsingType.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
+            CurrentParsingType.Templates = TypeTable[TemplateTokens[TemplateTokenIndex].Contents].GetLastCompiledTemplate();
+            CurrentParsingType.Templates->Templates = StoredParsedTemplates;
+            // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
+            TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 2));
+            TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 1));
+            string TemplateVariable = GetNextTemplateVariable();
+            TemplateTokens[TemplateTokenIndex].Contents = TemplateVariable;
+            TemplateVariableTable.emplace(TemplateVariable, CurrentParsingType);
+        }
+        else
+        {
+            TemplateTokenIndex = TemplateTokenIndex + 2;
+        }
+    }
+    else
+    {
+        TemplateTokenIndex = TemplateTokenIndex + 2;
+    }
+    
+}
+
+bool Parser::IsInCurrentScope(const string & VariableName)
+{
+    bool Output = false;
+    if(DoesMapContain(VariableName, ScopeStack[ScopeStack.size() - 1]->Objects) == true)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+bool Parser::IsInAnyScope(const string & VariableName)
+{
+    bool Output = false;
+    unsigned Index = 0;
+    while(Index < ScopeStack.size() && Output == false)
+    {
+        if(DoesMapContain(VariableName, ScopeStack[ScopeStack.size() - 1 - Index]->Objects) == true)
+        {
+            Output = true;
+        }
+    }
+    return Output;
+}
+
+Object * Parser::GetInCurrentScope(const string & VariableName)
+{
+    Object * Variable = &ScopeStack[ScopeStack.size() - 1]->Objects[VariableName];
+    return Variable;
+}
+
+Object * Parser::GetInAnyScope(const string & VariableName)
+{
+    bool IsFound = false;
+    Object * Variable = NULL;
+    unsigned Index = 0;
+    while(Index < ScopeStack.size() && IsFound == false)
+    {
+        if(DoesMapContain(VariableName, ScopeStack[ScopeStack.size() - 1 - Index]->Objects) == true)
+        {
+            Variable = &ScopeStack[ScopeStack.size() - 1 - Index]->Objects[VariableName];
+            IsFound = true;
+        }
+    }
+    return Variable;
+}
+
+bool Parser::IsAType(const string & TypeName)
+{
+    bool Output = false;
+    if(DoesMapContain(TypeName, TypeTable) == true)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+bool Parser::IsTemplateVariable(const string & VariableName)
+{
+    bool Output = false;
+    if(DoesMapContain(VariableName, TemplateVariableTable) == true)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+TemplatedType Parser::GetTemplateFromVariable(const string & VariableName)
+{
+    TemplatedType Output;
+    if(DoesMapContain(VariableName, TemplateVariableTable) == true)
+    {
+        Output = TemplateVariableTable[VariableName];
+    }
+    return Output;
+}
+
+string Parser::GetNextTemplateVariable()
+{
+    string Output = TEMPLATE_VARIABLE_NAME_PREFIX + to_string(TemplateVariableCounter);
+    TemplateVariableCounter = TemplateVariableCounter + 1;
+    return Output;
+}
+
+void Parser::ParseExpectParameterName()
+{
+    Object NewParamObject;
+    NewParamObject.Name = CurrentToken.Contents;
+    NewParamObject.Type = CurrentParsingType;
+    CurrentFunction->MyScope.Objects.emplace(NewParamObject.Name, NewParamObject);
+    CurrentFunction->Parameters.push_back(&NewParamObject);
 }

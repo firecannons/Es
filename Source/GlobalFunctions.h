@@ -45,7 +45,8 @@ bool DoesSetContain(const string & SearchWord, const unordered_set<string> & MyS
     return Found;
 }
 
-bool DoesMapContain(const string & SearchWord, const map<string, string> & MyMap)
+template<class T>
+bool DoesMapContain(const string & SearchWord, const map<string, T> & MyMap)
 {
     bool Found = true;
     if(MyMap.count(SearchWord) == 0)
