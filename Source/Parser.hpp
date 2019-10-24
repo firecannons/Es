@@ -398,6 +398,7 @@ void Parser::ParseExpectActionName()
         NewFunction.IsAsm = IsAsmFunction;
         CurrentFunction = &NewFunction;
         GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
+        ScopeStack.push_back(&CurrentFunction->MyScope);
         State = PARSER_STATE::EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE;
     }
     else
