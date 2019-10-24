@@ -34,7 +34,8 @@ enum PARSER_STATE
     EXPECT_TEMPLATE_START_OR_NEWLINE,
     EXPECT_TOKEN_UNTIL_END,
     EXPECT_PARAMETER_NAME,
-    EXPECT_RETURNS_NEWLINE
+    EXPECT_RETURNS_NEWLINE,
+    EXPECT_NEWLINE_AFTER_END
 };
 
 enum TYPE_PARSE_MODE
@@ -125,6 +126,8 @@ public:
     string GetNextTemplateVariable();
     void ParseExpectParameterName();
     void ParseExpectReturnsNewline();
+    void EndCurrentScope();
+    void ParseExpectNewlineAfterEnd();
 };
 
 #include "Compiler.h"

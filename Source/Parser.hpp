@@ -137,6 +137,10 @@ void Parser::Operate()
     {
         ParseExpectReturnsNewline();
     }
+    else if(State == PARSER_STATE::EXPECT_NEWLINE_AFTER_END)
+    {
+        ParseExpectNewlineAfterEnd();
+    }
 }
 
 void Parser::ParseStartOfLine()
@@ -147,7 +151,18 @@ void Parser::ParseStartOfLine()
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["CLASS"])
     {
-        State = PARSER_STATE::EXPECT_CLASS_NAME;
+        if(CurrentClass.Type != NULL)
+        {
+            OutputStandardErrorMessage(string("Cannot create class while already in class ") + CurrentClass.Type->Name + string("."), CurrentToken);
+        }
+        else if(CurrentFunction != NULL)
+        {
+            OutputStandardErrorMessage(string("Cannot create class while already in function ") + CurrentFunction->Name + string("."), CurrentToken);
+        }
+        else
+        {
+            State = PARSER_STATE::EXPECT_CLASS_NAME;
+        }
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ACTION"])
     {
@@ -159,6 +174,11 @@ void Parser::ParseStartOfLine()
         {
             State = PARSER_STATE::EXPECT_ACTION_NAME_OR_ACTION_TYPE;
         }
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"])
+    {
+        State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
+        //EndCurrentScope();
     }
 }
 
@@ -731,6 +751,31 @@ void Parser::ParseExpectParameterName()
 }
 
 void Parser::ParseExpectReturnsNewline()
+{
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
+    {
+        State = PARSER_STATE::START_OF_LINE;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
+}
+
+void Parser::EndCurrentScope()
+{
+    if(CurrentFunction != NULL)
+    {
+        CurrentFunction = NULL;
+    }
+    else if(CurrentClass.Type != NULL)
+    {
+        CurrentClass.Type = NULL;
+    }
+    ScopeStack.pop_back();
+}
+
+void Parser::ParseExpectNewlineAfterEnd()
 {
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
