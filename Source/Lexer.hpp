@@ -46,6 +46,9 @@ void Lexer::DoAsmBlockMode(const char InChar)
     AppendToSavedWord(InChar);
     if(IsEndOfString(SavedWord, "end") == true)
     {
+        SavedWord.erase(SavedWord.end() - 3, SavedWord.end());
+        Position = Position - 3;
+        RemoveUntilNotWhitespace();
         Mode = LEXER_MODE::NORMAL;
         AppendSavedWordToTokens();
     }
@@ -156,4 +159,13 @@ TEXT_TYPE Lexer::GetTextTypeOfChar(const char InChar)
         CharType = TEXT_TYPE::SYMBOL;
     }
     return CharType;
+}
+
+void Lexer::RemoveUntilNotWhitespace()
+{
+    while(GetTextTypeOfChar(SavedWord[SavedWord.size() - 1]) == TEXT_TYPE::WHITE_SPACE && SavedWord.size() > 0)
+    {
+        Position = Position - 1;
+        SavedWord.pop_back();
+    }
 }

@@ -178,8 +178,9 @@ void Parser::ParseStartOfLine()
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"])
     {
         State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
-        //EndCurrentScope();
+        EndCurrentScope();
     }
+    cout << "'" << CurrentToken.Contents << "' " << to_string(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"]) << endl;
 }
 
 void Parser::ParseExpectUsingIdent()
@@ -777,6 +778,7 @@ void Parser::EndCurrentScope()
 
 void Parser::ParseExpectNewlineAfterEnd()
 {
+    cout << "leaving class " << endl;
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         State = PARSER_STATE::START_OF_LINE;
