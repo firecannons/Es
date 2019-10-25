@@ -180,7 +180,6 @@ void Parser::ParseStartOfLine()
         State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
         EndCurrentScope();
     }
-    cout << "'" << CurrentToken.Contents << "' " << to_string(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"]) << endl;
 }
 
 void Parser::ParseExpectUsingIdent()
@@ -421,8 +420,8 @@ void Parser::ParseExpectActionName()
     {
         Function NewFunction;
         NewFunction.IsAsm = IsAsmFunction;
-        CurrentFunction = &NewFunction;
         GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
+        CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
         ScopeStack.push_back(&CurrentFunction->MyScope);
         State = PARSER_STATE::EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE;
     }
@@ -778,7 +777,6 @@ void Parser::EndCurrentScope()
 
 void Parser::ParseExpectNewlineAfterEnd()
 {
-    cout << "leaving class " << endl;
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         State = PARSER_STATE::START_OF_LINE;
