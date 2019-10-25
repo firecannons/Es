@@ -23,9 +23,15 @@ Keywords::Keywords()
 
     OverloadableOperators.emplace(string("<="));
     OverloadableOperators.emplace(string(">="));
+    OverloadableOperators.emplace(string("<"));
+    OverloadableOperators.emplace(string(">"));
     OverloadableOperators.emplace(ReservedWords["LEFT_BRACKET"]);
     OverloadableOperators.emplace(ReservedWords["RIGHT_BRACKET"]);
     OverloadableOperators.emplace(string("="));
+    OverloadableOperators.emplace(string("+"));
+    OverloadableOperators.emplace(string("-"));
+    OverloadableOperators.emplace(string("*"));
+    OverloadableOperators.emplace(string("/"));
 
     AllOperators = OverloadableOperators;
     AllOperators.emplace(string("//"));

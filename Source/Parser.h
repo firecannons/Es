@@ -27,7 +27,6 @@ enum PARSER_STATE
     EXPECT_ACTION_NAME,
     EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE,
     EXPECT_PARAM_NAME,
-    EXPECT_COMMA_OR_LPAREN,
     EXPECT_NEWLINE_OR_RETURNS,
     EXPECT_TYPE,
     EXPECT_TEMPLATE_START_OR_IDENT,
@@ -35,7 +34,8 @@ enum PARSER_STATE
     EXPECT_TOKEN_UNTIL_END,
     EXPECT_PARAMETER_NAME,
     EXPECT_RETURNS_NEWLINE,
-    EXPECT_NEWLINE_AFTER_END
+    EXPECT_NEWLINE_AFTER_END,
+    EXPECT_COMMA_OR_RPAREN
 };
 
 enum TYPE_PARSE_MODE
@@ -128,6 +128,8 @@ public:
     void ParseExpectReturnsNewline();
     void EndCurrentScope();
     void ParseExpectNewlineAfterEnd();
+    void ParseExpectCommaOrRParen();
+    void ParseExpectNewlineOrReturns();
 };
 
 #include "Compiler.h"

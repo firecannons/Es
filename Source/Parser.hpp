@@ -141,6 +141,14 @@ void Parser::Operate()
     {
         ParseExpectNewlineAfterEnd();
     }
+    else if(State == PARSER_STATE::EXPECT_COMMA_OR_RPAREN)
+    {
+        ParseExpectCommaOrRParen();
+    }
+    else if(State == PARSER_STATE::EXPECT_NEWLINE_OR_RETURNS)
+    {
+        ParseExpectNewlineOrReturns();
+    }
 }
 
 void Parser::ParseStartOfLine()
@@ -506,6 +514,7 @@ void Parser::ParseExpectTemplateStartOrIdent()
     {
         // Go to the next part
         ParseExpectParameterName();
+        State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
     }
     else
     {
@@ -554,7 +563,6 @@ Scope * Parser::GetCurrentScope()
 void Parser::ParseTemplates()
 {
     InitializeTemplateTokens();
-    OutputTokens(TemplateTokens);
     InitializeTemplateParse();
     ParseTemplateTokens();
 }
@@ -784,5 +792,38 @@ void Parser::ParseExpectNewlineAfterEnd()
     else
     {
         OutputStandardErrorMessage(string("Expected newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
+}
+
+void Parser::ParseExpectCommaOrRParen()
+{
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["COMMA"])
+    {
+        State = PARSER_STATE::EXPECT_TYPE;
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RPAREN"])
+    {
+        State = PARSER_STATE::EXPECT_NEWLINE_OR_RETURNS;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected ',' or ')' ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
+}
+
+void Parser::ParseExpectNewlineOrReturns()
+{
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
+    {
+        State = PARSER_STATE::START_OF_LINE;
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURNS"])
+    {
+        State = PARSER_STATE::EXPECT_TYPE;
+        TypeMode = TYPE_PARSE_MODE::PARSING_RETURNS;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected ',' or ')' ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
