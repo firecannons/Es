@@ -53,7 +53,6 @@ public:
     void AppendToSavedWord(const char NewChar);
     void AppendSavedWordToTokens();
     TEXT_TYPE GetTextTypeOfChar(const char InChar);
-    void RemoveUntilNotWhitespace();
 };
 
 #include "Lexer.hpp"

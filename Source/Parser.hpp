@@ -528,7 +528,7 @@ void Parser::ParseExpectTemplateStartOrNewline()
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected '<' or valid variable name ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+        OutputStandardErrorMessage(string("Expected '<' or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
