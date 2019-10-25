@@ -126,7 +126,11 @@ void Lexer::DoNormalLexMode(const char InChar)
 
 bool Lexer::IsSavedWordCompleteOp()
 {
-    bool Found = DoesSetContain(SavedWord, GlobalKeywords.AllOperators);
+    bool Found = false;
+    if(DoesSetContain(SavedWord, GlobalKeywords.AllOperators) == true && DoesSetContain(SavedWord, GlobalKeywords.ShortOperators) == false)
+    {
+        Found = true;
+    }
     return Found;
 }
 

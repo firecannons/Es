@@ -20,18 +20,22 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("RPAREN"), string(")")));
     ReservedWords.insert(pair<string,string>(string("ASM"), string("asm")));
     ReservedWords.insert(pair<string,string>(string("END"), string("end")));
-
+    
+    ShortOperators.emplace(ReservedWords["LESS_THAN"]);
+    ShortOperators.emplace(ReservedWords["GREATER_THAN"]);
+    ShortOperators.emplace(string("="));
+    
+    OverloadableOperators = ShortOperators;
     OverloadableOperators.emplace(string("<="));
     OverloadableOperators.emplace(string(">="));
-    OverloadableOperators.emplace(string("<"));
-    OverloadableOperators.emplace(string(">"));
     OverloadableOperators.emplace(ReservedWords["LEFT_BRACKET"]);
     OverloadableOperators.emplace(ReservedWords["RIGHT_BRACKET"]);
-    OverloadableOperators.emplace(string("="));
+    OverloadableOperators.emplace(string("=="));
     OverloadableOperators.emplace(string("+"));
     OverloadableOperators.emplace(string("-"));
     OverloadableOperators.emplace(string("*"));
     OverloadableOperators.emplace(string("/"));
+    OverloadableOperators.emplace(string("!="));
 
     AllOperators = OverloadableOperators;
     AllOperators.emplace(string("//"));

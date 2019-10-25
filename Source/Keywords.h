@@ -15,6 +15,7 @@ public:
     map<string, string> ReservedWords;
     unordered_set<string> AllOperators;
     unordered_set<string> OverloadableOperators;
+    unordered_set<string> ShortOperators;
 
     Keywords();
 };
