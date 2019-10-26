@@ -205,6 +205,10 @@ void Parser::ParseExpectUsingDotOrNewline()
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         string Path = ConvertSavedUsingIdentsToPath();
+        if(DoesFileExist(Path) == false)
+        {
+            OutputStandardErrorMessage(string("Code file does not exist:  ") + Path, CurrentToken);
+        }
         State = PARSER_STATE::START_OF_LINE;
         Compiler NextCompiler;
         vector<Token> NewTokens = NextCompiler.GetTokens(Path);

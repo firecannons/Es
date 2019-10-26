@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 #include <unordered_set>
+#include <fstream>
 using namespace std;
 
 const char FAIL_COLOR_TEXT[] = "\033[91m";
@@ -54,6 +55,17 @@ bool DoesMapContain(const string & SearchWord, const map<string, T> & MyMap)
         Found = false;
     }
     return Found;
+}
+
+bool DoesFileExist(const string & FileName)
+{
+    bool Output = false;
+    ifstream InputFile(FileName);
+    if(InputFile)
+    {
+        Output = true;
+    }
+    return Output;
 }
 
 #endif
