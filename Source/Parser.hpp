@@ -207,7 +207,8 @@ void Parser::ParseExpectUsingDotOrNewline()
         string Path = ConvertSavedUsingIdentsToPath();
         State = PARSER_STATE::START_OF_LINE;
         Compiler NextCompiler;
-        OutputAsm = OutputAsm + NextCompiler.CompileToAsm(Path);
+        vector<Token> NewTokens = NextCompiler.GetTokens(Path);
+        Tokens.insert(Tokens.begin() + Position, NewTokens.begin(), NewTokens.end());
     }
     else
     {

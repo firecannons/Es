@@ -43,3 +43,12 @@ void Compiler::WriteToOutputFile(const string & OutputCode, const string & Outpu
     out << OutputCode;
     out.close();
 }
+
+
+vector<Token> Compiler::GetTokens(const string & SourceFile)
+{
+    string InputText = ReadInputFile(SourceFile);
+    Lexer FirstLex;
+    vector<Token> Tokens = FirstLex.Lex(InputText);
+    return Tokens;
+}

@@ -25,6 +25,8 @@ public:
     string CompileToOutputText(const string & InputCode, const string & SourceFile);
     
     void WriteToOutputFile(const string & OutputCode, const string & OutputFile);
+    
+    vector<Token> GetTokens(const string & SourceFile);
 };
 
 #include "Parser.h"
