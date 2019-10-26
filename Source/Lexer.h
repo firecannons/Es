@@ -40,10 +40,11 @@ public:
     TEXT_TYPE SavedWordType;
     LEXER_MODE Mode;
     unsigned int LineNumber;
+    string SourceFileName;
     
     
-    void Initialize();
-    vector<Token> Lex(const string & InputCode);
+    void Initialize(const string & SourceFileName);
+    vector<Token> Lex(const string & InputCode, const string & SourceFileName);
     void DoAsmBlockMode(const char InChar);
     bool IsEndOfString(const string & Haystack, const string & Needle);
     void DoSingleLineCommentMode(const char InChar);

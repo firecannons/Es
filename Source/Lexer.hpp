@@ -1,6 +1,6 @@
 #include "Lexer.h"
 
-void Lexer::Initialize()
+void Lexer::Initialize(const string & InFileName)
 {
     Position = STRING_START_POS;
     SavedWord = string("");
@@ -8,11 +8,12 @@ void Lexer::Initialize()
     SavedWordType = TEXT_TYPE::ALNUM;
     Mode = LEXER_MODE::NORMAL;
     LineNumber = 1;
+    SourceFileName = InFileName;
 }
 
-vector<Token> Lexer::Lex(const string & InputCode)
+vector<Token> Lexer::Lex(const string & InputCode, const string & SourceFileName)
 {
-    Initialize();
+    Initialize(SourceFileName);
     
     while(Position <= InputCode.size())
     {
@@ -143,7 +144,7 @@ void Lexer::AppendSavedWordToTokens()
 {
     if(SavedWord.size() > 0)
     {
-        Tokens.push_back(Token(SavedWord, LineNumber));
+        Tokens.push_back(Token(SavedWord, LineNumber, SourceFileName));
         SavedWord.clear();
     }
 }

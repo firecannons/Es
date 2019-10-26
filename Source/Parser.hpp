@@ -1,8 +1,8 @@
 #include "Parser.h"
 
-string Parser::Parse(const vector<Token> & Tokens, const string & CodeFileName)
+string Parser::Parse(const vector<Token> & Tokens)
 {
-    Initialize(Tokens, CodeFileName);
+    Initialize(Tokens);
     
     RunParse();
     
@@ -19,7 +19,7 @@ void Parser::RunParse()
     }
 }    
 
-void Parser::Initialize(const vector<Token> & Tokens, const string & CodeFileName)
+void Parser::Initialize(const vector<Token> & Tokens)
 {
     this->Tokens = Tokens;
     State = PARSER_STATE::START_OF_LINE;
@@ -28,7 +28,6 @@ void Parser::Initialize(const vector<Token> & Tokens, const string & CodeFileNam
     HasToken = false;
     SavedUsingIdents.clear();
     ScopeStack.push_back(& GlobalScope);
-    CurrentCodeFileName = CodeFileName;
     CurrentFunction = NULL;
     CurrentClass.Type = NULL;
     IsAsmFunction = false;
@@ -222,12 +221,12 @@ void Parser::ParseExpectUsingDotOrNewline()
 
 void Parser::OutputStandardErrorMessage(const string & Message, const Token & OutToken)
 {
-    PrintError(GetFileNameErrorMessage() + GetErrorLineNumberText(OutToken) + Message);
+    PrintError(GetFileNameErrorMessage(OutToken) + GetErrorLineNumberText(OutToken) + Message);
 }
 
-string Parser::GetFileNameErrorMessage()
+string Parser::GetFileNameErrorMessage(const Token & OutToken)
 {
-    string FileNameErrorMessage = string("In ") + CurrentCodeFileName + string(": ");
+    string FileNameErrorMessage = string("In ") + OutToken.SourceFileName + string(": ");
     return FileNameErrorMessage;
 }
 

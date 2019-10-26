@@ -30,9 +30,9 @@ string Compiler::ReadInputFile(const string & SourceProgram)
 string Compiler::CompileToOutputText(const string & InputCode, const string & SourceFile)
 {
     Lexer FirstLex;
-    vector<Token> Tokens = FirstLex.Lex(InputCode);
+    vector<Token> Tokens = FirstLex.Lex(InputCode, SourceFile);
     Parser FirstParser;
-    string AsmString = FirstParser.Parse(Tokens, SourceFile);
+    string AsmString = FirstParser.Parse(Tokens);
     return AsmString;
 }
 
@@ -49,6 +49,6 @@ vector<Token> Compiler::GetTokens(const string & SourceFile)
 {
     string InputText = ReadInputFile(SourceFile);
     Lexer FirstLex;
-    vector<Token> Tokens = FirstLex.Lex(InputText);
+    vector<Token> Tokens = FirstLex.Lex(InputText, SourceFile);
     return Tokens;
 }

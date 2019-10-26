@@ -75,9 +75,9 @@ public:
     map<string, TemplatedType> TemplateVariableTable;
     unsigned int TemplateVariableCounter;
     
-    string Parse(const vector<Token> & Tokens, const string & CodeFileName);
+    string Parse(const vector<Token> & Tokens);
     void RunParse();
-    void Initialize(const vector<Token> & Tokens, const string & CodeFileName);
+    void Initialize(const vector<Token> & Tokens);
     void GetFirstToken();
     void GetNextToken();
     bool IsNextToken();
@@ -105,7 +105,7 @@ public:
     bool IsValidActionName(const string & Input);
     void ParseExpectReturnsOrLParenOrNewline();
     void ParseExpectType();
-    string GetFileNameErrorMessage();
+    string GetFileNameErrorMessage(const Token & OutToken);
     void ParseExpectActionNameOrActionType();
     void ParseExpectTemplateStartOrIdent();
     void ParseExpectTemplateStartOrNewline();
