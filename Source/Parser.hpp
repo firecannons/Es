@@ -526,6 +526,11 @@ void Parser::ParseExpectTemplateStartOrIdent()
     else if(IsValidIdent(CurrentToken.Contents) == true)
     {
         // Go to the next part
+
+        if(CurrentParsingType.Type->PossibleTemplates.size() != 0)
+        {
+            OutputStandardErrorMessage(string("Type '") + CurrentParsingType.Type->Name + "' expects templates.", CurrentToken);
+        }
         ParseExpectParameterName();
         State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
     }
@@ -613,7 +618,7 @@ void Parser::InitializeTemplateTokens()
 
 void Parser::ParseTemplateTokens()
 {
-    while(TemplateTokens.size() > 3)
+    while(TemplateTokens.size() >= 3)
     {
         OperateTemplateTokens();
     }
@@ -626,6 +631,15 @@ void Parser::InitializeTemplateParse()
     CurrentParsingType.Templates = CurrentParsingType.Type->GetLastCompiledTemplate();
 }
 
+void Parser::RemoveTypeInTemplates()
+{
+    TemplateTokens.erase(TemplateTokens.begin() + TemplateTokenIndex);
+    if(TemplateTokens[TemplateTokenIndex - 1].Contents != GlobalKeywords.ReservedWords["LESS_THAN"])
+    {
+        TemplateTokens.erase(TemplateTokens.begin() + TemplateTokenIndex - 1);
+    }
+}
+
 void Parser::OperateTemplateTokens()
 {
     if(TemplateTokens[TemplateTokenIndex + 1].Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
@@ -633,8 +647,7 @@ void Parser::OperateTemplateTokens()
         if(IsTemplateVariable(TemplateTokens[TemplateTokenIndex].Contents) == true)
         {
             StoredParsedTemplates.push_back(GetTemplateFromVariable(TemplateTokens[TemplateTokenIndex].Contents));
-            TemplateTokens.erase(TemplateTokens.begin() + TemplateTokenIndex);
-            TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex - 1));
+            RemoveTypeInTemplates();
         }
         else if(IsAType(TemplateTokens[TemplateTokenIndex].Contents) == true)
         {
@@ -642,8 +655,7 @@ void Parser::OperateTemplateTokens()
             NewType.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
             NewType.Templates = NewType.Type->GetLastCompiledTemplate();
             StoredParsedTemplates.push_back(NewType);
-            TemplateTokens.erase(TemplateTokens.begin() + TemplateTokenIndex);
-            TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex - 1));
+            RemoveTypeInTemplates();
         }
         else
         {
@@ -654,11 +666,20 @@ void Parser::OperateTemplateTokens()
     }
     else if(TemplateTokens[TemplateTokenIndex + 1].Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
+        if(TypeTable[TemplateTokens[TemplateTokenIndex].Contents].PossibleTemplates.size() == 0)
+        {
+            OutputStandardErrorMessage(string("Type '") + TemplateTokens[TemplateTokenIndex].Contents + "' is not templated. ", TemplateTokens[TemplateTokenIndex]);
+        }
         if(TemplateTokens[TemplateTokenIndex + 2].Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
         {
             TypeTable[TemplateTokens[TemplateTokenIndex].Contents].InitializeBlankCompiledTemplate();
             CurrentParsingType.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
             CurrentParsingType.Templates = TypeTable[TemplateTokens[TemplateTokenIndex].Contents].GetLastCompiledTemplate();
+            if(CurrentParsingType.Type->PossibleTemplates.size() != StoredParsedTemplates.size())
+            {
+                OutputStandardErrorMessage(string("Type '") + TemplateTokens[TemplateTokenIndex].Contents + "' expects " +
+                    to_string(CurrentParsingType.Type->PossibleTemplates.size()) + " templates not " + to_string(StoredParsedTemplates.size()) + ".", TemplateTokens[TemplateTokenIndex]);
+            }
             CurrentParsingType.Templates->Templates = StoredParsedTemplates;
             // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
             TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 2));
@@ -773,6 +794,7 @@ void Parser::ParseExpectParameterName()
     NewParamObject.Type = CurrentParsingType;
     CurrentFunction->MyScope.Objects.emplace(NewParamObject.Name, NewParamObject);
     CurrentFunction->Parameters.push_back(&NewParamObject);
+    State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
 }
 
 void Parser::ParseExpectReturnsNewline()

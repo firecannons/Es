@@ -115,6 +115,7 @@ public:
     void InitializeTemplateTokens(); 
     void ParseTemplateTokens();
     void InitializeTemplateParse();
+    void RemoveTypeInTemplates();
     void OperateTemplateTokens();
     bool IsInCurrentScope(const string & VariableName);
     bool IsInAnyScope(const string & VariableName);
