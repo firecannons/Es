@@ -310,6 +310,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         CurrentClass.Type->IsTemplated = true;
+        ScopeStack.push_back(NULL);
         State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["SIZE"])
