@@ -472,16 +472,23 @@ void Parser::ParseExpectType()
 {
     if(IsValidIdent(CurrentToken.Contents) == true)
     {
-        if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
+        if(IsAType(CurrentToken.Contents) == true)
         {
-            State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_IDENT;
+            if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
+            {
+                State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_IDENT;
+            }
+            else if(TypeMode == TYPE_PARSE_MODE::PARSING_RETURNS)
+            {
+                State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE;
+            }
+            CurrentParsingType.Type = &TypeTable[CurrentToken.Contents];
+            CurrentParsingType.Templates = CurrentParsingType.Type->GetFirstCompiledTemplate();
         }
-        else if(TypeMode == TYPE_PARSE_MODE::PARSING_RETURNS)
+        else
         {
-            State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE;
+            OutputStandardErrorMessage(string("No type '") + CurrentToken.Contents + string("'."), CurrentToken);
         }
-        CurrentParsingType.Type = &TypeTable[CurrentToken.Contents];
-        CurrentParsingType.Templates = CurrentParsingType.Type->GetFirstCompiledTemplate();
     }
     else
     {
@@ -657,6 +664,10 @@ void Parser::OperateTemplateTokens()
         }
         else
         {
+            if(IsAType(TemplateTokens[TemplateTokenIndex].Contents) == false)
+            {
+                OutputStandardErrorMessage(string("Unknown type name ") + TemplateTokens[TemplateTokenIndex].Contents, TemplateTokens[TemplateTokenIndex]);
+            }
             TemplateTokenIndex = TemplateTokenIndex + 2;
         }
     }
@@ -825,6 +836,6 @@ void Parser::ParseExpectNewlineOrReturns()
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected ',' or ')' ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+        OutputStandardErrorMessage(string("Expected 'returns' or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
