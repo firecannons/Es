@@ -148,6 +148,10 @@ void Parser::Operate()
     {
         ParseExpectNewlineOrReturns();
     }
+    else if(State == PARSER_STATE::EXPECT_VARIABLE_NAME)
+    {
+        ParseExpectVariableName();
+    }
 }
 
 void Parser::ParseStartOfLine()
@@ -187,6 +191,15 @@ void Parser::ParseStartOfLine()
         State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
         EndCurrentScope();
     }
+    else
+    {
+        if(IsAType(CurrentToken.Contents) == true)
+        {
+            TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
+            ParseExpectType();
+        }
+    }
+    
 }
 
 void Parser::ParseExpectUsingIdent()
@@ -478,7 +491,7 @@ void Parser::ParseExpectType()
     {
         if(IsAType(CurrentToken.Contents) == true)
         {
-            if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
+            if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM || TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
             {
                 State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_IDENT;
             }
@@ -520,7 +533,14 @@ void Parser::ParseExpectTemplateStartOrIdent()
     {
         // At this point, parse the template
         ParseTemplates();
-        State = PARSER_STATE::EXPECT_PARAMETER_NAME;
+        if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
+        {
+            State = PARSER_STATE::EXPECT_PARAMETER_NAME;
+        }
+        else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
+        {
+            State = PARSER_STATE::EXPECT_VARIABLE_NAME;
+        }
     }
     else if(IsValidIdent(CurrentToken.Contents) == true)
     {
@@ -788,12 +808,20 @@ string Parser::GetNextTemplateVariable()
 
 void Parser::ParseExpectParameterName()
 {
-    Object NewParamObject;
-    NewParamObject.Name = CurrentToken.Contents;
-    NewParamObject.Type = CurrentParsingType;
-    CurrentFunction->MyScope.Objects.emplace(NewParamObject.Name, NewParamObject);
-    CurrentFunction->Parameters.push_back(&NewParamObject);
-    State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
+    if(IsValidIdent(CurrentToken.Contents) == true)
+    {
+        Object NewParamObject;
+        NewParamObject.Name = CurrentToken.Contents;
+        NewParamObject.Type = CurrentParsingType;
+        CurrentFunction->MyScope.Objects.emplace(NewParamObject.Name, NewParamObject);
+        CurrentFunction->Parameters.push_back(&NewParamObject);
+        State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Invalid variable name ") + CurrentToken.Contents + string("."), CurrentToken);
+    }
+    
 }
 
 void Parser::ParseExpectReturnsNewline()
