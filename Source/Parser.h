@@ -32,11 +32,11 @@ enum PARSER_STATE
     EXPECT_TEMPLATE_START_OR_IDENT,
     EXPECT_TEMPLATE_START_OR_NEWLINE,
     EXPECT_TOKEN_UNTIL_END,
-    EXPECT_PARAMETER_NAME,
     EXPECT_RETURNS_NEWLINE,
     EXPECT_NEWLINE_AFTER_END,
     EXPECT_COMMA_OR_RPAREN,
-    EXPECT_VARIABLE_NAME
+    EXPECT_VARIABLE_NAME,
+    EXPECT_FIRST_OPERATOR_OR_NEWLINE
 };
 
 enum TYPE_PARSE_MODE
@@ -75,6 +75,7 @@ public:
     vector<TemplatedType> StoredParsedTemplates;
     map<string, TemplatedType> TemplateVariableTable;
     unsigned int TemplateVariableCounter;
+    vector<Token> ReduceTokens;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -126,13 +127,14 @@ public:
     bool IsTemplateVariable(const string & VariableName);
     TemplatedType GetTemplateFromVariable(const string & VariableName);
     string GetNextTemplateVariable();
-    void ParseExpectParameterName();
     void ParseExpectReturnsNewline();
     void EndCurrentScope();
     void ParseExpectNewlineAfterEnd();
     void ParseExpectCommaOrRParen();
     void ParseExpectNewlineOrReturns();
     void ParseExpectVariableName();
+    void ParseExpectFirstOperatorOrNewline();
+    void CopyUntilNextNewline();
 };
 
 #include "Compiler.h"

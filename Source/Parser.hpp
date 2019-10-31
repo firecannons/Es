@@ -128,10 +128,6 @@ void Parser::Operate()
     {
         ParseExpectTokenUntilEnd();
     }
-    else if(State == PARSER_STATE::EXPECT_PARAMETER_NAME)
-    {
-        ParseExpectParameterName();
-    }
     else if(State == PARSER_STATE::EXPECT_RETURNS_NEWLINE)
     {
         ParseExpectReturnsNewline();
@@ -151,6 +147,10 @@ void Parser::Operate()
     else if(State == PARSER_STATE::EXPECT_VARIABLE_NAME)
     {
         ParseExpectVariableName();
+    }
+    else if(State == PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE)
+    {
+        ParseExpectFirstOperatorOrNewline();
     }
 }
 
@@ -533,24 +533,17 @@ void Parser::ParseExpectTemplateStartOrIdent()
     {
         // At this point, parse the template
         ParseTemplates();
-        if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
-        {
-            State = PARSER_STATE::EXPECT_PARAMETER_NAME;
-        }
-        else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
-        {
-            State = PARSER_STATE::EXPECT_VARIABLE_NAME;
-        }
+        State = PARSER_STATE::EXPECT_VARIABLE_NAME;
     }
     else if(IsValidIdent(CurrentToken.Contents) == true)
     {
         // Go to the next part
-
+        
         if(CurrentParsingType.Type->PossibleTemplates.size() != 0)
         {
             OutputStandardErrorMessage(string("Type '") + CurrentParsingType.Type->Name + "' expects templates.", CurrentToken);
         }
-        ParseExpectParameterName();
+        ParseExpectVariableName();
         State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
     }
     else
@@ -806,24 +799,6 @@ string Parser::GetNextTemplateVariable()
     return Output;
 }
 
-void Parser::ParseExpectParameterName()
-{
-    if(IsValidIdent(CurrentToken.Contents) == true)
-    {
-        Object NewParamObject;
-        NewParamObject.Name = CurrentToken.Contents;
-        NewParamObject.Type = CurrentParsingType;
-        CurrentFunction->MyScope.Objects.emplace(NewParamObject.Name, NewParamObject);
-        CurrentFunction->Parameters.push_back(&NewParamObject);
-        State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
-    }
-    else
-    {
-        OutputStandardErrorMessage(string("Invalid variable name ") + CurrentToken.Contents + string("."), CurrentToken);
-    }
-    
-}
-
 void Parser::ParseExpectReturnsNewline()
 {
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
@@ -891,5 +866,58 @@ void Parser::ParseExpectNewlineOrReturns()
     else
     {
         OutputStandardErrorMessage(string("Expected 'returns' or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
+}
+
+void Parser::ParseExpectVariableName()
+{
+    if(IsValidIdent(CurrentToken.Contents) == true)
+    {
+        Object NewParamObject;
+        NewParamObject.Name = CurrentToken.Contents;
+        NewParamObject.Type = CurrentParsingType;
+        GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
+        if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
+        {
+            CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
+            State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
+        }
+        else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
+        {
+            State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
+        }
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Invalid variable name ") + CurrentToken.Contents + string("."), CurrentToken);
+    }
+}
+
+void Parser::ParseExpectFirstOperatorOrNewline()
+{
+    cout << "hello world 2" << endl;
+    if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true)
+    {
+        Position = Position - 1;
+        CopyUntilNextNewline();
+        State = PARSER_STATE::START_OF_LINE;
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
+    {
+        State = PARSER_STATE::START_OF_LINE;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected newline or '=' ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
+}
+
+void Parser::CopyUntilNextNewline()
+{
+    ReduceTokens.clear();
+    while(Position < Tokens.size() && Tokens[Position].Contents != GlobalKeywords.ReservedWords["NEW_LINE"])
+    {
+        ReduceTokens.push_back(Tokens[Position]);
+        Position = Position + 1;
     }
 }

@@ -16,6 +16,7 @@ public:
     unordered_set<string> AllOperators;
     unordered_set<string> OverloadableOperators;
     unordered_set<string> ShortOperators;
+    unordered_set<string> AfterDeclarationOperators;
 
     Keywords();
 };
