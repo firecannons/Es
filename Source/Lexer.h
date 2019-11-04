@@ -41,6 +41,7 @@ public:
     LEXER_MODE Mode;
     unsigned int LineNumber;
     string SourceFileName;
+    bool CountNextNewline;
     
     
     void Initialize(const string & SourceFileName);

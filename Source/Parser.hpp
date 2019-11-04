@@ -544,7 +544,6 @@ void Parser::ParseExpectTemplateStartOrIdent()
             OutputStandardErrorMessage(string("Type '") + CurrentParsingType.Type->Name + "' expects templates.", CurrentToken);
         }
         ParseExpectVariableName();
-        State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
     }
     else
     {
@@ -895,7 +894,6 @@ void Parser::ParseExpectVariableName()
 
 void Parser::ParseExpectFirstOperatorOrNewline()
 {
-    cout << "hello world 2" << endl;
     if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true)
     {
         Position = Position - 1;

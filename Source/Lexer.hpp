@@ -9,6 +9,7 @@ void Lexer::Initialize(const string & InFileName)
     Mode = LEXER_MODE::NORMAL;
     LineNumber = 1;
     SourceFileName = InFileName;
+    CountNextNewline = true;
 }
 
 vector<Token> Lexer::Lex(const string & InputCode, const string & SourceFileName)
@@ -33,9 +34,13 @@ vector<Token> Lexer::Lex(const string & InputCode, const string & SourceFileName
         {
             DoAsmBlockMode(InputCode[Position]);
         }
-        if(string(1, InputCode[Position]) == GlobalKeywords.ReservedWords["NEW_LINE"])
+        if(string(1, InputCode[Position]) == GlobalKeywords.ReservedWords["NEW_LINE"] && CountNextNewline == true)
         {
             LineNumber = LineNumber + 1;
+        }
+        else
+        {
+            CountNextNewline = true;
         }
         Position = Position + 1;
     }
@@ -49,8 +54,9 @@ void Lexer::DoAsmBlockMode(const char InChar)
     {
         SavedWord.erase(SavedWord.end() - 3, SavedWord.end());
         Position = Position - 3;
-        Mode = LEXER_MODE::NORMAL;
         AppendSavedWordToTokens();
+        Mode = LEXER_MODE::NORMAL;
+        CountNextNewline = false;
     }
 }
 
