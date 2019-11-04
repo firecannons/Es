@@ -76,6 +76,8 @@ public:
     map<string, TemplatedType> TemplateVariableTable;
     unsigned int TemplateVariableCounter;
     vector<Token> ReduceTokens;
+    unsigned int ReducePosition;
+    vector<unordered_set<string>> OperatorOrdering;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -135,6 +137,10 @@ public:
     void ParseExpectVariableName();
     void ParseExpectFirstOperatorOrNewline();
     void CopyUntilNextNewline();
+    void ReduceLine();
+    void OperateReduceTokens();
+    void InitializeOperatorOrdering();
+    bool IsLeftParenAheadTwo();
 };
 
 #include "Compiler.h"

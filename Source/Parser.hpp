@@ -898,6 +898,7 @@ void Parser::ParseExpectFirstOperatorOrNewline()
     {
         Position = Position - 1;
         CopyUntilNextNewline();
+        ReduceLine();
         State = PARSER_STATE::START_OF_LINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
@@ -918,4 +919,72 @@ void Parser::CopyUntilNextNewline()
         ReduceTokens.push_back(Tokens[Position]);
         Position = Position + 1;
     }
+}
+
+void Parser::ReduceLine()
+{
+    ReducePosition = 0;
+    while(ReduceTokens.size() > 2)
+    {
+        OperateReduceTokens();
+    }
+}
+
+void Parser::OperateReduceTokens()
+{
+    if(IsLeftParenAheadTwo() == true)
+    {
+        ReducePosition = ReducePosition + 2;
+    }
+}
+
+void Parser::InitializeOperatorOrdering()
+{
+    OperatorOrdering.clear();
+    unordered_set<string> NewSet;
+    
+    NewSet.emplace(GlobalKeywords.ReservedWords["COLON"]);
+    OperatorOrdering.push_back(NewSet);
+    
+    NewSet.clear();
+    NewSet.emplace(GlobalKeywords.ReservedWords["STAR"]);
+    NewSet.emplace(GlobalKeywords.ReservedWords["SLASH"]);
+    OperatorOrdering.push_back(NewSet);
+    
+    NewSet.clear();
+    NewSet.emplace(GlobalKeywords.ReservedWords["PLUS"]);
+    NewSet.emplace(GlobalKeywords.ReservedWords["MINUS"]);
+    OperatorOrdering.push_back(NewSet);
+    
+    NewSet.clear();
+    NewSet.emplace(GlobalKeywords.ReservedWords["IS_EQUAL"]);
+    NewSet.emplace(GlobalKeywords.ReservedWords["NOT_EQUAL"]);
+    NewSet.emplace(GlobalKeywords.ReservedWords["GREATER_THAN"]);
+    NewSet.emplace(GlobalKeywords.ReservedWords["GREATER_OR_EQUAL"]);
+    NewSet.emplace(GlobalKeywords.ReservedWords["LESS_OR_EQUAL"]);
+    NewSet.emplace(GlobalKeywords.ReservedWords["LESS_THAN"]);
+    OperatorOrdering.push_back(NewSet);
+    
+    NewSet.clear();
+    NewSet.emplace(GlobalKeywords.ReservedWords["EQUALS"]);
+    OperatorOrdering.push_back(NewSet);
+    
+    NewSet.clear();
+    NewSet.emplace(GlobalKeywords.ReservedWords["COMMA"]);
+    OperatorOrdering.push_back(NewSet);
+    
+    NewSet.clear();
+    NewSet.emplace(GlobalKeywords.ReservedWords["LEFT_PAREN"]);
+    NewSet.emplace(GlobalKeywords.ReservedWords["RIGHT_PAREN"]);
+    OperatorOrdering.push_back(NewSet);
+}
+
+bool Parser::IsLeftParenAheadTwo()
+{
+    bool Output = false;
+    if(ReduceTokens[ReducePosition + 2].Contents == GlobalKeywords.ReservedWords["LEFT_PAREN"])
+    {
+        Output = true;
+    }
+    return Output;
 }
