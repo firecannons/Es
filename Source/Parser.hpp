@@ -948,6 +948,14 @@ void Parser::OperateReduceTokens()
     {
         ReducePosition = ReducePosition + 2;
     }
+    else if(IsAColonInNextOperatorPosition() == true)
+    {
+        DoColonReduce();
+    }
+    else if(IsAColonInFarOperatorPosition() == true)
+    {
+        ReducePosition = ReducePosition + 2;
+    }
     else if(IsFirstOperatorHigherPrecedence() == true)
     {
         DoReduce();
@@ -962,9 +970,6 @@ void Parser::InitializeOperatorOrdering()
 {
     OperatorOrdering.clear();
     unordered_set<string> NewSet;
-    
-    NewSet.emplace(GlobalKeywords.ReservedWords["COLON"]);
-    OperatorOrdering.push_back(NewSet);
     
     NewSet.clear();
     NewSet.emplace(GlobalKeywords.ReservedWords["STAR"]);
@@ -1061,8 +1066,8 @@ bool Parser::IsFunctionCallCurrently()
 
 void Parser::DoReduceFunctionCall()
 {
-    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
-    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
+    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
+    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
 }
 
 void Parser::ReduceOperator()
@@ -1106,4 +1111,33 @@ void Parser::DoSingleVarInParens()
         ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
         ReducePosition = ReducePosition - 1;
     }
+}
+
+bool Parser::IsAColonInNextOperatorPosition()
+{
+    bool Output = false;
+    if(ReduceTokens[ReducePosition + 1].Contents == GlobalKeywords.ReservedWords["COLON"])
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+bool Parser::IsAColonInFarOperatorPosition()
+{
+    bool Output = false;
+    if(ReduceTokens.size() - ReducePosition > 3)
+    {
+        if(ReduceTokens[ReducePosition + 3].Contents == GlobalKeywords.ReservedWords["COLON"])
+        {
+            Output = true;
+        }
+    }
+    return Output;
+}
+
+void Parser::DoColonReduce()
+{
+    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
+    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
 }

@@ -150,6 +150,9 @@ public:
     bool IsSingleVarInParens();
     bool IsALeftParenInOperatorPosition();
     void DoSingleVarInParens();
+    bool IsAColonInNextOperatorPosition();
+    bool IsAColonInFarOperatorPosition();
+    void DoColonReduce();
 };
 
 #include "Compiler.h"
