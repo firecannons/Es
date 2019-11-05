@@ -140,7 +140,16 @@ public:
     void ReduceLine();
     void OperateReduceTokens();
     void InitializeOperatorOrdering();
-    bool IsLeftParenAheadTwo();
+    bool IsCurrentlyLeftParen();
+    bool IsFirstOperatorHigherPrecedence();
+    void DoReduce();
+    void ReduceRParen();
+    bool IsFunctionCallCurrently();
+    void DoReduceFunctionCall();
+    void ReduceOperator();
+    bool IsSingleVarInParens();
+    bool IsALeftParenInOperatorPosition();
+    void DoSingleVarInParens();
 };
 
 #include "Compiler.h"

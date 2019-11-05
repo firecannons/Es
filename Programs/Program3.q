@@ -120,5 +120,17 @@ action Main
     OutputByte ( I1 )
     OutputByte ( L )
     Integer CST_1 = I1
+/*
+    OutputByte ( I1 + Mult(L, I1) )
+
+    OutputByte ( t + 1 )
     
+    OutputByte ( GetNum ( ) + 1 )
+
+    OutputByte ( A + ( ( t1 ) ) ) + OutputByte ( t1 ) ) )
+
+    OutputByte ( ( ( A + ( t1 ) ) + OutputByte ( t1 ) ) )
+
+    OutputByte ( A + ( t1 + OutputByte ( ) )
+    */
 end

@@ -30,6 +30,7 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("GREATER_OR_EQUAL"), string(">=")));
     ReservedWords.insert(pair<string,string>(string("IS_EQUALS"), string("==")));
     ReservedWords.insert(pair<string,string>(string("NOT_EQUALS"), string("!=")));
+    ReservedWords.insert(pair<string,string>(string("UNDER_SCORE"), string("_")));
     
     ShortOperators.emplace(ReservedWords["LESS_THAN"]);
     ShortOperators.emplace(ReservedWords["GREATER_THAN"]);
@@ -55,6 +56,6 @@ Keywords::Keywords()
     ReducibleOperators.emplace(ReservedWords["COLON"]);
     ReducibleOperators.emplace(ReservedWords["COMMA"]);
 
-    AllOperators = OverloadableOperators;
+    AllOperators = ReducibleOperators;
     AllOperators.emplace(string("//"));
 }

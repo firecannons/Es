@@ -362,7 +362,7 @@ bool Parser::IsValidIdent(const string & Input)
     unsigned int Index = 0;
     while(Index < Input.size())
     {
-        if(isalnum(Input[Index]) == false)
+        if(isalnum(Input[Index]) == false && Input[Index] != GlobalKeywords.ReservedWords["UNDER_SCORE"][0])
         {
             Output = false;
         }
@@ -932,7 +932,27 @@ void Parser::ReduceLine()
 
 void Parser::OperateReduceTokens()
 {
-    if(IsLeftParenAheadTwo() == true)
+    if(IsCurrentlyLeftParen() == true)
+    {
+        ReducePosition = ReducePosition + 1;
+    }
+    else if(IsFunctionCallCurrently() == true)
+    {
+        DoReduceFunctionCall();
+    }
+    else if(IsSingleVarInParens() == true)
+    {
+        DoSingleVarInParens();
+    }
+    else if(IsALeftParenInOperatorPosition() == true)
+    {
+        ReducePosition = ReducePosition + 2;
+    }
+    else if(IsFirstOperatorHigherPrecedence() == true)
+    {
+        DoReduce();
+    }
+    else
     {
         ReducePosition = ReducePosition + 2;
     }
@@ -968,23 +988,122 @@ void Parser::InitializeOperatorOrdering()
     NewSet.clear();
     NewSet.emplace(GlobalKeywords.ReservedWords["EQUALS"]);
     OperatorOrdering.push_back(NewSet);
-    
-    NewSet.clear();
-    NewSet.emplace(GlobalKeywords.ReservedWords["COMMA"]);
-    OperatorOrdering.push_back(NewSet);
-    
-    NewSet.clear();
-    NewSet.emplace(GlobalKeywords.ReservedWords["LEFT_PAREN"]);
-    NewSet.emplace(GlobalKeywords.ReservedWords["RIGHT_PAREN"]);
-    OperatorOrdering.push_back(NewSet);
 }
 
-bool Parser::IsLeftParenAheadTwo()
+bool Parser::IsCurrentlyLeftParen()
 {
     bool Output = false;
-    if(ReduceTokens[ReducePosition + 2].Contents == GlobalKeywords.ReservedWords["LEFT_PAREN"])
+    if(ReduceTokens[ReducePosition].Contents == GlobalKeywords.ReservedWords["LEFT_PAREN"])
     {
         Output = true;
     }
     return Output;
+}
+
+bool Parser::IsFirstOperatorHigherPrecedence()
+{
+    bool Done = false;
+    bool Output = true;
+    unsigned int OrderingIndex = 0;
+    while(OrderingIndex < OperatorOrdering.size() && Done == false)
+    {
+        if(DoesSetContain(ReduceTokens[ReducePosition + 1].Contents, OperatorOrdering[OrderingIndex]) == true)
+        {
+            Done = true;
+        }
+        else if(ReduceTokens.size() - ReducePosition > 3)
+        {
+            if(DoesSetContain(ReduceTokens[ReducePosition + 3].Contents, OperatorOrdering[OrderingIndex]) == true)
+            {
+                Output = false;
+                Done = true;
+            }
+        }
+        OrderingIndex = OrderingIndex + 1;
+    }
+    return Output;
+}
+
+void Parser::DoReduce()
+{
+    if(ReduceTokens[ReducePosition + 3].Contents == GlobalKeywords.ReservedWords["RPAREN"])
+    {
+        ReduceRParen();
+    }
+    else
+    {
+        ReduceOperator();
+    }
+    
+}
+
+void Parser::ReduceRParen()
+{
+    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
+    if(ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["COMMA"])
+    {
+        ReduceTokens.erase(ReduceTokens.begin() + (ReducePosition - 1));
+    }
+    ReducePosition = ReducePosition - 2;
+}
+
+bool Parser::IsFunctionCallCurrently()
+{
+    bool Output = false;
+    if(ReduceTokens[ReducePosition + 1].Contents == GlobalKeywords.ReservedWords["LPAREN"]
+        && ReduceTokens[ReducePosition + 2].Contents == GlobalKeywords.ReservedWords["RPAREN"]
+        && IsValidActionName(ReduceTokens[ReducePosition].Contents) == true)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+void Parser::DoReduceFunctionCall()
+{
+    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
+    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
+}
+
+void Parser::ReduceOperator()
+{
+    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
+    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
+}
+
+bool Parser::IsSingleVarInParens()
+{
+    bool Output = false;
+    if(ReduceTokens[ReducePosition + 1].Contents == GlobalKeywords.ReservedWords["LPAREN"]
+        && ReduceTokens[ReducePosition + 3].Contents == GlobalKeywords.ReservedWords["RPAREN"]
+        && IsValidIdent(ReduceTokens[ReducePosition + 2].Contents) == true)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+bool Parser::IsALeftParenInOperatorPosition()
+{
+    bool Output = false;
+    if(ReduceTokens[ReducePosition + 1].Contents == GlobalKeywords.ReservedWords["LPAREN"]
+        || ReduceTokens[ReducePosition + 3].Contents == GlobalKeywords.ReservedWords["LPAREN"])
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+void Parser::DoSingleVarInParens()
+{
+    if(IsValidActionName(ReduceTokens[ReducePosition].Contents) == true)
+    {
+        ReducePosition = ReducePosition + 2;
+    }
+    else
+    {
+        ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 3);
+        ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
+        ReducePosition = ReducePosition - 1;
+    }
 }
