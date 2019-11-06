@@ -5,6 +5,8 @@
 #include "GlobalFunctions.h"
 #include "BaseType.h"
 #include "Token.h"
+#include "Keywords.h"
+#include "AsmCode.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -49,6 +51,8 @@ enum TYPE_PARSE_MODE
 const string EXTENSION = string(".q");
 const unsigned int DEFAULT_COMPILED_TEMPLATE_INDEX = 0;
 const string TEMPLATE_VARIABLE_NAME_PREFIX = "T";
+const string TEMPORARY_VARIABLE_PREFIX = "[T";
+const string LABEL_PREFIX = "L";
 
 class Parser
 {
@@ -78,6 +82,9 @@ public:
     vector<Token> ReduceTokens;
     unsigned int ReducePosition;
     vector<unordered_set<string>> OperatorOrdering;
+    string FileStartASM;
+    unsigned int TemporaryVariableCounter;
+    unsigned int LabelCounter;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -153,6 +160,9 @@ public:
     bool IsAColonInNextOperatorPosition();
     bool IsAColonInFarOperatorPosition();
     void DoColonReduce();
+    void AppendInitialASM();
+    string GetNextTemporaryVariable();
+    string GetNextLabel();
 };
 
 #include "Compiler.h"

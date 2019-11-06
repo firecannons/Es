@@ -2,4 +2,4 @@ main.o: main.cpp GlobalFunctions.h Token.h Token.hpp Compiler.h \
  Keywords.h Keywords.hpp Lexer.h Lexer.hpp Parser.h BaseType.h \
  CompiledTemplate.h TemplatedType.h TemplatedType.hpp Function.h Object.h \
  Object.hpp Scope.h Function.hpp CompiledTemplate.hpp BaseType.hpp \
- Parser.hpp Compiler.hpp
+ AsmCode.h AsmCode.hpp Parser.hpp Compiler.hpp

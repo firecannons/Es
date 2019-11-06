@@ -17,6 +17,7 @@ public:
     Scope MyScope;
     vector<Object*> Parameters;
     bool IsAsm;
+    string Label;
 };
 
 #include "Function.hpp"

@@ -4,9 +4,11 @@ string Parser::Parse(const vector<Token> & Tokens)
 {
     Initialize(Tokens);
     
+    AppendInitialASM();
+    
     RunParse();
     
-    return string("asm here ") + Tokens[0].Contents + string(" ") + OutputAsm;
+    return OutputAsm;
 }
 
 void Parser::RunParse()
@@ -446,6 +448,7 @@ void Parser::ParseExpectActionName()
     {
         Function NewFunction;
         NewFunction.IsAsm = IsAsmFunction;
+        NewFunction.Label = GetNextLabel();
         GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
         CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
         ScopeStack.push_back(&CurrentFunction->MyScope);
@@ -1140,4 +1143,23 @@ void Parser::DoColonReduce()
 {
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
+}
+
+void Parser::AppendInitialASM()
+{
+    OutputAsm = OutputAsm + GlobalASM.Codes["START_OF_FILE"];
+}
+
+string Parser::GetNextTemporaryVariable()
+{
+    string NextTemporaryVariable = TEMPORARY_VARIABLE_PREFIX + to_string(TemporaryVariableCounter);
+    TemporaryVariableCounter = TemporaryVariableCounter + 1;
+    return NextTemporaryVariable;
+}
+
+string Parser::GetNextLabel()
+{
+    string NextLabel = LABEL_PREFIX + to_string(LabelCounter);
+    LabelCounter = LabelCounter + 1;
+    return NextLabel;
 }
