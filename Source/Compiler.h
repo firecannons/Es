@@ -12,6 +12,8 @@
 #include <vector>
 using namespace std;
 
+const bool DEBUG = true;
+
 class Compiler
 {
     

@@ -53,6 +53,8 @@ const unsigned int DEFAULT_COMPILED_TEMPLATE_INDEX = 0;
 const string TEMPLATE_VARIABLE_NAME_PREFIX = "T";
 const string TEMPORARY_VARIABLE_PREFIX = "[T";
 const string LABEL_PREFIX = "L";
+const string SEMICOLON = ";";
+const string SPACE = " ";
 
 class Parser
 {
@@ -163,6 +165,10 @@ public:
     void AppendInitialASM();
     string GetNextTemporaryVariable();
     string GetNextLabel();
+    bool IsFunctionScopeClosest();
+    void AppendNewlinesToOutputASM(const unsigned int Number);
+    string GetNewlines(const unsigned int Number);
+    void OutputCurrentFunctionToAsm();
 };
 
 #include "Compiler.h"

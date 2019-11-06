@@ -8,6 +8,15 @@
 #include <map>
 using namespace std;
 
+enum SCOPE_ORIGIN
+{
+    GLOBAL,
+    CLASS,
+    FUNCTION,
+    IF,
+    REPEAT
+};
+
 class Scope
 {
     
@@ -15,6 +24,7 @@ public:
     int Offset;
     map<string, Function> Functions;
     map<string, Object> Objects;
+    SCOPE_ORIGIN Origin;
 };
 
 #include "Function.hpp"

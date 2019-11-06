@@ -24,7 +24,7 @@ end
 
 class Integer size 4
         
-        action asm Bool
+        action asm Integer
             
         end
         

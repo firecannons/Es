@@ -29,11 +29,14 @@ void Parser::Initialize(const vector<Token> & Tokens)
     OutputAsm = string("");
     HasToken = false;
     SavedUsingIdents.clear();
+    GlobalScope.Origin = SCOPE_ORIGIN::GLOBAL;
     ScopeStack.push_back(& GlobalScope);
     CurrentFunction = NULL;
     CurrentClass.Type = NULL;
     IsAsmFunction = false;
     TemplateVariableCounter = 0;
+    TemporaryVariableCounter = 0;
+    LabelCounter = 0;
 }
 
 void Parser::GetNextToken()
@@ -191,14 +194,31 @@ void Parser::ParseStartOfLine()
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"])
     {
         State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
+        if(IsFunctionScopeClosest() == true)
+        {
+            OutputAsm = OutputAsm + GlobalASM.Codes["RET"];
+            AppendNewlinesToOutputASM(2);
+        }
         EndCurrentScope();
     }
     else
     {
-        if(IsAType(CurrentToken.Contents) == true)
+        bool IsAsmFunction = false;
+        if(CurrentFunction != NULL)
         {
-            TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
-            ParseExpectType();
+            if(CurrentFunction->IsAsm == true)
+            {
+                IsAsmFunction = true;
+                OutputAsm = OutputAsm + CurrentToken.Contents + GlobalKeywords.ReservedWords["NEW_LINE"];
+            }
+        }
+        if(IsAsmFunction == false)
+        {
+            if(IsAType(CurrentToken.Contents) == true)
+            {
+                TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
+                ParseExpectType();
+            }
         }
     }
     
@@ -446,12 +466,21 @@ void Parser::ParseExpectActionName()
 {
     if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.OverloadableOperators) == true || IsValidActionName(CurrentToken.Contents) == true)
     {
+        string NextLabel = GetNextLabel();
         Function NewFunction;
         NewFunction.IsAsm = IsAsmFunction;
-        NewFunction.Label = GetNextLabel();
+        NewFunction.Label = NextLabel;
+        NewFunction.Name = CurrentToken.Contents;
+        NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
         GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
         CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
         ScopeStack.push_back(&CurrentFunction->MyScope);
+        OutputAsm = OutputAsm + NextLabel + GlobalKeywords.ReservedWords["COLON"];
+        if(DEBUG == true)
+        {
+            OutputCurrentFunctionToAsm();
+        }
+        AppendNewlinesToOutputASM(2);
         State = PARSER_STATE::EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE;
     }
     else
@@ -1148,6 +1177,7 @@ void Parser::DoColonReduce()
 void Parser::AppendInitialASM()
 {
     OutputAsm = OutputAsm + GlobalASM.Codes["START_OF_FILE"];
+    AppendNewlinesToOutputASM(2);
 }
 
 string Parser::GetNextTemporaryVariable()
@@ -1162,4 +1192,46 @@ string Parser::GetNextLabel()
     string NextLabel = LABEL_PREFIX + to_string(LabelCounter);
     LabelCounter = LabelCounter + 1;
     return NextLabel;
+}
+
+bool Parser::IsFunctionScopeClosest()
+{
+    bool Output = false;
+    if(ScopeStack[ScopeStack.size() - 1]->Origin == SCOPE_ORIGIN::FUNCTION)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+void Parser::AppendNewlinesToOutputASM(const unsigned int Number)
+{
+    OutputAsm = OutputAsm + GetNewlines(Number);
+}
+
+string Parser::GetNewlines(const unsigned int Number)
+{
+    string Newlines = "";
+    unsigned int Index = 0;
+    while(Index < Number)
+    {
+        Newlines = Newlines + GlobalKeywords.ReservedWords["NEW_LINE"];
+        Index = Index + 1;
+    }
+    return Newlines;
+}
+
+void Parser::OutputCurrentFunctionToAsm()
+{
+    string FunctionPath = SPACE + SEMICOLON + SPACE;
+    if(CurrentClass.Type != NULL)
+    {
+        FunctionPath = FunctionPath + CurrentClass.Type->Name;
+    }
+    
+    if(CurrentFunction != NULL)
+    {
+        FunctionPath = FunctionPath + GlobalKeywords.ReservedWords["COLON"] + CurrentFunction->Name;
+    }
+    OutputAsm = OutputAsm + FunctionPath;
 }
