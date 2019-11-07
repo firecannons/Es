@@ -579,7 +579,7 @@ L20: ; Byte:!=
         
 ret
 
-add esp, 4 ; Declaring Position
+add esp, -4 ; Declaring Position
 L21: ; Pointer:create
 
 ret
@@ -588,20 +588,20 @@ L22: ; Pointer:=
 
 ret
 
-add esp, 1 ; Declaring B1
-add esp, 1 ; Declaring B2
+add esp, -1 ; Declaring B1
+add esp, -1 ; Declaring B2
 L23: ; CapTest:CapTest
 
 ret
 
-add esp, 1670965440 ; Declaring C1
-add esp, 1670965440 ; Declaring C2
+add esp, -4341788 ; Declaring C1
+add esp, -4341788 ; Declaring C2
 L24: ; CapTest2:CapTest2
 
 ret
 
-add esp, 1670965440 ; Declaring C1
-add esp, 1670965440 ; Declaring C2
+add esp, -4341788 ; Declaring C1
+add esp, -4341788 ; Declaring C2
 L25: ; CapTest3:CapTest3
 
 ret
@@ -723,8 +723,52 @@ ret
 
 L29: ; :Main
 
-add esp, 1 ; Declaring L
-add esp, 4 ; Declaring I1
-add esp, 4 ; Declaring CST_1
+add esp, -1 ; Declaring L
+add esp, -4 ; Declaring [T0
+add esp, -4
+mov ebx, ebp
+add ebx, -5
+mov ebx, [ebx]
+mov [esp], ebx ; Pushing reference to [T0
+
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov ebx, [ebx]
+mov [esp], ebx ; Pushing reference to L
+
+call L12
+
+add esp, -4 ; Declaring I1
+add esp, -4 ; Declaring [T1
+add esp, -4
+mov ebx, ebp
+add ebx, -13
+mov ebx, [ebx]
+mov [esp], ebx ; Pushing reference to [T1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -9
+mov ebx, [ebx]
+mov [esp], ebx ; Pushing reference to I1
+
+call L2
+
+add esp, -4 ; Declaring CST_1
+add esp, -4
+mov ebx, ebp
+add ebx, -9
+mov ebx, [ebx]
+mov [esp], ebx ; Pushing reference to I1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -17
+mov ebx, [ebx]
+mov [esp], ebx ; Pushing reference to CST_1
+
+call L2
+
 ret
 

@@ -14,6 +14,8 @@ public:
     TemplatedType Type;
     int Offset;
     bool IsConstant;
+
+    Object();
 };
 
 #include "Object.hpp"

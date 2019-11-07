@@ -915,12 +915,7 @@ void Parser::ParseExpectVariableName()
         }
         else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
         {
-            OutputAsm = OutputAsm + GlobalASM.CalcReserveSpaceAsm(NewParamObject.Type.Templates->Size);
-            if(DEBUG == true)
-            {
-                OutputDeclaringVariableToAsm(NewParamObject.Name);
-            }
-            AppendNewlinesToOutputASM(1);
+            AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
             State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
         }
     }
@@ -1069,11 +1064,16 @@ bool Parser::IsFirstOperatorHigherPrecedence()
 
 void Parser::DoReduce()
 {
-    if(ReduceTokens[ReducePosition + 3].Contents == GlobalKeywords.ReservedWords["RPAREN"])
+    bool ReducedRParen = false;
+    if(ReduceTokens.size() - ReducePosition > 3)
     {
-        ReduceRParen();
+        if(ReduceTokens[ReducePosition + 3].Contents == GlobalKeywords.ReservedWords["RPAREN"])
+        {
+            ReducedRParen = true;
+            ReduceRParen();
+        }
     }
-    else
+    else if(ReducedRParen == false)
     {
         ReduceOperator();
     }
@@ -1110,6 +1110,9 @@ void Parser::DoReduceFunctionCall()
 
 void Parser::ReduceOperator()
 {
+    AddToArgList(ReducePosition + 2);
+    AddToArgList(ReducePosition);
+    CallFunction(GetInAnyScope(ReduceTokens[ReducePosition].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition + 1].Contents]);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
 }
@@ -1246,4 +1249,75 @@ void Parser::OutputDeclaringVariableToAsm(const string & VariableName)
 {
     string Output = SPACE + SEMICOLON + SPACE;
     OutputAsm = OutputAsm + Output + string("Declaring ") + VariableName;
+}
+
+void Parser::AddToArgList(const unsigned int Position)
+{
+    string VariableName = ReduceTokens[Position].Contents;
+    Object * NextArg = NULL;
+    if(IsNumber(VariableName) == true)
+    {
+        Object NumberObject;
+        NumberObject.Name = GetNextTemporaryVariable();
+        ReduceTokens[Position].Contents = NumberObject.Name;
+        NumberObject.Type.Type = &TypeTable["Integer"];
+        NumberObject.Type.Templates = TypeTable["Integer"].GetFirstCompiledTemplate();
+        GetCurrentScope()->Objects.emplace(NumberObject.Name, NumberObject);
+        AddNewVariableToStack(GetCurrentScope()->Objects[NumberObject.Name]);
+        NextArg = GetInAnyScope(NumberObject.Name);
+    }
+    else
+    {
+        NextArg = GetInAnyScope(VariableName);
+    }
+    NextFunctionObjects.push_back(NextArg);
+}
+
+void Parser::AddNewVariableToStack(Object & NewObject)
+{
+    OutputAsm = OutputAsm + GlobalASM.CalcReserveSpaceAsm(NewObject.Type.Templates->Size);
+    if(DEBUG == true)
+    {
+        OutputDeclaringVariableToAsm(NewObject.Name);
+    }
+    AppendNewlinesToOutputASM(1);
+    GetCurrentScope()->Offset = GetCurrentScope()->Offset - NewObject.Type.Templates->Size;
+    NewObject.Offset = GetCurrentScope()->Offset;
+}
+
+void Parser::CallFunction(const Function & InFunction)
+{
+    int StartOffset = GetCurrentScope()->Offset;
+    PushArguments();
+    OutputCallAsm(InFunction);
+    AppendNewlinesToOutputASM(2);
+    GetCurrentScope()->Offset = StartOffset;
+    NextFunctionObjects.clear();
+}
+
+void Parser::PushArguments()
+{
+    unsigned int Index = 0;
+    while(Index < NextFunctionObjects.size())
+    {
+        OutputAsm = OutputAsm + GlobalASM.CalcReferenceToPositionAsm(NextFunctionObjects[Index]->Offset, POINTER_SIZE);
+        if(DEBUG == true)
+        {
+            OutputPushingReferenceToVariableToAsm(NextFunctionObjects[Index]->Name);
+        }
+        AppendNewlinesToOutputASM(2);
+        GetCurrentScope()->Offset = GetCurrentScope()->Offset + NextFunctionObjects[Index]->Type.Templates->Size;
+        Index = Index + 1;
+    }
+}
+
+void Parser::OutputPushingReferenceToVariableToAsm(const string & VariableName)
+{
+    string Output = SPACE + SEMICOLON + SPACE;
+    OutputAsm = OutputAsm + Output + string("Pushing reference to ") + VariableName;
+}
+
+void Parser::OutputCallAsm(const Function & InFunction)
+{
+    OutputAsm = OutputAsm + GlobalASM.CalcCallAsm(InFunction.Label);
 }

@@ -55,6 +55,7 @@ const string TEMPORARY_VARIABLE_PREFIX = "[T";
 const string LABEL_PREFIX = "L";
 const string SEMICOLON = ";";
 const string SPACE = " ";
+const unsigned int POINTER_SIZE = 4;
 
 class Parser
 {
@@ -87,6 +88,7 @@ public:
     string FileStartASM;
     unsigned int TemporaryVariableCounter;
     unsigned int LabelCounter;
+    vector<Object *> NextFunctionObjects;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -170,6 +172,12 @@ public:
     string GetNewlines(const unsigned int Number);
     void OutputCurrentFunctionToAsm();
     void OutputDeclaringVariableToAsm(const string & VariableName);
+    void AddToArgList(const unsigned int Position);
+    void AddNewVariableToStack(Object & NewObject);
+    void CallFunction(const Function & InFunction);
+    void PushArguments();
+    void OutputPushingReferenceToVariableToAsm(const string & VariableName);
+    void OutputCallAsm(const Function & InFunction);
 };
 
 #include "Compiler.h"

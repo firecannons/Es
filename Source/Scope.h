@@ -25,7 +25,9 @@ public:
     map<string, Function> Functions;
     map<string, Object> Objects;
     SCOPE_ORIGIN Origin;
+
+    Scope();
 };
 
-#include "Function.hpp"
+#include "Scope.hpp"
 #endif

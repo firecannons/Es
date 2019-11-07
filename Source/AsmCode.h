@@ -16,6 +16,8 @@ public:
     string CalcReserveSpaceAsm(const unsigned int ReserveAmount);
     string CalcStartOfFileAsm();
     string CalcRetAsm();
+    string CalcReferenceToPositionAsm(const int ObjectOffset, const int ObjectSize);
+    string CalcCallAsm(const string & LabelName);
 };
 
 AsmCode GlobalASM;
