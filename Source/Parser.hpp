@@ -1298,6 +1298,8 @@ void Parser::CallFunction(const Function & InFunction)
     int StartOffset = GetCurrentScope()->Offset;
     PushArguments();
     OutputCallAsm(InFunction);
+    AppendNewlinesToOutputASM(1);
+    OutputShiftUpFromFunction(GetCurrentScope()->Offset - StartOffset);
     AppendNewlinesToOutputASM(2);
     GetCurrentScope()->Offset = StartOffset;
     NextFunctionObjects.clear();
@@ -1314,7 +1316,7 @@ void Parser::PushArguments()
             OutputPushingReferenceToVariableToAsm(NextFunctionObjects[Index]->Name);
         }
         AppendNewlinesToOutputASM(2);
-        GetCurrentScope()->Offset = GetCurrentScope()->Offset + NextFunctionObjects[Index]->Type.Templates->Size;
+        GetCurrentScope()->Offset = GetCurrentScope()->Offset + POINTER_SIZE;
         Index = Index + 1;
     }
 }
@@ -1328,4 +1330,9 @@ void Parser::OutputPushingReferenceToVariableToAsm(const string & VariableName)
 void Parser::OutputCallAsm(const Function & InFunction)
 {
     OutputAsm = OutputAsm + GlobalASM.CalcCallAsm(InFunction.Label);
+}
+
+void Parser::OutputShiftUpFromFunction(const unsigned int ShiftAmount)
+{
+    OutputAsm = OutputAsm + GlobalASM.CalcShiftUpAsm(ShiftAmount);
 }

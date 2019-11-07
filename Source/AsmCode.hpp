@@ -9,6 +9,7 @@ AsmCode::AsmCode()
     Codes.emplace(string("PUSH_REFERENCE_P2"), string("\nmov ebx, ebp\nadd ebx, "));
     Codes.emplace(string("PUSH_REFERENCE_P3"), string("\nmov ebx, [ebx]\nmov [esp], ebx"));
     Codes.emplace(string("CALL"), string("call "));
+    Codes.emplace(string("SHIFT_UP_ASM"), string("add esp, "));
 }
 
 string AsmCode::CalcReserveSpaceAsm(const unsigned int ReserveAmount)
@@ -39,5 +40,11 @@ string AsmCode::CalcReferenceToPositionAsm(const int ObjectOffset, const int Obj
 string AsmCode::CalcCallAsm(const string & LabelName)
 {
     string Output = Codes["CALL"] + LabelName;
+    return Output;
+}
+
+string AsmCode::CalcShiftUpAsm(const unsigned int ShiftAmount)
+{
+    string Output = Codes["SHIFT_UP_ASM"] + to_string(ShiftAmount);
     return Output;
 }

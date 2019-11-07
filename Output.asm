@@ -594,14 +594,14 @@ L23: ; CapTest:CapTest
 
 ret
 
-add esp, -2014074234 ; Declaring C1
-add esp, -2014074234 ; Declaring C2
+add esp, 1797412832 ; Declaring C1
+add esp, 1797412832 ; Declaring C2
 L24: ; CapTest2:CapTest2
 
 ret
 
-add esp, -2014074234 ; Declaring C1
-add esp, -2014074234 ; Declaring C2
+add esp, 1797412832 ; Declaring C1
+add esp, 1797412832 ; Declaring C2
 L25: ; CapTest3:CapTest3
 
 ret
@@ -738,6 +738,7 @@ mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to L
 
 call L12
+add esp, 8
 
 add esp, -4 ; Declaring I1
 add esp, -4 ; Declaring [T1
@@ -754,6 +755,7 @@ mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to I1
 
 call L2
+add esp, 8
 
 add esp, -4 ; Declaring CST_1
 add esp, -4
@@ -769,6 +771,7 @@ mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to CST_1
 
 call L2
+add esp, 8
 
 ret
 

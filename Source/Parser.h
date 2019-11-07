@@ -178,6 +178,7 @@ public:
     void PushArguments();
     void OutputPushingReferenceToVariableToAsm(const string & VariableName);
     void OutputCallAsm(const Function & InFunction);
+    void OutputShiftUpFromFunction(const unsigned int ShiftAmount);
 };
 
 #include "Compiler.h"
