@@ -196,7 +196,7 @@ void Parser::ParseStartOfLine()
         State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
         if(IsFunctionScopeClosest() == true)
         {
-            OutputAsm = OutputAsm + GlobalASM.Codes["RET"];
+            OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
             AppendNewlinesToOutputASM(2);
         }
         EndCurrentScope();
@@ -915,6 +915,12 @@ void Parser::ParseExpectVariableName()
         }
         else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
         {
+            OutputAsm = OutputAsm + GlobalASM.CalcReserveSpaceAsm(NewParamObject.Type.Templates->Size);
+            if(DEBUG == true)
+            {
+                OutputDeclaringVariableToAsm(NewParamObject.Name);
+            }
+            AppendNewlinesToOutputASM(1);
             State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
         }
     }
@@ -1176,7 +1182,7 @@ void Parser::DoColonReduce()
 
 void Parser::AppendInitialASM()
 {
-    OutputAsm = OutputAsm + GlobalASM.Codes["START_OF_FILE"];
+    OutputAsm = OutputAsm + GlobalASM.CalcStartOfFileAsm();
     AppendNewlinesToOutputASM(2);
 }
 
@@ -1234,4 +1240,10 @@ void Parser::OutputCurrentFunctionToAsm()
         FunctionPath = FunctionPath + GlobalKeywords.ReservedWords["COLON"] + CurrentFunction->Name;
     }
     OutputAsm = OutputAsm + FunctionPath;
+}
+
+void Parser::OutputDeclaringVariableToAsm(const string & VariableName)
+{
+    string Output = SPACE + SEMICOLON + SPACE;
+    OutputAsm = OutputAsm + Output + string("Declaring ") + VariableName;
 }

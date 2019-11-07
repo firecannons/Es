@@ -13,6 +13,9 @@ public:
     map<string, string> Codes;
 
     AsmCode();
+    string CalcReserveSpaceAsm(const unsigned int ReserveAmount);
+    string CalcStartOfFileAsm();
+    string CalcRetAsm();
 };
 
 AsmCode GlobalASM;
