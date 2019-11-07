@@ -594,14 +594,14 @@ L23: ; CapTest:CapTest
 
 ret
 
-add esp, -4341788 ; Declaring C1
-add esp, -4341788 ; Declaring C2
+add esp, -2014074234 ; Declaring C1
+add esp, -2014074234 ; Declaring C2
 L24: ; CapTest2:CapTest2
 
 ret
 
-add esp, -4341788 ; Declaring C1
-add esp, -4341788 ; Declaring C2
+add esp, -2014074234 ; Declaring C1
+add esp, -2014074234 ; Declaring C2
 L25: ; CapTest3:CapTest3
 
 ret

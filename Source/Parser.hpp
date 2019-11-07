@@ -1179,6 +1179,14 @@ bool Parser::IsAColonInFarOperatorPosition()
 
 void Parser::DoColonReduce()
 {
+    Object * CallingObject = GetInAnyScope(ReduceTokens[ReducePosition].Contents);
+    Object * ScopeObject = &CallingObject->Type.Templates->MyScope.Objects[ReduceTokens[ReducePosition + 2].Contents];
+    unsigned int OffsetShift = ScopeObject->Offset;
+    Object NumberObject;
+    NumberObject.Name = GetNextTemporaryVariable();
+    ReduceTokens[Position + 2].Contents = NumberObject.Name;
+    NumberObject.Type = ScopeObject->Type;
+    NumberObject.Offset = CallingObject->Offset + OffsetShift;
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
 }
