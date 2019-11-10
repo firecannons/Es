@@ -219,6 +219,12 @@ void Parser::ParseStartOfLine()
                 TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
                 ParseExpectType();
             }
+            else if(DoesMapContain(CurrentToken.Contents, GetGlobalScope()->Functions) == true)
+            {
+                CopyUntilNextNewline();
+                ReduceLine();
+                State = PARSER_STATE::START_OF_LINE;
+            }
         }
     }
     
@@ -767,6 +773,7 @@ bool Parser::IsInAnyScope(const string & VariableName)
         {
             Output = true;
         }
+        Index = Index + 1;
     }
     return Output;
 }
@@ -789,6 +796,7 @@ Object * Parser::GetInAnyScope(const string & VariableName)
             Variable = &ScopeStack[ScopeStack.size() - 1 - Index]->Objects[VariableName];
             IsFound = true;
         }
+        Index = Index + 1;
     }
     return Variable;
 }
@@ -965,38 +973,49 @@ void Parser::ReduceLine()
 
 void Parser::OperateReduceTokens()
 {
+    cout << "reducing " << ReduceTokens[ReducePosition].Contents << endl;
+    OutputTokens(ReduceTokens);
     if(IsCurrentlyLeftParen() == true)
     {
+        cout << "one" << endl;
         ReducePosition = ReducePosition + 1;
     }
     else if(IsFunctionCallCurrently() == true)
     {
+        cout << "reducing funciton cll" << endl;
         DoReduceFunctionCall();
     }
     else if(IsSingleVarInParens() == true)
     {
+        cout << "3" << endl;
         DoSingleVarInParens();
     }
     else if(IsALeftParenInOperatorPosition() == true)
     {
+        cout << "jumping because of left paren" << endl;
         ReducePosition = ReducePosition + 2;
     }
     else if(IsAColonInNextOperatorPosition() == true)
     {
+        cout << "5" << endl;
         DoColonReduce();
     }
     else if(IsAColonInFarOperatorPosition() == true)
     {
+        cout << "6" << endl;
         ReducePosition = ReducePosition + 2;
     }
     else if(IsFirstOperatorHigherPrecedence() == true)
     {
+        cout << "7" << endl;
         DoReduce();
     }
     else
     {
+        cout << "Jumping forward 2" << endl;
         ReducePosition = ReducePosition + 2;
     }
+    cout << "end reducing " << ReduceTokens.size() << endl;
 }
 
 void Parser::InitializeOperatorOrdering()
@@ -1041,19 +1060,19 @@ bool Parser::IsCurrentlyLeftParen()
 bool Parser::IsFirstOperatorHigherPrecedence()
 {
     bool Done = false;
-    bool Output = true;
+    bool Output = false;
     unsigned int OrderingIndex = 0;
     while(OrderingIndex < OperatorOrdering.size() && Done == false)
     {
         if(DoesSetContain(ReduceTokens[ReducePosition + 1].Contents, OperatorOrdering[OrderingIndex]) == true)
         {
+            Output = true;
             Done = true;
         }
         else if(ReduceTokens.size() - ReducePosition > 3)
         {
             if(DoesSetContain(ReduceTokens[ReducePosition + 3].Contents, OperatorOrdering[OrderingIndex]) == true)
             {
-                Output = false;
                 Done = true;
             }
         }
@@ -1065,19 +1084,19 @@ bool Parser::IsFirstOperatorHigherPrecedence()
 void Parser::DoReduce()
 {
     bool ReducedRParen = false;
-    if(ReduceTokens.size() - ReducePosition > 3)
+    if(ReduceTokens.size() - ReducePosition > 1)
     {
-        if(ReduceTokens[ReducePosition + 3].Contents == GlobalKeywords.ReservedWords["RPAREN"])
+        if(ReduceTokens[ReducePosition + 1].Contents == GlobalKeywords.ReservedWords["RPAREN"])
         {
             ReducedRParen = true;
             ReduceRParen();
         }
     }
-    else if(ReducedRParen == false)
+    if(ReducedRParen == false)
     {
         ReduceOperator();
     }
-    
+    cout << "ReducedRParen = " << ReducedRParen << endl;
 }
 
 void Parser::ReduceRParen()
@@ -1104,6 +1123,24 @@ bool Parser::IsFunctionCallCurrently()
 
 void Parser::DoReduceFunctionCall()
 {
+    Function * WantedFunction = NULL;
+    bool IsCallingObject = false;
+    if(ReducePosition >= 2)
+    {
+        if(ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["COLON"])
+        {
+            IsCallingObject = true;
+            AddToArgList(ReducePosition - 2);
+            WantedFunction = &GetInAnyScope(ReduceTokens[ReducePosition - 2].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition].Contents];
+            ReduceTokens.erase(ReduceTokens.begin() + ReducePosition - 1);
+            ReduceTokens.erase(ReduceTokens.begin() + ReducePosition - 1);
+        }
+    }
+    if(IsCallingObject == false)
+    {
+        WantedFunction = &GetGlobalScope()->Functions[ReduceTokens[ReducePosition].Contents];
+    }
+    CallFunction(*WantedFunction);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
 }
@@ -1298,6 +1335,10 @@ void Parser::CallFunction(const Function & InFunction)
     int StartOffset = GetCurrentScope()->Offset;
     PushArguments();
     OutputCallAsm(InFunction);
+    if(DEBUG == true)
+    {
+        OutputCallingFunctionCommentToAsm(InFunction);
+    }
     AppendNewlinesToOutputASM(1);
     OutputShiftUpFromFunction(GetCurrentScope()->Offset - StartOffset);
     AppendNewlinesToOutputASM(2);
@@ -1335,4 +1376,15 @@ void Parser::OutputCallAsm(const Function & InFunction)
 void Parser::OutputShiftUpFromFunction(const unsigned int ShiftAmount)
 {
     OutputAsm = OutputAsm + GlobalASM.CalcShiftUpAsm(ShiftAmount);
+}
+
+Scope * Parser::GetGlobalScope()
+{
+    return &GlobalScope;
+}
+
+void Parser::OutputCallingFunctionCommentToAsm(const Function & InFunction)
+{
+    string Output = SPACE + SEMICOLON + SPACE;
+    OutputAsm = OutputAsm + Output + string("Calling ") + InFunction.Name;
 }

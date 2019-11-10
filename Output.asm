@@ -594,14 +594,14 @@ L23: ; CapTest:CapTest
 
 ret
 
-add esp, 1797412832 ; Declaring C1
-add esp, 1797412832 ; Declaring C2
+add esp, 941784310 ; Declaring C1
+add esp, 941784310 ; Declaring C2
 L24: ; CapTest2:CapTest2
 
 ret
 
-add esp, 1797412832 ; Declaring C1
-add esp, 1797412832 ; Declaring C2
+add esp, 941784310 ; Declaring C1
+add esp, 941784310 ; Declaring C2
 L25: ; CapTest3:CapTest3
 
 ret
@@ -737,8 +737,11 @@ add ebx, -1
 mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to L
 
-call L12
+call L12 ; Calling =
 add esp, 8
+
+call L26 ; Calling OutputByte
+add esp, 0
 
 add esp, -4 ; Declaring I1
 add esp, -4 ; Declaring [T1
@@ -754,8 +757,14 @@ add ebx, -9
 mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to I1
 
-call L2
+call L2 ; Calling =
 add esp, 8
+
+call L26 ; Calling OutputByte
+add esp, 0
+
+call L26 ; Calling OutputByte
+add esp, 0
 
 add esp, -4 ; Declaring CST_1
 add esp, -4
@@ -770,7 +779,7 @@ add ebx, -17
 mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to CST_1
 
-call L2
+call L2 ; Calling =
 add esp, 8
 
 ret
