@@ -7,7 +7,7 @@ AsmCode::AsmCode()
     Codes.emplace(string("RESERVE_SPACE"), string("add esp, "));
     Codes.emplace(string("PUSH_REFERENCE_P1"), string("add esp, "));
     Codes.emplace(string("PUSH_REFERENCE_P2"), string("\nmov ebx, ebp\nadd ebx, "));
-    Codes.emplace(string("PUSH_REFERENCE_P3"), string("\nmov ebx, [ebx]\nmov [esp], ebx"));
+    Codes.emplace(string("PUSH_REFERENCE_P3"), string("\nmov [esp], ebx"));
     Codes.emplace(string("CALL"), string("call "));
     Codes.emplace(string("SHIFT_UP_ASM"), string("add esp, "));
     Codes.emplace(string("CREATE_STACK_FRAME"), string("push ebp\nmov ebp, esp"));

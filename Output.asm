@@ -4,9 +4,6 @@ entry L29
 
 L0: ; Bool:Bool
 
-push ebp
-mov ebp, esp
-
         push ebp
         mov ebp, esp
     
@@ -23,27 +20,15 @@ mov ebp, esp
         pop ebp
         
     
-mov esp, ebp
-pop ebp
-
 ret
 
 L1: ; Integer:Integer
 
-push ebp
-mov ebp, esp
-
             
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L2: ; Integer:=
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -75,15 +60,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L3: ; Integer:+
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -109,15 +88,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L4: ; Integer:-
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -143,15 +116,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L5: ; Integer:>
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -179,15 +146,9 @@ mov ebp, esp
             pop ebp
             
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L6: ; Integer:>=
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -215,15 +176,9 @@ mov ebp, esp
             pop ebp
             
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L7: ; Integer:==
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -250,15 +205,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L8: ; Integer:<
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -285,15 +234,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L9: ; Integer:<=
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -320,15 +263,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L10: ; Integer:!=
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -355,15 +292,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L11: ; Byte:Byte
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -379,15 +310,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L12: ; Byte:=
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -419,15 +344,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L13: ; Byte:+
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -453,15 +372,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L14: ; Byte:-
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -487,15 +400,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L15: ; Byte:>
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -523,15 +430,9 @@ mov ebp, esp
             pop ebp
             
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L16: ; Byte:>=
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -558,15 +459,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L17: ; Byte:==
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -593,15 +488,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L18: ; Byte:<
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -629,15 +518,9 @@ mov ebp, esp
             pop ebp
             
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L19: ; Byte:<=
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -664,15 +547,9 @@ mov ebp, esp
             mov esp, ebp
             pop ebp
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L20: ; Byte:!=
-
-push ebp
-mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -700,9 +577,6 @@ mov ebp, esp
             pop ebp
             
         
-mov esp, ebp
-pop ebp
-
 ret
 
 L21: ; Pointer:create
@@ -757,9 +631,6 @@ ret
 
 L26: ; :OutputByte
 
-push ebp
-mov ebp, esp
-
     push ebp
     mov ebp, esp
     
@@ -777,15 +648,9 @@ mov ebp, esp
     mov esp, ebp
     pop ebp
 
-mov esp, ebp
-pop ebp
-
 ret
 
 L27: ; :OutputByte2
-
-push ebp
-mov ebp, esp
 
     push ebp
     mov ebp, esp
@@ -815,15 +680,9 @@ mov ebp, esp
     pop ebp
     
 
-mov esp, ebp
-pop ebp
-
 ret
 
 L28: ; :OutputByte5
-
-push ebp
-mov ebp, esp
 
     push ebp
     mov ebp, esp
@@ -883,9 +742,6 @@ mov ebp, esp
     pop ebp
     
 
-mov esp, ebp
-pop ebp
-
 ret
 
 L29: ; :Main
@@ -898,13 +754,11 @@ add esp, -1 ; Declaring [T0
 add esp, -4
 mov ebx, ebp
 add ebx, -2
-mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to [T0
 
 add esp, -4
 mov ebx, ebp
 add ebx, -1
-mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to L
 
 call L12 ; Calling =
@@ -918,13 +772,11 @@ add esp, -1 ; Declaring [T1
 add esp, -4
 mov ebx, ebp
 add ebx, -4
-mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to [T1
 
 add esp, -4
 mov ebx, ebp
 add ebx, -3
-mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to I1
 
 call L12 ; Calling =
@@ -940,13 +792,11 @@ add esp, -1 ; Declaring CST_1
 add esp, -4
 mov ebx, ebp
 add ebx, -3
-mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to I1
 
 add esp, -4
 mov ebx, ebp
 add ebx, -5
-mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to CST_1
 
 call L12 ; Calling =

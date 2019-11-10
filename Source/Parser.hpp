@@ -202,8 +202,11 @@ void Parser::ParseStartOfLine()
         State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
         if(IsFunctionScopeClosest() == true)
         {
-            OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
-            AppendNewlinesToOutputASM(2);
+            if(CurrentFunction->IsAsm == false)
+            {
+                OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
+                AppendNewlinesToOutputASM(2);
+            }
             OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
             AppendNewlinesToOutputASM(2);
         }
@@ -498,8 +501,11 @@ void Parser::ParseExpectActionName()
             OutputCurrentFunctionToAsm();
         }
         AppendNewlinesToOutputASM(2);
-        OutputAsm = OutputAsm + GlobalASM.CalcCreateStackFrameAsm();
-        AppendNewlinesToOutputASM(2);
+        if(NewFunction.IsAsm == false)
+        {
+            OutputAsm = OutputAsm + GlobalASM.CalcCreateStackFrameAsm();
+            AppendNewlinesToOutputASM(2);
+        }
         State = PARSER_STATE::EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE;
     }
     else
