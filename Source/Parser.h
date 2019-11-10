@@ -89,6 +89,7 @@ public:
     unsigned int TemporaryVariableCounter;
     unsigned int LabelCounter;
     vector<Object *> NextFunctionObjects;
+    bool WasVariableFound;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -181,6 +182,8 @@ public:
     void OutputShiftUpFromFunction(const unsigned int ShiftAmount);
     Scope * GetGlobalScope();
     void OutputCallingFunctionCommentToAsm(const Function & InFunction);
+    bool IsRParamNext();
+    void AddReturnValue(const Function & InFunction);
 };
 
 #include "Compiler.h"

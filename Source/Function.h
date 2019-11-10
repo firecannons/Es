@@ -18,6 +18,7 @@ public:
     vector<Object*> Parameters;
     bool IsAsm;
     string Label;
+    bool HasReturnType;
 };
 
 #include "Function.hpp"
