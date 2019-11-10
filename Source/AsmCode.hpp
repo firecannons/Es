@@ -2,7 +2,7 @@
 
 AsmCode::AsmCode()
 {
-    Codes.emplace(string("START_OF_FILE"), string("format ELF executable 3\nsegment readable executable\nentry Main"));
+    Codes.emplace(string("START_OF_FILE"), string("format ELF executable 3\nsegment readable executable\nentry "));
     Codes.emplace(string("RET"), string("ret"));
     Codes.emplace(string("RESERVE_SPACE"), string("add esp, "));
     Codes.emplace(string("PUSH_REFERENCE_P1"), string("add esp, "));

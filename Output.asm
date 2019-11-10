@@ -579,7 +579,6 @@ L20: ; Byte:!=
         
 ret
 
-add esp, -4 ; Declaring Position
 L21: ; Pointer:create
 
 ret
@@ -588,20 +587,14 @@ L22: ; Pointer:=
 
 ret
 
-add esp, -1 ; Declaring B1
-add esp, -1 ; Declaring B2
 L23: ; CapTest:CapTest
 
 ret
 
-add esp, -4346000 ; Declaring C1
-add esp, -4346000 ; Declaring C2
 L24: ; CapTest2:CapTest2
 
 ret
 
-add esp, -4346000 ; Declaring C1
-add esp, -4346000 ; Declaring C2
 L25: ; CapTest3:CapTest3
 
 ret

@@ -38,7 +38,8 @@ enum PARSER_STATE
     EXPECT_NEWLINE_AFTER_END,
     EXPECT_COMMA_OR_RPAREN,
     EXPECT_VARIABLE_NAME,
-    EXPECT_FIRST_OPERATOR_OR_NEWLINE
+    EXPECT_FIRST_OPERATOR_OR_NEWLINE,
+    EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION
 };
 
 enum TYPE_PARSE_MODE
@@ -56,6 +57,7 @@ const string LABEL_PREFIX = "L";
 const string SEMICOLON = ";";
 const string SPACE = " ";
 const unsigned int POINTER_SIZE = 4;
+const string MAIN_FUNCTION_NAME = "Main";
 
 class Parser
 {
@@ -184,6 +186,11 @@ public:
     void OutputCallingFunctionCommentToAsm(const Function & InFunction);
     bool IsRParamNext();
     void AddReturnValue(const Function & InFunction);
+    void ParseExpectNewlineAfterVariableDeclaration();
+    bool IsGlobalScopeClosest();
+    bool IsClassScopeClosest();
+    SCOPE_ORIGIN GetClosestScopeOrigin();
+    void MoveBackCurrentScopeOffset(Object & NewObject);
 };
 
 #include "Compiler.h"

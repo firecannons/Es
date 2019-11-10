@@ -4,9 +4,9 @@ string Parser::Parse(const vector<Token> & Tokens)
 {
     Initialize(Tokens);
     
-    AppendInitialASM();
-    
     RunParse();
+
+    AppendInitialASM();
     
     return OutputAsm;
 }
@@ -158,6 +158,10 @@ void Parser::Operate()
     else if(State == PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE)
     {
         ParseExpectFirstOperatorOrNewline();
+    }
+    else if(State == PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION)
+    {
+        ParseExpectNewlineAfterVariableDeclaration();
     }
 }
 
@@ -350,6 +354,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
         CurrentClass.Type->InitializeBlankCompiledTemplate();
         CurrentClass.Type->IsTemplated = false;
         CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
+        CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         ScopeStack.push_back(&CurrentClass.Templates->MyScope);
         State = PARSER_STATE::START_OF_LINE;
     }
@@ -364,6 +369,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
         CurrentClass.Type->InitializeBlankCompiledTemplate();
         CurrentClass.Type->IsTemplated = false;
         CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
+        CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         ScopeStack.push_back(&CurrentClass.Templates->MyScope);
         State = PARSER_STATE::EXPECT_CLASS_SIZE_NUMBER;
     }
@@ -931,8 +937,17 @@ void Parser::ParseExpectVariableName()
         }
         else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
         {
-            AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
-            State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
+            if(IsClassScopeClosest() == false)
+            {
+                AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
+                State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
+            }
+            else
+            {
+                MoveBackCurrentScopeOffset(NewParamObject);
+                State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
+            }
+            
         }
     }
     else
@@ -1222,8 +1237,8 @@ void Parser::DoColonReduce()
 
 void Parser::AppendInitialASM()
 {
-    OutputAsm = OutputAsm + GlobalASM.CalcStartOfFileAsm();
-    AppendNewlinesToOutputASM(2);
+    string LabelString = GetGlobalScope()->Functions[MAIN_FUNCTION_NAME].Label;
+    OutputAsm = GlobalASM.CalcStartOfFileAsm() + LabelString + GetNewlines(2) + OutputAsm;
 }
 
 string Parser::GetNextTemporaryVariable()
@@ -1243,7 +1258,7 @@ string Parser::GetNextLabel()
 bool Parser::IsFunctionScopeClosest()
 {
     bool Output = false;
-    if(ScopeStack[ScopeStack.size() - 1]->Origin == SCOPE_ORIGIN::FUNCTION)
+    if(GetClosestScopeOrigin() == SCOPE_ORIGIN::FUNCTION)
     {
         Output = true;
     }
@@ -1318,8 +1333,7 @@ void Parser::AddNewVariableToStack(Object & NewObject)
         OutputDeclaringVariableToAsm(NewObject.Name);
     }
     AppendNewlinesToOutputASM(1);
-    GetCurrentScope()->Offset = GetCurrentScope()->Offset - NewObject.Type.Templates->Size;
-    NewObject.Offset = GetCurrentScope()->Offset;
+    MoveBackCurrentScopeOffset(NewObject);
 }
 
 void Parser::CallFunction(const Function & InFunction)
@@ -1406,4 +1420,47 @@ void Parser::AddReturnValue(const Function & InFunction)
         AddNewVariableToStack(GetCurrentScope()->Objects[NewObject.Name]);
         ReduceTokens[ReducePosition].Contents = NewObject.Name;
     }
+}
+
+void Parser::ParseExpectNewlineAfterVariableDeclaration()
+{
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
+    {
+        State = PARSER_STATE::START_OF_LINE;
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
+}
+
+bool Parser::IsGlobalScopeClosest()
+{
+    bool Output = false;
+    if(GetClosestScopeOrigin() == SCOPE_ORIGIN::GLOBAL)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+bool Parser::IsClassScopeClosest()
+{
+    bool Output = false;
+    if(GetClosestScopeOrigin() == SCOPE_ORIGIN::CLASS)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+SCOPE_ORIGIN Parser::GetClosestScopeOrigin()
+{
+    return ScopeStack[ScopeStack.size() - 1]->Origin;
+}
+
+void Parser::MoveBackCurrentScopeOffset(Object & NewObject)
+{
+    GetCurrentScope()->Offset = GetCurrentScope()->Offset - NewObject.Type.Templates->Size;
+    NewObject.Offset = GetCurrentScope()->Offset;
 }
