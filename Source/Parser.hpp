@@ -228,7 +228,7 @@ void Parser::ParseStartOfLine()
                 ParseExpectType();
             }
             else if(DoesMapContain(CurrentToken.Contents, GetGlobalScope()->Functions) == true)
-            {
+            { // Change above line to just "else" when Me: is working.
                 CopyUntilNextNewline();
                 ReduceLine();
                 State = PARSER_STATE::START_OF_LINE;
@@ -1307,15 +1307,15 @@ void Parser::OutputDeclaringVariableToAsm(const string & VariableName)
     OutputAsm = OutputAsm + Output + string("Declaring ") + VariableName;
 }
 
-void Parser::AddToArgList(const unsigned int Position)
+void Parser::AddToArgList(const unsigned int InPosition)
 {
-    string VariableName = ReduceTokens[Position].Contents;
+    string VariableName = ReduceTokens[InPosition].Contents;
     Object * NextArg = NULL;
     if(IsNumber(VariableName) == true)
     {
         Object NumberObject;
         NumberObject.Name = GetNextTemporaryVariable();
-        ReduceTokens[ReducePosition].Contents = NumberObject.Name;
+        ReduceTokens[InPosition].Contents = NumberObject.Name;
         NumberObject.Type.Type = &TypeTable["Byte"];
         NumberObject.Type.Templates = TypeTable["Byte"].GetFirstCompiledTemplate();
         GetCurrentScope()->Objects.emplace(NumberObject.Name, NumberObject);

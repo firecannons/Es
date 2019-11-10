@@ -114,12 +114,12 @@ action Main
     Byte L = 102
     OutputByte ( L )
     
-    Integer I1 = 100
+    Byte I1 = 100
     I1 = L
     L = I1
     OutputByte ( I1 )
     OutputByte ( L )
-    Integer CST_1 = I1
+    Byte CST_1 = I1
 /*
     OutputByte ( I1 + Mult(L, I1) )
 
