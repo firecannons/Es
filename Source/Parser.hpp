@@ -292,7 +292,7 @@ string Parser::ConvertSavedUsingIdentsToPath()
     unsigned int Index = 1;
     while(Index < SavedUsingIdents.size())
     {
-        OutputPath = OutputPath + GlobalKeywords.ReservedWords["FORWARD_SLASH"] + SavedUsingIdents[Index];
+        OutputPath = OutputPath + GlobalKeywords.ReservedWords["SLASH"] + SavedUsingIdents[Index];
         Index = Index + 1;
     }
     OutputPath = OutputPath + EXTENSION;
@@ -981,54 +981,42 @@ void Parser::ReduceLine()
 
 void Parser::OperateReduceTokens()
 {
-    cout << "reducing " << ReduceTokens[ReducePosition].Contents << endl;
-    OutputTokens(ReduceTokens);
     if(IsCurrentlyLeftParen() == true)
     {
-        cout << "one" << endl;
         ReducePosition = ReducePosition + 1;
     }
     else if(IsFunctionCallCurrently() == true)
     {
-        cout << "reducing funciton cll" << endl;
         DoReduceFunctionCall();
     }
     else if(IsSingleVarInParens() == true)
     {
-        cout << "3" << endl;
         DoSingleVarInParens();
     }
     else if(IsALeftParenInOperatorPosition() == true)
     {
-        cout << "jumping because of left paren" << endl;
         ReducePosition = ReducePosition + 2;
     }
     else if(IsAColonInNextOperatorPosition() == true)
     {
-        cout << "5" << endl;
         DoColonReduce();
     }
     else if(IsAColonInFarOperatorPosition() == true)
     {
-        cout << "6" << endl;
         ReducePosition = ReducePosition + 2;
     }
     else if(IsFirstOperatorHigherPrecedence() == true)
     {
-        cout << "7" << endl;
         DoReduce();
     }
     else if(IsRParamNext() == true)
     {
-        cout << "reducing R paren" << endl;
         ReduceRParen();
     }
     else
     {
-        cout << "Jumping forward 2" << endl;
         ReducePosition = ReducePosition + 2;
     }
-    cout << "end reducing " << ReduceTokens.size() << endl;
 }
 
 void Parser::InitializeOperatorOrdering()
@@ -1077,7 +1065,6 @@ bool Parser::IsFirstOperatorHigherPrecedence()
     unsigned int OrderingIndex = 0;
     while(OrderingIndex < OperatorOrdering.size() && Done == false)
     {
-        cout << "Searching for " << ReduceTokens[ReducePosition + 1].Contents << endl;
         if(DoesSetContain(ReduceTokens[ReducePosition + 1].Contents, OperatorOrdering[OrderingIndex]) == true)
         {
             Output = true;
@@ -1102,22 +1089,16 @@ void Parser::DoReduce()
 
 void Parser::ReduceRParen()
 {
-    cout << "line 1098 " << endl;
-    cout << "line 1100 " << ReduceTokens[ReducePosition].Contents << endl;
     if(ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["LPAREN"])
     {
         ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
     }
     else if(ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["COMMA"])
     {
-        cout << "line 1103 " << endl;
         ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
         ReduceTokens.erase(ReduceTokens.begin() + (ReducePosition - 1));
     }
-
-    cout << "line 1106 " << endl;
     ReducePosition = ReducePosition - 2;
-cout << "line 1105 " << endl;
 }
 
 bool Parser::IsFunctionCallCurrently()
@@ -1324,12 +1305,9 @@ void Parser::AddToArgList(const unsigned int Position)
     }
     else
     {
-        cout << "adding " << VariableName << endl;
         NextArg = GetInAnyScope(VariableName);
-        cout << "added " << VariableName << endl;
     }
     NextFunctionObjects.push_back(NextArg);
-    cout << NextFunctionObjects.size() << " is new size" << endl;
 }
 
 void Parser::AddNewVariableToStack(Object & NewObject)
@@ -1346,14 +1324,10 @@ void Parser::AddNewVariableToStack(Object & NewObject)
 
 void Parser::CallFunction(const Function & InFunction)
 {
-    cout << "entering CallFunction()" << endl;
     AddReturnValue(InFunction);
     int StartOffset = GetCurrentScope()->Offset;
-    cout << "line 1342" << endl;
     PushArguments();
-    cout << "line 1344" << endl;
     OutputCallAsm(InFunction);
-    cout << "line 1346" << endl;
     if(DEBUG == true)
     {
         OutputCallingFunctionCommentToAsm(InFunction);
@@ -1363,16 +1337,13 @@ void Parser::CallFunction(const Function & InFunction)
     AppendNewlinesToOutputASM(2);
     GetCurrentScope()->Offset = StartOffset;
     NextFunctionObjects.clear();
-    cout << "leaving CallFunction)(" << endl;
 }
 
 void Parser::PushArguments()
 {
-    cout << "in PushArguments()" << endl;
     unsigned int Index = 0;
     while(Index < NextFunctionObjects.size())
     {
-        cout << "adding " << NextFunctionObjects[Index]->Name << endl;
         OutputAsm = OutputAsm + GlobalASM.CalcReferenceToPositionAsm(NextFunctionObjects[Index]->Offset, POINTER_SIZE);
         if(DEBUG == true)
         {
@@ -1431,12 +1402,8 @@ void Parser::AddReturnValue(const Function & InFunction)
         Object NewObject;
         NewObject.Name = GetNextTemporaryVariable();
         NewObject.Type = InFunction.ReturnType;
-        cout << "line 1430 " << InFunction.Name << " " << InFunction.ReturnType.Type->Name << endl;
         GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
-        cout << "line 1432 " << NewObject.Type.Type->Name << endl;
         AddNewVariableToStack(GetCurrentScope()->Objects[NewObject.Name]);
-        cout << "line 1434" << endl;
         ReduceTokens[ReducePosition].Contents = NewObject.Name;
-        cout << "line 1436" << endl;
     }
 }

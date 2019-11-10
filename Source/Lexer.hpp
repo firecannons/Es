@@ -148,7 +148,6 @@ void Lexer::AppendToSavedWord(const char NewChar)
 
 void Lexer::AppendSavedWordToTokens()
 {
-    cout << SavedWord << endl;
     if(SavedWord.size() > 0)
     {
         Tokens.push_back(Token(SavedWord, LineNumber, SourceFileName));

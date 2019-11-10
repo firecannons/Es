@@ -8,7 +8,6 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("USING"), string("using")));
     ReservedWords.insert(pair<string,string>(string("DOT"), string(".")));
     ReservedWords.insert(pair<string,string>(string("BACK_SLASH"), string("\\")));
-    ReservedWords.insert(pair<string,string>(string("FORWARD_SLASH"), string("/")));
     ReservedWords.insert(pair<string,string>(string("NEW_LINE"), string("\n")));
     ReservedWords.insert(pair<string,string>(string("LESS_THAN"), string("<")));
     ReservedWords.insert(pair<string,string>(string("GREATER_THAN"), string(">")));
@@ -35,6 +34,7 @@ Keywords::Keywords()
     ShortOperators.emplace(ReservedWords["LESS_THAN"]);
     ShortOperators.emplace(ReservedWords["GREATER_THAN"]);
     ShortOperators.emplace(ReservedWords["EQUALS"]);
+    ShortOperators.emplace(ReservedWords["SLASH"]);
     
     OverloadableOperators = ShortOperators;
     OverloadableOperators.emplace(ReservedWords["LESS_OR_EQUAL"]);
@@ -45,7 +45,6 @@ Keywords::Keywords()
     OverloadableOperators.emplace(ReservedWords["PLUS"]);
     OverloadableOperators.emplace(ReservedWords["MINUS"]);
     OverloadableOperators.emplace(ReservedWords["STAR"]);
-    OverloadableOperators.emplace(ReservedWords["SLASH"]);
     OverloadableOperators.emplace(ReservedWords["NOT_EQUALS"]);
 
     AfterDeclarationOperators.emplace(ReservedWords["EQUALS"]);

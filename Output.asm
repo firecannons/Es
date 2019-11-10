@@ -1,6 +1,6 @@
 format ELF executable 3
 segment readable executable
-entry Main
+entry L29
 
 L0: ; Bool:Bool
 
@@ -594,14 +594,14 @@ L23: ; CapTest:CapTest
 
 ret
 
-add esp, 941784310 ; Declaring C1
-add esp, 941784310 ; Declaring C2
+add esp, -4346000 ; Declaring C1
+add esp, -4346000 ; Declaring C2
 L24: ; CapTest2:CapTest2
 
 ret
 
-add esp, 941784310 ; Declaring C1
-add esp, 941784310 ; Declaring C2
+add esp, -4346000 ; Declaring C1
+add esp, -4346000 ; Declaring C2
 L25: ; CapTest3:CapTest3
 
 ret
@@ -733,11 +733,11 @@ mov [esp], ebx ; Pushing reference to [T0
 
 add esp, -4
 mov ebx, ebp
-add ebx, -1
+add ebx, -5
 mov ebx, [ebx]
-mov [esp], ebx ; Pushing reference to L
+mov [esp], ebx ; Pushing reference to [T0
 
-call L12 ; Calling =
+call L2 ; Calling =
 add esp, 8
 
 call L26 ; Calling OutputByte
@@ -753,9 +753,9 @@ mov [esp], ebx ; Pushing reference to [T1
 
 add esp, -4
 mov ebx, ebp
-add ebx, -9
+add ebx, -13
 mov ebx, [ebx]
-mov [esp], ebx ; Pushing reference to I1
+mov [esp], ebx ; Pushing reference to [T1
 
 call L2 ; Calling =
 add esp, 8
