@@ -4,6 +4,9 @@ entry L29
 
 L0: ; Bool:Bool
 
+push ebp
+mov ebp, esp
+
         push ebp
         mov ebp, esp
     
@@ -20,15 +23,27 @@ L0: ; Bool:Bool
         pop ebp
         
     
+mov esp, ebp
+pop ebp
+
 ret
 
 L1: ; Integer:Integer
 
+push ebp
+mov ebp, esp
+
             
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L2: ; Integer:=
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -60,9 +75,15 @@ L2: ; Integer:=
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L3: ; Integer:+
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -88,9 +109,15 @@ L3: ; Integer:+
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L4: ; Integer:-
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -116,9 +143,15 @@ L4: ; Integer:-
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L5: ; Integer:>
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -146,9 +179,15 @@ L5: ; Integer:>
             pop ebp
             
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L6: ; Integer:>=
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -176,9 +215,15 @@ L6: ; Integer:>=
             pop ebp
             
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L7: ; Integer:==
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -205,9 +250,15 @@ L7: ; Integer:==
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L8: ; Integer:<
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -234,9 +285,15 @@ L8: ; Integer:<
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L9: ; Integer:<=
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -263,9 +320,15 @@ L9: ; Integer:<=
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L10: ; Integer:!=
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -292,9 +355,15 @@ L10: ; Integer:!=
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L11: ; Byte:Byte
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -310,9 +379,15 @@ L11: ; Byte:Byte
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L12: ; Byte:=
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -344,9 +419,15 @@ L12: ; Byte:=
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L13: ; Byte:+
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -372,9 +453,15 @@ L13: ; Byte:+
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L14: ; Byte:-
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -400,9 +487,15 @@ L14: ; Byte:-
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L15: ; Byte:>
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -430,9 +523,15 @@ L15: ; Byte:>
             pop ebp
             
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L16: ; Byte:>=
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -459,9 +558,15 @@ L16: ; Byte:>=
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L17: ; Byte:==
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -488,9 +593,15 @@ L17: ; Byte:==
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L18: ; Byte:<
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -518,9 +629,15 @@ L18: ; Byte:<
             pop ebp
             
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L19: ; Byte:<=
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -547,9 +664,15 @@ L19: ; Byte:<=
             mov esp, ebp
             pop ebp
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L20: ; Byte:!=
+
+push ebp
+mov ebp, esp
 
             push ebp
             mov ebp, esp
@@ -577,29 +700,65 @@ L20: ; Byte:!=
             pop ebp
             
         
+mov esp, ebp
+pop ebp
+
 ret
 
 L21: ; Pointer:create
+
+push ebp
+mov ebp, esp
+
+mov esp, ebp
+pop ebp
 
 ret
 
 L22: ; Pointer:=
 
+push ebp
+mov ebp, esp
+
+mov esp, ebp
+pop ebp
+
 ret
 
 L23: ; CapTest:CapTest
+
+push ebp
+mov ebp, esp
+
+mov esp, ebp
+pop ebp
 
 ret
 
 L24: ; CapTest2:CapTest2
 
+push ebp
+mov ebp, esp
+
+mov esp, ebp
+pop ebp
+
 ret
 
 L25: ; CapTest3:CapTest3
 
+push ebp
+mov ebp, esp
+
+mov esp, ebp
+pop ebp
+
 ret
 
 L26: ; :OutputByte
+
+push ebp
+mov ebp, esp
 
     push ebp
     mov ebp, esp
@@ -618,9 +777,15 @@ L26: ; :OutputByte
     mov esp, ebp
     pop ebp
 
+mov esp, ebp
+pop ebp
+
 ret
 
 L27: ; :OutputByte2
+
+push ebp
+mov ebp, esp
 
     push ebp
     mov ebp, esp
@@ -650,9 +815,15 @@ L27: ; :OutputByte2
     pop ebp
     
 
+mov esp, ebp
+pop ebp
+
 ret
 
 L28: ; :OutputByte5
+
+push ebp
+mov ebp, esp
 
     push ebp
     mov ebp, esp
@@ -712,45 +883,51 @@ L28: ; :OutputByte5
     pop ebp
     
 
+mov esp, ebp
+pop ebp
+
 ret
 
 L29: ; :Main
 
+push ebp
+mov ebp, esp
+
 add esp, -1 ; Declaring L
-add esp, -4 ; Declaring [T0
+add esp, -1 ; Declaring [T0
 add esp, -4
 mov ebx, ebp
-add ebx, -5
+add ebx, -2
 mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to [T0
 
 add esp, -4
 mov ebx, ebp
-add ebx, -5
+add ebx, -2
 mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to [T0
 
-call L2 ; Calling =
+call L12 ; Calling =
 add esp, 8
 
 call L26 ; Calling OutputByte
 add esp, 0
 
 add esp, -4 ; Declaring I1
-add esp, -4 ; Declaring [T1
+add esp, -1 ; Declaring [T1
 add esp, -4
 mov ebx, ebp
-add ebx, -13
+add ebx, -7
 mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to [T1
 
 add esp, -4
 mov ebx, ebp
-add ebx, -13
+add ebx, -7
 mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to [T1
 
-call L2 ; Calling =
+call L12 ; Calling =
 add esp, 8
 
 call L26 ; Calling OutputByte
@@ -762,18 +939,21 @@ add esp, 0
 add esp, -4 ; Declaring CST_1
 add esp, -4
 mov ebx, ebp
-add ebx, -9
+add ebx, -6
 mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to I1
 
 add esp, -4
 mov ebx, ebp
-add ebx, -17
+add ebx, -11
 mov ebx, [ebx]
 mov [esp], ebx ; Pushing reference to CST_1
 
 call L2 ; Calling =
 add esp, 8
+
+mov esp, ebp
+pop ebp
 
 ret
 

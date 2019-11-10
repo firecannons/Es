@@ -191,6 +191,8 @@ public:
     bool IsClassScopeClosest();
     SCOPE_ORIGIN GetClosestScopeOrigin();
     void MoveBackCurrentScopeOffset(Object & NewObject);
+    void OutputCreateStackFrameAsm();
+    void OutputDestroyStackFrameAsm();
 };
 
 #include "Compiler.h"

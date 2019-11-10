@@ -19,6 +19,8 @@ public:
     string CalcReferenceToPositionAsm(const int ObjectOffset, const int ObjectSize);
     string CalcCallAsm(const string & LabelName);
     string CalcShiftUpAsm(const unsigned int ShiftAmount);
+    string CalcCreateStackFrameAsm();
+    string CalcDestroyStackFrameAsm();
 };
 
 AsmCode GlobalASM;
