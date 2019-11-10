@@ -184,7 +184,7 @@ public:
     void OutputShiftUpFromFunction(const unsigned int ShiftAmount);
     Scope * GetGlobalScope();
     void OutputCallingFunctionCommentToAsm(const Function & InFunction);
-    bool IsRParamNext();
+    bool IsRParenNext();
     void AddReturnValue(const Function & InFunction);
     void ParseExpectNewlineAfterVariableDeclaration();
     bool IsGlobalScopeClosest();

@@ -1034,7 +1034,7 @@ void Parser::OperateReduceTokens()
     {
         DoReduce();
     }
-    else if(IsRParamNext() == true)
+    else if(IsRParenNext() == true)
     {
         ReduceRParen();
     }
@@ -1114,6 +1114,7 @@ void Parser::DoReduce()
 
 void Parser::ReduceRParen()
 {
+    AddToArgList(ReducePosition);
     if(ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["LPAREN"])
     {
         ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
@@ -1406,7 +1407,7 @@ void Parser::OutputCallingFunctionCommentToAsm(const Function & InFunction)
     OutputAsm = OutputAsm + Output + string("Calling ") + InFunction.Name;
 }
 
-bool Parser::IsRParamNext()
+bool Parser::IsRParenNext()
 {
     bool Output = false;
     if(ReduceTokens.size() - ReducePosition > 1)

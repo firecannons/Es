@@ -764,8 +764,13 @@ mov [esp], ebx ; Pushing reference to L
 call L12 ; Calling =
 add esp, 8
 
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx ; Pushing reference to L
+
 call L26 ; Calling OutputByte
-add esp, 0
+add esp, 4
 
 add esp, -1 ; Declaring I1
 add esp, -1 ; Declaring [T1
@@ -782,11 +787,21 @@ mov [esp], ebx ; Pushing reference to I1
 call L12 ; Calling =
 add esp, 8
 
-call L26 ; Calling OutputByte
-add esp, 0
+add esp, -4
+mov ebx, ebp
+add ebx, -3
+mov [esp], ebx ; Pushing reference to I1
 
 call L26 ; Calling OutputByte
-add esp, 0
+add esp, 4
+
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx ; Pushing reference to L
+
+call L26 ; Calling OutputByte
+add esp, 4
 
 add esp, -1 ; Declaring CST_1
 add esp, -4
