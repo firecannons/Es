@@ -751,6 +751,7 @@ mov ebp, esp
 
 add esp, -1 ; Declaring L
 add esp, -1 ; Declaring [T0
+mov byte [esp], 102
 add esp, -4
 mov ebx, ebp
 add ebx, -2
@@ -774,6 +775,7 @@ add esp, 4
 
 add esp, -1 ; Declaring I1
 add esp, -1 ; Declaring [T1
+mov byte [esp], 100
 add esp, -4
 mov ebx, ebp
 add ebx, -4
@@ -816,6 +818,15 @@ mov [esp], ebx ; Pushing reference to CST_1
 
 call L12 ; Calling =
 add esp, 8
+
+add esp, -2 ; Declaring ET
+add esp, -4
+mov ebx, ebp
+add ebx, -7
+mov [esp], ebx ; Pushing reference to [T2
+
+call L26 ; Calling OutputByte
+add esp, 4
 
 mov esp, ebp
 pop ebp

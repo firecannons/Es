@@ -21,6 +21,7 @@ public:
     string CalcShiftUpAsm(const unsigned int ShiftAmount);
     string CalcCreateStackFrameAsm();
     string CalcDestroyStackFrameAsm();
+    string CalcIntegerQuickAssignAsm(const int Integer);
 };
 
 AsmCode GlobalASM;

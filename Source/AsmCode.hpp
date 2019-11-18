@@ -12,6 +12,7 @@ AsmCode::AsmCode()
     Codes.emplace(string("SHIFT_UP_ASM"), string("add esp, "));
     Codes.emplace(string("CREATE_STACK_FRAME"), string("push ebp\nmov ebp, esp"));
     Codes.emplace(string("DESTROY_STACK_FRAME"), string("mov esp, ebp\npop ebp"));
+    Codes.emplace(string("INTEGER_QUICK_ASSIGN"), string("mov byte [esp], "));
 }
 
 string AsmCode::CalcReserveSpaceAsm(const unsigned int ReserveAmount)
@@ -60,5 +61,11 @@ string AsmCode::CalcCreateStackFrameAsm()
 string AsmCode::CalcDestroyStackFrameAsm()
 {
     string Output = Codes["DESTROY_STACK_FRAME"];
+    return Output;
+}
+
+string AsmCode::CalcIntegerQuickAssignAsm(const int Integer)
+{
+    string Output = Codes["INTEGER_QUICK_ASSIGN"] + to_string(Integer);
     return Output;
 }

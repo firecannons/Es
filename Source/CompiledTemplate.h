@@ -17,6 +17,8 @@ public:
     vector<TemplatedType> Templates;
     unsigned int Size;
     Scope MyScope;
+
+    CompiledTemplate();
     
 };
 

@@ -109,6 +109,10 @@ action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
     
 end
 
+class ElemTest
+    Byte B1
+    Byte B2
+end
 
 action Main
     Byte L = 102
@@ -120,6 +124,10 @@ action Main
     OutputByte ( I1 )
     OutputByte ( L )
     Byte CST_1 = I1
+    
+    ElemTest ET
+    ET:B1 = 102
+    OutputByte ( ET:B1 )
 /*
     OutputByte ( I1 + Mult(L, I1) )
 

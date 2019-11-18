@@ -58,6 +58,7 @@ const string SEMICOLON = ";";
 const string SPACE = " ";
 const unsigned int POINTER_SIZE = 4;
 const string MAIN_FUNCTION_NAME = "Main";
+const unsigned int INTEGER_SIZE = POINTER_SIZE;
 
 class Parser
 {
@@ -193,6 +194,8 @@ public:
     void MoveBackCurrentScopeOffset(Object & NewObject);
     void OutputCreateStackFrameAsm();
     void OutputDestroyStackFrameAsm();
+    void AddNumericalValueToTempInteger(const string & NewValue);
+    void PositionObjectInClass(Object & NewObject);
 };
 
 #include "Compiler.h"

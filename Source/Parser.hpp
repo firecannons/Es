@@ -230,7 +230,7 @@ void Parser::ParseStartOfLine()
                 TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
                 ParseExpectType();
             }
-            else if(DoesMapContain(CurrentToken.Contents, GetGlobalScope()->Functions) == true)
+            else
             { // Change above line to just "else" when Me: is working.
                 CopyUntilNextNewline();
                 ReduceLine();
@@ -947,15 +947,15 @@ void Parser::ParseExpectVariableName()
         }
         else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
         {
-            if(IsClassScopeClosest() == false)
+            if(IsClassScopeClosest() == true)
             {
-                AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
-                State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
+                PositionObjectInClass(NewParamObject);
+                State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
             }
             else
             {
-                MoveBackCurrentScopeOffset(NewParamObject);
-                State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
+                AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
+                State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
             }
             
         }
@@ -1006,6 +1006,8 @@ void Parser::ReduceLine()
 
 void Parser::OperateReduceTokens()
 {
+    cout << ReduceTokens[ReducePosition].Contents << endl;
+    OutputTokens(ReduceTokens);
     if(IsCurrentlyLeftParen() == true)
     {
         ReducePosition = ReducePosition + 1;
@@ -1237,11 +1239,12 @@ void Parser::DoColonReduce()
     Object * CallingObject = GetInAnyScope(ReduceTokens[ReducePosition].Contents);
     Object * ScopeObject = &CallingObject->Type.Templates->MyScope.Objects[ReduceTokens[ReducePosition + 2].Contents];
     unsigned int OffsetShift = ScopeObject->Offset;
-    Object NumberObject;
-    NumberObject.Name = GetNextTemporaryVariable();
-    ReduceTokens[Position + 2].Contents = NumberObject.Name;
-    NumberObject.Type = ScopeObject->Type;
-    NumberObject.Offset = CallingObject->Offset + OffsetShift;
+    Object NewObject;
+    NewObject.Name = GetNextTemporaryVariable();
+    ReduceTokens[ReducePosition + 2].Contents = NewObject.Name;
+    NewObject.Type = ScopeObject->Type;
+    NewObject.Offset = CallingObject->Offset + OffsetShift;
+    GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
 }
@@ -1327,6 +1330,7 @@ void Parser::AddToArgList(const unsigned int InPosition)
         NumberObject.Type.Templates = TypeTable["Byte"].GetFirstCompiledTemplate();
         GetCurrentScope()->Objects.emplace(NumberObject.Name, NumberObject);
         AddNewVariableToStack(GetCurrentScope()->Objects[NumberObject.Name]);
+        AddNumericalValueToTempInteger(VariableName);
         NextArg = GetInAnyScope(NumberObject.Name);
     }
     else
@@ -1474,4 +1478,16 @@ void Parser::MoveBackCurrentScopeOffset(Object & NewObject)
 {
     GetCurrentScope()->Offset = GetCurrentScope()->Offset - NewObject.Type.Templates->Size;
     NewObject.Offset = GetCurrentScope()->Offset;
+}
+
+void Parser::AddNumericalValueToTempInteger(const string & NewValue)
+{
+    OutputAsm = OutputAsm + GlobalASM.CalcIntegerQuickAssignAsm(stoi(NewValue));
+    AppendNewlinesToOutputASM(1);
+}
+
+void Parser::PositionObjectInClass(Object & NewObject)
+{
+    NewObject.Offset = CurrentClass.Templates->Size;
+    CurrentClass.Templates->Size = CurrentClass.Templates->Size + NewObject.Type.Templates->Size;
 }
