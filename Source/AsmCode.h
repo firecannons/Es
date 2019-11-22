@@ -16,7 +16,7 @@ public:
     string CalcReserveSpaceAsm(const unsigned int ReserveAmount);
     string CalcStartOfFileAsm();
     string CalcRetAsm();
-    string CalcReferenceToPositionAsm(const int ObjectOffset, const int ObjectSize);
+    string CalcPushRefForFunctionCall(const int ObjectOffset, const int ObjectSize);
     string CalcCallAsm(const string & LabelName);
     string CalcShiftUpAsm(const unsigned int ShiftAmount);
     string CalcCreateStackFrameAsm();

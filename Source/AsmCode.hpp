@@ -33,7 +33,7 @@ string AsmCode::CalcRetAsm()
     return Output;
 }
 
-string AsmCode::CalcReferenceToPositionAsm(const int ObjectOffset, const int ObjectSize)
+string AsmCode::CalcPushRefForFunctionCall(const int ObjectOffset, const int ObjectSize)
 {
     string Output = Codes["PUSH_REFERENCE_P1"] + to_string(-((int)ObjectSize)) + Codes["PUSH_REFERENCE_P2"] + to_string(ObjectOffset) +
         Codes["PUSH_REFERENCE_P3"];

@@ -594,6 +594,19 @@ L22: ; Pointer:=
 push ebp
 mov ebp, esp
 
+add esp, -4
+mov ebx, ebp
+add ebx, 12
+mov [esp], ebx ; Pushing reference to [T1
+
+add esp, -4
+mov ebx, ebp
+add ebx, 8
+mov [esp], ebx ; Pushing reference to [T0
+
+call L2 ; Calling =
+add esp, 8
+
 mov esp, ebp
 pop ebp
 
@@ -750,12 +763,12 @@ push ebp
 mov ebp, esp
 
 add esp, -1 ; Declaring L
-add esp, -1 ; Declaring [T0
+add esp, -1 ; Declaring [T2
 mov byte [esp], 102
 add esp, -4
 mov ebx, ebp
 add ebx, -2
-mov [esp], ebx ; Pushing reference to [T0
+mov [esp], ebx ; Pushing reference to [T2
 
 add esp, -4
 mov ebx, ebp
@@ -774,17 +787,43 @@ call L26 ; Calling OutputByte
 add esp, 4
 
 add esp, -1 ; Declaring I1
-add esp, -1 ; Declaring [T1
+add esp, -1 ; Declaring [T3
 mov byte [esp], 100
 add esp, -4
 mov ebx, ebp
 add ebx, -4
-mov [esp], ebx ; Pushing reference to [T1
+mov [esp], ebx ; Pushing reference to [T3
 
 add esp, -4
 mov ebx, ebp
 add ebx, -3
 mov [esp], ebx ; Pushing reference to I1
+
+call L12 ; Calling =
+add esp, 8
+
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx ; Pushing reference to L
+
+add esp, -4
+mov ebx, ebp
+add ebx, -3
+mov [esp], ebx ; Pushing reference to I1
+
+call L12 ; Calling =
+add esp, 8
+
+add esp, -4
+mov ebx, ebp
+add ebx, -3
+mov [esp], ebx ; Pushing reference to I1
+
+add esp, -4
+mov ebx, ebp
+add ebx, -1
+mov [esp], ebx ; Pushing reference to L
 
 call L12 ; Calling =
 add esp, 8
@@ -820,10 +859,25 @@ call L12 ; Calling =
 add esp, 8
 
 add esp, -2 ; Declaring ET
+add esp, -1 ; Declaring [T5
+mov byte [esp], 102
+add esp, -4
+mov ebx, ebp
+add ebx, -8
+mov [esp], ebx ; Pushing reference to [T5
+
 add esp, -4
 mov ebx, ebp
 add ebx, -7
-mov [esp], ebx ; Pushing reference to [T2
+mov [esp], ebx ; Pushing reference to [T4
+
+call L12 ; Calling =
+add esp, 8
+
+add esp, -4
+mov ebx, ebp
+add ebx, -7
+mov [esp], ebx ; Pushing reference to [T6
 
 call L26 ; Calling OutputByte
 add esp, 4

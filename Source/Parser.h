@@ -59,6 +59,7 @@ const string SPACE = " ";
 const unsigned int POINTER_SIZE = 4;
 const string MAIN_FUNCTION_NAME = "Main";
 const unsigned int INTEGER_SIZE = POINTER_SIZE;
+const unsigned int STACK_FRAME_SIZE = 8;
 
 class Parser
 {
@@ -196,6 +197,7 @@ public:
     void OutputDestroyStackFrameAsm();
     void AddNumericalValueToTempInteger(const string & NewValue);
     void PositionObjectInClass(Object & NewObject);
+    unsigned int GetNextParamOffset();
 };
 
 #include "Compiler.h"

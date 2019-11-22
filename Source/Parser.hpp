@@ -71,6 +71,7 @@ bool Parser::IsNextToken()
 
 void Parser::Operate()
 {
+    cout << CurrentToken.Contents << " " << State << endl;
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
@@ -457,6 +458,7 @@ void Parser::ParseExpectClassSizeNumber()
 {
     if(IsNumber(CurrentToken.Contents) == true)
     {
+        cout << "two" << endl;
         CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX].Size = stoi(CurrentToken.Contents);
         State = PARSER_STATE::START_OF_LINE;
     }
@@ -495,6 +497,15 @@ void Parser::ParseExpectActionName()
         GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
         CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
         ScopeStack.push_back(&CurrentFunction->MyScope);
+        
+        Object NewObject;
+        NewObject.Name = GlobalKeywords.ReservedWords["ME"];
+        NewObject.Type = CurrentClass;
+        NewObject.Offset = GetNextParamOffset();
+        NewObject.IsReference = true;
+        GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
+        CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
+        
         OutputAsm = OutputAsm + NextLabel + GlobalKeywords.ReservedWords["COLON"];
         if(DEBUG == true)
         {
@@ -942,6 +953,7 @@ void Parser::ParseExpectVariableName()
         GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
         if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
         {
+            GetCurrentScope()->Objects[NewParamObject.Name].Offset = GetNextParamOffset();
             CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
             State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
         }
@@ -1032,13 +1044,17 @@ void Parser::OperateReduceTokens()
     {
         ReducePosition = ReducePosition + 2;
     }
-    else if(IsFirstOperatorHigherPrecedence() == true)
-    {
-        DoReduce();
-    }
     else if(IsRParenNext() == true)
     {
         ReduceRParen();
+    }
+    else if(ReduceTokens.size() - ReducePosition <= 2)
+    {
+        ReducePosition = ReducePosition - 2;
+    }
+    else if(IsFirstOperatorHigherPrecedence() == true)
+    {
+        DoReduce();
     }
     else
     {
@@ -1321,6 +1337,7 @@ void Parser::AddToArgList(const unsigned int InPosition)
 {
     string VariableName = ReduceTokens[InPosition].Contents;
     Object * NextArg = NULL;
+    cout << "'" << VariableName << "' " << IsNumber(VariableName) << endl;
     if(IsNumber(VariableName) == true)
     {
         Object NumberObject;
@@ -1373,7 +1390,7 @@ void Parser::PushArguments()
     unsigned int Index = 0;
     while(Index < NextFunctionObjects.size())
     {
-        OutputAsm = OutputAsm + GlobalASM.CalcReferenceToPositionAsm(NextFunctionObjects[Index]->Offset, POINTER_SIZE);
+        OutputAsm = OutputAsm + GlobalASM.CalcPushRefForFunctionCall(NextFunctionObjects[Index]->Offset, POINTER_SIZE);
         if(DEBUG == true)
         {
             OutputPushingReferenceToVariableToAsm(NextFunctionObjects[Index]->Name);
@@ -1482,6 +1499,7 @@ void Parser::MoveBackCurrentScopeOffset(Object & NewObject)
 
 void Parser::AddNumericalValueToTempInteger(const string & NewValue)
 {
+    cout << "one" << endl;
     OutputAsm = OutputAsm + GlobalASM.CalcIntegerQuickAssignAsm(stoi(NewValue));
     AppendNewlinesToOutputASM(1);
 }
@@ -1490,4 +1508,10 @@ void Parser::PositionObjectInClass(Object & NewObject)
 {
     NewObject.Offset = CurrentClass.Templates->Size;
     CurrentClass.Templates->Size = CurrentClass.Templates->Size + NewObject.Type.Templates->Size;
+}
+
+unsigned int Parser::GetNextParamOffset()
+{
+    unsigned int NextParamOffset = STACK_FRAME_SIZE + CurrentFunction->Parameters.size() * POINTER_SIZE;
+    return NextParamOffset;
 }

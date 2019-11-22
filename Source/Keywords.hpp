@@ -30,6 +30,7 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("IS_EQUALS"), string("==")));
     ReservedWords.insert(pair<string,string>(string("NOT_EQUALS"), string("!=")));
     ReservedWords.insert(pair<string,string>(string("UNDER_SCORE"), string("_")));
+    ReservedWords.insert(pair<string,string>(string("ME"), string("Me")));
     
     ShortOperators.emplace(ReservedWords["LESS_THAN"]);
     ShortOperators.emplace(ReservedWords["GREATER_THAN"]);

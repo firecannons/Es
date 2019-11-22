@@ -14,6 +14,7 @@ public:
     TemplatedType Type;
     int Offset;
     bool IsConstant;
+    bool IsReference;
 
     Object();
 };
