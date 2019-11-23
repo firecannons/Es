@@ -1622,7 +1622,7 @@ string Parser::OutputObjectToString(const Object & OutputObject, const unsigned 
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Is Reference: " + to_string(OutputObject.IsReference) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
-    OutputString = OutputString + "Type: ";
+    OutputString = OutputString + "Type: \n";
     OutputString = OutputString + OutputTemplatedTypeToString(OutputObject.Type, Level + 1);
     return OutputString;
 }
@@ -1646,10 +1646,10 @@ string Parser::OutputFunctionToString(Function & OutputFunction, const unsigned 
     OutputString = OutputString + "Label: " + OutputFunction.Label + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Has Return Type: " + to_string(OutputFunction.HasReturnType) + '\n';
-    OutputString = OutputString + OutputTabsToString(Level);
     if(OutputFunction.HasReturnType == true)
     {
-        OutputString = OutputString + "Return Type: ";
+        OutputString = OutputString + OutputTabsToString(Level);
+        OutputString = OutputString + "Return Type: \n";
         OutputString = OutputString + OutputTemplatedTypeToString(OutputFunction.ReturnType, Level + 1);
     }
 
