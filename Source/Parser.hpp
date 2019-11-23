@@ -324,7 +324,6 @@ void Parser::ParseExpectClassName()
     {
         BaseType NewClassBase;
         NewClassBase.Name = CurrentToken.Contents;
-        NewClassBase.InitializeBlankCompiledTemplate();
         TypeTable.insert(pair<string,BaseType>(CurrentToken.Contents, NewClassBase));
         CurrentClass.Type = &TypeTable[CurrentToken.Contents];
         State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE;
