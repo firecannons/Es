@@ -19,6 +19,7 @@ void Parser::RunParse()
         Operate();
         GetNextToken();
     }
+    OutputTypeTable();
 }    
 
 void Parser::Initialize(const vector<Token> & Tokens)
@@ -1514,4 +1515,149 @@ unsigned int Parser::GetNextParamOffset()
 {
     unsigned int NextParamOffset = STACK_FRAME_SIZE + CurrentFunction->Parameters.size() * POINTER_SIZE;
     return NextParamOffset;
+}
+
+void Parser::OutputTypeTable()
+{
+    string OutputString;
+
+    OutputString = OutputString + OutputTypeTableToString();
+    cout << OutputString << endl;
+}
+
+string Parser::OutputTypeTableToString()
+{
+    string OutputString;
+    map<string, BaseType>::iterator Iterator;
+    for (Iterator = TypeTable.begin(); Iterator != TypeTable.end(); Iterator++)
+    {
+        OutputString = OutputString + OutputTypeToString(Iterator->second, 1);
+    }
+    return OutputString;
+}
+
+string Parser::OutputTypeToString(const BaseType & InType, const unsigned int Level)
+{
+    string OutputString;
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Name: " + InType.Name + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "IsTemplated: " + to_string(InType.IsTemplated) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Templates: ";
+    OutputString = OutputString + OutputSingleLineVectorToString(InType.PossibleTemplates) + '\n';
+    unsigned int Index = 0;
+    while(Index < InType.CompiledTemplates.size())
+    {
+        OutputString = OutputString + OutputCompiledTemplateToString(InType.CompiledTemplates[Index], Level + 1);
+        Index = Index + 1;
+    }
+    return OutputString;
+}
+
+string Parser::OutputSingleLineVectorToString(const vector<string> & InVector)
+{
+    string OutputString;
+    unsigned int Index = 0;
+    while(Index < InVector.size())
+    {
+        OutputString = OutputString + InVector[Index] + GlobalKeywords.ReservedWords["SPACE"];
+        Index = Index + 1;
+    }
+    return OutputString;
+}
+
+string Parser::OutputTabsToString(const unsigned int NumberTabs)
+{
+    string OutputString;
+    unsigned int Index = 0;
+    while(Index < NumberTabs)
+    {
+        OutputString = OutputString + '\t';
+        Index = Index + 1;
+    }
+    return OutputString;
+}
+
+string Parser::OutputCompiledTemplateToString(const CompiledTemplate & OutputCT, const unsigned int Level)
+{
+    string OutputString;
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Size: " + to_string(OutputCT.Size) + '\n';
+    OutputString = OutputString + OutputScopeToString((Scope &)OutputCT.MyScope, Level + 1);
+    return OutputString;
+}
+
+string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level)
+{
+    string OutputString;
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Offset: " + to_string(OutputScope.Offset) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Origin: " + to_string(OutputScope.Origin) + '\n';
+
+    map<string, Object>::iterator Iterator;
+    for (Iterator = OutputScope.Objects.begin(); Iterator != OutputScope.Objects.end(); Iterator++)
+    {
+        OutputString = OutputString + OutputObjectToString(Iterator->second, Level + 1);
+    }
+
+    map<string, Function>::iterator FuncIterator;
+    for (FuncIterator = OutputScope.Functions.begin(); FuncIterator != OutputScope.Functions.end(); FuncIterator++)
+    {
+        OutputString = OutputString + OutputFunctionToString((Function &)FuncIterator->second, Level + 1);
+    }
+    return OutputString;
+}
+
+string Parser::OutputObjectToString(const Object & OutputObject, const unsigned int Level)
+{
+    string OutputString;
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Name: " + OutputObject.Name + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Offset: " + to_string(OutputObject.Offset) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Is Constant: " + to_string(OutputObject.IsConstant) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Is Reference: " + to_string(OutputObject.IsReference) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Type: ";
+    OutputString = OutputString + OutputTemplatedTypeToString(OutputObject.Type, Level + 1);
+    return OutputString;
+}
+
+string Parser::OutputTemplatedTypeToString(const TemplatedType & OutputTT, const unsigned int Level)
+{
+    string OutputString;
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Type Name: " + OutputTT.Type->Name + '\n';
+    return OutputString;
+}
+
+string Parser::OutputFunctionToString(Function & OutputFunction, const unsigned int Level)
+{
+    string OutputString;
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Name: " + OutputFunction.Name + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Is Asm: " + to_string(OutputFunction.IsAsm) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Label: " + OutputFunction.Label + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Has Return Type: " + to_string(OutputFunction.HasReturnType) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    if(OutputFunction.HasReturnType == true)
+    {
+        OutputString = OutputString + "Return Type: ";
+        OutputString = OutputString + OutputTemplatedTypeToString(OutputFunction.ReturnType, Level + 1);
+    }
+
+    unsigned int Index = 0;
+    while(Index < OutputFunction.Parameters.size())
+    {
+        OutputString = OutputString + OutputObjectToString(*(OutputFunction.Parameters[Index]), Level + 1);
+        Index = Index + 1;
+    }
+    return OutputString;
 }

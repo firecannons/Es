@@ -198,6 +198,16 @@ public:
     void AddNumericalValueToTempInteger(const string & NewValue);
     void PositionObjectInClass(Object & NewObject);
     unsigned int GetNextParamOffset();
+    void OutputTypeTable();
+    string OutputTypeTableToString();
+    string OutputTypeToString(const BaseType & InType, const unsigned int Level);
+    string OutputSingleLineVectorToString(const vector<string> & InVector);
+    string OutputTabsToString(const unsigned int NumberTabs);
+    string OutputCompiledTemplateToString(const CompiledTemplate & OutputCT, const unsigned int Level);
+    string OutputScopeToString(Scope & InScope, const unsigned int Level);
+    string OutputObjectToString(const Object & OutputObject, const unsigned int Level);
+    string OutputTemplatedTypeToString(const TemplatedType & OutputTT, const unsigned int Level);
+    string OutputFunctionToString(Function & OutputFunction, const unsigned int Level);
 };
 
 #include "Compiler.h"
