@@ -961,7 +961,7 @@ void Parser::ParseExpectVariableName()
         {
             if(IsClassScopeClosest() == true)
             {
-                PositionObjectInClass(NewParamObject);
+                PositionObjectInClass(GetCurrentScope()->Objects[NewParamObject.Name]);
                 State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
             }
             else
@@ -1508,6 +1508,7 @@ void Parser::PositionObjectInClass(Object & NewObject)
 {
     NewObject.Offset = CurrentClass.Templates->Size;
     CurrentClass.Templates->Size = CurrentClass.Templates->Size + NewObject.Type.Templates->Size;
+    GetCurrentScope()->Offset = GetCurrentScope()->Offset + NewObject.Type.Templates->Size;
 }
 
 unsigned int Parser::GetNextParamOffset()
