@@ -16,12 +16,14 @@ public:
     string CalcReserveSpaceAsm(const unsigned int ReserveAmount);
     string CalcStartOfFileAsm();
     string CalcRetAsm();
-    string CalcPushRefForFunctionCall(const int ObjectOffset, const int ObjectSize);
+    string CalcPushFromBasePointer(const int ObjectOffset, const int ObjectSize);
     string CalcCallAsm(const string & LabelName);
     string CalcShiftUpAsm(const unsigned int ShiftAmount);
     string CalcCreateStackFrameAsm();
     string CalcDestroyStackFrameAsm();
     string CalcIntegerQuickAssignAsm(const int Integer);
+    string CalcDerefForFuncCall(const int ReferenceOffset);
+    string CalcPushFromReference(const int ObjectOffset, const int ObjectSize);
 };
 
 AsmCode GlobalASM;

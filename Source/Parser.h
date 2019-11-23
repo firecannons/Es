@@ -181,7 +181,7 @@ public:
     void AddNewVariableToStack(Object & NewObject);
     void CallFunction(const Function & InFunction);
     void PushArguments();
-    void OutputPushingReferenceToVariableToAsm(const string & VariableName);
+    void OutputPushingReferenceToVariableToAsm(const string & VariableName, const int Offset);
     void OutputCallAsm(const Function & InFunction);
     void OutputShiftUpFromFunction(const unsigned int ShiftAmount);
     Scope * GetGlobalScope();
@@ -208,6 +208,7 @@ public:
     string OutputObjectToString(const Object & OutputObject, const unsigned int Level);
     string OutputTemplatedTypeToString(const TemplatedType & OutputTT, const unsigned int Level);
     string OutputFunctionToString(Function & OutputFunction, const unsigned int Level);
+    void OutputDerefReference(const string & VariableName, const int ReferenceOffset);
 };
 
 #include "Compiler.h"

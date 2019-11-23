@@ -15,6 +15,7 @@ public:
     int Offset;
     bool IsConstant;
     bool IsReference;
+    int ReferenceOffset;
 
     Object();
 };

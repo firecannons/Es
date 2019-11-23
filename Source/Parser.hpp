@@ -501,7 +501,7 @@ void Parser::ParseExpectActionName()
         Object NewObject;
         NewObject.Name = GlobalKeywords.ReservedWords["ME"];
         NewObject.Type = CurrentClass;
-        NewObject.Offset = GetNextParamOffset();
+        NewObject.ReferenceOffset = GetNextParamOffset();
         NewObject.IsReference = true;
         GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
         CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
@@ -1260,6 +1260,8 @@ void Parser::DoColonReduce()
     ReduceTokens[ReducePosition + 2].Contents = NewObject.Name;
     NewObject.Type = ScopeObject->Type;
     NewObject.Offset = CallingObject->Offset + OffsetShift;
+    NewObject.IsReference = CallingObject->IsReference;
+    NewObject.ReferenceOffset = CallingObject->ReferenceOffset;
     GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
@@ -1390,10 +1392,23 @@ void Parser::PushArguments()
     unsigned int Index = 0;
     while(Index < NextFunctionObjects.size())
     {
-        OutputAsm = OutputAsm + GlobalASM.CalcPushRefForFunctionCall(NextFunctionObjects[Index]->Offset, POINTER_SIZE);
+        if(NextFunctionObjects[Index]->IsReference == true)
+        {
+            OutputAsm = OutputAsm + GlobalASM.CalcDerefForFuncCall(NextFunctionObjects[Index]->ReferenceOffset);
+            if(DEBUG == true)
+            {
+                OutputDerefReference(NextFunctionObjects[Index]->Name, NextFunctionObjects[Index]->ReferenceOffset);
+            }
+            AppendNewlinesToOutputASM(2);
+            OutputAsm = OutputAsm + GlobalASM.CalcPushFromReference(NextFunctionObjects[Index]->Offset, POINTER_SIZE);
+        }
+        else
+        {
+            OutputAsm = OutputAsm + GlobalASM.CalcPushFromBasePointer(NextFunctionObjects[Index]->Offset, POINTER_SIZE);
+        }
         if(DEBUG == true)
         {
-            OutputPushingReferenceToVariableToAsm(NextFunctionObjects[Index]->Name);
+            OutputPushingReferenceToVariableToAsm(NextFunctionObjects[Index]->Name, NextFunctionObjects[Index]->Offset);
         }
         AppendNewlinesToOutputASM(2);
         GetCurrentScope()->Offset = GetCurrentScope()->Offset + POINTER_SIZE;
@@ -1401,10 +1416,10 @@ void Parser::PushArguments()
     }
 }
 
-void Parser::OutputPushingReferenceToVariableToAsm(const string & VariableName)
+void Parser::OutputPushingReferenceToVariableToAsm(const string & VariableName, const int Offset)
 {
     string Output = SPACE + SEMICOLON + SPACE;
-    OutputAsm = OutputAsm + Output + string("Pushing reference to ") + VariableName;
+    OutputAsm = OutputAsm + Output + string("Pushing reference to ") + VariableName + string(" from offset ") + to_string(Offset);
 }
 
 void Parser::OutputCallAsm(const Function & InFunction)
@@ -1622,6 +1637,8 @@ string Parser::OutputObjectToString(const Object & OutputObject, const unsigned 
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Is Reference: " + to_string(OutputObject.IsReference) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Reference Offset: " + to_string(OutputObject.ReferenceOffset) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Type: \n";
     OutputString = OutputString + OutputTemplatedTypeToString(OutputObject.Type, Level + 1);
     return OutputString;
@@ -1660,4 +1677,10 @@ string Parser::OutputFunctionToString(Function & OutputFunction, const unsigned 
         Index = Index + 1;
     }
     return OutputString;
+}
+
+void Parser::OutputDerefReference(const string & VariableName, const int ReferenceOffset)
+{
+    string Output = SPACE + SEMICOLON + SPACE;
+    OutputAsm = OutputAsm + Output + string("Dereferencing before push ") + VariableName + string(" from reference offset ") + to_string(ReferenceOffset);
 }
