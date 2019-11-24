@@ -72,7 +72,7 @@ bool Parser::IsNextToken()
 
 void Parser::Operate()
 {
-    cout << CurrentToken.Contents << " " << State << endl;
+    cout << "'" << CurrentToken.Contents << "' " << State << endl;
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
@@ -251,6 +251,7 @@ void Parser::ParseExpectUsingIdent()
 
 void Parser::ParseExpectUsingDotOrNewline()
 {
+    cout << "fdas " << (CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"]) << endl;
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["DOT"])
     {
         State = PARSER_STATE::EXPECT_USING_IDENT;
@@ -258,14 +259,19 @@ void Parser::ParseExpectUsingDotOrNewline()
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         string Path = ConvertSavedUsingIdentsToPath();
-        if(DoesFileExist(Path) == false)
+        if(DoesSetContain(Path, IncludedFiles) == false)
         {
-            OutputStandardErrorMessage(string("Code file does not exist:  ") + Path, CurrentToken);
+            if(DoesFileExist(Path) == false)
+            {
+                OutputStandardErrorMessage(string("Code file does not exist:  ") + Path, CurrentToken);
+            }
+            IncludedFiles.emplace(Path);
+            Compiler NextCompiler;
+            vector<Token> NewTokens = NextCompiler.GetTokens(Path);
+            Tokens.insert(Tokens.begin() + Position + 1, NewTokens.begin(), NewTokens.end());
         }
         State = PARSER_STATE::START_OF_LINE;
-        Compiler NextCompiler;
-        vector<Token> NewTokens = NextCompiler.GetTokens(Path);
-        Tokens.insert(Tokens.begin() + Position, NewTokens.begin(), NewTokens.end());
+        SavedUsingIdents.clear();
     }
     else
     {
@@ -458,7 +464,6 @@ void Parser::ParseExpectClassSizeNumber()
 {
     if(IsNumber(CurrentToken.Contents) == true)
     {
-        cout << "two" << endl;
         CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX].Size = stoi(CurrentToken.Contents);
         State = PARSER_STATE::START_OF_LINE;
     }
@@ -1018,7 +1023,6 @@ void Parser::ReduceLine()
 
 void Parser::OperateReduceTokens()
 {
-    cout << ReduceTokens[ReducePosition].Contents << endl;
     OutputTokens(ReduceTokens);
     if(IsCurrentlyLeftParen() == true)
     {
@@ -1339,7 +1343,6 @@ void Parser::AddToArgList(const unsigned int InPosition)
 {
     string VariableName = ReduceTokens[InPosition].Contents;
     Object * NextArg = NULL;
-    cout << "'" << VariableName << "' " << IsNumber(VariableName) << endl;
     if(IsNumber(VariableName) == true)
     {
         Object NumberObject;
@@ -1514,7 +1517,6 @@ void Parser::MoveBackCurrentScopeOffset(Object & NewObject)
 
 void Parser::AddNumericalValueToTempInteger(const string & NewValue)
 {
-    cout << "one" << endl;
     OutputAsm = OutputAsm + GlobalASM.CalcIntegerQuickAssignAsm(stoi(NewValue));
     AppendNewlinesToOutputASM(1);
 }

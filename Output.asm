@@ -1,6 +1,6 @@
 format ELF executable 3
 segment readable executable
-entry L29
+entry L31
 
 L0: ; Bool:Bool
 
@@ -579,7 +579,7 @@ L20: ; Byte:!=
         
 ret
 
-L21: ; Pointer:create
+L21: ; Pointer:Pointer
 
 push ebp
 mov ebp, esp
@@ -646,7 +646,112 @@ pop ebp
 
 ret
 
-L26: ; :OutputByte
+L26: ; :AllocateHeapMemory
+
+    push ebp
+    mov ebp, esp
+    
+    ; Must build the struct in reverse order
+    ; offset
+    add esp, -4
+    mov dword [esp], 0
+    
+    ; fd
+    add esp, -4
+    mov dword [esp], -1
+    
+    ; flags
+    add esp, -4
+    mov dword [esp], 34
+    
+    ; prot
+    add esp, -4
+    mov dword [esp], 3
+    
+    ; len
+    xor ecx, ecx
+    mov ebx, ebp
+    add ebx, 8
+    mov byte cl, [ebx]
+    add esp, -4
+    mov dword [esp], ecx
+    
+    ; addr
+    add esp, -4
+    mov dword [esp], 0
+    
+    ; call mmap
+    mov eax, 90
+    mov ebx, esp
+    ;lea ebx, [mmap_arg]
+    int	0x80
+    
+    add esp, 24
+    
+    ;ope:
+    ;
+    ;push eax
+    ;mov byte [eax], 85
+    ;add esp, -4
+    ;mov [esp], eax
+    ;call OutputByte
+    ;pop eax
+    ;
+    ;add esp, 4
+    ;
+    ;add eax, 1
+    ;
+    ;jmp ope
+    
+    ;test eax, eax
+    ;jnz cont
+    
+    ;mov	eax,1
+	;xor	ebx,ebx
+	;int	0x80
+    
+    ;cont:
+
+    
+    ; move new memory location to return position
+    mov ebx, ebp
+    add ebx, 12
+    mov [ebx], eax
+    
+    mov esp, ebp
+    pop ebp
+
+ret
+
+L27: ; :DeallocateHeapMemory
+
+    push ebp
+    mov ebp, esp
+    
+    ; len to ecx
+    xor ecx, ecx
+    mov ebx, ebp
+    add ebx, 12
+    mov byte cl, [ebx]
+    
+    ; addr to ebx
+    mov ebx, ebp
+    add ebx, 8
+    mov ebx, [ebx]
+    mov ebx, [ebx]
+    
+    ; call mmap
+    mov eax, 90
+    mov ebx, esp
+    ;lea ebx, [mmap_arg]
+    int	0x80
+    
+    mov esp, ebp
+    pop ebp
+
+ret
+
+L28: ; :OutputByte
 
     push ebp
     mov ebp, esp
@@ -667,7 +772,7 @@ L26: ; :OutputByte
 
 ret
 
-L27: ; :OutputByte2
+L29: ; :OutputByte2
 
     push ebp
     mov ebp, esp
@@ -699,7 +804,7 @@ L27: ; :OutputByte2
 
 ret
 
-L28: ; :OutputByte5
+L30: ; :OutputByte5
 
     push ebp
     mov ebp, esp
@@ -761,7 +866,7 @@ L28: ; :OutputByte5
 
 ret
 
-L29: ; :Main
+L31: ; :Main
 
 push ebp
 mov ebp, esp
@@ -787,7 +892,7 @@ mov ebx, ebp
 add ebx, -1
 mov [esp], ebx ; Pushing reference to L from offset -1
 
-call L26 ; Calling OutputByte
+call L28 ; Calling OutputByte
 add esp, 4
 
 add esp, -1 ; Declaring I1
@@ -837,7 +942,7 @@ mov ebx, ebp
 add ebx, -3
 mov [esp], ebx ; Pushing reference to I1 from offset -3
 
-call L26 ; Calling OutputByte
+call L28 ; Calling OutputByte
 add esp, 4
 
 add esp, -4
@@ -845,7 +950,7 @@ mov ebx, ebp
 add ebx, -1
 mov [esp], ebx ; Pushing reference to L from offset -1
 
-call L26 ; Calling OutputByte
+call L28 ; Calling OutputByte
 add esp, 4
 
 add esp, -1 ; Declaring CST_1
@@ -883,7 +988,7 @@ mov ebx, ebp
 add ebx, -7
 mov [esp], ebx ; Pushing reference to [T6 from offset -7
 
-call L26 ; Calling OutputByte
+call L28 ; Calling OutputByte
 add esp, 4
 
 mov esp, ebp

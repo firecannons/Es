@@ -548,13 +548,23 @@ end
 class Pointer
     Integer Position
     
-    action create
+    action Pointer
     end
     
     action = ( Pointer Source )
         Me : Position = Source : Position
     end
+
+    /*action Dereference ( ) return T Reference
+        return Me
+    end*/
 end
+/*
+action asm Reference<T>(T) returns Pointer<T>
+    mov ebx, ebp
+    add ebx, 12
+    mov [ebx+8], ebx
+end*/
 
 class CapTest
     Byte B1

@@ -94,6 +94,7 @@ public:
     unsigned int LabelCounter;
     vector<Object *> NextFunctionObjects;
     bool WasVariableFound;
+    unordered_set<string> IncludedFiles;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
