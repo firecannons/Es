@@ -111,6 +111,11 @@ action asm OutputByte5 ( Byte L , Byte L2 , Byte L3 , Byte L4 , Byte L5 )
     
 end
 
+class MultiPassTest
+    ElemTest E1
+    ElemTest E2
+end
+
 class ElemTest
     Byte B1
     Byte B2

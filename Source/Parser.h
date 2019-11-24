@@ -49,6 +49,13 @@ enum TYPE_PARSE_MODE
     PARSING_RETURNS
 };
 
+enum PASS_MODE
+{
+    CLASS_SKIM,
+    FUNCTION_SKIM,
+    FULL_PASS
+};
+
 const string EXTENSION = string(".q");
 const unsigned int DEFAULT_COMPILED_TEMPLATE_INDEX = 0;
 const string TEMPLATE_VARIABLE_NAME_PREFIX = "T";
@@ -95,6 +102,7 @@ public:
     vector<Object *> NextFunctionObjects;
     bool WasVariableFound;
     unordered_set<string> IncludedFiles;
+    PASS_MODE PassMode;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -210,6 +218,7 @@ public:
     string OutputTemplatedTypeToString(const TemplatedType & OutputTT, const unsigned int Level);
     string OutputFunctionToString(Function & OutputFunction, const unsigned int Level);
     void OutputDerefReference(const string & VariableName, const int ReferenceOffset);
+    bool IsParsingType();
 };
 
 #include "Compiler.h"

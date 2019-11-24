@@ -40,6 +40,7 @@ void Parser::Initialize(const vector<Token> & Tokens)
     LabelCounter = 0;
     WasVariableFound = false;
     InitializeOperatorOrdering();
+    PassMode = PASS_MODE::CLASS_SKIM;
 }
 
 void Parser::GetNextToken()
@@ -232,8 +233,12 @@ void Parser::ParseStartOfLine()
                 TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
                 ParseExpectType();
             }
+            else if(IsParsingType() == true)
+            {
+                OutputStandardErrorMessage(string("Unknown type: ") + CurrentToken.Contents, CurrentToken);
+            }
             else
-            { // Change above line to just "else" when Me: is working.
+            {
                 CopyUntilNextNewline();
                 ReduceLine();
                 State = PARSER_STATE::START_OF_LINE;
@@ -251,7 +256,6 @@ void Parser::ParseExpectUsingIdent()
 
 void Parser::ParseExpectUsingDotOrNewline()
 {
-    cout << "fdas " << (CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"]) << endl;
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["DOT"])
     {
         State = PARSER_STATE::EXPECT_USING_IDENT;
@@ -1015,7 +1019,7 @@ void Parser::CopyUntilNextNewline()
 void Parser::ReduceLine()
 {
     ReducePosition = 0;
-    while(ReduceTokens.size() > 2)
+    while(ReduceTokens.size() > 1)
     {
         OperateReduceTokens();
     }
@@ -1685,4 +1689,17 @@ void Parser::OutputDerefReference(const string & VariableName, const int Referen
 {
     string Output = SPACE + SEMICOLON + SPACE;
     OutputAsm = OutputAsm + Output + string("Dereferencing before push ") + VariableName + string(" from reference offset ") + to_string(ReferenceOffset);
+}
+
+bool Parser::IsParsingType()
+{
+    bool Output = false;
+    if(Tokens.size() - Position >= 1 && IsValidIdent(CurrentToken.Contents) == true)
+    {
+        if(Tokens[Position + 1].Contents == GlobalKeywords.ReservedWords["LESS_THAN"] || IsValidIdent(Tokens[Position + 1].Contents) == true)
+        {
+            Output = true;
+        }
+    }
+    return Output;
 }
