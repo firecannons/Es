@@ -226,7 +226,7 @@ void Parser::ParseStartOfLine()
         }
         else
         {
-            if(IsLocalScopeToBeParsedNow() == true)
+            if(IsLocalScopeToBeParsedNow() == true || (PassMode == PASS_MODE::CLASS_SKIM && GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION))
             {
                 EndCurrentScope();
             }
@@ -533,28 +533,19 @@ void Parser::ParseExpectActionName()
         NewFunction.HasReturnType = false;
         NewFunction.Name = CurrentToken.Contents;
         NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
-        if(PassMode == PASS_MODE::FUNCTION_SKIM)
-        {
-            GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
-        }
-        if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
-        {
-            CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
-            ScopeStack.push_back(&CurrentFunction->MyScope);
-        }
+        GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
+        CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
+        ScopeStack.push_back(&CurrentFunction->MyScope);
         
         if(CurrentClass.Type != NULL)
         {
-            if(PassMode == PASS_MODE::FUNCTION_SKIM)
-            {
-                Object NewObject;
-                NewObject.Name = GlobalKeywords.ReservedWords["ME"];
-                NewObject.Type = CurrentClass;
-                NewObject.ReferenceOffset = GetNextParamOffset();
-                NewObject.IsReference = true;
-                GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
-                CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
-            }
+            Object NewObject;
+            NewObject.Name = GlobalKeywords.ReservedWords["ME"];
+            NewObject.Type = CurrentClass;
+            NewObject.ReferenceOffset = GetNextParamOffset();
+            NewObject.IsReference = true;
+            GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
+            CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
         }
         
         if(PassMode == PASS_MODE::FULL_PASS)
@@ -1009,29 +1000,32 @@ void Parser::ParseExpectVariableName()
 {
     if(IsValidIdent(CurrentToken.Contents) == true)
     {
-        Object NewParamObject;
-        NewParamObject.Name = CurrentToken.Contents;
-        NewParamObject.Type = CurrentParsingType;
-        GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
-        if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
+        if(IsLocalScopeToBeParsedNow() == true)
         {
-            GetCurrentScope()->Objects[NewParamObject.Name].Offset = GetNextParamOffset();
-            CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
-            State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
-        }
-        else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
-        {
-            if(IsClassScopeClosest() == true)
+            Object NewParamObject;
+            NewParamObject.Name = CurrentToken.Contents;
+            NewParamObject.Type = CurrentParsingType;
+            GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
+            if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
             {
-                PositionObjectInClass(GetCurrentScope()->Objects[NewParamObject.Name]);
-                State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
+                GetCurrentScope()->Objects[NewParamObject.Name].Offset = GetNextParamOffset();
+                CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
+                State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
             }
-            else
+            else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
             {
-                AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
-                State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
+                if(IsClassScopeClosest() == true)
+                {
+                    PositionObjectInClass(GetCurrentScope()->Objects[NewParamObject.Name]);
+                    State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
+                }
+                else
+                {
+                    AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
+                    State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
+                }
+                
             }
-            
         }
     }
     else
