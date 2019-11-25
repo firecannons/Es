@@ -2,25 +2,6 @@
 /* comment test > 2 */
 /* comment
 test 3*/
-class Bool size 1
-    action asm Bool
-        push ebp
-        mov ebp, esp
-    
-        ; asm comment
-        ; mov address of the object into
-        mov ebx, ebp
-        add ebx, 8
-        mov eax, [ebx]
-        
-        ; Automatically assign true
-        mov byte [eax], 1
-        
-        mov esp, ebp
-        pop ebp
-        
-    end
-end
 
 class Integer size 4
         
@@ -543,6 +524,26 @@ class Byte size 1
             pop ebp
             
         end
+end
+
+class Bool size 1
+    action asm Bool
+        push ebp
+        mov ebp, esp
+    
+        ; asm comment
+        ; mov address of the object into
+        mov ebx, ebp
+        add ebx, 8
+        mov eax, [ebx]
+        
+        ; Automatically assign true
+        mov byte [eax], 1
+        
+        mov esp, ebp
+        pop ebp
+        
+    end
 end
 
 class Pointer

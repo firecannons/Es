@@ -2,33 +2,13 @@ format ELF executable 3
 segment readable executable
 entry L31
 
-L0: ; Bool:Bool
-
-        push ebp
-        mov ebp, esp
-    
-        ; asm comment
-        ; mov address of the object into
-        mov ebx, ebp
-        add ebx, 8
-        mov eax, [ebx]
-        
-        ; Automatically assign true
-        mov byte [eax], 1
-        
-        mov esp, ebp
-        pop ebp
-        
-    
-ret
-
-L1: ; Integer:Integer
+L0: ; Integer:Integer
 
             
         
 ret
 
-L2: ; Integer:=
+L1: ; Integer:=
 
             push ebp
             mov ebp, esp
@@ -62,7 +42,7 @@ L2: ; Integer:=
         
 ret
 
-L3: ; Integer:+
+L2: ; Integer:+
 
             push ebp
             mov ebp, esp
@@ -90,7 +70,7 @@ L3: ; Integer:+
         
 ret
 
-L4: ; Integer:-
+L3: ; Integer:-
 
             push ebp
             mov ebp, esp
@@ -118,7 +98,7 @@ L4: ; Integer:-
         
 ret
 
-L5: ; Integer:>
+L4: ; Integer:>
 
             push ebp
             mov ebp, esp
@@ -148,7 +128,7 @@ L5: ; Integer:>
         
 ret
 
-L6: ; Integer:>=
+L5: ; Integer:>=
 
             push ebp
             mov ebp, esp
@@ -178,7 +158,7 @@ L6: ; Integer:>=
         
 ret
 
-L7: ; Integer:==
+L6: ; Integer:==
 
             push ebp
             mov ebp, esp
@@ -207,7 +187,7 @@ L7: ; Integer:==
         
 ret
 
-L8: ; Integer:<
+L7: ; Integer:<
 
             push ebp
             mov ebp, esp
@@ -236,7 +216,7 @@ L8: ; Integer:<
         
 ret
 
-L9: ; Integer:<=
+L8: ; Integer:<=
 
             push ebp
             mov ebp, esp
@@ -265,7 +245,7 @@ L9: ; Integer:<=
         
 ret
 
-L10: ; Integer:!=
+L9: ; Integer:!=
 
             push ebp
             mov ebp, esp
@@ -294,7 +274,7 @@ L10: ; Integer:!=
         
 ret
 
-L11: ; Byte:Byte
+L10: ; Byte:Byte
 
             push ebp
             mov ebp, esp
@@ -312,7 +292,7 @@ L11: ; Byte:Byte
         
 ret
 
-L12: ; Byte:=
+L11: ; Byte:=
 
             push ebp
             mov ebp, esp
@@ -346,7 +326,7 @@ L12: ; Byte:=
         
 ret
 
-L13: ; Byte:+
+L12: ; Byte:+
 
             push ebp
             mov ebp, esp
@@ -374,7 +354,7 @@ L13: ; Byte:+
         
 ret
 
-L14: ; Byte:-
+L13: ; Byte:-
 
             push ebp
             mov ebp, esp
@@ -402,7 +382,7 @@ L14: ; Byte:-
         
 ret
 
-L15: ; Byte:>
+L14: ; Byte:>
 
             push ebp
             mov ebp, esp
@@ -432,7 +412,7 @@ L15: ; Byte:>
         
 ret
 
-L16: ; Byte:>=
+L15: ; Byte:>=
 
             push ebp
             mov ebp, esp
@@ -461,7 +441,7 @@ L16: ; Byte:>=
         
 ret
 
-L17: ; Byte:==
+L16: ; Byte:==
 
             push ebp
             mov ebp, esp
@@ -490,7 +470,7 @@ L17: ; Byte:==
         
 ret
 
-L18: ; Byte:<
+L17: ; Byte:<
 
             push ebp
             mov ebp, esp
@@ -520,7 +500,7 @@ L18: ; Byte:<
         
 ret
 
-L19: ; Byte:<=
+L18: ; Byte:<=
 
             push ebp
             mov ebp, esp
@@ -549,7 +529,7 @@ L19: ; Byte:<=
         
 ret
 
-L20: ; Byte:!=
+L19: ; Byte:!=
 
             push ebp
             mov ebp, esp
@@ -577,6 +557,26 @@ L20: ; Byte:!=
             pop ebp
             
         
+ret
+
+L20: ; Bool:Bool
+
+        push ebp
+        mov ebp, esp
+    
+        ; asm comment
+        ; mov address of the object into
+        mov ebx, ebp
+        add ebx, 8
+        mov eax, [ebx]
+        
+        ; Automatically assign true
+        mov byte [eax], 1
+        
+        mov esp, ebp
+        pop ebp
+        
+    
 ret
 
 L21: ; Pointer:Pointer
@@ -612,7 +612,7 @@ add esp, -4
 add ebx, 0
 mov [esp], ebx ; Pushing reference to [T0 from offset 0
 
-call L2 ; Calling =
+call L1 ; Calling =
 add esp, 8
 
 mov esp, ebp
@@ -888,7 +888,7 @@ mov ebx, ebp
 add ebx, -1
 mov [esp], ebx ; Pushing reference to L from offset -1
 
-call L12 ; Calling =
+call L11 ; Calling =
 add esp, 8
 
 add esp, -4
@@ -912,7 +912,7 @@ mov ebx, ebp
 add ebx, -3
 mov [esp], ebx ; Pushing reference to I1 from offset -3
 
-call L12 ; Calling =
+call L11 ; Calling =
 add esp, 8
 
 add esp, -4
@@ -925,7 +925,7 @@ mov ebx, ebp
 add ebx, -3
 mov [esp], ebx ; Pushing reference to I1 from offset -3
 
-call L12 ; Calling =
+call L11 ; Calling =
 add esp, 8
 
 add esp, -4
@@ -938,7 +938,7 @@ mov ebx, ebp
 add ebx, -1
 mov [esp], ebx ; Pushing reference to L from offset -1
 
-call L12 ; Calling =
+call L11 ; Calling =
 add esp, 8
 
 add esp, -4
@@ -968,7 +968,7 @@ mov ebx, ebp
 add ebx, -5
 mov [esp], ebx ; Pushing reference to CST_1 from offset -5
 
-call L12 ; Calling =
+call L11 ; Calling =
 add esp, 8
 
 add esp, -2 ; Declaring ET
@@ -984,7 +984,7 @@ mov ebx, ebp
 add ebx, -7
 mov [esp], ebx ; Pushing reference to [T4 from offset -7
 
-call L12 ; Calling =
+call L11 ; Calling =
 add esp, 8
 
 add esp, -4
@@ -1008,7 +1008,7 @@ mov ebx, ebp
 add ebx, -9
 mov [esp], ebx ; Pushing reference to [T7 from offset -9
 
-call L12 ; Calling =
+call L11 ; Calling =
 add esp, 8
 
 add esp, -4

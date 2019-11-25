@@ -623,22 +623,25 @@ void Parser::ParseExpectType()
 {
     if(IsValidIdent(CurrentToken.Contents) == true)
     {
-        if(IsAType(CurrentToken.Contents) == true)
+        if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
         {
-            if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM || TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
+            if(IsAType(CurrentToken.Contents) == true)
             {
-                State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_IDENT;
+                CurrentParsingType.Type = &TypeTable[CurrentToken.Contents];
+                CurrentParsingType.Templates = CurrentParsingType.Type->GetFirstCompiledTemplate();
             }
-            else if(TypeMode == TYPE_PARSE_MODE::PARSING_RETURNS)
+            else
             {
-                State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE;
+                OutputStandardErrorMessage(string("No type '") + CurrentToken.Contents + string("'."), CurrentToken);
             }
-            CurrentParsingType.Type = &TypeTable[CurrentToken.Contents];
-            CurrentParsingType.Templates = CurrentParsingType.Type->GetFirstCompiledTemplate();
         }
-        else
+        if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM || TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
         {
-            OutputStandardErrorMessage(string("No type '") + CurrentToken.Contents + string("'."), CurrentToken);
+            State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_IDENT;
+        }
+        else if(TypeMode == TYPE_PARSE_MODE::PARSING_RETURNS)
+        {
+            State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE;
         }
     }
     else
@@ -675,10 +678,12 @@ void Parser::ParseExpectTemplateStartOrIdent()
     else if(IsValidIdent(CurrentToken.Contents) == true)
     {
         // Go to the next part
-        
-        if(CurrentParsingType.Type->PossibleTemplates.size() != 0)
+        if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
         {
-            OutputStandardErrorMessage(string("Type '") + CurrentParsingType.Type->Name + "' expects templates.", CurrentToken);
+            if(CurrentParsingType.Type->PossibleTemplates.size() != 0)
+            {
+                OutputStandardErrorMessage(string("Type '") + CurrentParsingType.Type->Name + "' expects templates.", CurrentToken);
+            }
         }
         ParseExpectVariableName();
     }
@@ -1016,33 +1021,34 @@ void Parser::ParseExpectNewlineOrReturns()
 
 void Parser::ParseExpectVariableName()
 {
+    cout << "safd" << endl;
     if(IsValidIdent(CurrentToken.Contents) == true)
     {
-        Object NewParamObject;
-        NewParamObject.Name = CurrentToken.Contents;
-        NewParamObject.Type = CurrentParsingType;
-        if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM && PassMode == PASS_MODE::FUNCTION_SKIM)
+        if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
         {
-            NewParamObject.ReferenceOffset = GetNextParamOffset();
-            NewParamObject.IsReference = true;
-            GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
-            CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
-            State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
-        }
-        else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
-        {
-            if(IsClassScopeClosest() == true && PassMode == PASS_MODE::FUNCTION_SKIM)
+            Object NewParamObject;
+            NewParamObject.Name = CurrentToken.Contents;
+            NewParamObject.Type = CurrentParsingType;
+            if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM && PassMode == PASS_MODE::FUNCTION_SKIM)
             {
-                cout << "afsd" << NewParamObject.Name << endl;
+                NewParamObject.ReferenceOffset = GetNextParamOffset();
+                NewParamObject.IsReference = true;
                 GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
-                GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
-                State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
+                CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
             }
-            else if(IsFunctionScopeClosest() == true && PassMode == PASS_MODE::FULL_PASS)
+            else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
             {
-                GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
-                AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
-                State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
+                if(IsClassScopeClosest() == true && PassMode == PASS_MODE::FUNCTION_SKIM)
+                {
+                    cout << "afsd" << NewParamObject.Name << endl;
+                    GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
+                    GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
+                }
+                else if(IsFunctionScopeClosest() == true && PassMode == PASS_MODE::FULL_PASS)
+                {
+                    GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
+                    AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
+                }
             }
         }
         if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
