@@ -1023,8 +1023,9 @@ void Parser::ParseExpectVariableName()
         NewParamObject.Type = CurrentParsingType;
         if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM && PassMode == PASS_MODE::FUNCTION_SKIM)
         {
+            NewParamObject.ReferenceOffset = GetNextParamOffset();
+            NewParamObject.IsReference = true;
             GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
-            GetCurrentScope()->Objects[NewParamObject.Name].Offset = GetNextParamOffset();
             CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
             State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
         }

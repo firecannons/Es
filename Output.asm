@@ -594,10 +594,14 @@ L22: ; Pointer:=
 push ebp
 mov ebp, esp
 
-add esp, -4
+
 mov ebx, ebp
 add ebx, 12
-mov [esp], ebx ; Pushing reference to [T1 from offset 12
+mov ebx, [ebx] ; Dereferencing before push [T1 from reference offset 12
+
+add esp, -4
+add ebx, 0
+mov [esp], ebx ; Pushing reference to [T1 from offset 0
 
 
 mov ebx, ebp
