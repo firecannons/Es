@@ -225,6 +225,9 @@ public:
     bool IsLocalScopeToBeParsedNow();
     bool IsLocalScopeInOneLevelLow();
     void InitializeForPass();
+    void SetSizesAndOffsets();
+    void SizeType(BaseType & InBaseType);
+    void SizeCompiledTemplate(CompiledTemplate & InCompiledTemplate);
 };
 
 #include "Compiler.h"

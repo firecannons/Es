@@ -3,4 +3,5 @@
 CompiledTemplate::CompiledTemplate()
 {
     Size = 0;
+    HasSizeBeenCalculated = false;
 }

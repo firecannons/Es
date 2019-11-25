@@ -17,6 +17,7 @@ public:
     vector<TemplatedType> Templates;
     unsigned int Size;
     Scope MyScope;
+    bool HasSizeBeenCalculated;
 
     CompiledTemplate();
     

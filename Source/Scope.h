@@ -24,6 +24,7 @@ public:
     int Offset;
     map<string, Function> Functions;
     map<string, Object> Objects;
+    vector<Object *> OrderedObjects;
     SCOPE_ORIGIN Origin;
 
     Scope();

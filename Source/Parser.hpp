@@ -9,6 +9,10 @@ string Parser::Parse(const vector<Token> & Tokens)
     PassMode = PASS_MODE::FUNCTION_SKIM;
     InitializeForPass();
     RunParse();
+    cout << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl;
+    SetSizesAndOffsets();
+    OutputTypeTable();
+    exit(1);
 
     PassMode = PASS_MODE::FULL_PASS;
     InitializeForPass();
@@ -421,6 +425,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
         }
         CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
         CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
+        CurrentClass.Templates->HasSizeBeenCalculated = true;
         ScopeStack.push_back(&CurrentClass.Templates->MyScope);
         State = PARSER_STATE::EXPECT_CLASS_SIZE_NUMBER;
     }
@@ -1028,10 +1033,10 @@ void Parser::ParseExpectVariableName()
             {
                 cout << "afsd" << NewParamObject.Name << endl;
                 GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
-                PositionObjectInClass(GetCurrentScope()->Objects[NewParamObject.Name]);
+                GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
                 State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
             }
-            else if(PassMode == PASS_MODE::FULL_PASS)
+            else if(IsFunctionScopeClosest() == true && PassMode == PASS_MODE::FULL_PASS)
             {
                 GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                 AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
@@ -1447,7 +1452,6 @@ void Parser::AddNewVariableToStack(Object & NewObject)
         OutputDeclaringVariableToAsm(NewObject.Name);
     }
     AppendNewlinesToOutputASM(1);
-    MoveBackCurrentScopeOffset(NewObject);
 }
 
 void Parser::CallFunction(const Function & InFunction)
@@ -1679,6 +1683,8 @@ string Parser::OutputCompiledTemplateToString(const CompiledTemplate & OutputCT,
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Size: " + to_string(OutputCT.Size) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Has size been calculated: " + to_string(OutputCT.HasSizeBeenCalculated) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Scope:\n";
     OutputString = OutputString + OutputScopeToString((Scope &)OutputCT.MyScope, Level + 1);
     return OutputString;
@@ -1691,6 +1697,8 @@ string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level
     OutputString = OutputString + "Offset: " + to_string(OutputScope.Offset) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Origin: " + to_string(OutputScope.Origin) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Ordered Objects Size: " + to_string(OutputScope.OrderedObjects.size()) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Objects:\n";
 
@@ -1870,4 +1878,43 @@ void Parser::InitializeForPass()
     IsAsmFunction = false;
     LabelCounter = 0;
     WasVariableFound = false;
+}
+
+void Parser::SetSizesAndOffsets()
+{
+    map<string, BaseType>::iterator Iterator;
+    for (Iterator = TypeTable.begin(); Iterator != TypeTable.end(); Iterator++)
+    {
+        SizeType(Iterator->second);
+    }
+}
+
+void Parser::SizeType(BaseType & InBaseType)
+{
+    unsigned int Index = 0;
+    while(Index < InBaseType.CompiledTemplates.size())
+    {
+        if(InBaseType.CompiledTemplates[Index].HasSizeBeenCalculated == false)
+        {
+            SizeCompiledTemplate(InBaseType.CompiledTemplates[Index]);
+        }
+        Index = Index + 1;
+    }
+}
+
+void Parser::SizeCompiledTemplate(CompiledTemplate & InCompiledTemplate)
+{
+    InCompiledTemplate.HasSizeBeenCalculated = true;
+    unsigned int Index = 0;
+    while(Index < InCompiledTemplate.MyScope.OrderedObjects.size())
+    {
+        if(InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->HasSizeBeenCalculated == false)
+        {
+            SizeCompiledTemplate(*(InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates));
+        }
+        InCompiledTemplate.MyScope.OrderedObjects[Index]->Offset = InCompiledTemplate.MyScope.Offset;
+        InCompiledTemplate.MyScope.Offset = InCompiledTemplate.MyScope.Offset + InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->Size;
+        InCompiledTemplate.Size = InCompiledTemplate.MyScope.Offset;
+        Index = Index + 1;
+    }
 }
