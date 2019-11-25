@@ -6,6 +6,14 @@ string Parser::Parse(const vector<Token> & Tokens)
     
     RunParse();
 
+    PassMode = PASS_MODE::FUNCTION_SKIM;
+    InitializePosition();
+    RunParse();
+
+    PassMode = PASS_MODE::FULL_PASS;
+    InitializePosition();
+    RunParse();
+
     AppendInitialASM();
     
     return OutputAsm;
@@ -26,7 +34,7 @@ void Parser::Initialize(const vector<Token> & Tokens)
 {
     this->Tokens = Tokens;
     State = PARSER_STATE::START_OF_LINE;
-    Position = 0;
+    InitializePosition();
     OutputAsm = string("");
     HasToken = false;
     SavedUsingIdents.clear();
@@ -203,45 +211,57 @@ void Parser::ParseStartOfLine()
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"])
     {
         State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
-        if(IsFunctionScopeClosest() == true)
+        if(PassMode == PASS_MODE::FULL_PASS)
         {
-            if(CurrentFunction->IsAsm == false)
+            if(IsFunctionScopeClosest() == true)
             {
-                OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
+                if(CurrentFunction->IsAsm == false)
+                {
+                    OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
+                    AppendNewlinesToOutputASM(2);
+                }
+                OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
                 AppendNewlinesToOutputASM(2);
             }
-            OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
-            AppendNewlinesToOutputASM(2);
         }
-        EndCurrentScope();
+        else
+        {
+            if(IsLocalScopeToBeParsedNow() == true)
+            {
+                EndCurrentScope();
+            }
+        }
     }
     else
     {
-        bool IsAsmFunction = false;
-        if(CurrentFunction != NULL)
+        if(IsLocalScopeToBeParsedNow() == true)
         {
-            if(CurrentFunction->IsAsm == true)
+            bool IsAsmFunction = false;
+            if(CurrentFunction != NULL)
             {
-                IsAsmFunction = true;
-                OutputAsm = OutputAsm + CurrentToken.Contents + GlobalKeywords.ReservedWords["NEW_LINE"];
+                if(CurrentFunction->IsAsm == true)
+                {
+                    IsAsmFunction = true;
+                    OutputAsm = OutputAsm + CurrentToken.Contents + GlobalKeywords.ReservedWords["NEW_LINE"];
+                }
             }
-        }
-        if(IsAsmFunction == false)
-        {
-            if(IsAType(CurrentToken.Contents) == true)
+            if(IsAsmFunction == false)
             {
-                TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
-                ParseExpectType();
-            }
-            else if(IsParsingType() == true)
-            {
-                OutputStandardErrorMessage(string("Unknown type: ") + CurrentToken.Contents, CurrentToken);
-            }
-            else
-            {
-                CopyUntilNextNewline();
-                ReduceLine();
-                State = PARSER_STATE::START_OF_LINE;
+                if(IsAType(CurrentToken.Contents) == true)
+                {
+                    TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
+                    ParseExpectType();
+                }
+                else if(IsParsingType() == true)
+                {
+                    OutputStandardErrorMessage(string("Unknown type: ") + CurrentToken.Contents, CurrentToken);
+                }
+                else
+                {
+                    CopyUntilNextNewline();
+                    ReduceLine();
+                    State = PARSER_STATE::START_OF_LINE;
+                }
             }
         }
     }
@@ -334,7 +354,10 @@ void Parser::ParseExpectClassName()
     {
         BaseType NewClassBase;
         NewClassBase.Name = CurrentToken.Contents;
-        TypeTable.insert(pair<string,BaseType>(CurrentToken.Contents, NewClassBase));
+        if(PassMode == PASS_MODE::CLASS_SKIM)
+        {
+            TypeTable.insert(pair<string,BaseType>(CurrentToken.Contents, NewClassBase));
+        }
         CurrentClass.Type = &TypeTable[CurrentToken.Contents];
         State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE;
     }
@@ -371,13 +394,19 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
         CurrentClass.Type->IsTemplated = false;
         CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
         CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
-        ScopeStack.push_back(&CurrentClass.Templates->MyScope);
+        if(PassMode == PASS_MODE::CLASS_SKIM)
+        {
+            ScopeStack.push_back(&CurrentClass.Templates->MyScope);
+        }
         State = PARSER_STATE::START_OF_LINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         CurrentClass.Type->IsTemplated = true;
-        ScopeStack.push_back(NULL);
+        if(PassMode == PASS_MODE::CLASS_SKIM)
+        {
+            ScopeStack.push_back(NULL);
+        }
         State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["SIZE"])
@@ -386,7 +415,10 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
         CurrentClass.Type->IsTemplated = false;
         CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
         CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
-        ScopeStack.push_back(&CurrentClass.Templates->MyScope);
+        if(PassMode == PASS_MODE::CLASS_SKIM)
+        {
+            ScopeStack.push_back(&CurrentClass.Templates->MyScope);
+        }
         State = PARSER_STATE::EXPECT_CLASS_SIZE_NUMBER;
     }
     else
@@ -496,35 +528,50 @@ void Parser::ParseExpectActionName()
 {
     if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.OverloadableOperators) == true || IsValidActionName(CurrentToken.Contents) == true)
     {
-        string NextLabel = GetNextLabel();
         Function NewFunction;
         NewFunction.IsAsm = IsAsmFunction;
         NewFunction.HasReturnType = false;
-        NewFunction.Label = NextLabel;
         NewFunction.Name = CurrentToken.Contents;
         NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
-        GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
-        CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
-        ScopeStack.push_back(&CurrentFunction->MyScope);
-        
-        Object NewObject;
-        NewObject.Name = GlobalKeywords.ReservedWords["ME"];
-        NewObject.Type = CurrentClass;
-        NewObject.ReferenceOffset = GetNextParamOffset();
-        NewObject.IsReference = true;
-        GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
-        CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
-        
-        OutputAsm = OutputAsm + NextLabel + GlobalKeywords.ReservedWords["COLON"];
-        if(DEBUG == true)
+        if(PassMode == PASS_MODE::FUNCTION_SKIM)
         {
-            OutputCurrentFunctionToAsm();
+            GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
         }
-        AppendNewlinesToOutputASM(2);
-        if(NewFunction.IsAsm == false)
+        if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
         {
-            OutputAsm = OutputAsm + GlobalASM.CalcCreateStackFrameAsm();
+            CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
+            ScopeStack.push_back(&CurrentFunction->MyScope);
+        }
+        
+        if(CurrentClass.Type != NULL)
+        {
+            if(PassMode == PASS_MODE::FUNCTION_SKIM)
+            {
+                Object NewObject;
+                NewObject.Name = GlobalKeywords.ReservedWords["ME"];
+                NewObject.Type = CurrentClass;
+                NewObject.ReferenceOffset = GetNextParamOffset();
+                NewObject.IsReference = true;
+                GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
+                CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
+            }
+        }
+        
+        if(PassMode == PASS_MODE::FULL_PASS)
+        {
+            string NextLabel = GetNextLabel();
+            NewFunction.Label = NextLabel;
+            OutputAsm = OutputAsm + NextLabel + GlobalKeywords.ReservedWords["COLON"];
+            if(DEBUG == true)
+            {
+                OutputCurrentFunctionToAsm();
+            }
             AppendNewlinesToOutputASM(2);
+            if(NewFunction.IsAsm == false)
+            {
+                OutputAsm = OutputAsm + GlobalASM.CalcCreateStackFrameAsm();
+                AppendNewlinesToOutputASM(2);
+            }
         }
         State = PARSER_STATE::EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE;
     }
@@ -610,7 +657,10 @@ void Parser::ParseExpectTemplateStartOrIdent()
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         // At this point, parse the template
-        ParseTemplates();
+        if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
+        {
+            ParseTemplates();
+        }
         State = PARSER_STATE::EXPECT_VARIABLE_NAME;
     }
     else if(IsValidIdent(CurrentToken.Contents) == true)
@@ -634,7 +684,10 @@ void Parser::ParseExpectTemplateStartOrNewline()
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         // At this point, parse the template
-        ParseTemplates();
+        if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
+        {
+            ParseTemplates();
+        }
         State = PARSER_STATE::EXPECT_RETURNS_NEWLINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
@@ -1700,6 +1753,56 @@ bool Parser::IsParsingType()
         {
             Output = true;
         }
+    }
+    return Output;
+}
+
+void Parser::InitializePosition()
+{
+    Position = 0;
+}
+
+bool Parser::IsPassModeLowerOrEqual(const PASS_MODE InPassMode)
+{
+    bool Output = false;
+    if(PassMode >= InPassMode)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+
+bool Parser::IsPassModeHigherOrEqual(const PASS_MODE InPassMode)
+{
+    bool Output = false;
+    if(PassMode <= InPassMode)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+bool Parser::IsLocalScopeToBeParsedNow()
+{
+    bool Output = false;
+    if(PassMode == PASS_MODE::CLASS_SKIM)
+    {
+        if(GetCurrentScope()->Origin == SCOPE_ORIGIN::CLASS || GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
+        {
+            Output = true;
+        }
+    }
+    else if(PassMode == PASS_MODE::FUNCTION_SKIM)
+    {
+        if(GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION || GetCurrentScope()->Origin == SCOPE_ORIGIN::CLASS || GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
+        {
+            Output = true;
+        }
+    }
+    else
+    {
+        Output = true;
     }
     return Output;
 }

@@ -219,6 +219,10 @@ public:
     string OutputFunctionToString(Function & OutputFunction, const unsigned int Level);
     void OutputDerefReference(const string & VariableName, const int ReferenceOffset);
     bool IsParsingType();
+    void InitializePosition();
+    bool IsPassModeLowerOrEqual(const PASS_MODE InPassMode);
+    bool IsPassModeHigherOrEqual(const PASS_MODE InPassMode);
+    bool IsLocalScopeToBeParsedNow();
 };
 
 #include "Compiler.h"
