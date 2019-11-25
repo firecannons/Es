@@ -74,6 +74,7 @@ bool Parser::IsNextToken()
 
 void Parser::Operate()
 {
+    cout << CurrentToken.Contents << " " << State << " " << PassMode << endl;
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
@@ -228,9 +229,11 @@ void Parser::ParseStartOfLine()
     {
         if(IsLocalScopeToBeParsedNow() == true)
         {
+            cout << "wroierwio" << endl;
             bool IsAsmFunction = false;
             if(CurrentFunction != NULL)
             {
+                cout << "wre" << CurrentFunction->IsAsm << endl;
                 if(CurrentFunction->IsAsm == true)
                 {
                     IsAsmFunction = true;
@@ -340,20 +343,24 @@ void Parser::ParseExpectClassName()
     }
     else
     {
-        BaseType NewClassBase;
-        NewClassBase.Name = CurrentToken.Contents;
         if(PassMode == PASS_MODE::CLASS_SKIM)
         {
-            if(TypeTableContains(CurrentToken.Contents) != false)
+            BaseType NewClassBase;
+            NewClassBase.Name = CurrentToken.Contents;
+            if(PassMode == PASS_MODE::CLASS_SKIM)
             {
-                OutputStandardErrorMessage(string("A class named ") + CurrentToken.Contents + string(" has already been declared."), CurrentToken);
-            }
-            else
-            {
-                TypeTable.insert(pair<string,BaseType>(CurrentToken.Contents, NewClassBase));
+                if(TypeTableContains(CurrentToken.Contents) != false)
+                {
+                    OutputStandardErrorMessage(string("A class named ") + CurrentToken.Contents + string(" has already been declared."), CurrentToken);
+                }
+                else
+                {
+                    TypeTable.insert(pair<string,BaseType>(CurrentToken.Contents, NewClassBase));
+                }
             }
         }
         CurrentClass.Type = &TypeTable[CurrentToken.Contents];
+        cout << OutputTypeToString(*(CurrentClass.Type),1);
         State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE;
     }
 }
@@ -383,15 +390,16 @@ bool Parser::TypeTableContains(const string & Input)
 
 void Parser::ParseExpectTemplateStartOrNewlineOrSize()
 {
+    cout << OutputScopeToString(*GetCurrentScope(), 1);
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         if(PassMode == PASS_MODE::CLASS_SKIM)
         {
             CurrentClass.Type->InitializeBlankCompiledTemplate();
             CurrentClass.Type->IsTemplated = false;
-            CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
-            CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         }
+        CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
+        CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         ScopeStack.push_back(&CurrentClass.Templates->MyScope);
         State = PARSER_STATE::START_OF_LINE;
     }
@@ -410,9 +418,9 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
         {
             CurrentClass.Type->InitializeBlankCompiledTemplate();
             CurrentClass.Type->IsTemplated = false;
-            CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
-            CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         }
+        CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
+        CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         ScopeStack.push_back(&CurrentClass.Templates->MyScope);
         State = PARSER_STATE::EXPECT_CLASS_SIZE_NUMBER;
     }
@@ -420,6 +428,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
     {
         OutputStandardErrorMessage(string("Expected '<' or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
+    cout << OutputScopeToString(*GetCurrentScope(), 1);
 }
 
 void Parser::ParseExpectClassTemplateName()
@@ -531,9 +540,14 @@ void Parser::ParseExpectActionName()
             NewFunction.Name = CurrentToken.Contents;
             NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
             GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
-            CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
-            ScopeStack.push_back(&CurrentFunction->MyScope);
-            
+        }
+        CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
+        ScopeStack.push_back(&CurrentFunction->MyScope);
+        cout << "is asm " << CurrentFunction->IsAsm << " '" << CurrentFunction->Name << "' " << CurrentToken.Contents << " " << CurrentFunction->Parameters.size() << endl;
+        cout << OutputScopeToString(*GetCurrentScope(), 1) ;
+
+        if(PassMode == PASS_MODE::CLASS_SKIM)
+        {
             if(CurrentClass.Type != NULL)
             {
                 Object NewObject;
@@ -1012,6 +1026,7 @@ void Parser::ParseExpectVariableName()
         {
             if(IsClassScopeClosest() == true && PassMode == PASS_MODE::FUNCTION_SKIM)
             {
+                cout << "afsd" << NewParamObject.Name << endl;
                 GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                 PositionObjectInClass(GetCurrentScope()->Objects[NewParamObject.Name]);
                 State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
@@ -1739,6 +1754,8 @@ string Parser::OutputFunctionToString(Function & OutputFunction, const unsigned 
         OutputString = OutputString + "Return Type: \n";
         OutputString = OutputString + OutputTemplatedTypeToString(OutputFunction.ReturnType, Level + 1);
     }
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Parameters: \n";
 
     unsigned int Index = 0;
     while(Index < OutputFunction.Parameters.size())
