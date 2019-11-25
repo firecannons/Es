@@ -22,8 +22,6 @@ L0: ; Bool:Bool
     
 ret
 
-ret
-
 L1: ; Integer:Integer
 
             
@@ -294,8 +292,6 @@ L10: ; Integer:!=
             mov esp, ebp
             pop ebp
         
-ret
-
 ret
 
 L11: ; Byte:Byte
@@ -583,8 +579,6 @@ L20: ; Byte:!=
         
 ret
 
-ret
-
 L21: ; Pointer:Pointer
 
 push ebp
@@ -622,8 +616,6 @@ pop ebp
 
 ret
 
-ret
-
 L23: ; CapTest:CapTest
 
 push ebp
@@ -631,8 +623,6 @@ mov ebp, esp
 
 mov esp, ebp
 pop ebp
-
-ret
 
 ret
 
@@ -646,8 +636,6 @@ pop ebp
 
 ret
 
-ret
-
 L25: ; CapTest3:CapTest3
 
 push ebp
@@ -655,8 +643,6 @@ mov ebp, esp
 
 mov esp, ebp
 pop ebp
-
-ret
 
 ret
 
@@ -880,10 +866,6 @@ L30: ; :OutputByte5
 
 ret
 
-ret
-
-ret
-
 L31: ; :Main
 
 push ebp
@@ -894,21 +876,21 @@ add esp, -1 ; Declaring [T2
 mov byte [esp], 102
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T2 from offset 0
+add ebx, -2
+mov [esp], ebx ; Pushing reference to [T2 from offset -2
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to L from offset 0
+add ebx, -1
+mov [esp], ebx ; Pushing reference to L from offset -1
 
 call L12 ; Calling =
 add esp, 8
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to L from offset 0
+add ebx, -1
+mov [esp], ebx ; Pushing reference to L from offset -1
 
 call L28 ; Calling OutputByte
 add esp, 4
@@ -918,55 +900,55 @@ add esp, -1 ; Declaring [T3
 mov byte [esp], 100
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T3 from offset 0
+add ebx, -4
+mov [esp], ebx ; Pushing reference to [T3 from offset -4
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to I1 from offset 0
+add ebx, -3
+mov [esp], ebx ; Pushing reference to I1 from offset -3
 
 call L12 ; Calling =
 add esp, 8
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to L from offset 0
+add ebx, -1
+mov [esp], ebx ; Pushing reference to L from offset -1
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to I1 from offset 0
+add ebx, -3
+mov [esp], ebx ; Pushing reference to I1 from offset -3
 
 call L12 ; Calling =
 add esp, 8
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to I1 from offset 0
+add ebx, -3
+mov [esp], ebx ; Pushing reference to I1 from offset -3
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to L from offset 0
+add ebx, -1
+mov [esp], ebx ; Pushing reference to L from offset -1
 
 call L12 ; Calling =
 add esp, 8
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to I1 from offset 0
+add ebx, -3
+mov [esp], ebx ; Pushing reference to I1 from offset -3
 
 call L28 ; Calling OutputByte
 add esp, 4
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to L from offset 0
+add ebx, -1
+mov [esp], ebx ; Pushing reference to L from offset -1
 
 call L28 ; Calling OutputByte
 add esp, 4
@@ -974,37 +956,37 @@ add esp, 4
 add esp, -1 ; Declaring CST_1
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to I1 from offset 0
+add ebx, -3
+mov [esp], ebx ; Pushing reference to I1 from offset -3
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to CST_1 from offset 0
+add ebx, -5
+mov [esp], ebx ; Pushing reference to CST_1 from offset -5
 
 call L12 ; Calling =
 add esp, 8
 
-add esp, -6 ; Declaring ET
+add esp, -2 ; Declaring ET
 add esp, -1 ; Declaring [T5
 mov byte [esp], 102
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T5 from offset 0
+add ebx, -8
+mov [esp], ebx ; Pushing reference to [T5 from offset -8
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T4 from offset 0
+add ebx, -7
+mov [esp], ebx ; Pushing reference to [T4 from offset -7
 
 call L12 ; Calling =
 add esp, 8
 
 add esp, -4
 mov ebx, ebp
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T6 from offset 0
+add ebx, -7
+mov [esp], ebx ; Pushing reference to [T6 from offset -7
 
 call L28 ; Calling OutputByte
 add esp, 4

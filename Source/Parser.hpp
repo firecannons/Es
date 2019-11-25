@@ -9,10 +9,7 @@ string Parser::Parse(const vector<Token> & Tokens)
     PassMode = PASS_MODE::FUNCTION_SKIM;
     InitializeForPass();
     RunParse();
-    cout << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl << endl;
     SetSizesAndOffsets();
-    OutputTypeTable();
-    exit(1);
 
     PassMode = PASS_MODE::FULL_PASS;
     InitializeForPass();
@@ -219,9 +216,9 @@ void Parser::ParseStartOfLine()
                         OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
                         AppendNewlinesToOutputASM(2);
                     }
+                    OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
+                    AppendNewlinesToOutputASM(2);
                 }
-                OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
-                AppendNewlinesToOutputASM(2);
             }
         }
         if(IsLocalScopeInOneLevelLow() == true || (PassMode == PASS_MODE::CLASS_SKIM && GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION))
@@ -1452,6 +1449,7 @@ void Parser::AddNewVariableToStack(Object & NewObject)
         OutputDeclaringVariableToAsm(NewObject.Name);
     }
     AppendNewlinesToOutputASM(1);
+    MoveBackCurrentScopeOffset(NewObject);
 }
 
 void Parser::CallFunction(const Function & InFunction)
@@ -1600,13 +1598,6 @@ void Parser::AddNumericalValueToTempInteger(const string & NewValue)
 {
     OutputAsm = OutputAsm + GlobalASM.CalcIntegerQuickAssignAsm(stoi(NewValue));
     AppendNewlinesToOutputASM(1);
-}
-
-void Parser::PositionObjectInClass(Object & NewObject)
-{
-    NewObject.Offset = CurrentClass.Templates->Size;
-    CurrentClass.Templates->Size = CurrentClass.Templates->Size + NewObject.Type.Templates->Size;
-    GetCurrentScope()->Offset = GetCurrentScope()->Offset + NewObject.Type.Templates->Size;
 }
 
 unsigned int Parser::GetNextParamOffset()

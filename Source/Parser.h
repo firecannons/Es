@@ -205,7 +205,6 @@ public:
     void OutputCreateStackFrameAsm();
     void OutputDestroyStackFrameAsm();
     void AddNumericalValueToTempInteger(const string & NewValue);
-    void PositionObjectInClass(Object & NewObject);
     unsigned int GetNextParamOffset();
     void OutputTypeTable();
     string OutputTypeTableToString();
