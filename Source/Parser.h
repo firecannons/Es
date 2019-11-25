@@ -223,6 +223,8 @@ public:
     bool IsPassModeLowerOrEqual(const PASS_MODE InPassMode);
     bool IsPassModeHigherOrEqual(const PASS_MODE InPassMode);
     bool IsLocalScopeToBeParsedNow();
+    bool IsLocalScopeInOneLevelLow();
+    void InitializeForPass();
 };
 
 #include "Compiler.h"

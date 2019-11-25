@@ -7,11 +7,11 @@ string Parser::Parse(const vector<Token> & Tokens)
     RunParse();
 
     PassMode = PASS_MODE::FUNCTION_SKIM;
-    InitializePosition();
+    InitializeForPass();
     RunParse();
 
     PassMode = PASS_MODE::FULL_PASS;
-    InitializePosition();
+    InitializeForPass();
     RunParse();
 
     AppendInitialASM();
@@ -33,20 +33,13 @@ void Parser::RunParse()
 void Parser::Initialize(const vector<Token> & Tokens)
 {
     this->Tokens = Tokens;
-    State = PARSER_STATE::START_OF_LINE;
-    InitializePosition();
+    InitializeForPass();
     OutputAsm = string("");
-    HasToken = false;
-    SavedUsingIdents.clear();
     GlobalScope.Origin = SCOPE_ORIGIN::GLOBAL;
+    ScopeStack.clear();
     ScopeStack.push_back(& GlobalScope);
-    CurrentFunction = NULL;
-    CurrentClass.Type = NULL;
-    IsAsmFunction = false;
     TemplateVariableCounter = 0;
     TemporaryVariableCounter = 0;
-    LabelCounter = 0;
-    WasVariableFound = false;
     InitializeOperatorOrdering();
     PassMode = PASS_MODE::CLASS_SKIM;
 }
@@ -81,7 +74,6 @@ bool Parser::IsNextToken()
 
 void Parser::Operate()
 {
-    cout << "'" << CurrentToken.Contents << "' " << State << endl;
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
@@ -213,23 +205,23 @@ void Parser::ParseStartOfLine()
         State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
         if(PassMode == PASS_MODE::FULL_PASS)
         {
-            if(IsFunctionScopeClosest() == true)
+            if(IsLocalScopeInOneLevelLow() == true)
             {
-                if(CurrentFunction->IsAsm == false)
+                if(CurrentFunction != NULL)
                 {
-                    OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
-                    AppendNewlinesToOutputASM(2);
+                    if(CurrentFunction->IsAsm == false)
+                    {
+                        OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
+                        AppendNewlinesToOutputASM(2);
+                    }
                 }
                 OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
                 AppendNewlinesToOutputASM(2);
             }
         }
-        else
+        if(IsLocalScopeInOneLevelLow() == true || (PassMode == PASS_MODE::CLASS_SKIM && GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION))
         {
-            if(IsLocalScopeToBeParsedNow() == true || (PassMode == PASS_MODE::CLASS_SKIM && GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION))
-            {
-                EndCurrentScope();
-            }
+            EndCurrentScope();
         }
     }
     else
@@ -346,17 +338,20 @@ void Parser::ParseExpectClassName()
     {
         OutputStandardErrorMessage(GetNameErrorText(CurrentToken.Contents) + string(" is not a valid class name."), CurrentToken);
     }
-    else if(TypeTableContains(CurrentToken.Contents) != false)
-    {
-        OutputStandardErrorMessage(string("A class named ") + CurrentToken.Contents + string(" has already been declared."), CurrentToken);
-    }
     else
     {
         BaseType NewClassBase;
         NewClassBase.Name = CurrentToken.Contents;
         if(PassMode == PASS_MODE::CLASS_SKIM)
         {
-            TypeTable.insert(pair<string,BaseType>(CurrentToken.Contents, NewClassBase));
+            if(TypeTableContains(CurrentToken.Contents) != false)
+            {
+                OutputStandardErrorMessage(string("A class named ") + CurrentToken.Contents + string(" has already been declared."), CurrentToken);
+            }
+            else
+            {
+                TypeTable.insert(pair<string,BaseType>(CurrentToken.Contents, NewClassBase));
+            }
         }
         CurrentClass.Type = &TypeTable[CurrentToken.Contents];
         State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE;
@@ -390,14 +385,14 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
 {
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
-        CurrentClass.Type->InitializeBlankCompiledTemplate();
-        CurrentClass.Type->IsTemplated = false;
-        CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
-        CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         if(PassMode == PASS_MODE::CLASS_SKIM)
         {
-            ScopeStack.push_back(&CurrentClass.Templates->MyScope);
+            CurrentClass.Type->InitializeBlankCompiledTemplate();
+            CurrentClass.Type->IsTemplated = false;
+            CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
+            CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         }
+        ScopeStack.push_back(&CurrentClass.Templates->MyScope);
         State = PARSER_STATE::START_OF_LINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
@@ -411,14 +406,14 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["SIZE"])
     {
-        CurrentClass.Type->InitializeBlankCompiledTemplate();
-        CurrentClass.Type->IsTemplated = false;
-        CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
-        CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         if(PassMode == PASS_MODE::CLASS_SKIM)
         {
-            ScopeStack.push_back(&CurrentClass.Templates->MyScope);
+            CurrentClass.Type->InitializeBlankCompiledTemplate();
+            CurrentClass.Type->IsTemplated = false;
+            CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
+            CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         }
+        ScopeStack.push_back(&CurrentClass.Templates->MyScope);
         State = PARSER_STATE::EXPECT_CLASS_SIZE_NUMBER;
     }
     else
@@ -528,37 +523,40 @@ void Parser::ParseExpectActionName()
 {
     if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.OverloadableOperators) == true || IsValidActionName(CurrentToken.Contents) == true)
     {
-        Function NewFunction;
-        NewFunction.IsAsm = IsAsmFunction;
-        NewFunction.HasReturnType = false;
-        NewFunction.Name = CurrentToken.Contents;
-        NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
-        GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
-        CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
-        ScopeStack.push_back(&CurrentFunction->MyScope);
-        
-        if(CurrentClass.Type != NULL)
+        if(PassMode == PASS_MODE::CLASS_SKIM)
         {
-            Object NewObject;
-            NewObject.Name = GlobalKeywords.ReservedWords["ME"];
-            NewObject.Type = CurrentClass;
-            NewObject.ReferenceOffset = GetNextParamOffset();
-            NewObject.IsReference = true;
-            GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
-            CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
+            Function NewFunction;
+            NewFunction.IsAsm = IsAsmFunction;
+            NewFunction.HasReturnType = false;
+            NewFunction.Name = CurrentToken.Contents;
+            NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
+            GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
+            CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
+            ScopeStack.push_back(&CurrentFunction->MyScope);
+            
+            if(CurrentClass.Type != NULL)
+            {
+                Object NewObject;
+                NewObject.Name = GlobalKeywords.ReservedWords["ME"];
+                NewObject.Type = CurrentClass;
+                NewObject.ReferenceOffset = GetNextParamOffset();
+                NewObject.IsReference = true;
+                GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
+                CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
+            }
         }
         
         if(PassMode == PASS_MODE::FULL_PASS)
         {
             string NextLabel = GetNextLabel();
-            NewFunction.Label = NextLabel;
+            CurrentFunction->Label = NextLabel;
             OutputAsm = OutputAsm + NextLabel + GlobalKeywords.ReservedWords["COLON"];
             if(DEBUG == true)
             {
                 OutputCurrentFunctionToAsm();
             }
             AppendNewlinesToOutputASM(2);
-            if(NewFunction.IsAsm == false)
+            if(CurrentFunction->IsAsm == false)
             {
                 OutputAsm = OutputAsm + GlobalASM.CalcCreateStackFrameAsm();
                 AppendNewlinesToOutputASM(2);
@@ -1000,31 +998,44 @@ void Parser::ParseExpectVariableName()
 {
     if(IsValidIdent(CurrentToken.Contents) == true)
     {
-        if(IsLocalScopeToBeParsedNow() == true)
+        Object NewParamObject;
+        NewParamObject.Name = CurrentToken.Contents;
+        NewParamObject.Type = CurrentParsingType;
+        if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM && PassMode == PASS_MODE::FUNCTION_SKIM)
         {
-            Object NewParamObject;
-            NewParamObject.Name = CurrentToken.Contents;
-            NewParamObject.Type = CurrentParsingType;
             GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
-            if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
+            GetCurrentScope()->Objects[NewParamObject.Name].Offset = GetNextParamOffset();
+            CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
+            State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
+        }
+        else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
+        {
+            if(IsClassScopeClosest() == true && PassMode == PASS_MODE::FUNCTION_SKIM)
             {
-                GetCurrentScope()->Objects[NewParamObject.Name].Offset = GetNextParamOffset();
-                CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
-                State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
+                GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
+                PositionObjectInClass(GetCurrentScope()->Objects[NewParamObject.Name]);
+                State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
             }
-            else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
+            else if(PassMode == PASS_MODE::FULL_PASS)
             {
-                if(IsClassScopeClosest() == true)
-                {
-                    PositionObjectInClass(GetCurrentScope()->Objects[NewParamObject.Name]);
-                    State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
-                }
-                else
-                {
-                    AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
-                    State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
-                }
-                
+                GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
+                AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
+                State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
+            }
+        }
+        if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
+        {
+            State = PARSER_STATE::EXPECT_COMMA_OR_RPAREN;
+        }
+        else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
+        {
+            if(IsClassScopeClosest() == true)
+            {
+                State = PARSER_STATE::EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION;
+            }
+            else
+            {
+                State = PARSER_STATE::EXPECT_FIRST_OPERATOR_OR_NEWLINE;
             }
         }
     }
@@ -1652,6 +1663,8 @@ string Parser::OutputCompiledTemplateToString(const CompiledTemplate & OutputCT,
     string OutputString;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Size: " + to_string(OutputCT.Size) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Scope:\n";
     OutputString = OutputString + OutputScopeToString((Scope &)OutputCT.MyScope, Level + 1);
     return OutputString;
 }
@@ -1663,12 +1676,16 @@ string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level
     OutputString = OutputString + "Offset: " + to_string(OutputScope.Offset) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Origin: " + to_string(OutputScope.Origin) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Objects:\n";
 
     map<string, Object>::iterator Iterator;
     for (Iterator = OutputScope.Objects.begin(); Iterator != OutputScope.Objects.end(); Iterator++)
     {
         OutputString = OutputString + OutputObjectToString(Iterator->second, Level + 1);
     }
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Functions:\n";
 
     map<string, Function>::iterator FuncIterator;
     for (FuncIterator = OutputScope.Functions.begin(); FuncIterator != OutputScope.Functions.end(); FuncIterator++)
@@ -1782,7 +1799,31 @@ bool Parser::IsLocalScopeToBeParsedNow()
     bool Output = false;
     if(PassMode == PASS_MODE::CLASS_SKIM)
     {
+        if(GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
+        {
+            Output = true;
+        }
+    }
+    else if(PassMode == PASS_MODE::FUNCTION_SKIM)
+    {
         if(GetCurrentScope()->Origin == SCOPE_ORIGIN::CLASS || GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
+        {
+            Output = true;
+        }
+    }
+    else
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+bool Parser::IsLocalScopeInOneLevelLow()
+{
+    bool Output = false;
+    if(PassMode == PASS_MODE::CLASS_SKIM)
+    {
+        if(GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL || GetCurrentScope()->Origin == SCOPE_ORIGIN::CLASS)
         {
             Output = true;
         }
@@ -1799,4 +1840,17 @@ bool Parser::IsLocalScopeToBeParsedNow()
         Output = true;
     }
     return Output;
+}
+
+void Parser::InitializeForPass()
+{
+    State = PARSER_STATE::START_OF_LINE;
+    InitializePosition();
+    HasToken = false;
+    SavedUsingIdents.clear();
+    CurrentFunction = NULL;
+    CurrentClass.Type = NULL;
+    IsAsmFunction = false;
+    LabelCounter = 0;
+    WasVariableFound = false;
 }
