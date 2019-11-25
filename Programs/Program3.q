@@ -135,6 +135,10 @@ action Main
     ElemTest ET
     ET:B1 = 102
     OutputByte ( ET:B1 )
+
+    afterClass A
+    A:TestByte = 102
+    OutputByte ( A : TestByte )
 /*
     OutputByte ( I1 + Mult(L, I1) )
 
@@ -148,4 +152,8 @@ action Main
 
     OutputByte ( A + ( t1 + OutputByte ( ) )
     */
+end
+
+class afterClass
+    Byte TestByte
 end

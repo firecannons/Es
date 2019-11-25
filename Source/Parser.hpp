@@ -22,12 +22,11 @@ string Parser::Parse(const vector<Token> & Tokens)
 
 void Parser::RunParse()
 {
-    GetNextToken();
-    while(IsNextToken() == true)
+    do
     {
-        Operate();
         GetNextToken();
-    }
+        Operate();
+    }while(IsNextToken() == true);
     OutputTypeTable();
 }    
 
@@ -70,12 +69,17 @@ bool Parser::IsNextToken()
     {
         Output = false;
     }
+    else
+    {
+        cout << "ok " << Tokens[CheckPosition].Contents << endl;
+    }
+    
     return Output;
 }
 
 void Parser::Operate()
 {
-    cout << CurrentToken.Contents << " " << State << " " << PassMode << endl;
+    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << endl;
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();

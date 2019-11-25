@@ -991,6 +991,30 @@ mov [esp], ebx ; Pushing reference to [T6 from offset -7
 call L28 ; Calling OutputByte
 add esp, 4
 
+add esp, -1 ; Declaring A
+add esp, -1 ; Declaring [T8
+mov byte [esp], 102
+add esp, -4
+mov ebx, ebp
+add ebx, -10
+mov [esp], ebx ; Pushing reference to [T8 from offset -10
+
+add esp, -4
+mov ebx, ebp
+add ebx, -9
+mov [esp], ebx ; Pushing reference to [T7 from offset -9
+
+call L12 ; Calling =
+add esp, 8
+
+add esp, -4
+mov ebx, ebp
+add ebx, -9
+mov [esp], ebx ; Pushing reference to [T9 from offset -9
+
+call L28 ; Calling OutputByte
+add esp, 4
+
 mov esp, ebp
 pop ebp
 
