@@ -139,6 +139,9 @@ action Main
     afterClass A
     A:TestByte = 102
     OutputByte ( A : TestByte )
+
+    Pointer<Byte> Pb
+    Pointer<Integer> Pi
 /*
     OutputByte ( I1 + Mult(L, I1) )
 

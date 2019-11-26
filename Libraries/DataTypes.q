@@ -546,13 +546,13 @@ class Bool size 1
     end
 end
 
-class Pointer
+class Pointer<T>
     Integer Position
     
     action Pointer
     end
     
-    action = ( Pointer Source )
+    action = ( Pointer<T> Source )
         Me : Position = Source : Position
     end
 

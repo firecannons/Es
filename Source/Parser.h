@@ -227,6 +227,8 @@ public:
     void SetSizesAndOffsets();
     void SizeType(BaseType & InBaseType);
     void SizeCompiledTemplate(CompiledTemplate & InCompiledTemplate);
+    bool IsCurrentClassTemplated();
+    void DoPossibleTemplatedClassTokenCopy();
 };
 
 #include "Compiler.h"

@@ -31,6 +31,8 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("NOT_EQUALS"), string("!=")));
     ReservedWords.insert(pair<string,string>(string("UNDER_SCORE"), string("_")));
     ReservedWords.insert(pair<string,string>(string("ME"), string("Me")));
+    ReservedWords.insert(pair<string,string>(string("REPEAT"), string("repeat")));
+    ReservedWords.insert(pair<string,string>(string("IF"), string("if")));
     
     ShortOperators.emplace(ReservedWords["LESS_THAN"]);
     ShortOperators.emplace(ReservedWords["GREATER_THAN"]);
@@ -58,4 +60,9 @@ Keywords::Keywords()
 
     AllOperators = ReducibleOperators;
     AllOperators.emplace(string("//"));
+
+    ScopeCreateKeywords.emplace(ReservedWords["ACTION"]);
+    ScopeCreateKeywords.emplace(ReservedWords["CLASS"]);
+    ScopeCreateKeywords.emplace(ReservedWords["REPEAT"]);
+    ScopeCreateKeywords.emplace(ReservedWords["IF"]);
 }

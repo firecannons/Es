@@ -80,6 +80,7 @@ bool Parser::IsNextToken()
 void Parser::Operate()
 {
     cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << endl;
+    DoPossibleTemplatedClassTokenCopy();
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
@@ -411,10 +412,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         CurrentClass.Type->IsTemplated = true;
-        if(PassMode == PASS_MODE::CLASS_SKIM)
-        {
-            ScopeStack.push_back(NULL);
-        }
+        ScopeStack.push_back(NULL);
         State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_NAME;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["SIZE"])
@@ -434,14 +432,16 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
     {
         OutputStandardErrorMessage(string("Expected '<' or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
-    cout << OutputScopeToString(*GetCurrentScope(), 1);
 }
 
 void Parser::ParseExpectClassTemplateName()
 {
     if(IsValidClassTemplateName(CurrentToken.Contents) == true)
     {
-        CurrentClass.Type->PossibleTemplates.push_back(CurrentToken.Contents);
+        if(PassMode == PASS_MODE::CLASS_SKIM)
+        {
+            CurrentClass.Type->PossibleTemplates.push_back(CurrentToken.Contents);
+        }
         State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_END_OR_COMMA;
     }
     else
@@ -717,14 +717,22 @@ void Parser::ParseExpectTemplateStartOrNewline()
 
 void Parser::ParseExpectTokenUntilEnd()
 {
+    if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.ScopeCreateKeywords) == true)
+    {
+        ScopeStack.push_back(NULL);
+    }
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"])
     {
-        CurrentClass.Type = NULL;
-        State = PARSER_STATE::START_OF_LINE;
+        ScopeStack.pop_back();
     }
     else
     {
-        CurrentClass.Type->Tokens.push_back(CurrentToken);
+        DoPossibleTemplatedClassTokenCopy();
+    }
+    if(GetCurrentScope() != NULL)
+    {
+        CurrentClass.Type = NULL;
+        State = PARSER_STATE::START_OF_LINE;
     }
 }
 
@@ -785,6 +793,7 @@ void Parser::InitializeTemplateParse()
     TemplateTokenIndex = 0;
     CurrentParsingType.Type->InitializeBlankCompiledTemplate();
     CurrentParsingType.Templates = CurrentParsingType.Type->GetLastCompiledTemplate();
+    StoredParsedTemplates.clear();
 }
 
 void Parser::RemoveTypeInTemplates()
@@ -970,6 +979,7 @@ void Parser::EndCurrentScope()
     else if(CurrentClass.Type != NULL)
     {
         CurrentClass.Type = NULL;
+        CurrentClass.Templates = NULL;
     }
     ScopeStack.pop_back();
 }
@@ -1918,5 +1928,26 @@ void Parser::SizeCompiledTemplate(CompiledTemplate & InCompiledTemplate)
         InCompiledTemplate.MyScope.Offset = InCompiledTemplate.MyScope.Offset + InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->Size;
         InCompiledTemplate.Size = InCompiledTemplate.MyScope.Offset;
         Index = Index + 1;
+    }
+}
+
+bool Parser::IsCurrentClassTemplated()
+{
+    bool Output = false;
+    if(CurrentClass.Type != NULL)
+    {
+        Output = CurrentClass.Type->IsTemplated;
+    }
+    return Output;
+}
+
+void Parser::DoPossibleTemplatedClassTokenCopy()
+{
+    if(IsCurrentClassTemplated() == true)
+    {
+        if(PassMode == PASS_MODE::CLASS_SKIM)
+        {
+            CurrentClass.Type->Tokens.push_back(CurrentToken);
+        }
     }
 }
