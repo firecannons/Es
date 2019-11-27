@@ -211,7 +211,7 @@ public:
     string OutputTypeToString(const BaseType & InType, const unsigned int Level);
     string OutputSingleLineVectorToString(const vector<string> & InVector);
     string OutputTabsToString(const unsigned int NumberTabs);
-    string OutputCompiledTemplateToString(const CompiledTemplate & OutputCT, const unsigned int Level);
+    string OutputCompiledTemplateToString(const CompiledTemplate & OutputCT, const BaseType & InType, const unsigned int Level);
     string OutputScopeToString(Scope & InScope, const unsigned int Level);
     string OutputObjectToString(const Object & OutputObject, const unsigned int Level);
     string OutputTemplatedTypeToString(const TemplatedType & OutputTT, const unsigned int Level);
@@ -229,6 +229,7 @@ public:
     void SizeCompiledTemplate(CompiledTemplate & InCompiledTemplate);
     bool IsCurrentClassTemplated();
     void DoPossibleTemplatedClassTokenCopy();
+    string OutputFullTemplatesToString(const TemplatedType & InTT);
 };
 
 #include "Compiler.h"

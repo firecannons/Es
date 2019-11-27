@@ -791,8 +791,6 @@ void Parser::ParseTemplateTokens()
 void Parser::InitializeTemplateParse()
 {
     TemplateTokenIndex = 0;
-    CurrentParsingType.Type->InitializeBlankCompiledTemplate();
-    CurrentParsingType.Templates = CurrentParsingType.Type->GetLastCompiledTemplate();
     StoredParsedTemplates.clear();
 }
 
@@ -840,12 +838,14 @@ void Parser::OperateTemplateTokens()
             TypeTable[TemplateTokens[TemplateTokenIndex].Contents].InitializeBlankCompiledTemplate();
             CurrentParsingType.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
             CurrentParsingType.Templates = TypeTable[TemplateTokens[TemplateTokenIndex].Contents].GetLastCompiledTemplate();
+            CurrentParsingType.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
             if(CurrentParsingType.Type->PossibleTemplates.size() != StoredParsedTemplates.size())
             {
                 OutputStandardErrorMessage(string("Type '") + TemplateTokens[TemplateTokenIndex].Contents + "' expects " +
                     to_string(CurrentParsingType.Type->PossibleTemplates.size()) + " templates not " + to_string(StoredParsedTemplates.size()) + ".", TemplateTokens[TemplateTokenIndex]);
             }
             CurrentParsingType.Templates->Templates = StoredParsedTemplates;
+
             // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
             TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 2));
             TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 1));
@@ -1656,10 +1656,12 @@ string Parser::OutputTypeToString(const BaseType & InType, const unsigned int Le
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Templates: ";
     OutputString = OutputString + OutputSingleLineVectorToString(InType.PossibleTemplates) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    OutputString = OutputString + "Compiled Templates: ";
     unsigned int Index = 0;
     while(Index < InType.CompiledTemplates.size())
     {
-        OutputString = OutputString + OutputCompiledTemplateToString(InType.CompiledTemplates[Index], Level + 1);
+        OutputString = OutputString + OutputCompiledTemplateToString(InType.CompiledTemplates[Index], InType, Level + 1);
         Index = Index + 1;
     }
     return OutputString;
@@ -1689,13 +1691,18 @@ string Parser::OutputTabsToString(const unsigned int NumberTabs)
     return OutputString;
 }
 
-string Parser::OutputCompiledTemplateToString(const CompiledTemplate & OutputCT, const unsigned int Level)
+string Parser::OutputCompiledTemplateToString(const CompiledTemplate & OutputCT, const BaseType & InType, const unsigned int Level)
 {
     string OutputString;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Size: " + to_string(OutputCT.Size) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Has size been calculated: " + to_string(OutputCT.HasSizeBeenCalculated) + '\n';
+    OutputString = OutputString + OutputTabsToString(Level);
+    TemplatedType NewTT;
+    NewTT.Type = (BaseType *) &InType;
+    NewTT.Templates = (CompiledTemplate *) &OutputCT;
+    OutputString = OutputString + "Recursive Template: " + OutputFullTemplatesToString(NewTT) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Scope:\n";
     OutputString = OutputString + OutputScopeToString((Scope &)OutputCT.MyScope, Level + 1);
@@ -1950,4 +1957,26 @@ void Parser::DoPossibleTemplatedClassTokenCopy()
             CurrentClass.Type->Tokens.push_back(CurrentToken);
         }
     }
+}
+
+string Parser::OutputFullTemplatesToString(const TemplatedType & InTT)
+{
+    string Output;
+    Output = Output + InTT.Type->Name;
+    if(InTT.Type->IsTemplated == true)
+    {
+        Output = Output + GlobalKeywords.ReservedWords["LESS_THAN"];
+        unsigned int Index = 0;
+        while(Index < InTT.Templates->Templates.size())
+        {
+            Output = Output + OutputFullTemplatesToString(InTT.Templates->Templates[Index]);
+            if(Index != InTT.Templates->Templates.size() - 1)
+            {
+                Output = Output + ", ";
+            }
+            Index = Index + 1;
+        }
+        Output = Output + GlobalKeywords.ReservedWords["GREATER_THAN"];
+    }
+    return Output;
 }
