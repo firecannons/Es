@@ -232,6 +232,11 @@ public:
     string OutputFullTemplatesToString(const TemplatedType & InTT);
     bool DoesTypeHaveTemplates(const BaseType & InType, const vector<TemplatedType> & InTypes);
     bool AreTemplateListsEqual(const vector<TemplatedType> & InTypes, const vector<TemplatedType> & InTypes2);
+    void CompileTemplatedCode();
+    void RunAllPasses();
+    string OutputSingleLineSetToString(unordered_set<string> & InSet);
+    TemplatedType GetType(const string & InName);
+    void InitializeForTemplatedPass();
 };
 
 #include "Compiler.h"

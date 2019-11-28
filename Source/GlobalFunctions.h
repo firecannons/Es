@@ -15,6 +15,7 @@ const char END_COLOR_TEXT[] = "\033[0m";
 const char ERROR_START_TEXT[] = "ERROR: ";
 const char ON_LINE_TEXT[] = " on line ";
 const bool END_ON_ERROR = true;
+const int NOT_FOUND_POSITION = -1;
 
 
 void PrintError(const string & ErrorMessage)
@@ -66,6 +67,31 @@ bool DoesFileExist(const string & FileName)
         Output = true;
     }
     return Output;
+}
+
+int LocationInVector(const string & SearchWord, const vector<string> & InVector)
+{
+    int Position = NOT_FOUND_POSITION;
+    unsigned int Index = 0;
+    while(Index < InVector.size() && Position == NOT_FOUND_POSITION)
+    {
+        if(InVector[Index] == SearchWord)
+        {
+            Position = Index;
+        }
+        Index = Index + 1;
+    }
+    return Position;
+}
+
+bool DoesVectorContain(const string & SearchWord, const vector<string> & InVector)
+{
+    bool Found = false;
+    if(LocationInVector(SearchWord, InVector) != NOT_FOUND_POSITION)
+    {
+        Found = true;
+    }
+    return Found;
 }
 
 #endif

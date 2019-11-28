@@ -4,16 +4,7 @@ string Parser::Parse(const vector<Token> & Tokens)
 {
     Initialize(Tokens);
     
-    RunParse();
-
-    PassMode = PASS_MODE::FUNCTION_SKIM;
-    InitializeForPass();
-    RunParse();
-    SetSizesAndOffsets();
-
-    PassMode = PASS_MODE::FULL_PASS;
-    InitializeForPass();
-    RunParse();
+    RunAllPasses();
 
     AppendInitialASM();
     
@@ -28,6 +19,7 @@ void Parser::RunParse()
         Operate();
     }while(IsNextToken() == true);
     OutputTypeTable();
+    cout << OutputScopeToString(GlobalScope, 1) << endl;
 }    
 
 void Parser::Initialize(const vector<Token> & Tokens)
@@ -40,8 +32,8 @@ void Parser::Initialize(const vector<Token> & Tokens)
     ScopeStack.push_back(& GlobalScope);
     TemplateVariableCounter = 0;
     TemporaryVariableCounter = 0;
+    LabelCounter = 0;
     InitializeOperatorOrdering();
-    PassMode = PASS_MODE::CLASS_SKIM;
 }
 
 void Parser::GetNextToken()
@@ -79,8 +71,11 @@ bool Parser::IsNextToken()
 
 void Parser::Operate()
 {
+    if(DoesMapContain(string("Main"), GlobalScope.Functions) == true)
+    {
+        cout << "main exists" << GlobalScope.Functions["Main"].Parameters.size() << endl;
+    }
     cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << endl;
-    DoPossibleTemplatedClassTokenCopy();
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
@@ -248,6 +243,7 @@ void Parser::ParseStartOfLine()
             }
             if(IsAsmFunction == false)
             {
+                cout << "afd'" << IsAType(CurrentToken.Contents) << " " << IsParsingType()  << endl;
                 if(IsAType(CurrentToken.Contents) == true)
                 {
                     TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
@@ -396,7 +392,6 @@ bool Parser::TypeTableContains(const string & Input)
 
 void Parser::ParseExpectTemplateStartOrNewlineOrSize()
 {
-    cout << OutputScopeToString(*GetCurrentScope(), 1);
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         if(PassMode == PASS_MODE::CLASS_SKIM)
@@ -440,7 +435,14 @@ void Parser::ParseExpectClassTemplateName()
     {
         if(PassMode == PASS_MODE::CLASS_SKIM)
         {
-            CurrentClass.Type->PossibleTemplates.push_back(CurrentToken.Contents);
+            if(DoesVectorContain(CurrentToken.Contents, CurrentClass.Type->PossibleTemplates) == false)
+            {
+                CurrentClass.Type->PossibleTemplates.push_back(CurrentToken.Contents);
+            }
+            else
+            {
+                OutputStandardErrorMessage(string("Class ") + CurrentClass.Type->Name + string(" already has template named ") + CurrentToken.Contents + string("."), CurrentToken);
+            }
         }
         State = PARSER_STATE::EXPECT_CLASS_TEMPLATE_END_OR_COMMA;
     }
@@ -549,8 +551,6 @@ void Parser::ParseExpectActionName()
         }
         CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
         ScopeStack.push_back(&CurrentFunction->MyScope);
-        cout << "is asm " << CurrentFunction->IsAsm << " '" << CurrentFunction->Name << "' " << CurrentToken.Contents << " " << CurrentFunction->Parameters.size() << endl;
-        cout << OutputScopeToString(*GetCurrentScope(), 1) ;
 
         if(PassMode == PASS_MODE::CLASS_SKIM)
         {
@@ -625,10 +625,12 @@ void Parser::ParseExpectType()
     {
         if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
         {
+            cout << "ok" << endl;
             if(IsAType(CurrentToken.Contents) == true)
             {
-                CurrentParsingType.Type = &TypeTable[CurrentToken.Contents];
-                CurrentParsingType.Templates = CurrentParsingType.Type->GetFirstCompiledTemplate();
+                cout << "ok2" << endl;
+                CurrentParsingType = GetType(CurrentToken.Contents);
+                cout << "ok3" << endl;
             }
             else
             {
@@ -669,7 +671,11 @@ void Parser::ParseExpectTemplateStartOrIdent()
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         // At this point, parse the template
-        if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
+        if(IsPassModeHigherOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
+        {
+            InitializeTemplateTokens();
+        }
+        else
         {
             ParseTemplates();
         }
@@ -680,7 +686,7 @@ void Parser::ParseExpectTemplateStartOrIdent()
         // Go to the next part
         if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
         {
-            if(CurrentParsingType.Type->PossibleTemplates.size() != 0)
+            if(CurrentParsingType.Type->IsTemplated == true)
             {
                 OutputStandardErrorMessage(string("Type '") + CurrentParsingType.Type->Name + "' expects templates.", CurrentToken);
             }
@@ -698,7 +704,11 @@ void Parser::ParseExpectTemplateStartOrNewline()
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         // At this point, parse the template
-        if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
+        if(IsPassModeHigherOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
+        {
+            InitializeTemplateTokens();
+        }
+        else
         {
             ParseTemplates();
         }
@@ -725,14 +735,14 @@ void Parser::ParseExpectTokenUntilEnd()
     {
         ScopeStack.pop_back();
     }
-    else
-    {
-        DoPossibleTemplatedClassTokenCopy();
-    }
     if(GetCurrentScope() != NULL)
     {
         CurrentClass.Type = NULL;
         State = PARSER_STATE::START_OF_LINE;
+    }
+    else
+    {
+        DoPossibleTemplatedClassTokenCopy();
     }
 }
 
@@ -744,9 +754,12 @@ Scope * Parser::GetCurrentScope()
 
 void Parser::ParseTemplates()
 {
+    cout << "Position = " << Position << endl;
     InitializeTemplateTokens();
+    cout << "Position = " << Position << endl;
     InitializeTemplateParse();
     ParseTemplateTokens();
+    cout << "Position = " << Position << endl;
 }
 
 void Parser::InitializeTemplateTokens()
@@ -815,8 +828,7 @@ void Parser::OperateTemplateTokens()
         else if(IsAType(TemplateTokens[TemplateTokenIndex].Contents) == true)
         {
             TemplatedType NewType;
-            NewType.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
-            NewType.Templates = NewType.Type->GetLastCompiledTemplate();
+            NewType = GetType(TemplateTokens[TemplateTokenIndex].Contents);
             StoredParsedTemplates.push_back(NewType);
             RemoveTypeInTemplates();
         }
@@ -847,9 +859,11 @@ void Parser::OperateTemplateTokens()
                         to_string(CurrentParsingType.Type->PossibleTemplates.size()) + " templates not " + to_string(StoredParsedTemplates.size()) + ".", TemplateTokens[TemplateTokenIndex]);
                 }
                 CurrentParsingType.Templates->Templates = StoredParsedTemplates;
+
+                CompileTemplatedCode();
+                // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
             }
 
-            // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
             TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 2));
             TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 1));
             string TemplateVariable = GetNextTemplateVariable();
@@ -926,8 +940,20 @@ Object * Parser::GetInAnyScope(const string & VariableName)
 
 bool Parser::IsAType(const string & TypeName)
 {
+    bool IsATemplate = false;
     bool Output = false;
-    if(DoesMapContain(TypeName, TypeTable) == true)
+    if(CurrentClass.Type != NULL)
+    {
+        if(CurrentClass.Type->IsTemplated == true)
+        {
+            if(DoesVectorContain(TypeName, CurrentClass.Type->PossibleTemplates) == true)
+            {
+                Output = true;
+                IsATemplate = true;
+            }
+        }
+    }
+    if(IsATemplate == false && DoesMapContain(TypeName, TypeTable) == true)
     {
         Output = true;
     }
@@ -1053,7 +1079,6 @@ void Parser::ParseExpectVariableName()
             {
                 if(IsClassScopeClosest() == true && PassMode == PASS_MODE::FUNCTION_SKIM)
                 {
-                    cout << "afsd" << NewParamObject.Name << endl;
                     GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                     GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
                 }
@@ -1426,7 +1451,7 @@ void Parser::OutputCurrentFunctionToAsm()
     string FunctionPath = SPACE + SEMICOLON + SPACE;
     if(CurrentClass.Type != NULL)
     {
-        FunctionPath = FunctionPath + CurrentClass.Type->Name;
+        FunctionPath = FunctionPath + OutputFullTemplatesToString(CurrentClass);
     }
     
     if(CurrentFunction != NULL)
@@ -1660,7 +1685,7 @@ string Parser::OutputTypeToString(const BaseType & InType, const unsigned int Le
     OutputString = OutputString + "Templates: ";
     OutputString = OutputString + OutputSingleLineVectorToString(InType.PossibleTemplates) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
-    OutputString = OutputString + "Compiled Templates: ";
+    OutputString = OutputString + "Compiled Templates: \n";
     unsigned int Index = 0;
     while(Index < InType.CompiledTemplates.size())
     {
@@ -1745,25 +1770,44 @@ string Parser::OutputObjectToString(const Object & OutputObject, const unsigned 
     string OutputString;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Name: " + OutputObject.Name + '\n';
+
+    if(DoesMapContain(string("Main"), GlobalScope.Functions) == true)
+    {
+        cout << "main exists" << GlobalScope.Functions["Main"].Parameters.size() << endl;
+    }
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Offset: " + to_string(OutputObject.Offset) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Is Constant: " + to_string(OutputObject.IsConstant) + '\n';
+
+    if(DoesMapContain(string("Main"), GlobalScope.Functions) == true)
+    {
+        cout << "main exists" << GlobalScope.Functions["Main"].Parameters.size() << endl;
+    }
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Is Reference: " + to_string(OutputObject.IsReference) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Reference Offset: " + to_string(OutputObject.ReferenceOffset) + '\n';
+
+    if(DoesMapContain(string("Main"), GlobalScope.Functions) == true)
+    {
+        cout << "main exists" << GlobalScope.Functions["Main"].Parameters.size() << endl;
+    }
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Type: \n";
+
     OutputString = OutputString + OutputTemplatedTypeToString(OutputObject.Type, Level + 1);
+
     return OutputString;
 }
 
 string Parser::OutputTemplatedTypeToString(const TemplatedType & OutputTT, const unsigned int Level)
 {
     string OutputString;
+
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Type Name: " + OutputTT.Type->Name + '\n';
+
     return OutputString;
 }
 
@@ -1891,14 +1935,11 @@ bool Parser::IsLocalScopeInOneLevelLow()
 
 void Parser::InitializeForPass()
 {
-    State = PARSER_STATE::START_OF_LINE;
-    InitializePosition();
-    HasToken = false;
+    InitializeForTemplatedPass();
     SavedUsingIdents.clear();
     CurrentFunction = NULL;
     CurrentClass.Type = NULL;
     IsAsmFunction = false;
-    LabelCounter = 0;
     WasVariableFound = false;
 }
 
@@ -2017,4 +2058,96 @@ bool Parser::AreTemplateListsEqual(const vector<TemplatedType> & InTypes, const 
         Index = Index + 1;
     }
     return IsValid;
+}
+
+void Parser::CompileTemplatedCode()
+{
+    TemplatedType OldCurrentClass = CurrentClass;
+    Function * OldCurrentFunction = CurrentFunction;
+    CurrentClass = CurrentParsingType;
+    vector<Scope *> OldScopeStack = ScopeStack;
+    ScopeStack.clear();
+    ScopeStack.push_back(&GlobalScope);
+    ScopeStack.push_back(&CurrentClass.Templates->MyScope);
+    vector<Token> OldTokens = Tokens;
+    PARSER_STATE OldState = State;
+    unsigned int OldPosition = Position;
+    bool OldHasToken = HasToken;
+
+    State = PARSER_STATE::START_OF_LINE;
+    InitializePosition();
+    HasToken = false;
+    Tokens = CurrentClass.Type->Tokens;
+    CurrentFunction = NULL;
+
+    RunAllPasses();
+
+    CurrentClass = OldCurrentClass;
+    CurrentFunction = OldCurrentFunction;
+    ScopeStack = OldScopeStack;
+    Tokens = OldTokens;
+    State = OldState;
+    Position = OldPosition;
+    HasToken = OldHasToken;
+}
+
+void Parser::RunAllPasses()
+{
+    PassMode = PASS_MODE::CLASS_SKIM;
+    RunParse();
+
+    PassMode = PASS_MODE::FUNCTION_SKIM;
+    InitializeForTemplatedPass();
+    RunParse();
+    SetSizesAndOffsets();
+
+    PassMode = PASS_MODE::FULL_PASS;
+    InitializeForTemplatedPass();
+    RunParse();
+}
+
+string Parser::OutputSingleLineSetToString(unordered_set<string> & InSet)
+{
+    string OutputString;
+    unordered_set<string>::iterator Iterator;
+    for (Iterator = InSet.begin(); Iterator != InSet.end(); Iterator++)
+    {
+        OutputString = OutputString + *Iterator + GlobalKeywords.ReservedWords["SPACE"];
+    }
+    return OutputString;
+}
+
+TemplatedType Parser::GetType(const string & InName)
+{
+    cout << "sdf1" << endl;
+    bool IsATemplate = false;
+    TemplatedType Output;
+    if(CurrentClass.Type != NULL)
+    {
+        cout << "sdf2" << endl;
+        if(CurrentClass.Type->IsTemplated == true)
+        {
+            cout << "sdf3" << endl;
+            int Location = LocationInVector(InName, CurrentParsingType.Type->PossibleTemplates);
+            if(Location != NOT_FOUND_POSITION)
+            {
+                cout << "sdf4" << endl;
+                Output = CurrentClass.Templates->Templates[Location];
+                IsATemplate = true;
+            }
+        }
+    }
+    if(IsATemplate == false && DoesMapContain(InName, TypeTable) == true)
+    {
+        Output.Type = &TypeTable[InName];
+        Output.Templates = Output.Type->GetFirstCompiledTemplate();
+    }
+    return Output;
+}
+
+void Parser::InitializeForTemplatedPass()
+{
+    State = PARSER_STATE::START_OF_LINE;
+    InitializePosition();
+    HasToken = false;
 }
