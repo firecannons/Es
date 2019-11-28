@@ -230,6 +230,8 @@ public:
     bool IsCurrentClassTemplated();
     void DoPossibleTemplatedClassTokenCopy();
     string OutputFullTemplatesToString(const TemplatedType & InTT);
+    bool DoesTypeHaveTemplates(const BaseType & InType, const vector<TemplatedType> & InTypes);
+    bool AreTemplateListsEqual(const vector<TemplatedType> & InTypes, const vector<TemplatedType> & InTypes2);
 };
 
 #include "Compiler.h"

@@ -835,16 +835,19 @@ void Parser::OperateTemplateTokens()
         }
         if(TemplateTokens[TemplateTokenIndex + 2].Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
         {
-            TypeTable[TemplateTokens[TemplateTokenIndex].Contents].InitializeBlankCompiledTemplate();
-            CurrentParsingType.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
-            CurrentParsingType.Templates = TypeTable[TemplateTokens[TemplateTokenIndex].Contents].GetLastCompiledTemplate();
-            CurrentParsingType.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
-            if(CurrentParsingType.Type->PossibleTemplates.size() != StoredParsedTemplates.size())
+            if(DoesTypeHaveTemplates(TypeTable[TemplateTokens[TemplateTokenIndex].Contents], StoredParsedTemplates) == false)
             {
-                OutputStandardErrorMessage(string("Type '") + TemplateTokens[TemplateTokenIndex].Contents + "' expects " +
-                    to_string(CurrentParsingType.Type->PossibleTemplates.size()) + " templates not " + to_string(StoredParsedTemplates.size()) + ".", TemplateTokens[TemplateTokenIndex]);
+                TypeTable[TemplateTokens[TemplateTokenIndex].Contents].InitializeBlankCompiledTemplate();
+                CurrentParsingType.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
+                CurrentParsingType.Templates = TypeTable[TemplateTokens[TemplateTokenIndex].Contents].GetLastCompiledTemplate();
+                CurrentParsingType.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
+                if(CurrentParsingType.Type->PossibleTemplates.size() != StoredParsedTemplates.size())
+                {
+                    OutputStandardErrorMessage(string("Type '") + TemplateTokens[TemplateTokenIndex].Contents + "' expects " +
+                        to_string(CurrentParsingType.Type->PossibleTemplates.size()) + " templates not " + to_string(StoredParsedTemplates.size()) + ".", TemplateTokens[TemplateTokenIndex]);
+                }
+                CurrentParsingType.Templates->Templates = StoredParsedTemplates;
             }
-            CurrentParsingType.Templates->Templates = StoredParsedTemplates;
 
             // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
             TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 2));
@@ -1979,4 +1982,39 @@ string Parser::OutputFullTemplatesToString(const TemplatedType & InTT)
         Output = Output + GlobalKeywords.ReservedWords["GREATER_THAN"];
     }
     return Output;
+}
+
+bool Parser::DoesTypeHaveTemplates(const BaseType & InType, const vector<TemplatedType> & InTypes)
+{
+    bool Output = false;
+    unsigned int Index = 0;
+    while(Index < InType.CompiledTemplates.size())
+    {
+        bool IsValid = AreTemplateListsEqual(InType.CompiledTemplates[Index].Templates, InTypes);
+        if(IsValid == true)
+        {
+            Output = true;
+        }
+        Index = Index + 1;
+    }
+    return Output;
+}
+
+bool Parser::AreTemplateListsEqual(const vector<TemplatedType> & InTypes, const vector<TemplatedType> & InTypes2)
+{
+    bool IsValid = true;
+    if(InTypes.size() != InTypes2.size())
+    {
+        IsValid = false;
+    }
+    unsigned int Index = 0;
+    while(Index < InTypes.size() && IsValid == true)
+    {
+        if(InTypes[Index].Type != InTypes2[Index].Type && InTypes[Index].Templates != InTypes2[Index].Templates)
+        {
+            IsValid = false;
+        }
+        Index = Index + 1;
+    }
+    return IsValid;
 }
