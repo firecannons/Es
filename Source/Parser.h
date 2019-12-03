@@ -237,6 +237,7 @@ public:
     string OutputSingleLineSetToString(unordered_set<string> & InSet);
     TemplatedType GetType(const string & InName);
     void InitializeForTemplatedPass();
+    void RunAllTemplatedPasses();
 };
 
 #include "Compiler.h"

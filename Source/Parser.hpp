@@ -15,11 +15,20 @@ void Parser::RunParse()
 {
     do
     {
+        if(IsCurrentClassTemplated() == true)
+        {
+            if(PassMode == PASS_MODE::FULL_PASS)
+            {
+                if(Position > 200)
+                {
+                    cout << "triggered" << endl;
+                    exit(1);
+                }
+            }
+        }
         GetNextToken();
         Operate();
     }while(IsNextToken() == true);
-    OutputTypeTable();
-    cout << OutputScopeToString(GlobalScope, 1) << endl;
 }    
 
 void Parser::Initialize(const vector<Token> & Tokens)
@@ -2080,7 +2089,7 @@ void Parser::CompileTemplatedCode()
     Tokens = CurrentClass.Type->Tokens;
     CurrentFunction = NULL;
 
-    RunAllPasses();
+    RunAllTemplatedPasses();
 
     CurrentClass = OldCurrentClass;
     CurrentFunction = OldCurrentFunction;
@@ -2097,13 +2106,15 @@ void Parser::RunAllPasses()
     RunParse();
 
     PassMode = PASS_MODE::FUNCTION_SKIM;
-    InitializeForTemplatedPass();
+    InitializeForPass();
     RunParse();
     SetSizesAndOffsets();
 
     PassMode = PASS_MODE::FULL_PASS;
-    InitializeForTemplatedPass();
+    InitializeForPass();
     RunParse();
+    cout << "asdf" << endl;
+    exit(1);
 }
 
 string Parser::OutputSingleLineSetToString(unordered_set<string> & InSet)
@@ -2150,4 +2161,20 @@ void Parser::InitializeForTemplatedPass()
     State = PARSER_STATE::START_OF_LINE;
     InitializePosition();
     HasToken = false;
+}
+
+void Parser::RunAllTemplatedPasses()
+{
+    PassMode = PASS_MODE::CLASS_SKIM;
+    RunParse();
+
+    PassMode = PASS_MODE::FUNCTION_SKIM;
+    InitializeForTemplatedPass();
+    RunParse();
+    SetSizesAndOffsets();
+
+    PassMode = PASS_MODE::FULL_PASS;
+    InitializeForTemplatedPass();
+    RunParse();
+    OutputTypeTable();
 }
