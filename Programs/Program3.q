@@ -1,6 +1,6 @@
 using Libraries . DataTypes
 using Libraries . DataTypes
-//using Libraries . DynamicMemory
+using Libraries . DynamicMemory
 
 action asm OutputByte ( Byte L )
     push ebp
@@ -144,6 +144,9 @@ action Main
     Pointer<Integer> Pi
     Box<Integer> Bi
     Box<Byte> Bb
+
+    Byte MyByte = 101
+    MyByte:OutputToConsole()
 /*
     OutputByte ( I1 + Mult(L, I1) )
 

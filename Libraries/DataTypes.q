@@ -524,6 +524,25 @@ class Byte size 1
             pop ebp
             
         end
+
+        action asm OutputToConsole ( )
+            push ebp
+            mov ebp, esp
+            
+            ; load a pointer to the byte in ecx
+            mov ecx, ebp
+            add ecx, 8
+            mov ecx, [ecx]
+            
+            ; Set other values
+            mov	eax, 4
+            mov	ebx, 1
+            mov	edx, 1
+            int	0x80
+            
+            mov esp, ebp
+            pop ebp
+        end
 end
 
 class Bool size 1
@@ -556,7 +575,7 @@ class Pointer<T>
         Me : Position = Source : Position
     end
 
-    action Deref returns T
+    action Deref ( ) returns T
     end
 
     /*action Dereference ( ) return T Reference

@@ -1,6 +1,6 @@
 format ELF executable 3
 segment readable executable
-entry L27
+entry L28
 
 L0: ; Integer:Integer
 
@@ -559,7 +559,28 @@ L19: ; Byte:!=
         
 ret
 
-L20: ; Bool:Bool
+L20: ; Byte:OutputToConsole
+
+            push ebp
+            mov ebp, esp
+            
+            ; load a pointer to the byte in ecx
+            mov ecx, ebp
+            add ecx, 8
+            mov ecx, [ecx]
+            
+            ; Set other values
+            mov	eax, 4
+            mov	ebx, 1
+            mov	edx, 1
+            int	0x80
+            
+            mov esp, ebp
+            pop ebp
+        
+ret
+
+L21: ; Bool:Bool
 
         push ebp
         mov ebp, esp
@@ -579,7 +600,7 @@ L20: ; Bool:Bool
     
 ret
 
-L21: ; CapTest:CapTest
+L22: ; CapTest:CapTest
 
 push ebp
 mov ebp, esp
@@ -589,7 +610,7 @@ pop ebp
 
 ret
 
-L22: ; CapTest2:CapTest2
+L23: ; CapTest2:CapTest2
 
 push ebp
 mov ebp, esp
@@ -599,7 +620,7 @@ pop ebp
 
 ret
 
-L23: ; CapTest3:CapTest3
+L24: ; CapTest3:CapTest3
 
 push ebp
 mov ebp, esp
@@ -609,7 +630,7 @@ pop ebp
 
 ret
 
-L24: ; :OutputByte
+L25: ; :OutputByte
 
     push ebp
     mov ebp, esp
@@ -630,7 +651,7 @@ L24: ; :OutputByte
 
 ret
 
-L25: ; :OutputByte2
+L26: ; :OutputByte2
 
     push ebp
     mov ebp, esp
@@ -662,7 +683,7 @@ L25: ; :OutputByte2
 
 ret
 
-L26: ; :OutputByte5
+L27: ; :OutputByte5
 
     push ebp
     mov ebp, esp
@@ -724,7 +745,7 @@ L26: ; :OutputByte5
 
 ret
 
-L27: ; :Main
+L28: ; :Main
 
 push ebp
 mov ebp, esp
@@ -750,7 +771,7 @@ mov ebx, ebp
 add ebx, -1
 mov [esp], ebx ; Pushing reference to L from offset -1
 
-call L24 ; Calling OutputByte
+call L25 ; Calling OutputByte
 add esp, 4
 
 add esp, -1 ; Declaring I1
@@ -800,7 +821,7 @@ mov ebx, ebp
 add ebx, -3
 mov [esp], ebx ; Pushing reference to I1 from offset -3
 
-call L24 ; Calling OutputByte
+call L25 ; Calling OutputByte
 add esp, 4
 
 add esp, -4
@@ -808,7 +829,7 @@ mov ebx, ebp
 add ebx, -1
 mov [esp], ebx ; Pushing reference to L from offset -1
 
-call L24 ; Calling OutputByte
+call L25 ; Calling OutputByte
 add esp, 4
 
 add esp, -1 ; Declaring CST_1
@@ -846,7 +867,7 @@ mov ebx, ebp
 add ebx, -7
 mov [esp], ebx ; Pushing reference to [T4 from offset -7
 
-call L24 ; Calling OutputByte
+call L25 ; Calling OutputByte
 add esp, 4
 
 add esp, -1 ; Declaring A
@@ -870,19 +891,43 @@ mov ebx, ebp
 add ebx, -9
 mov [esp], ebx ; Pushing reference to [T7 from offset -9
 
-call L24 ; Calling OutputByte
+call L25 ; Calling OutputByte
 add esp, 4
 
 add esp, -1 ; Declaring Pb
 add esp, -4 ; Declaring Pi
 add esp, -4 ; Declaring Bi
 add esp, -4 ; Declaring Bb
+add esp, -1 ; Declaring MyByte
+add esp, -1 ; Declaring [T16
+mov byte [esp], 101
+add esp, -4
+mov ebx, ebp
+add ebx, -25
+mov [esp], ebx ; Pushing reference to [T16 from offset -25
+
+add esp, -4
+mov ebx, ebp
+add ebx, -24
+mov [esp], ebx ; Pushing reference to MyByte from offset -24
+
+call L11 ; Calling =
+add esp, 8
+
+add esp, -4
+mov ebx, ebp
+add ebx, -24
+mov [esp], ebx ; Pushing reference to MyByte from offset -24
+
+call L20 ; Calling OutputToConsole
+add esp, 4
+
 mov esp, ebp
 pop ebp
 
 ret
 
-L28: ; Pointer<Byte>:Pointer
+L29: ; Pointer<Byte>:Pointer
 
 push ebp
 mov ebp, esp
@@ -892,7 +937,7 @@ pop ebp
 
 ret
 
-L29: ; Pointer<Byte>:=
+L30: ; Pointer<Byte>:=
 
 push ebp
 mov ebp, esp
@@ -923,7 +968,7 @@ pop ebp
 
 ret
 
-L30: ; Pointer<Byte>:Deref
+L31: ; Pointer<Byte>:Deref
 
 push ebp
 mov ebp, esp
@@ -933,7 +978,7 @@ pop ebp
 
 ret
 
-L31: ; Pointer<Integer>:Pointer
+L32: ; Pointer<Integer>:Pointer
 
 push ebp
 mov ebp, esp
@@ -943,7 +988,7 @@ pop ebp
 
 ret
 
-L32: ; Pointer<Integer>:=
+L33: ; Pointer<Integer>:=
 
 push ebp
 mov ebp, esp
@@ -974,7 +1019,7 @@ pop ebp
 
 ret
 
-L33: ; Pointer<Integer>:Deref
+L34: ; Pointer<Integer>:Deref
 
 push ebp
 mov ebp, esp
@@ -984,7 +1029,7 @@ pop ebp
 
 ret
 
-L34: ; Box<Integer>:Box
+L35: ; Box<Integer>:Box
 
 push ebp
 mov ebp, esp
@@ -994,7 +1039,7 @@ pop ebp
 
 ret
 
-L35: ; Box<Integer>:=
+L36: ; Box<Integer>:=
 
 push ebp
 mov ebp, esp
@@ -1025,7 +1070,7 @@ pop ebp
 
 ret
 
-L36: ; Box<Byte>:Box
+L37: ; Box<Byte>:Box
 
 push ebp
 mov ebp, esp
@@ -1035,7 +1080,7 @@ pop ebp
 
 ret
 
-L37: ; Box<Byte>:=
+L38: ; Box<Byte>:=
 
 push ebp
 mov ebp, esp

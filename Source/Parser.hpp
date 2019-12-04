@@ -609,7 +609,11 @@ void Parser::ParseExpectReturnsOrLParenOrNewline()
 
 void Parser::ParseExpectType()
 {
-    if(IsValidIdent(CurrentToken.Contents) == true)
+    if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM && CurrentToken.Contents == GlobalKeywords.ReservedWords["RPAREN"])
+    {
+        State = PARSER_STATE::EXPECT_RETURNS_OR_LPAREN_OR_NEWLINE;
+    }
+    else if(IsValidIdent(CurrentToken.Contents) == true)
     {
         if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
         {
