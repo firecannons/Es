@@ -847,8 +847,6 @@ call L11 ; Calling =
 add esp, 8
 
 add esp, -2 ; Declaring ET
-;ET ElemTest
-;B1 Byte
 add esp, -1 ; Declaring [T3
 mov byte [esp], 102
 add esp, -4
@@ -864,8 +862,6 @@ mov [esp], ebx ; Pushing reference to [T2 from offset -7
 call L11 ; Calling =
 add esp, 8
 
-;ET ElemTest
-;B1 Byte
 add esp, -4
 mov ebx, ebp
 add ebx, -7
@@ -875,8 +871,6 @@ call L25 ; Calling OutputByte
 add esp, 4
 
 add esp, -1 ; Declaring A
-;A afterClass
-;TestByte Byte
 add esp, -1 ; Declaring [T6
 mov byte [esp], 102
 add esp, -4
@@ -892,8 +886,6 @@ mov [esp], ebx ; Pushing reference to [T5 from offset -9
 call L11 ; Calling =
 add esp, 8
 
-;A afterClass
-;TestByte Byte
 add esp, -4
 mov ebx, ebp
 add ebx, -9
@@ -902,33 +894,9 @@ mov [esp], ebx ; Pushing reference to [T7 from offset -9
 call L25 ; Calling OutputByte
 add esp, 4
 
-; 'Pointer'
-'<'
-'Byte'
-'>'
-Pointer<Byte> 1
-Byte
 add esp, -4 ; Declaring Pb
-; 'Pointer'
-'<'
-'Integer'
-'>'
-Pointer<Integer> 2
-Integer
 add esp, -4 ; Declaring Pi
-; 'Box'
-'<'
-'Integer'
-'>'
-Box<Integer> 1
-Integer
 add esp, -4 ; Declaring Bi
-; 'Box'
-'<'
-'Byte'
-'>'
-Box<Byte> 2
-Byte
 add esp, -1 ; Declaring Bb
 add esp, -1 ; Declaring MyByte
 add esp, -1 ; Declaring [T16
@@ -954,8 +922,6 @@ mov [esp], ebx ; Pushing reference to MyByte from offset -24
 call L20 ; Calling OutputToConsole
 add esp, 4
 
-;Bb Box<Byte>
-;MyT Byte
 add esp, -1 ; Declaring [T18
 mov byte [esp], 103
 add esp, -4
@@ -971,8 +937,6 @@ mov [esp], ebx ; Pushing reference to [T17 from offset -23
 call L11 ; Calling =
 add esp, 8
 
-;Bb Box<Byte>
-;MyT Byte
 add esp, -4
 mov ebx, ebp
 add ebx, -23
@@ -981,10 +945,6 @@ mov [esp], ebx ; Pushing reference to [T19 from offset -23
 call L20 ; Calling OutputToConsole
 add esp, 4
 
-; 'Box'
-'<'
-'Byte'
-'>'
 add esp, -1 ; Declaring Bb2
 add esp, -4
 mov ebx, ebp
@@ -999,8 +959,6 @@ mov [esp], ebx ; Pushing reference to Bb2 from offset -27
 call L38 ; Calling =
 add esp, 8
 
-;Bb2 Box<Byte>
-;MyT Byte
 add esp, -4
 mov ebx, ebp
 add ebx, -27
@@ -1029,14 +987,6 @@ L30: ; Pointer<Byte>:=
 push ebp
 mov ebp, esp
 
-; 'Pointer'
-'<'
-'T'
-'>'
-;Me Pointer<Byte>
-;Position Integer
-;Source Pointer<Byte>
-;Position Integer
 
 mov ebx, ebp
 add ebx, 12
@@ -1088,14 +1038,6 @@ L33: ; Pointer<Integer>:=
 push ebp
 mov ebp, esp
 
-; 'Pointer'
-'<'
-'T'
-'>'
-;Me Pointer<Integer>
-;Position Integer
-;Source Pointer<Byte>
-;Position Integer
 
 mov ebx, ebp
 add ebx, 12
@@ -1147,14 +1089,6 @@ L36: ; Box<Integer>:=
 push ebp
 mov ebp, esp
 
-; 'Box'
-'<'
-'T'
-'>'
-;Me Box<Integer>
-;MyT Integer
-;Source Box<Integer>
-;MyT Integer
 
 mov ebx, ebp
 add ebx, 12
@@ -1196,14 +1130,6 @@ L38: ; Box<Byte>:=
 push ebp
 mov ebp, esp
 
-; 'Box'
-'<'
-'T'
-'>'
-;Me Box<Byte>
-;MyT Byte
-;Source Box<Integer>
-;MyT Integer
 
 mov ebx, ebp
 add ebx, 12

@@ -745,7 +745,6 @@ void Parser::ParseTemplates()
 {
     cout << "Position = " << Position << endl;
     InitializeTemplateTokens();
-    OutputAsm = OutputAsm + "; " + OutputTokensToString(TemplateTokens);
     cout << "Position = " << Position << endl;
     InitializeTemplateParse();
     ParseTemplateTokens();
@@ -850,8 +849,6 @@ void Parser::OperateTemplateTokens()
                 CurrentParsingType.Templates->Templates = StoredParsedTemplates;
 
                 CompileTemplatedCode();
-                OutputAsm = OutputAsm + OutputFullTemplatesToString(CurrentParsingType) + " " + to_string(TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates.size()) + "\n";
-                OutputAsm = OutputAsm + OutputFullCompiledTemplateVector(StoredParsedTemplates) + "\n";
                 // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
             }
             else
@@ -1391,8 +1388,6 @@ void Parser::DoColonReduce()
 {
     Object * CallingObject = GetInAnyScope(ReduceTokens[ReducePosition].Contents);
     Object * ScopeObject = &CallingObject->Type.Templates->MyScope.Objects[ReduceTokens[ReducePosition + 2].Contents];
-    OutputAsm = OutputAsm + ";" + CallingObject->Name + " " +  OutputFullTemplatesToString(CallingObject->Type) + "\n";
-    OutputAsm = OutputAsm + ";" + ScopeObject->Name + " " +  OutputFullTemplatesToString(ScopeObject->Type) + "\n";
     unsigned int OffsetShift = ScopeObject->Offset;
     Object NewObject;
     NewObject.Name = GetNextTemporaryVariable();
