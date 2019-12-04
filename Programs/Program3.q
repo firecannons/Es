@@ -150,6 +150,10 @@ action Main
     
     Bb:MyT = 103
     Bb:MyT:OutputToConsole()
+    
+    Box<Byte> Bb2
+    Bb2 = Bb
+    Bb2:MyT:OutputToConsole()
 /*
     OutputByte ( I1 + Mult(L, I1) )
 

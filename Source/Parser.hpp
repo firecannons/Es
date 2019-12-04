@@ -745,6 +745,7 @@ void Parser::ParseTemplates()
 {
     cout << "Position = " << Position << endl;
     InitializeTemplateTokens();
+    OutputAsm = OutputAsm + "; " + OutputTokensToString(TemplateTokens);
     cout << "Position = " << Position << endl;
     InitializeTemplateParse();
     ParseTemplateTokens();
@@ -849,7 +850,13 @@ void Parser::OperateTemplateTokens()
                 CurrentParsingType.Templates->Templates = StoredParsedTemplates;
 
                 CompileTemplatedCode();
+                OutputAsm = OutputAsm + OutputFullTemplatesToString(CurrentParsingType) + " " + to_string(TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates.size()) + "\n";
+                OutputAsm = OutputAsm + OutputFullCompiledTemplateVector(StoredParsedTemplates) + "\n";
                 // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
+            }
+            else
+            {
+                CurrentParsingType.Templates = GetCompiledTemplate(TypeTable[TemplateTokens[TemplateTokenIndex].Contents], StoredParsedTemplates);
             }
 
             //TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 2));
@@ -1384,6 +1391,8 @@ void Parser::DoColonReduce()
 {
     Object * CallingObject = GetInAnyScope(ReduceTokens[ReducePosition].Contents);
     Object * ScopeObject = &CallingObject->Type.Templates->MyScope.Objects[ReduceTokens[ReducePosition + 2].Contents];
+    OutputAsm = OutputAsm + ";" + CallingObject->Name + " " +  OutputFullTemplatesToString(CallingObject->Type) + "\n";
+    OutputAsm = OutputAsm + ";" + ScopeObject->Name + " " +  OutputFullTemplatesToString(ScopeObject->Type) + "\n";
     unsigned int OffsetShift = ScopeObject->Offset;
     Object NewObject;
     NewObject.Name = GetNextTemporaryVariable();
@@ -2177,4 +2186,22 @@ string Parser::OutputFullCompiledTemplateVector(const vector<TemplatedType> & TT
 void Parser::OutputTemplateAsm()
 {
     OutputAsm = OutputAsm + TemplateOutputAsm;
+}
+
+CompiledTemplate * Parser::GetCompiledTemplate(BaseType & InType, vector<TemplatedType> & InTypes)
+{
+    CompiledTemplate * Output;
+    bool Found = false;
+    unsigned int Index = 0;
+    while(Index < InType.CompiledTemplates.size() && Found == false)
+    {
+        bool IsValid = AreTemplateListsEqual(InType.CompiledTemplates[Index].Templates, InTypes);
+        if(IsValid == true)
+        {
+            Found = true;
+            Output = &InType.CompiledTemplates[Index];
+        }
+        Index = Index + 1;
+    }
+    return Output;
 }

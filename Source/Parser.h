@@ -242,6 +242,7 @@ public:
     void RunAllTemplatedPasses();
     string OutputFullCompiledTemplateVector(const vector<TemplatedType> & TTs);
     void OutputTemplateAsm();
+    CompiledTemplate * GetCompiledTemplate(BaseType & InType, vector<TemplatedType> & InTypes);
 };
 
 #include "Compiler.h"
