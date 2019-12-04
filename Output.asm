@@ -894,10 +894,10 @@ mov [esp], ebx ; Pushing reference to [T7 from offset -9
 call L25 ; Calling OutputByte
 add esp, 4
 
-add esp, -1 ; Declaring Pb
+add esp, -4 ; Declaring Pb
 add esp, -4 ; Declaring Pi
 add esp, -4 ; Declaring Bi
-add esp, -4 ; Declaring Bb
+add esp, -1 ; Declaring Bb
 add esp, -1 ; Declaring MyByte
 add esp, -1 ; Declaring [T16
 mov byte [esp], 101
@@ -918,6 +918,29 @@ add esp, -4
 mov ebx, ebp
 add ebx, -24
 mov [esp], ebx ; Pushing reference to MyByte from offset -24
+
+call L20 ; Calling OutputToConsole
+add esp, 4
+
+add esp, -1 ; Declaring [T18
+mov byte [esp], 103
+add esp, -4
+mov ebx, ebp
+add ebx, -26
+mov [esp], ebx ; Pushing reference to [T18 from offset -26
+
+add esp, -4
+mov ebx, ebp
+add ebx, -23
+mov [esp], ebx ; Pushing reference to [T17 from offset -23
+
+call L11 ; Calling =
+add esp, 8
+
+add esp, -4
+mov ebx, ebp
+add ebx, -23
+mov [esp], ebx ; Pushing reference to [T19 from offset -23
 
 call L20 ; Calling OutputToConsole
 add esp, 4

@@ -147,6 +147,9 @@ action Main
 
     Byte MyByte = 101
     MyByte:OutputToConsole()
+    
+    Bb:MyT = 103
+    Bb:MyT:OutputToConsole()
 /*
     OutputByte ( I1 + Mult(L, I1) )
 

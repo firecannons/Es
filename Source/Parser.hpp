@@ -2057,6 +2057,7 @@ void Parser::CompileTemplatedCode()
     OutputAsm = "";
     unsigned int OldTemplateTokenIndex = TemplateTokenIndex;
     vector<TemplatedType> OldStoredParsedTemplates = StoredParsedTemplates;
+    TemplatedType OldCurrentParsingType = CurrentParsingType;
 
     State = PARSER_STATE::START_OF_LINE;
     InitializePosition();
@@ -2081,6 +2082,7 @@ void Parser::CompileTemplatedCode()
     OutputAsm = OldOutputAsm;
     TemplateTokenIndex = OldTemplateTokenIndex;
     StoredParsedTemplates = OldStoredParsedTemplates;
+    CurrentParsingType = OldCurrentParsingType;
 }
 
 void Parser::RunAllPasses()

@@ -27,14 +27,21 @@ void PrintError(const string & ErrorMessage)
     }
 }
 
-void OutputTokens(const vector<Token> & Tokens)
+string OutputTokensToString(const vector<Token> & Tokens)
 {
+    string OutputString;
     unsigned int Index = 0;
     while(Index < Tokens.size())
     {
-        cout << "'" << Tokens[Index].Contents << "'" << endl;
+        OutputString = OutputString + "'" + Tokens[Index].Contents + "'\n";
         Index = Index + 1;
     }
+    return OutputString;
+}
+
+void OutputTokens(const vector<Token> & Tokens)
+{
+    cout << OutputTokensToString(Tokens);
 }
 
 bool DoesSetContain(const string & SearchWord, const unordered_set<string> & MySet)
