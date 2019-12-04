@@ -142,6 +142,8 @@ action Main
 
     Pointer<Byte> Pb
     Pointer<Integer> Pi
+    Box<Integer> Bi
+    Box<Byte> Bb
 /*
     OutputByte ( I1 + Mult(L, I1) )
 

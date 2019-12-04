@@ -104,6 +104,7 @@ public:
     unordered_set<string> IncludedFiles;
     PASS_MODE PassMode;
     vector<TemplatedType> TemplateCompileStack;
+    string TemplateOutputAsm;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -240,6 +241,7 @@ public:
     void InitializeForTemplatedPass();
     void RunAllTemplatedPasses();
     string OutputFullCompiledTemplateVector(const vector<TemplatedType> & TTs);
+    void OutputTemplateAsm();
 };
 
 #include "Compiler.h"

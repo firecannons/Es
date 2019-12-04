@@ -556,10 +556,25 @@ class Pointer<T>
         Me : Position = Source : Position
     end
 
+    action Deref returns T
+    end
+
     /*action Dereference ( ) return T Reference
         return Me
     end*/
 end
+
+class Box<T>
+    T MyT
+
+    action Box
+    end
+
+    action = ( Box<T> Source )
+        Me:MyT = Source:MyT
+    end
+end
+
 /*
 action asm Reference<T>(T) returns Pointer<T>
     mov ebx, ebp
