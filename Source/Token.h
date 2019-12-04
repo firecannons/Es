@@ -12,9 +12,6 @@ public:
     string Contents;
     unsigned int LineNumber;
     string SourceFileName;
-
-    Token();
-    Token(const string & In, const unsigned int InLineNumber, const string & SourceFileName);
 };
 
 #include "Token.hpp"

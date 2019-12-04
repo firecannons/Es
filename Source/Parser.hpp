@@ -15,19 +15,23 @@ void Parser::RunParse()
 {
     do
     {
+        GetNextToken();
+        Operate();
         if(IsCurrentClassTemplated() == true)
         {
             if(PassMode == PASS_MODE::FULL_PASS)
             {
-                if(Position > 200)
+                if(TemplateCompileStack.size() > 0)
                 {
-                    cout << "triggered" << endl;
-                    exit(1);
+                    if(Position > 13)
+                    {
+                        cout << "triggered " << Tokens[Position].Contents << endl;
+                        //exit(1);
+                        Position = Tokens.size();
+                    }
                 }
             }
         }
-        GetNextToken();
-        Operate();
     }while(IsNextToken() == true);
 }    
 
@@ -84,7 +88,7 @@ void Parser::Operate()
     {
         cout << "main exists" << GlobalScope.Functions["Main"].Parameters.size() << endl;
     }
-    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << endl;
+    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << endl;
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
@@ -767,8 +771,17 @@ void Parser::ParseTemplates()
     InitializeTemplateTokens();
     cout << "Position = " << Position << endl;
     InitializeTemplateParse();
-    ParseTemplateTokens();
-    cout << "Position = " << Position << endl;
+    OutputTokens(TemplateTokens);
+    //if(Position != 16)
+    {
+        ParseTemplateTokens();
+        cout << "Position = " << Position << endl;
+    }
+    if(Position == 16)
+    {
+        //exit(1);
+    }
+    cout << "leaving ParseTemplates" << endl;
 }
 
 void Parser::InitializeTemplateTokens()
@@ -808,6 +821,7 @@ void Parser::ParseTemplateTokens()
     {
         OperateTemplateTokens();
     }
+    cout << "leaving ParseTemplateTokens" << endl;
 }
 
 void Parser::InitializeTemplateParse()
@@ -827,6 +841,7 @@ void Parser::RemoveTypeInTemplates()
 
 void Parser::OperateTemplateTokens()
 {
+    cout << "In OperateTemplateTokens" << endl;
     if(TemplateTokens[TemplateTokenIndex + 1].Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
     {
         if(IsTemplateVariable(TemplateTokens[TemplateTokenIndex].Contents) == true)
@@ -837,8 +852,19 @@ void Parser::OperateTemplateTokens()
         else if(IsAType(TemplateTokens[TemplateTokenIndex].Contents) == true)
         {
             TemplatedType NewType;
-            NewType = GetType(TemplateTokens[TemplateTokenIndex].Contents);
+            cout << "getting type" << endl;
+            if(Position != 16)
+            {
+                NewType = GetType(TemplateTokens[TemplateTokenIndex].Contents);
+            }
+            else
+            {
+                NewType.Type = &TypeTable[string("Byte")];
+                NewType.Templates = TypeTable[string("Byte")].GetFirstCompiledTemplate();
+            }
             StoredParsedTemplates.push_back(NewType);
+            cout << OutputFullCompiledTemplateVector(StoredParsedTemplates);
+            cout << "here it is: " << StoredParsedTemplates[0].Type->Name << endl;
             RemoveTypeInTemplates();
         }
         else
@@ -856,6 +882,9 @@ void Parser::OperateTemplateTokens()
         }
         if(TemplateTokens[TemplateTokenIndex + 2].Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
         {
+            cout << "well" << StoredParsedTemplates.size() << endl;
+            cout << OutputFullCompiledTemplateVector(StoredParsedTemplates);
+            cout << DoesTypeHaveTemplates(TypeTable[TemplateTokens[TemplateTokenIndex].Contents], StoredParsedTemplates) << endl;
             if(DoesTypeHaveTemplates(TypeTable[TemplateTokens[TemplateTokenIndex].Contents], StoredParsedTemplates) == false)
             {
                 TypeTable[TemplateTokens[TemplateTokenIndex].Contents].InitializeBlankCompiledTemplate();
@@ -870,14 +899,26 @@ void Parser::OperateTemplateTokens()
                 CurrentParsingType.Templates->Templates = StoredParsedTemplates;
 
                 CompileTemplatedCode();
+                cout << "exiting template 3" << endl;
                 // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
             }
+            cout << "after DoesTypeHaveTemplates section" << endl;
 
-            TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 2));
-            TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 1));
-            string TemplateVariable = GetNextTemplateVariable();
-            TemplateTokens[TemplateTokenIndex].Contents = TemplateVariable;
-            TemplateVariableTable.emplace(TemplateVariable, CurrentParsingType);
+            cout << "test2" << endl;
+
+            OutputTokens(TemplateTokens);
+            cout << TemplateTokenIndex << endl;
+
+            //TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 2));
+            TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 1), TemplateTokens.begin() + (TemplateTokenIndex + 3));
+
+            cout << "test2" << endl;
+            if(Position != 16)
+            {
+                string TemplateVariable = GetNextTemplateVariable();
+                TemplateTokens[TemplateTokenIndex].Contents = TemplateVariable;
+                TemplateVariableTable.emplace(TemplateVariable, CurrentParsingType);
+            }
         }
         else
         {
@@ -887,12 +928,13 @@ void Parser::OperateTemplateTokens()
             }
             TemplateTokenIndex = TemplateTokenIndex + 2;
         }
+        cout << "leaving test1" << endl;
     }
     else
     {
         TemplateTokenIndex = TemplateTokenIndex + 2;
     }
-    
+    cout << "leaving OperateTemplateTokens" << endl;
 }
 
 bool Parser::IsInCurrentScope(const string & VariableName)
@@ -2019,16 +2061,7 @@ string Parser::OutputFullTemplatesToString(const TemplatedType & InTT)
     if(InTT.Type->IsTemplated == true)
     {
         Output = Output + GlobalKeywords.ReservedWords["LESS_THAN"];
-        unsigned int Index = 0;
-        while(Index < InTT.Templates->Templates.size())
-        {
-            Output = Output + OutputFullTemplatesToString(InTT.Templates->Templates[Index]);
-            if(Index != InTT.Templates->Templates.size() - 1)
-            {
-                Output = Output + ", ";
-            }
-            Index = Index + 1;
-        }
+        Output = Output + OutputFullCompiledTemplateVector(InTT.Templates->Templates);
         Output = Output + GlobalKeywords.ReservedWords["GREATER_THAN"];
     }
     return Output;
@@ -2079,9 +2112,12 @@ void Parser::CompileTemplatedCode()
     ScopeStack.push_back(&GlobalScope);
     ScopeStack.push_back(&CurrentClass.Templates->MyScope);
     vector<Token> OldTokens = Tokens;
+    vector<Token> OldTemplateTokens = TemplateTokens;
     PARSER_STATE OldState = State;
     unsigned int OldPosition = Position;
     bool OldHasToken = HasToken;
+    TYPE_PARSE_MODE OldTypeMode = TypeMode;
+    TemplateCompileStack.push_back(CurrentClass);
 
     State = PARSER_STATE::START_OF_LINE;
     InitializePosition();
@@ -2090,14 +2126,20 @@ void Parser::CompileTemplatedCode()
     CurrentFunction = NULL;
 
     RunAllTemplatedPasses();
+    cout << "exiting template compilation" << endl;
+
+    TemplateCompileStack.pop_back();
 
     CurrentClass = OldCurrentClass;
     CurrentFunction = OldCurrentFunction;
     ScopeStack = OldScopeStack;
     Tokens = OldTokens;
+    TemplateTokens = OldTemplateTokens;y
     State = OldState;
     Position = OldPosition;
     HasToken = OldHasToken;
+    TypeMode = OldTypeMode;
+    cout << "exiting template compilation2" << endl;
 }
 
 void Parser::RunAllPasses()
@@ -2142,8 +2184,8 @@ TemplatedType Parser::GetType(const string & InName)
             int Location = LocationInVector(InName, CurrentParsingType.Type->PossibleTemplates);
             if(Location != NOT_FOUND_POSITION)
             {
-                cout << "sdf4" << endl;
                 Output = CurrentClass.Templates->Templates[Location];
+                cout << "sdf4" << Output.Type->Name << endl;
                 IsATemplate = true;
             }
         }
@@ -2177,4 +2219,20 @@ void Parser::RunAllTemplatedPasses()
     InitializeForTemplatedPass();
     RunParse();
     OutputTypeTable();
+}
+
+string Parser::OutputFullCompiledTemplateVector(const vector<TemplatedType> & TTs)
+{
+    string Output;
+    unsigned int Index = 0;
+    while(Index < TTs.size())
+    {
+        Output = Output + OutputFullTemplatesToString(TTs[Index]);
+        if(Index != TTs.size() - 1)
+        {
+            Output = Output + ", ";
+        }
+        Index = Index + 1;
+    }
+    return Output;
 }

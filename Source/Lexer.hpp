@@ -150,7 +150,10 @@ void Lexer::AppendSavedWordToTokens()
 {
     if(SavedWord.size() > 0)
     {
-        Tokens.push_back(Token(SavedWord, LineNumber, SourceFileName));
+        Tokens.push_back(Token());
+        Tokens[Tokens.size() - 1].Contents = SavedWord;
+        Tokens[Tokens.size() - 1].LineNumber = LineNumber;
+        Tokens[Tokens.size() - 1].SourceFileName = SourceFileName;
         SavedWord.clear();
     }
 }

@@ -103,6 +103,7 @@ public:
     bool WasVariableFound;
     unordered_set<string> IncludedFiles;
     PASS_MODE PassMode;
+    vector<TemplatedType> TemplateCompileStack;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -238,6 +239,7 @@ public:
     TemplatedType GetType(const string & InName);
     void InitializeForTemplatedPass();
     void RunAllTemplatedPasses();
+    string OutputFullCompiledTemplateVector(const vector<TemplatedType> & TTs);
 };
 
 #include "Compiler.h"

@@ -1,6 +1,6 @@
 using Libraries . DataTypes
 using Libraries . DataTypes
-using Libraries . DynamicMemory
+//using Libraries . DynamicMemory
 
 action asm OutputByte ( Byte L )
     push ebp
