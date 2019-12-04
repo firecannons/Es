@@ -55,6 +55,8 @@ public:
     void AppendToSavedWord(const char NewChar);
     void AppendSavedWordToTokens();
     TEXT_TYPE GetTextTypeOfChar(const char InChar);
+    bool IsInvalidGrouping();
+    void AppendCharactersToTokens();
 };
 
 #include "Lexer.hpp"

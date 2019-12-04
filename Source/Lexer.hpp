@@ -109,6 +109,10 @@ void Lexer::DoNormalLexMode(const char InChar)
     {
         AppendToSavedWord(InChar);
     }
+    if(IsInvalidGrouping() == true)
+    {
+        AppendCharactersToTokens();
+    }
     if(SavedWord == "//")
     {
         Mode = LEXER_MODE::SINGLE_LINE_COMMENT;
@@ -172,4 +176,26 @@ TEXT_TYPE Lexer::GetTextTypeOfChar(const char InChar)
         CharType = TEXT_TYPE::SYMBOL;
     }
     return CharType;
+}
+
+bool Lexer::IsInvalidGrouping()
+{
+    bool Found = false;
+    if(SavedWord.size() > 1 && SavedWordType == TEXT_TYPE::SYMBOL && DoesSetContain(SavedWord, GlobalKeywords.AllOperators) == false)
+    {
+        Found = true;
+    }
+    return Found;
+}
+
+void Lexer::AppendCharactersToTokens()
+{
+    string OldSavedWord = SavedWord;
+    unsigned int Index = 0;
+    while(Index < OldSavedWord.size())
+    {
+        SavedWord = OldSavedWord[Index];
+        AppendSavedWordToTokens();
+        Index = Index + 1;
+    }
 }

@@ -33,11 +33,15 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("ME"), string("Me")));
     ReservedWords.insert(pair<string,string>(string("REPEAT"), string("repeat")));
     ReservedWords.insert(pair<string,string>(string("IF"), string("if")));
+    ReservedWords.insert(pair<string,string>(string("EXCLAMATION"), string("!")));
+    ReservedWords.insert(pair<string,string>(string("MULTI_LINE_COMMENT_BEGIN"), string("/*")));
+    ReservedWords.insert(pair<string,string>(string("MULTI_LINE_COMMENT_END"), string("*/")));
     
     ShortOperators.emplace(ReservedWords["LESS_THAN"]);
     ShortOperators.emplace(ReservedWords["GREATER_THAN"]);
     ShortOperators.emplace(ReservedWords["EQUALS"]);
     ShortOperators.emplace(ReservedWords["SLASH"]);
+    ShortOperators.emplace(ReservedWords["EXCLAMATION"]);
     
     OverloadableOperators = ShortOperators;
     OverloadableOperators.emplace(ReservedWords["LESS_OR_EQUAL"]);
@@ -60,6 +64,8 @@ Keywords::Keywords()
 
     AllOperators = ReducibleOperators;
     AllOperators.emplace(string("//"));
+    AllOperators.emplace(ReservedWords["MULTI_LINE_COMMENT_BEGIN"]);
+    AllOperators.emplace(ReservedWords["MULTI_LINE_COMMENT_END"]);
 
     ScopeCreateKeywords.emplace(ReservedWords["ACTION"]);
     ScopeCreateKeywords.emplace(ReservedWords["CLASS"]);

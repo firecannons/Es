@@ -763,6 +763,10 @@ void Parser::InitializeTemplateTokens()
         {
             OutputStandardErrorMessage(string("Hit end of input while parsing template."), Tokens[Index - 1]);
         }
+        else if(Tokens[Index].Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
+        {
+            OutputStandardErrorMessage(string("Hit newline while parsing template."), Tokens[Index]);
+        }
         TemplateTokens.push_back(Tokens[Index]);
         if(Tokens[Index].Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
         {
@@ -776,6 +780,7 @@ void Parser::InitializeTemplateTokens()
                 TemplatesFinished = true;
             }
         }
+    cout << Tokens[Index].Contents << " " << TemplateDeepness << endl;
         Index = Index + 1;
     }
     Position = Index - 1;
@@ -806,6 +811,8 @@ void Parser::RemoveTypeInTemplates()
 
 void Parser::OperateTemplateTokens()
 {
+    cout << "entering OperateTemplateTokens" << endl;
+    OutputTokens(TemplateTokens);
     if(TemplateTokens[TemplateTokenIndex + 1].Contents == GlobalKeywords.ReservedWords["GREATER_THAN"])
     {
         if(IsTemplateVariable(TemplateTokens[TemplateTokenIndex].Contents) == true)
@@ -862,6 +869,7 @@ void Parser::OperateTemplateTokens()
             string TemplateVariable = GetNextTemplateVariable();
             TemplateTokens[TemplateTokenIndex].Contents = TemplateVariable;
             TemplateVariableTable.emplace(TemplateVariable, CurrentParsingType);
+            StoredParsedTemplates.clear();
         }
         else
         {
