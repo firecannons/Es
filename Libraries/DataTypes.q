@@ -585,6 +585,7 @@ end
 
 class Box<T>
     T MyT
+    Pointer<T> MyP
 
     action Box
     end
