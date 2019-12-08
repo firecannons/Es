@@ -68,6 +68,41 @@ bool Parser::IsNextToken()
 void Parser::Operate()
 {
     cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << endl;
+
+                BaseType BT1;
+                BT1.Name = "toy";
+                BT1.IsTemplated = false;
+                TypeTable.insert(pair<string,BaseType>(string("toy"), BT1));
+                TypeTable[string("toy")].InitializeBlankCompiledTemplate();
+
+
+                BaseType BT;
+                BT.Name = "test";
+                BT.IsTemplated = true;
+                TypeTable.insert(pair<string,BaseType>(string("test"), BT));
+                TypeTable[string("test")].InitializeBlankCompiledTemplate();
+                
+                
+                CompiledTemplate * CT = TypeTable[string("test")].GetFirstCompiledTemplate();
+
+                TemplatedType TT1;
+                TT1.Type = &TypeTable[string("toy")];
+                TT1.Templates = TypeTable[string("toy")].GetFirstCompiledTemplate();
+                CT->Templates.push_back(TT1);
+                
+                TypeTable[string("test")].InitializeBlankCompiledTemplate();
+                CompiledTemplate * CT2 = TypeTable[string("test")].GetLastCompiledTemplate();
+                
+                TemplatedType TestTT2;
+                TestTT2.Type = &TypeTable[string("test")];
+                TestTT2.Templates = TypeTable[string("test")].GetFirstCompiledTemplate();
+                
+                CT2->Templates.push_back(TestTT2);
+                
+                
+                cout << "done setting values" << endl;
+                OutputTypeTable();
+
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
@@ -679,38 +714,6 @@ void Parser::ParseExpectTemplateStartOrIdent()
         {
             if(CurrentParsingType.Type->IsTemplated == true && CurrentParsingType.Templates->Templates.size() == 0)
             {
-                
-                BaseType BT;
-                BT.Name = "test";
-                BT.IsTemplated = true;
-                TypeTable.insert(pair<string,BaseType>(string("test"), BT));
-                TypeTable[string("test")].InitializeBlankCompiledTemplate();
-                
-                
-                CompiledTemplate * CT = TypeTable[string("test")].GetFirstCompiledTemplate();
-                
-                TemplatedType TestTT;
-                TestTT.Type = &TypeTable[string("test")];
-                TestTT.Templates = NULL;
-                
-                cout << TestTT.Type->Name;
-                cout << CT;
-                
-                CT->Templates.push_back(TestTT);
-                /*
-                
-                TypeTable[string("test")].InitializeBlankCompiledTemplate();
-                CompiledTemplate * CT2 = TypeTable[string("test")].GetLastCompiledTemplate();
-                
-                TemplatedType TestTT2;
-                TestTT2.Type = &TypeTable[string("test")];
-                TestTT2.Templates = TypeTable[string("test")].GetFirstCompiledTemplate();
-                
-                CT2->Templates.push_back(TestTT2);
-                */
-                
-                
-                OutputTypeTable();
                 OutputStandardErrorMessage(string("Type '") + CurrentParsingType.Type->Name + "' expects templates.", CurrentToken);
             }
         }
@@ -2050,16 +2053,18 @@ string Parser::OutputFullTemplatesToString(const TemplatedType & InTT)
 {
     cout << "entering OutputFullTemplatesToString"<< endl;
     string Output;
-    cout << InTT.Type->Name << endl;
-    Output = Output + InTT.Type->Name;
-    if(InTT.Type->IsTemplated == true)
+    if(InTT.Type != NULL)
     {
-        cout << GlobalKeywords.ReservedWords["LESS_THAN"];
-        Output = Output + GlobalKeywords.ReservedWords["LESS_THAN"];
-        cout << OutputFullCompiledTemplateVector(InTT.Templates->Templates);
-        Output = Output + OutputFullCompiledTemplateVector(InTT.Templates->Templates);
-        cout << GlobalKeywords.ReservedWords["GREATER_THAN"];
-        Output = Output + GlobalKeywords.ReservedWords["GREATER_THAN"];
+        cout << InTT.Type->Name << endl;
+        Output = Output + InTT.Type->Name;
+        if(InTT.Type->IsTemplated == true)
+        {
+            cout << GlobalKeywords.ReservedWords["LESS_THAN"];
+            Output = Output + GlobalKeywords.ReservedWords["LESS_THAN"];
+            Output = Output + OutputFullCompiledTemplateVector(InTT.Templates->Templates);
+            cout << GlobalKeywords.ReservedWords["GREATER_THAN"];
+            Output = Output + GlobalKeywords.ReservedWords["GREATER_THAN"];
+        }
     }
     return Output;
 }
@@ -2237,7 +2242,6 @@ string Parser::OutputFullCompiledTemplateVector(const vector<TemplatedType> & TT
     cout << "size: " << TTs.size() << endl;
     while(Index < TTs.size())
     {
-        cout << OutputFullTemplatesToString(TTs[Index]);
         Output = Output + OutputFullTemplatesToString(TTs[Index]);
         if(Index != TTs.size() - 1)
         {
