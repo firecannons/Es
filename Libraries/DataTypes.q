@@ -575,8 +575,8 @@ class Pointer<T>
         Me : Position = Source : Position
     end
 
-    action Deref ( ) returns T
-    end
+    //action Deref ( ) returns T
+    //end
 
     /*action Dereference ( ) return T Reference
         return Me
@@ -585,7 +585,7 @@ end
 
 class Box<T>
     T MyT
-    Pointer<T> MyP
+    //Pointer<T> MyP
 
     action Box
     end

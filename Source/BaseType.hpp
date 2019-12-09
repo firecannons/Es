@@ -1,9 +1,18 @@
 #include "BaseType.h"
+#include <iostream>
 
 void BaseType::InitializeBlankCompiledTemplate()
 {
+    if(CompiledTemplates.size() > 0)
+    {
+        cout << &CompiledTemplates[0] << endl;
+    }
     CompiledTemplate Temp;
     CompiledTemplates.push_back(Temp);
+    if(CompiledTemplates.size() > 0)
+    {
+        cout << &CompiledTemplates[0] << endl;
+    }
 }
 
 CompiledTemplate * BaseType::GetLastCompiledTemplate()
