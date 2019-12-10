@@ -8,6 +8,7 @@
 #include <map>
 #include <unordered_set>
 #include <fstream>
+#include <list>
 using namespace std;
 
 const char FAIL_COLOR_TEXT[] = "\033[91m";
@@ -99,6 +100,19 @@ bool DoesVectorContain(const string & SearchWord, const vector<string> & InVecto
         Found = true;
     }
     return Found;
+}
+
+template<class T>
+T & GetInList(const list<T> & InList, const unsigned int Position)
+{
+    unsigned int Index = 0;
+    typename list<T>::const_iterator it = InList.begin();
+    while(Index < Position)
+    {
+        Index = Index + 1;
+        it++;
+    }
+    return (T &)*it;
 }
 
 #endif

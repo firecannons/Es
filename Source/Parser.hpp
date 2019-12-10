@@ -425,7 +425,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
             CurrentClass.Type->InitializeBlankCompiledTemplate();
             CurrentClass.Type->IsTemplated = false;
         }
-        CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
+        CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates.front();
         CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         ScopeStack.push_back(&CurrentClass.Templates->MyScope);
         State = PARSER_STATE::START_OF_LINE;
@@ -443,7 +443,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
             CurrentClass.Type->InitializeBlankCompiledTemplate();
             CurrentClass.Type->IsTemplated = false;
         }
-        CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX];
+        CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates.front();
         CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         CurrentClass.Templates->HasSizeBeenCalculated = true;
         ScopeStack.push_back(&CurrentClass.Templates->MyScope);
@@ -538,7 +538,7 @@ void Parser::ParseExpectClassSizeNumber()
 {
     if(IsNumber(CurrentToken.Contents) == true)
     {
-        CurrentClass.Type->CompiledTemplates[DEFAULT_COMPILED_TEMPLATE_INDEX].Size = stoi(CurrentToken.Contents);
+        CurrentClass.Type->CompiledTemplates.front().Size = stoi(CurrentToken.Contents);
         State = PARSER_STATE::START_OF_LINE;
     }
     else
@@ -897,7 +897,7 @@ void Parser::OperateTemplateTokens()
                 {
                     TemplatedType TT;
                     TT.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
-                    TT.Templates = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates[i];
+                    TT.Templates = &GetInList(TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates, i);
                     cout << OutputFullTemplatesToString(TT) << " " << i << " " << TT.Templates << endl;
                 }
 
@@ -905,7 +905,7 @@ void Parser::OperateTemplateTokens()
                 {
                     TemplatedType TT;
                     TT.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
-                    TT.Templates = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates[i];
+                    TT.Templates = &GetInList(TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates, i);
                     cout << OutputFullTemplatesToString(TT) << " " << i << " " << TT.Templates << endl;
                 }
                     TypeTable[TemplateTokens[TemplateTokenIndex].Contents].InitializeBlankCompiledTemplate();
@@ -914,7 +914,7 @@ void Parser::OperateTemplateTokens()
                 {
                     TemplatedType TT;
                     TT.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
-                    TT.Templates = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates[i];
+                    TT.Templates = &GetInList(TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates, i);
                     cout << OutputFullTemplatesToString(TT) << " " << i << " " << TT.Templates << endl;
                 }
                 cout << StoredParsedTemplates[StoredParsedTemplates.size() - 1].Templates << endl;
@@ -1777,7 +1777,7 @@ string Parser::OutputTypeToString(const BaseType & InType, const unsigned int Le
     unsigned int Index = 0;
     while(Index < InType.CompiledTemplates.size())
     {
-        OutputString = OutputString + OutputCompiledTemplateToString(InType.CompiledTemplates[Index], InType, Level + 1);
+        OutputString = OutputString + OutputCompiledTemplateToString(GetInList(InType.CompiledTemplates, Index), InType, Level + 1);
         Index = Index + 1;
     }
     return OutputString;
@@ -2044,9 +2044,9 @@ void Parser::SizeType(BaseType & InBaseType)
     unsigned int Index = 0;
     while(Index < InBaseType.CompiledTemplates.size())
     {
-        if(InBaseType.CompiledTemplates[Index].HasSizeBeenCalculated == false)
+        if(GetInList(InBaseType.CompiledTemplates, Index).HasSizeBeenCalculated == false)
         {
-            SizeCompiledTemplate(InBaseType.CompiledTemplates[Index]);
+            SizeCompiledTemplate(GetInList(InBaseType.CompiledTemplates, Index));
         }
         Index = Index + 1;
     }
@@ -2116,7 +2116,7 @@ bool Parser::DoesTypeHaveTemplates(const BaseType & InType, const vector<Templat
     unsigned int Index = 0;
     while(Index < InType.CompiledTemplates.size())
     {
-        bool IsValid = AreTemplateListsEqual(InType.CompiledTemplates[Index].Templates, InTypes);
+        bool IsValid = AreTemplateListsEqual(GetInList(InType.CompiledTemplates, Index).Templates, InTypes);
         if(IsValid == true)
         {
             Output = true;
@@ -2306,11 +2306,11 @@ CompiledTemplate * Parser::GetCompiledTemplate(BaseType & InType, vector<Templat
     unsigned int Index = 0;
     while(Index < InType.CompiledTemplates.size() && Found == false)
     {
-        bool IsValid = AreTemplateListsEqual(InType.CompiledTemplates[Index].Templates, InTypes);
+        bool IsValid = AreTemplateListsEqual(GetInList(InType.CompiledTemplates, Index).Templates, InTypes);
         if(IsValid == true)
         {
             Found = true;
-            Output = &InType.CompiledTemplates[Index];
+            Output = &GetInList(InType.CompiledTemplates, Index);
         }
         Index = Index + 1;
     }

@@ -156,8 +156,8 @@ action Main
     Bb2:MyT:OutputToConsole()
     
     Box<Box<Byte>> BBb
-    /*BBb:MyT:MyT = 99
-    BBb:MyT:MyT:OutputToConsole()*/
+    BBb:MyT:MyT = 99
+    BBb:MyT:MyT:OutputToConsole()
 /*
     OutputByte ( I1 + Mult(L, I1) )
 

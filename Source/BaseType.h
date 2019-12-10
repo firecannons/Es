@@ -3,8 +3,10 @@
 #define BASETYPE_H
 
 #include "CompiledTemplate.h"
+#include "GlobalFunctions.h"
 #include <string>
 #include <vector>
+#include <list>
 using namespace std;
 
 class BaseType
@@ -13,7 +15,7 @@ class BaseType
 public:
     string Name;
     vector<string> PossibleTemplates;
-    vector<CompiledTemplate> CompiledTemplates;
+    list<CompiledTemplate> CompiledTemplates;
     bool IsTemplated;
     vector<Token> Tokens;
     
