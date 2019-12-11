@@ -1377,23 +1377,31 @@ bool Parser::IsFunctionCallCurrently()
 void Parser::DoReduceFunctionCall()
 {
     Function * WantedFunction = NULL;
+    Scope * CallingScope = NULL;
     bool IsCallingObject = false;
+    cout << "one:" << ReduceTokens[ReducePosition].Contents << endl;
     if(ReducePosition >= 2)
     {
         if(ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["COLON"])
         {
             IsCallingObject = true;
             AddToArgList(ReducePosition - 2);
-            WantedFunction = GetFromFunctionList(GetInAnyScope(ReduceTokens[ReducePosition - 2].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition].Contents],
-                Reverse(NextFunctionObjects));
-            ReduceTokens.erase(ReduceTokens.begin() + ReducePosition - 1);
-            ReduceTokens.erase(ReduceTokens.begin() + ReducePosition - 1);
+            CallingScope = &GetInAnyScope(ReduceTokens[ReducePosition - 2].Contents)->Type.Templates->MyScope;
+            ReduceTokens.erase(ReduceTokens.begin() + ReducePosition - 2);
+            ReduceTokens.erase(ReduceTokens.begin() + ReducePosition - 2);
+            ReducePosition = ReducePosition - 2;
         }
     }
     if(IsCallingObject == false)
     {
-        WantedFunction = GetFromFunctionList(GetGlobalScope()->Functions[ReduceTokens[ReducePosition].Contents], Reverse(NextFunctionObjects));
+        CallingScope = GetGlobalScope();
     }
+    if(DoesMapContain(ReduceTokens[ReducePosition].Contents, CallingScope->Functions) == false)
+    {
+        OutputStandardErrorMessage(string("No function matching ") + OutputFunctionNameWithObjects(ReduceTokens[ReducePosition].Contents, Reverse(NextFunctionObjects)) + string("."),
+            CurrentToken);
+    }
+    WantedFunction = GetFromFunctionList(CallingScope->Functions[ReduceTokens[ReducePosition].Contents], Reverse(NextFunctionObjects));
     CallFunction(*WantedFunction);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
@@ -2307,7 +2315,6 @@ string Parser::OutputFullCompiledTemplateVector(const vector<TemplatedType> & TT
         Output = Output + OutputFullTemplatesToString(TTs[Index]);
         if(Index != TTs.size() - 1)
         {
-            cout << ", ";
             Output = Output + ", ";
         }
         Index = Index + 1;
@@ -2354,7 +2361,8 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
     }
     if(Found == false)
     {
-        OutputStandardErrorMessage(string("No function matching ") + OutputFunctionNameWithObjects(((FunctionList &) InList).GetFirstFunction()->Name, InObjects) + string("."), CurrentToken);
+        OutputStandardErrorMessage(string("No function matching ") + OutputFunctionNameWithObjects(((FunctionList &) InList).GetFirstFunction()->Name, InObjects) + string("."),
+            CurrentToken);
     }
     return &GetInList(InList.Functions, FoundPos);
 }
@@ -2384,12 +2392,16 @@ bool Parser::DoesFunctionMatch(const Function & InFunction, const vector<Object 
 string Parser::OutputFunctionNameWithObjects(const string & Name, const vector<Object *> InObjects)
 {
     string Prototype;
+    cout << "Name" << Name << endl;
     if(CurrentParsingType.Type != NULL)
     {
+        cout << "before" << endl;
         Prototype = Prototype + CurrentParsingType.Type->Name;
+        cout << "after" << endl;
         Prototype = Prototype + GlobalKeywords.ReservedWords["COLON"];
     }
     Prototype = Prototype + Name;
+    cout << "after two" << Name << endl;
     Prototype = Prototype + GlobalKeywords.ReservedWords["LPAREN"];
     Prototype = Prototype + OutputFunctionParameters(InObjects);
     Prototype = Prototype + GlobalKeywords.ReservedWords["RPAREN"];

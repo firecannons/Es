@@ -1,6 +1,5 @@
 using Libraries . DataTypes
-using Libraries . DataTypes
-using Libraries . DynamicMemory
+using Libraries . Array
 
 action asm OutputByte ( Byte L )
     push ebp
@@ -121,10 +120,10 @@ class ElemTest
     Byte B2
 end
 
-action Main/*
+action Main
     Array<Byte> MyArray
     MyArray:Resize(4)
-    MyArray:GetAt(4)*/
+    MyArray:GetAt(4)
 end
 
 class afterClass
