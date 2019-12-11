@@ -20,7 +20,6 @@ void Parser::RunParse()
         GetNextToken();
         Operate();
     }while(IsNextToken() == true);
-    OutputTypeTable();
 }    
 
 void Parser::Initialize(const vector<Token> & Tokens)
@@ -68,7 +67,10 @@ bool Parser::IsNextToken()
 
 void Parser::Operate()
 {
+    if(CurrentClass.Type != NULL && CurrentClass.Type->Name == "Array" && PassMode == PASS_MODE::FUNCTION_SKIM)
+    {
     cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << endl;
+    }
 /*
                 BaseType BT1;
                 BT1.Name = "toy";
@@ -748,6 +750,7 @@ void Parser::ParseExpectTemplateStartOrNewline()
         {
             ParseTemplates();
         }
+        CurrentFunction->ReturnType = CurrentParsingType;
         State = PARSER_STATE::EXPECT_RETURNS_NEWLINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
@@ -1134,6 +1137,7 @@ void Parser::ParseExpectNewlineOrReturns()
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURNS"])
     {
+        CurrentFunction->HasReturnType = true;
         State = PARSER_STATE::EXPECT_TYPE;
         TypeMode = TYPE_PARSE_MODE::PARSING_RETURNS;
     }
@@ -1145,10 +1149,13 @@ void Parser::ParseExpectNewlineOrReturns()
 
 void Parser::ParseExpectVariableName()
 {
+    cout << "one " << CurrentToken.Contents << endl;
     if(IsValidIdent(CurrentToken.Contents) == true)
     {
+        cout << "two " << CurrentToken.Contents << endl;
         if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
         {
+            cout << "three " << CurrentToken.Contents << endl;
             Object NewParamObject;
             NewParamObject.Name = CurrentToken.Contents;
             NewParamObject.Type = CurrentParsingType;
@@ -1162,8 +1169,15 @@ void Parser::ParseExpectVariableName()
             }
             else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
             {
+                cout << "four " << CurrentToken.Contents << endl;
                 if(IsClassScopeClosest() == true && PassMode == PASS_MODE::FUNCTION_SKIM)
                 {
+                    cout << "five " << CurrentToken.Contents << endl;
+                    if(CurrentToken.Contents == "P")
+                    {
+                        cout << "adding P" << endl;
+                        cout << OutputFullTemplatesToString(CurrentParsingType) << endl;
+                    }
                     GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                     GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
                 }
@@ -1402,6 +1416,7 @@ void Parser::DoReduceFunctionCall()
             CurrentToken);
     }
     WantedFunction = GetFromFunctionList(CallingScope->Functions[ReduceTokens[ReducePosition].Contents], Reverse(NextFunctionObjects));
+    cout << "two " << ReduceTokens[ReducePosition].Contents << endl;
     CallFunction(*WantedFunction);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
@@ -1409,9 +1424,14 @@ void Parser::DoReduceFunctionCall()
 
 void Parser::ReduceOperator()
 {
+    cout << "in ReduceOperator " << ReducePosition << endl;
     AddToArgList(ReducePosition + 2);
     AddToArgList(ReducePosition);
-    //cout << "ok" << OutputFunctionParameters(Reverse(NextFunctionObjects)) << " " << NextFunctionObjects[0]->Type.Type->Name << " " << NextFunctionObjects[1]->Type.Type->Name << endl;
+    cout << "fore " << endl;
+    cout << "fure " << NextFunctionObjects.size() << " " << NextFunctionObjects[0]->Type.Type << " " << NextFunctionObjects[0]->Type.Type->Name << endl;
+    cout << "fyre " << OutputFunctionParameters(Reverse(NextFunctionObjects)) << endl;
+    cout << "fare " << NextFunctionObjects[1]->Type.Type << " " << NextFunctionObjects[1]->Type.Type->Name << endl;
+    cout << "ok" << OutputFunctionParameters(Reverse(NextFunctionObjects)) << " " << NextFunctionObjects[0]->Type.Type->Name << " " << NextFunctionObjects[1]->Type.Type->Name << endl;
     //cout << Reverse(NextFunctionObjects)[0]->Type.Type->Name << " " << Reverse(NextFunctionObjects)[1]->Type.Type->Name;
     //exit(1);
     CallFunction(*GetFromFunctionList(GetInAnyScope(ReduceTokens[ReducePosition].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition + 1].Contents],
@@ -1497,11 +1517,8 @@ void Parser::DoColonReduce()
     Object * ScopeObject = &CallingObject->Type.Templates->MyScope.Objects[ReduceTokens[ReducePosition + 2].Contents];
     if(CurrentClass.Type != NULL)
     {
-        if(CurrentClass.Type->Name == "Box")
-        {
-            cout << "doing colon reduce " << CallingObject->Type.Type->Name << " " << ScopeObject->Type.Type->Name << " " << GetType("T").Type->Name << " " << 
-            OutputFullTemplatesToString(GetInCurrentScope("Source")->Type) << endl;
-        }
+        //cout << "doing colon reduce " << CallingObject->Type.Type->Name << " " << ScopeObject->Type.Type->Name << endl;
+        cout << ReduceTokens[ReducePosition + 2].Contents << " " << ReduceTokens[ReducePosition].Contents << endl;
     }
     unsigned int OffsetShift = ScopeObject->Offset;
     Object NewObject;
@@ -1605,6 +1622,7 @@ void Parser::AddToArgList(const unsigned int InPosition)
         NextArg = GetInAnyScope(VariableName);
     }
     NextFunctionObjects.push_back(NextArg);
+    cout << "adding " << NextArg->Name << " " << OutputFullTemplatesToString(NextArg->Type) << endl;
 }
 
 void Parser::AddNewVariableToStack(Object & NewObject)
@@ -1927,7 +1945,7 @@ string Parser::OutputTemplatedTypeToString(const TemplatedType & OutputTT, const
     string OutputString;
 
     OutputString = OutputString + OutputTabsToString(Level);
-    OutputString = OutputString + "Type Name: " + OutputTT.Type->Name + '\n';
+    OutputString = OutputString + "Type: " + OutputFullTemplatesToString(OutputTT) + '\n';
 
     return OutputString;
 }
@@ -2197,6 +2215,7 @@ void Parser::CompileTemplatedCode()
     unsigned int OldTemplateTokenIndex = TemplateTokenIndex;
     vector<TemplatedType> OldStoredParsedTemplates = StoredParsedTemplates;
     TemplatedType OldCurrentParsingType = CurrentParsingType;
+    PASS_MODE OldPassMode = PassMode;
 
     State = PARSER_STATE::START_OF_LINE;
     InitializePosition();
@@ -2222,6 +2241,7 @@ void Parser::CompileTemplatedCode()
     TemplateTokenIndex = OldTemplateTokenIndex;
     StoredParsedTemplates = OldStoredParsedTemplates;
     CurrentParsingType = OldCurrentParsingType;
+    PassMode = OldPassMode;
 }
 
 void Parser::RunAllPasses()
@@ -2298,7 +2318,6 @@ void Parser::RunAllTemplatedPasses()
     PassMode = PASS_MODE::FULL_PASS;
     InitializeForTemplatedPass();
     RunParse();
-    OutputTypeTable();
 }
 
 string Parser::OutputFullCompiledTemplateVector(const vector<TemplatedType> & TTs)

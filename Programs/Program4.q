@@ -123,7 +123,7 @@ end
 action Main
     Array<Byte> MyArray
     MyArray:Resize(4)
-    MyArray:GetAt(4)
+    MyArray:GetAt(3)
 end
 
 class afterClass

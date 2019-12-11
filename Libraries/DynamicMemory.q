@@ -1,5 +1,5 @@
 class DynamicMemory<T>
-    action asm AllocateHeapMemory( Byte Size ) returns Pointer<T>
+    action asm AllocateHeapMemory( Integer Size ) returns Pointer<T>
         push ebp
         mov ebp, esp
         
