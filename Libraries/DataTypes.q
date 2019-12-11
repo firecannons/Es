@@ -307,6 +307,9 @@ class Byte size 1
             mov esp, ebp
             pop ebp
         end
+
+        action = ( Integer Source )
+        end
         
         action asm + ( Byte Rhs ) returns Byte
             push ebp

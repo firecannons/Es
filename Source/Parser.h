@@ -2,6 +2,13 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+enum PASS_MODE
+{
+    CLASS_SKIM,
+    FUNCTION_SKIM,
+    FULL_PASS
+};
+
 #include "GlobalFunctions.h"
 #include "BaseType.h"
 #include "Token.h"
@@ -47,13 +54,6 @@ enum TYPE_PARSE_MODE
     PARSING_NEW_VARIABLE,
     PARSING_PARAM,
     PARSING_RETURNS
-};
-
-enum PASS_MODE
-{
-    CLASS_SKIM,
-    FUNCTION_SKIM,
-    FULL_PASS
 };
 
 const string EXTENSION = string(".q");

@@ -5,6 +5,7 @@
 #include "TemplatedType.h"
 #include "Object.h"
 #include "Scope.h"
+#include "Parser.h"
 #include <string>
 using namespace std;
 
@@ -19,6 +20,7 @@ public:
     bool IsAsm;
     string Label;
     bool HasReturnType;
+    PASS_MODE LatestPassMode;
 };
 
 #include "Function.hpp"

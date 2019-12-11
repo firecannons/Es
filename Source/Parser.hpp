@@ -20,6 +20,7 @@ void Parser::RunParse()
         GetNextToken();
         Operate();
     }while(IsNextToken() == true);
+    OutputTypeTable();
 }    
 
 void Parser::Initialize(const vector<Token> & Tokens)
@@ -573,10 +574,16 @@ void Parser::ParseExpectActionName()
             NewFunction.HasReturnType = false;
             NewFunction.Name = CurrentToken.Contents;
             NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
+            NewFunction.LatestPassMode = PASS_MODE::CLASS_SKIM;
             GetCurrentScope()->Functions[CurrentToken.Contents].Functions.push_back(NewFunction);
+            CurrentFunction = GetCurrentScope()->Functions[CurrentToken.Contents].GetLastFunction();
         }
-        CurrentFunction = GetCurrentScope()->Functions[CurrentToken.Contents].GetLastFunction();
+        else
+        {
+            CurrentFunction = GetCurrentScope()->Functions[CurrentToken.Contents].GetFirstFunctionNotOfPassMode(PassMode);
+        }
         ScopeStack.push_back(&CurrentFunction->MyScope);
+        CurrentFunction->LatestPassMode = PassMode;
 
         if(PassMode == PASS_MODE::CLASS_SKIM)
         {
@@ -1578,8 +1585,8 @@ void Parser::AddToArgList(const unsigned int InPosition)
         Object NumberObject;
         NumberObject.Name = GetNextTemporaryVariable();
         ReduceTokens[InPosition].Contents = NumberObject.Name;
-        NumberObject.Type.Type = &TypeTable["Byte"];
-        NumberObject.Type.Templates = TypeTable["Byte"].GetFirstCompiledTemplate();
+        NumberObject.Type.Type = &TypeTable["Integer"];
+        NumberObject.Type.Templates = TypeTable["Integer"].GetFirstCompiledTemplate();
         GetCurrentScope()->Objects.emplace(NumberObject.Name, NumberObject);
         AddNewVariableToStack(GetCurrentScope()->Objects[NumberObject.Name]);
         AddNumericalValueToTempInteger(VariableName);
