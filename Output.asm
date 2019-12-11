@@ -752,7 +752,7 @@ mov ebp, esp
 
 add esp, -1 ; Declaring L
 add esp, -1 ; Declaring [T0
-mov byte [esp], 102
+mov [esp], 102
 add esp, -4
 mov ebx, ebp
 add ebx, -2
@@ -776,7 +776,7 @@ add esp, 4
 
 add esp, -1 ; Declaring I1
 add esp, -1 ; Declaring [T1
-mov byte [esp], 100
+mov [esp], 100
 add esp, -4
 mov ebx, ebp
 add ebx, -4
@@ -848,7 +848,7 @@ add esp, 8
 
 add esp, -2 ; Declaring ET
 add esp, -1 ; Declaring [T3
-mov byte [esp], 102
+mov [esp], 102
 add esp, -4
 mov ebx, ebp
 add ebx, -8
@@ -872,7 +872,7 @@ add esp, 4
 
 add esp, -1 ; Declaring A
 add esp, -1 ; Declaring [T6
-mov byte [esp], 102
+mov [esp], 102
 add esp, -4
 mov ebx, ebp
 add ebx, -10
@@ -900,7 +900,7 @@ add esp, -4 ; Declaring Bi
 add esp, -1 ; Declaring Bb
 add esp, -1 ; Declaring MyByte
 add esp, -1 ; Declaring [T16
-mov byte [esp], 101
+mov [esp], 101
 add esp, -4
 mov ebx, ebp
 add ebx, -25
@@ -923,7 +923,7 @@ call L20 ; Calling OutputToConsole
 add esp, 4
 
 add esp, -1 ; Declaring [T18
-mov byte [esp], 103
+mov [esp], 103
 add esp, -4
 mov ebx, ebp
 add ebx, -26
@@ -969,7 +969,7 @@ add esp, 4
 
 add esp, -1 ; Declaring BBb
 add esp, -1 ; Declaring [T25
-mov byte [esp], 99
+mov [esp], 99
 add esp, -4
 mov ebx, ebp
 add ebx, -29

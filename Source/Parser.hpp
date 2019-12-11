@@ -700,7 +700,7 @@ void Parser::ParseExpectTemplateStartOrIdent()
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         // At this point, parse the template
-        if(IsPassModeHigherOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
+        if(IsPassModeHigherOrEqual(PASS_MODE::CLASS_SKIM) == true)
         {
             InitializeTemplateTokens();
         }
@@ -1151,6 +1151,7 @@ void Parser::ParseExpectVariableName()
                 NewParamObject.IsReference = true;
                 GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                 CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
+                cout << OutputFullTemplatesToString(CurrentFunction->Parameters.back()->Type) << endl;
             }
             else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
             {
@@ -1479,6 +1480,14 @@ void Parser::DoColonReduce()
 {
     Object * CallingObject = GetInAnyScope(ReduceTokens[ReducePosition].Contents);
     Object * ScopeObject = &CallingObject->Type.Templates->MyScope.Objects[ReduceTokens[ReducePosition + 2].Contents];
+    if(CurrentClass.Type != NULL)
+    {
+        if(CurrentClass.Type->Name == "Box")
+        {
+            cout << "doing colon reduce " << CallingObject->Type.Type->Name << " " << ScopeObject->Type.Type->Name << " " << GetType("T").Type->Name << " " << 
+            OutputFullTemplatesToString(GetInCurrentScope("Source")->Type) << endl;
+        }
+    }
     unsigned int OffsetShift = ScopeObject->Offset;
     Object NewObject;
     NewObject.Name = GetNextTemporaryVariable();
@@ -1569,8 +1578,8 @@ void Parser::AddToArgList(const unsigned int InPosition)
         Object NumberObject;
         NumberObject.Name = GetNextTemporaryVariable();
         ReduceTokens[InPosition].Contents = NumberObject.Name;
-        NumberObject.Type.Type = &TypeTable["Integer"];
-        NumberObject.Type.Templates = TypeTable["Integer"].GetFirstCompiledTemplate();
+        NumberObject.Type.Type = &TypeTable["Byte"];
+        NumberObject.Type.Templates = TypeTable["Byte"].GetFirstCompiledTemplate();
         GetCurrentScope()->Objects.emplace(NumberObject.Name, NumberObject);
         AddNewVariableToStack(GetCurrentScope()->Objects[NumberObject.Name]);
         AddNumericalValueToTempInteger(VariableName);
@@ -2235,16 +2244,14 @@ TemplatedType Parser::GetType(const string & InName)
         if(CurrentClass.Type->IsTemplated == true)
         {
             int Location = LocationInVector(InName, CurrentClass.Type->PossibleTemplates);
-            cout << "Possible templates: " << CurrentClass.Type->PossibleTemplates.size() << " " << Location;
             if(Location != NOT_FOUND_POSITION)
             {
                 Output = CurrentClass.Templates->Templates[Location];
                 IsATemplate = true;
-                cout << " why " << CurrentClass.Type->Name << " " << Output.Type->Name << endl;
-                for(unsigned int i = 0; i < CurrentClass.Templates->Templates.size(); i++)
+                /*for(unsigned int i = 0; i < CurrentClass.Templates->Templates.size(); i++)
                 {
                     cout << CurrentClass.Templates->Templates[i].Type->Name << endl;
-                }
+                }*/
             }
         }
     }
@@ -2369,7 +2376,6 @@ bool Parser::DoesFunctionMatch(const Function & InFunction, const vector<Object 
 
 string Parser::OutputFunctionNameWithObjects(const string & Name, const vector<Object *> InObjects)
 {
-    OutputTypeTable();
     string Prototype;
     if(CurrentParsingType.Type != NULL)
     {
