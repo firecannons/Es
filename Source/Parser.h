@@ -243,6 +243,10 @@ public:
     string OutputFullCompiledTemplateVector(const vector<TemplatedType> & TTs);
     void OutputTemplateAsm();
     CompiledTemplate * GetCompiledTemplate(BaseType & InType, vector<TemplatedType> & InTypes);
+    Function * GetFromFunctionList(const FunctionList & InList, const vector<Object *> InObjects);
+    bool DoesFunctionMatch(const Function & InFunction, const vector<Object *> InObjects);
+    string OutputFunctionNameWithObjects(const string & Name, const vector<Object *> InObjects);
+    string OutputFunctionParameters(const vector<Object *> InObjects);
 };
 
 #include "Compiler.h"

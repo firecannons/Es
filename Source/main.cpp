@@ -9,6 +9,7 @@ class Compiler;
 class Parser;
 class Scope;
 class CompiledTemplate;
+class FunctionList;
 
 #include <string>
 #include "GlobalFunctions.h"

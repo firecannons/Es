@@ -573,9 +573,9 @@ void Parser::ParseExpectActionName()
             NewFunction.HasReturnType = false;
             NewFunction.Name = CurrentToken.Contents;
             NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
-            GetCurrentScope()->Functions.emplace(CurrentToken.Contents, NewFunction);
+            GetCurrentScope()->Functions[CurrentToken.Contents].Functions.push_back(NewFunction);
         }
-        CurrentFunction = &GetCurrentScope()->Functions[CurrentToken.Contents];
+        CurrentFunction = GetCurrentScope()->Functions[CurrentToken.Contents].GetLastFunction();
         ScopeStack.push_back(&CurrentFunction->MyScope);
 
         if(PassMode == PASS_MODE::CLASS_SKIM)
@@ -1376,14 +1376,15 @@ void Parser::DoReduceFunctionCall()
         {
             IsCallingObject = true;
             AddToArgList(ReducePosition - 2);
-            WantedFunction = &GetInAnyScope(ReduceTokens[ReducePosition - 2].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition].Contents];
+            WantedFunction = GetFromFunctionList(GetInAnyScope(ReduceTokens[ReducePosition - 2].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition].Contents],
+                Reverse(NextFunctionObjects));
             ReduceTokens.erase(ReduceTokens.begin() + ReducePosition - 1);
             ReduceTokens.erase(ReduceTokens.begin() + ReducePosition - 1);
         }
     }
     if(IsCallingObject == false)
     {
-        WantedFunction = &GetGlobalScope()->Functions[ReduceTokens[ReducePosition].Contents];
+        WantedFunction = GetFromFunctionList(GetGlobalScope()->Functions[ReduceTokens[ReducePosition].Contents], Reverse(NextFunctionObjects));
     }
     CallFunction(*WantedFunction);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
@@ -1394,7 +1395,11 @@ void Parser::ReduceOperator()
 {
     AddToArgList(ReducePosition + 2);
     AddToArgList(ReducePosition);
-    CallFunction(GetInAnyScope(ReduceTokens[ReducePosition].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition + 1].Contents]);
+    //cout << "ok" << OutputFunctionParameters(Reverse(NextFunctionObjects)) << " " << NextFunctionObjects[0]->Type.Type->Name << " " << NextFunctionObjects[1]->Type.Type->Name << endl;
+    //cout << Reverse(NextFunctionObjects)[0]->Type.Type->Name << " " << Reverse(NextFunctionObjects)[1]->Type.Type->Name;
+    //exit(1);
+    CallFunction(*GetFromFunctionList(GetInAnyScope(ReduceTokens[ReducePosition].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition + 1].Contents],
+        Reverse(NextFunctionObjects)));
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
 }
@@ -1489,7 +1494,7 @@ void Parser::DoColonReduce()
 
 void Parser::AppendInitialASM()
 {
-    string LabelString = GetGlobalScope()->Functions[MAIN_FUNCTION_NAME].Label;
+    string LabelString = GetGlobalScope()->Functions[MAIN_FUNCTION_NAME].GetFirstFunction()->Label;
     OutputAsm = GlobalASM.CalcStartOfFileAsm() + LabelString + GetNewlines(2) + OutputAsm;
 }
 
@@ -1564,8 +1569,8 @@ void Parser::AddToArgList(const unsigned int InPosition)
         Object NumberObject;
         NumberObject.Name = GetNextTemporaryVariable();
         ReduceTokens[InPosition].Contents = NumberObject.Name;
-        NumberObject.Type.Type = &TypeTable["Byte"];
-        NumberObject.Type.Templates = TypeTable["Byte"].GetFirstCompiledTemplate();
+        NumberObject.Type.Type = &TypeTable["Integer"];
+        NumberObject.Type.Templates = TypeTable["Integer"].GetFirstCompiledTemplate();
         GetCurrentScope()->Objects.emplace(NumberObject.Name, NumberObject);
         AddNewVariableToStack(GetCurrentScope()->Objects[NumberObject.Name]);
         AddNumericalValueToTempInteger(VariableName);
@@ -1856,10 +1861,15 @@ string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Functions:\n";
 
-    map<string, Function>::iterator FuncIterator;
+    map<string, FunctionList>::iterator FuncIterator;
     for (FuncIterator = OutputScope.Functions.begin(); FuncIterator != OutputScope.Functions.end(); FuncIterator++)
     {
-        OutputString = OutputString + OutputFunctionToString((Function &)FuncIterator->second, Level + 1);
+        unsigned int Index = 0;
+        while(Index < FuncIterator->second.Functions.size())
+        {
+            OutputString = OutputString + OutputFunctionToString((Function &)GetInList(FuncIterator->second.Functions, Index), Level + 1);
+            Index = Index + 1;
+        }
     }
     return OutputString;
 }
@@ -2096,14 +2106,11 @@ string Parser::OutputFullTemplatesToString(const TemplatedType & InTT)
     string Output;
     if(InTT.Type != NULL)
     {
-        cout << InTT.Type->Name;
         Output = Output + InTT.Type->Name;
         if(InTT.Type->IsTemplated == true)
         {
-            cout << GlobalKeywords.ReservedWords["LESS_THAN"];
             Output = Output + GlobalKeywords.ReservedWords["LESS_THAN"];
             Output = Output + OutputFullCompiledTemplateVector(InTT.Templates->Templates);
-            cout << GlobalKeywords.ReservedWords["GREATER_THAN"];
             Output = Output + GlobalKeywords.ReservedWords["GREATER_THAN"];
         }
     }
@@ -2315,4 +2322,83 @@ CompiledTemplate * Parser::GetCompiledTemplate(BaseType & InType, vector<Templat
         Index = Index + 1;
     }
     return Output;
+}
+
+Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector<Object *> InObjects)
+{
+    bool Found = false;
+    unsigned int FoundPos = 0;
+    unsigned int Index = 0;
+    while(Index < InList.Functions.size() && Found == false)
+    {
+        if(DoesFunctionMatch(GetInList(InList.Functions, Index), InObjects) == true)
+        {
+            Found = true;
+            FoundPos = Index;
+        }
+        Index = Index + 1;
+    }
+    if(Found == false)
+    {
+        OutputStandardErrorMessage(string("No function matching ") + OutputFunctionNameWithObjects(((FunctionList &) InList).GetFirstFunction()->Name, InObjects) + string("."), CurrentToken);
+    }
+    return &GetInList(InList.Functions, FoundPos);
+}
+
+bool Parser::DoesFunctionMatch(const Function & InFunction, const vector<Object *> InObjects)
+{
+    bool IsMatch = true;
+    if(InFunction.Parameters.size() != InObjects.size())
+    {
+        IsMatch = false;
+    }
+    else
+    {
+        unsigned int Index = 0;
+        while(Index < InObjects.size() && IsMatch == true)
+        {
+            if(InFunction.Parameters[Index]->Type.Type != InObjects[Index]->Type.Type || InFunction.Parameters[Index]->Type.Templates != InObjects[Index]->Type.Templates)
+            {
+                IsMatch = false;
+            }
+            Index = Index + 1;
+        }
+    }
+    return IsMatch;
+}
+
+string Parser::OutputFunctionNameWithObjects(const string & Name, const vector<Object *> InObjects)
+{
+    OutputTypeTable();
+    string Prototype;
+    if(CurrentParsingType.Type != NULL)
+    {
+        Prototype = Prototype + CurrentParsingType.Type->Name;
+        Prototype = Prototype + GlobalKeywords.ReservedWords["COLON"];
+    }
+    Prototype = Prototype + Name;
+    Prototype = Prototype + GlobalKeywords.ReservedWords["LPAREN"];
+    Prototype = Prototype + OutputFunctionParameters(InObjects);
+    Prototype = Prototype + GlobalKeywords.ReservedWords["RPAREN"];
+    return Prototype;
+}
+
+string Parser::OutputFunctionParameters(const vector<Object *> InObjects)
+{
+    string Parameters;
+    unsigned int Index = 0;
+    if(CurrentParsingType.Type != NULL)
+    {
+        Index = 1;
+    }
+    while(Index < InObjects.size())
+    {
+        Parameters = Parameters + OutputFullTemplatesToString(InObjects[Index]->Type);
+        if(Index < InObjects.size() - 1)
+        {
+            Parameters = Parameters + GlobalKeywords.ReservedWords["COMMA"];
+        }
+        Index = Index + 1;
+    }
+    return Parameters;
 }

@@ -1,5 +1,4 @@
 #include "BaseType.h"
-#include <iostream>
 
 void BaseType::InitializeBlankCompiledTemplate()
 {

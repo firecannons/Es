@@ -1,5 +1,6 @@
 class Array < Type >
+
         
-        action on create
+        action Array
         end
 end

@@ -115,4 +115,17 @@ T & GetInList(const list<T> & InList, const unsigned int Position)
     return (T &)*it;
 }
 
+template<class T>
+T Reverse(T & InVector)
+{
+    T NewVector;
+    unsigned int Index = 0;
+    while(Index < InVector.size())
+    {
+        NewVector.push_back(InVector[InVector.size() - Index - 1]);
+        Index = Index + 1;
+    }
+    return NewVector;
+}
+
 #endif
