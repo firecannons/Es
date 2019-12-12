@@ -760,246 +760,21 @@ L29: ; :Main
 push ebp
 mov ebp, esp
 
-add esp, -1 ; Declaring L
-add esp, -4 ; Declaring [T0
-mov [esp], 102
+add esp, -4 ; Declaring MyArray
+add esp, -4 ; Declaring [T4
+mov [esp], 4
 add esp, -4
 mov ebx, ebp
-add ebx, -5
-mov [esp], ebx ; Pushing reference to [T0 from offset -5
+add ebx, -8
+mov [esp], ebx ; Pushing reference to [T4 from offset -8
 
 add esp, -4
 mov ebx, ebp
-add ebx, -1
-mov [esp], ebx ; Pushing reference to L from offset -1
+add ebx, -4
+mov [esp], ebx ; Pushing reference to MyArray from offset -4
 
-call L12 ; Calling =
+call L33 ; Calling Resize
 add esp, 8
-
-add esp, -4
-mov ebx, ebp
-add ebx, -1
-mov [esp], ebx ; Pushing reference to L from offset -1
-
-call L26 ; Calling OutputByte
-add esp, 4
-
-add esp, -1 ; Declaring I1
-add esp, -4 ; Declaring [T1
-mov [esp], 100
-add esp, -4
-mov ebx, ebp
-add ebx, -10
-mov [esp], ebx ; Pushing reference to [T1 from offset -10
-
-add esp, -4
-mov ebx, ebp
-add ebx, -6
-mov [esp], ebx ; Pushing reference to I1 from offset -6
-
-call L12 ; Calling =
-add esp, 8
-
-add esp, -4
-mov ebx, ebp
-add ebx, -1
-mov [esp], ebx ; Pushing reference to L from offset -1
-
-add esp, -4
-mov ebx, ebp
-add ebx, -6
-mov [esp], ebx ; Pushing reference to I1 from offset -6
-
-call L11 ; Calling =
-add esp, 8
-
-add esp, -4
-mov ebx, ebp
-add ebx, -6
-mov [esp], ebx ; Pushing reference to I1 from offset -6
-
-add esp, -4
-mov ebx, ebp
-add ebx, -1
-mov [esp], ebx ; Pushing reference to L from offset -1
-
-call L11 ; Calling =
-add esp, 8
-
-add esp, -4
-mov ebx, ebp
-add ebx, -6
-mov [esp], ebx ; Pushing reference to I1 from offset -6
-
-call L26 ; Calling OutputByte
-add esp, 4
-
-add esp, -4
-mov ebx, ebp
-add ebx, -1
-mov [esp], ebx ; Pushing reference to L from offset -1
-
-call L26 ; Calling OutputByte
-add esp, 4
-
-add esp, -1 ; Declaring CST_1
-add esp, -4
-mov ebx, ebp
-add ebx, -6
-mov [esp], ebx ; Pushing reference to I1 from offset -6
-
-add esp, -4
-mov ebx, ebp
-add ebx, -11
-mov [esp], ebx ; Pushing reference to CST_1 from offset -11
-
-call L11 ; Calling =
-add esp, 8
-
-add esp, -2 ; Declaring ET
-add esp, -4 ; Declaring [T3
-mov [esp], 102
-add esp, -4
-mov ebx, ebp
-add ebx, -17
-mov [esp], ebx ; Pushing reference to [T3 from offset -17
-
-add esp, -4
-mov ebx, ebp
-add ebx, -13
-mov [esp], ebx ; Pushing reference to [T2 from offset -13
-
-call L12 ; Calling =
-add esp, 8
-
-add esp, -4
-mov ebx, ebp
-add ebx, -13
-mov [esp], ebx ; Pushing reference to [T4 from offset -13
-
-call L26 ; Calling OutputByte
-add esp, 4
-
-add esp, -1 ; Declaring A
-add esp, -4 ; Declaring [T6
-mov [esp], 102
-add esp, -4
-mov ebx, ebp
-add ebx, -22
-mov [esp], ebx ; Pushing reference to [T6 from offset -22
-
-add esp, -4
-mov ebx, ebp
-add ebx, -18
-mov [esp], ebx ; Pushing reference to [T5 from offset -18
-
-call L12 ; Calling =
-add esp, 8
-
-add esp, -4
-mov ebx, ebp
-add ebx, -18
-mov [esp], ebx ; Pushing reference to [T7 from offset -18
-
-call L26 ; Calling OutputByte
-add esp, 4
-
-add esp, -4 ; Declaring Pb
-add esp, -4 ; Declaring Pi
-add esp, -4 ; Declaring Bi
-add esp, -1 ; Declaring Bb
-add esp, -1 ; Declaring MyByte
-add esp, -4 ; Declaring [T16
-mov [esp], 101
-add esp, -4
-mov ebx, ebp
-add ebx, -40
-mov [esp], ebx ; Pushing reference to [T16 from offset -40
-
-add esp, -4
-mov ebx, ebp
-add ebx, -36
-mov [esp], ebx ; Pushing reference to MyByte from offset -36
-
-call L12 ; Calling =
-add esp, 8
-
-add esp, -4
-mov ebx, ebp
-add ebx, -36
-mov [esp], ebx ; Pushing reference to MyByte from offset -36
-
-call L21 ; Calling OutputToConsole
-add esp, 4
-
-add esp, -4 ; Declaring [T18
-mov [esp], 103
-add esp, -4
-mov ebx, ebp
-add ebx, -44
-mov [esp], ebx ; Pushing reference to [T18 from offset -44
-
-add esp, -4
-mov ebx, ebp
-add ebx, -35
-mov [esp], ebx ; Pushing reference to [T17 from offset -35
-
-call L12 ; Calling =
-add esp, 8
-
-add esp, -4
-mov ebx, ebp
-add ebx, -35
-mov [esp], ebx ; Pushing reference to [T19 from offset -35
-
-call L21 ; Calling OutputToConsole
-add esp, 4
-
-add esp, -1 ; Declaring Bb2
-add esp, -4
-mov ebx, ebp
-add ebx, -35
-mov [esp], ebx ; Pushing reference to Bb from offset -35
-
-add esp, -4
-mov ebx, ebp
-add ebx, -45
-mov [esp], ebx ; Pushing reference to Bb2 from offset -45
-
-call L37 ; Calling =
-add esp, 8
-
-add esp, -4
-mov ebx, ebp
-add ebx, -45
-mov [esp], ebx ; Pushing reference to [T20 from offset -45
-
-call L21 ; Calling OutputToConsole
-add esp, 4
-
-add esp, -1 ; Declaring BBb
-add esp, -4 ; Declaring [T25
-mov [esp], 99
-add esp, -4
-mov ebx, ebp
-add ebx, -50
-mov [esp], ebx ; Pushing reference to [T25 from offset -50
-
-add esp, -4
-mov ebx, ebp
-add ebx, -46
-mov [esp], ebx ; Pushing reference to [T24 from offset -46
-
-call L12 ; Calling =
-add esp, 8
-
-add esp, -4
-mov ebx, ebp
-add ebx, -46
-mov [esp], ebx ; Pushing reference to [T27 from offset -46
-
-call L21 ; Calling OutputToConsole
-add esp, 4
 
 mov esp, ebp
 pop ebp
@@ -1024,20 +799,20 @@ mov ebp, esp
 
 mov ebx, ebp
 add ebx, 12
-mov ebx, [ebx] ; Dereferencing before push [T9 from reference offset 12
+mov ebx, [ebx] ; Dereferencing before push [T1 from reference offset 12
 
 add esp, -4
 add ebx, 0
-mov [esp], ebx ; Pushing reference to [T9 from offset 0
+mov [esp], ebx ; Pushing reference to [T1 from offset 0
 
 
 mov ebx, ebp
 add ebx, 8
-mov ebx, [ebx] ; Dereferencing before push [T8 from reference offset 8
+mov ebx, [ebx] ; Dereferencing before push [T0 from reference offset 8
 
 add esp, -4
 add ebx, 0
-mov [esp], ebx ; Pushing reference to [T8 from offset 0
+mov [esp], ebx ; Pushing reference to [T0 from offset 0
 
 call L1 ; Calling =
 add esp, 8
@@ -1047,7 +822,112 @@ pop ebp
 
 ret
 
-L32: ; Pointer<Integer>:Pointer
+L34: ; DynamicMemory<Byte>:AllocateHeapMemory
+
+        push ebp
+        mov ebp, esp
+        
+        ; Must build the struct in reverse order
+        ; offset
+        add esp, -4
+        mov dword [esp], 0
+        
+        ; fd
+        add esp, -4
+        mov dword [esp], -1
+        
+        ; flags
+        add esp, -4
+        mov dword [esp], 34
+        
+        ; prot
+        add esp, -4
+        mov dword [esp], 3
+        
+        ; len
+        xor ecx, ecx
+        mov ebx, ebp
+        add ebx, 8
+        mov byte cl, [ebx]
+        add esp, -4
+        mov dword [esp], ecx
+        
+        ; addr
+        add esp, -4
+        mov dword [esp], 0
+        
+        ; call mmap
+        mov eax, 90
+        mov ebx, esp
+        ;lea ebx, [mmap_arg]
+        int	0x80
+        
+        add esp, 24
+        
+        ;ope:
+        ;
+        ;push eax
+        ;mov byte [eax], 85
+        ;add esp, -4
+        ;mov [esp], eax
+        ;call OutputByte
+        ;pop eax
+        ;
+        ;add esp, 4
+        ;
+        ;add eax, 1
+        ;
+        ;jmp ope
+        
+        ;test eax, eax
+        ;jnz cont
+        
+        ;mov	eax,1
+        ;xor	ebx,ebx
+        ;int	0x80
+        
+        ;cont:
+
+        
+        ; move new memory location to return position
+        mov ebx, ebp
+        add ebx, 12
+        mov [ebx], eax
+        
+        mov esp, ebp
+        pop ebp
+    
+ret
+
+L35: ; DynamicMemory<Byte>:DeallocateHeapMemory
+
+        push ebp
+        mov ebp, esp
+        
+        ; len to ecx
+        xor ecx, ecx
+        mov ebx, ebp
+        add ebx, 12
+        mov byte cl, [ebx]
+        
+        ; addr to ebx
+        mov ebx, ebp
+        add ebx, 8
+        mov ebx, [ebx]
+        mov ebx, [ebx]
+        
+        ; call mmap
+        mov eax, 90
+        mov ebx, esp
+        ;lea ebx, [mmap_arg]
+        int	0x80
+        
+        mov esp, ebp
+        pop ebp
+    
+ret
+
+L32: ; Array<Byte>:Array
 
 push ebp
 mov ebp, esp
@@ -1057,30 +937,45 @@ pop ebp
 
 ret
 
-L33: ; Pointer<Integer>:=
+L33: ; Array<Byte>:Resize
 
 push ebp
 mov ebp, esp
 
+add esp, 0 ; Declaring DM
+add esp, -4 ; Declaring [T3
 
 mov ebx, ebp
 add ebx, 12
-mov ebx, [ebx] ; Dereferencing before push [T11 from reference offset 12
+mov ebx, [ebx] ; Dereferencing before push Size from reference offset 12
 
 add esp, -4
 add ebx, 0
-mov [esp], ebx ; Pushing reference to [T11 from offset 0
+mov [esp], ebx ; Pushing reference to Size from offset 0
+
+add esp, -4
+mov ebx, ebp
+add ebx, 0
+mov [esp], ebx ; Pushing reference to DM from offset 0
+
+call L34 ; Calling AllocateHeapMemory
+add esp, 8
+
+add esp, -4
+mov ebx, ebp
+add ebx, -4
+mov [esp], ebx ; Pushing reference to [T3 from offset -4
 
 
 mov ebx, ebp
 add ebx, 8
-mov ebx, [ebx] ; Dereferencing before push [T10 from reference offset 8
+mov ebx, [ebx] ; Dereferencing before push [T2 from reference offset 8
 
 add esp, -4
 add ebx, 0
-mov [esp], ebx ; Pushing reference to [T10 from offset 0
+mov [esp], ebx ; Pushing reference to [T2 from offset 0
 
-call L1 ; Calling =
+call L31 ; Calling =
 add esp, 8
 
 mov esp, ebp
@@ -1088,123 +983,10 @@ pop ebp
 
 ret
 
-L34: ; Box<Integer>:Box
+L36: ; Array<Byte>:GetAt
 
 push ebp
 mov ebp, esp
-
-mov esp, ebp
-pop ebp
-
-ret
-
-L35: ; Box<Integer>:=
-
-push ebp
-mov ebp, esp
-
-
-mov ebx, ebp
-add ebx, 12
-mov ebx, [ebx] ; Dereferencing before push [T13 from reference offset 12
-
-add esp, -4
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T13 from offset 0
-
-
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx] ; Dereferencing before push [T12 from reference offset 8
-
-add esp, -4
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T12 from offset 0
-
-call L1 ; Calling =
-add esp, 8
-
-mov esp, ebp
-pop ebp
-
-ret
-
-L36: ; Box<Byte>:Box
-
-push ebp
-mov ebp, esp
-
-mov esp, ebp
-pop ebp
-
-ret
-
-L37: ; Box<Byte>:=
-
-push ebp
-mov ebp, esp
-
-
-mov ebx, ebp
-add ebx, 12
-mov ebx, [ebx] ; Dereferencing before push [T15 from reference offset 12
-
-add esp, -4
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T15 from offset 0
-
-
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx] ; Dereferencing before push [T14 from reference offset 8
-
-add esp, -4
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T14 from offset 0
-
-call L11 ; Calling =
-add esp, 8
-
-mov esp, ebp
-pop ebp
-
-ret
-
-L38: ; Box<Box<Byte>>:Box
-
-push ebp
-mov ebp, esp
-
-mov esp, ebp
-pop ebp
-
-ret
-
-L39: ; Box<Box<Byte>>:=
-
-push ebp
-mov ebp, esp
-
-
-mov ebx, ebp
-add ebx, 12
-mov ebx, [ebx] ; Dereferencing before push [T22 from reference offset 12
-
-add esp, -4
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T22 from offset 0
-
-
-mov ebx, ebp
-add ebx, 8
-mov ebx, [ebx] ; Dereferencing before push [T21 from reference offset 8
-
-add esp, -4
-add ebx, 0
-mov [esp], ebx ; Pushing reference to [T21 from offset 0
-
-call L37 ; Calling =
-add esp, 8
 
 mov esp, ebp
 pop ebp
