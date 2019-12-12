@@ -247,6 +247,9 @@ public:
     bool DoesFunctionMatch(const Function & InFunction, const vector<Object *> InObjects);
     string OutputFunctionNameWithObjects(const string & Name, const vector<Object *> InObjects);
     string OutputFunctionParameters(const vector<Object *> InObjects);
+    string LinkAsm(const string & LinkAsm);
+    string ReplaceLinkString(const string & LinkString, const string & InAsmCode);
+    string PerformLinkStringAction(const string & LinkString, const string & InAsmCode, const size_t Found, const string & ParenOperand);
 };
 
 #include "Compiler.h"

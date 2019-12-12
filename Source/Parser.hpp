@@ -269,6 +269,7 @@ void Parser::ParseStartOfLine()
                 if(CurrentFunction->IsAsm == true)
                 {
                     IsAsmFunction = true;
+                    string LinkedAsm = LinkAsm(CurrentToken.Contents);
                     OutputAsm = OutputAsm + CurrentToken.Contents + GlobalKeywords.ReservedWords["NEW_LINE"];
                 }
             }
@@ -2445,4 +2446,77 @@ string Parser::OutputFunctionParameters(const vector<Object *> InObjects)
         Index = Index + 1;
     }
     return Parameters;
+}
+
+string Parser::LinkAsm(const string & LinkAsm)
+{
+    string AsmCode = LinkAsm;
+    map<string, string>::iterator Iterator;
+    for(Iterator = GlobalKeywords.AsmLinkWords.begin(); Iterator != GlobalKeywords.AsmLinkWords.end(); Iterator++)
+    {
+        AsmCode = ReplaceLinkString(Iterator->second, AsmCode);
+    }
+    return AsmCode;
+}
+
+string Parser::ReplaceLinkString(const string & LinkString, const string & InAsmCode)
+{
+    string OutAsmCode = InAsmCode;
+    size_t Found = OutAsmCode.find(LinkString);
+    while(Found != std::string::npos)
+    {
+        cout << "we got one " << LinkString << endl;
+        Found = OutAsmCode.find(LinkString);
+        OutAsmCode.erase(Found, LinkString.size());
+        OutAsmCode.erase(Found, 1);
+        string ParenOperand = OutAsmCode.substr(Found, OutAsmCode.find(GlobalKeywords.ReservedWords["RPAREN"], Found) - Found);
+        OutAsmCode.erase(Found, ParenOperand.size());
+        OutAsmCode.erase(Found, 1);
+        OutAsmCode = PerformLinkStringAction(LinkString, OutAsmCode, Found, ParenOperand);
+        Found = OutAsmCode.find(LinkString);
+        cout << OutAsmCode << endl;
+    }
+    return OutAsmCode;
+}
+
+string Parser::PerformLinkStringAction(const string & LinkString, const string & InAsmCode, const size_t Found, const string & ParenOperand)
+{
+    string OutAsmCode = InAsmCode;
+    if(LinkString == GlobalKeywords.AsmLinkWords["GET_SIZE_OF"])
+    {
+        cout << "in" << ParenOperand << endl;
+        TemplatedType SizeTT = GetType(ParenOperand);
+        string SizeString = to_string(SizeTT.Templates->Size);
+        cout << "going..." << SizeString << endl;
+        OutAsmCode.insert(Found, SizeString);
+        cout << "out" << endl;
+    }
+    else if(LinkString == GlobalKeywords.AsmLinkWords["GET_ACTION"])
+    {
+        FunctionList * CalledFunctionList;
+        Function * CalledFunction;
+        size_t ColonPosition = ParenOperand.find(GlobalKeywords.ReservedWords["COLON"]);
+        if(ColonPosition != std::string::npos)
+        {
+            string ClassName = ParenOperand.substr(0, ColonPosition);
+            string ActionName = ParenOperand.substr(ColonPosition + 1, ParenOperand.size() - (ColonPosition + 1));
+            cout << "Class Name: " << ClassName << " ActionName: " << ActionName << endl;
+            TemplatedType ClassTT = GetType(ClassName);
+            CalledFunctionList = &ClassTT.Templates->MyScope.Functions[ActionName];
+        }
+        else
+        {
+            CalledFunctionList = &GetGlobalScope()->Functions[ParenOperand];
+        }
+        size_t RightParenPosition = OutAsmCode.find(GlobalKeywords.ReservedWords["RPAREN"], Found);
+        cout << "ok... " << ParenOperand << " " << RightParenPosition << " " << Found << " " << RightParenPosition - (Found + 1) << " " << OutAsmCode.substr(Found - 5, 10) << endl;
+        string FunctionNumberString = OutAsmCode.substr(Found + 1, RightParenPosition - (Found + 1));
+        unsigned int FunctionNumber = stoi(FunctionNumberString);
+        cout << "aha we got one sdf " << LinkString << " " << FunctionNumberString << " " << FunctionNumber << " " << CalledFunctionList->Functions.size() << endl;
+        CalledFunction = &GetInList(CalledFunctionList->Functions, FunctionNumber);
+        OutAsmCode.erase(Found, RightParenPosition - Found + 1);
+        OutAsmCode.insert(Found, CalledFunction->Label);
+        cout << "aha we got one " << LinkString << " " << ParenOperand << endl;
+    }
+    return OutAsmCode;
 }

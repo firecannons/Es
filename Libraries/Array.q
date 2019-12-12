@@ -13,7 +13,7 @@ class Array < Type >
                 Me : P = DM : AllocateHeapMemory ( Size )
         end
 
-        action GetAt( Integer Position ) returns Type
+        action asm GetAt( Integer Position ) returns Type
                 push ebp
                 mov ebp, esp
 
@@ -31,7 +31,7 @@ class Array < Type >
                 mov dword edx, [edx]
 
                 ; perform addition
-                mov eax, SizeOf(Type)
+                mov eax, GetSize(Type)
                 mul dl
                 add dword ecx, eax
 
@@ -45,7 +45,7 @@ class Array < Type >
                 add esp, -4
                 mov [esp], ebx
                 
-                call GetResolvedClassName(Type)=
+                call GetAction(Type:=)(0)
                 
                 ; Move the stack pointer back up
                 add esp, 8

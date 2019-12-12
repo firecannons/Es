@@ -21,7 +21,8 @@
 .PHONY: all clean
 
 CXX = /usr/bin/g++
-CXXFLAGS = -Wpedantic -Wall -Wextra -Wfloat-conversion -Werror
+CXXFLAGS = -Wpedantic -Wall -Wextra -Wfloat-conversion -Werror -std=c++11
+CXXDEPENDFLAGS = -std=c++11
 
 # The following 2 lines only work with gnu make.
 # It's much nicer than having to list them out,
@@ -64,7 +65,7 @@ clean:
 # Automatically generate dependencies and include them in Makefile
 depend: $(SOURCES) $(HEADERS)
 	@echo "Generating dependencies"
-	@$(CXX) -MM *.cpp > $@
+	@$(CXX) $(CXXFLAGS) -MM *.cpp > $@
 
 
 -include depend

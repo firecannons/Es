@@ -2,7 +2,11 @@
 
 Keywords::Keywords()
 {
-
+    
+    AsmLinkWords.insert(pair<string,string>(string("GET_SIZE_OF"), string("GetSize")));
+    AsmLinkWords.insert(pair<string,string>(string("GET_ACTION"), string("GetAction")));
+    
+    ReservedWords = AsmLinkWords;
     ReservedWords.insert(pair<string,string>(string("CLASS"), string("class")));
     ReservedWords.insert(pair<string,string>(string("ACTION"), string("action")));
     ReservedWords.insert(pair<string,string>(string("USING"), string("using")));
