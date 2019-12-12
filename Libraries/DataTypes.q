@@ -308,7 +308,36 @@ class Byte size 1
             pop ebp
         end
 
-        action = ( Integer Source )
+        action asm = ( Integer Source )
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov eax, [eax]
+            
+            ; mov address of return byte into ebx
+            sub ebx, 4
+            mov ebx, [ebx]
+            
+            ; mov value of eax into position of [ebx]
+            mov dword [ebx], eax
+            
+            
+            
+            
+            
+            ;mov ecx, ebx
+            ; Set other values
+            ;mov	eax, 4
+            ;mov	ebx, 1
+            ;mov	edx, 1
+            ;int	0x80
+            
+            mov esp, ebp
+            pop ebp
         end
         
         action asm + ( Byte Rhs ) returns Byte

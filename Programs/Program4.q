@@ -121,8 +121,22 @@ class ElemTest
 end
 
 action Main
+    Byte OverloadTest = 97
+    OutputByte(OverloadTest)
+    OverloadTest = 97
+    OutputByte(OverloadTest)
     Array<Byte> MyArray
+    OverloadTest = 98
+    OutputByte(OverloadTest)
     MyArray:Resize(4)
+    OverloadTest = 99
+    OutputByte(OverloadTest)
+    OverloadTest = 99
+    OutputByte(OverloadTest)
+    Byte B = MyArray:GetAt(3)
+    OverloadTest = 100
+    OutputByte(OverloadTest)
+    OutputByte(B)
 end
 
 class afterClass

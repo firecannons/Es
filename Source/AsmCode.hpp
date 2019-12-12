@@ -16,7 +16,7 @@ AsmCode::AsmCode()
     Codes.emplace(string("SHIFT_UP_ASM"), string("add esp, "));
     Codes.emplace(string("CREATE_STACK_FRAME"), string("push ebp\nmov ebp, esp"));
     Codes.emplace(string("DESTROY_STACK_FRAME"), string("mov esp, ebp\npop ebp"));
-    Codes.emplace(string("INTEGER_QUICK_ASSIGN"), string("mov [esp], "));
+    Codes.emplace(string("INTEGER_QUICK_ASSIGN"), string("mov dword [esp], "));
     Codes.emplace(string("DEREF_P1"), Codes["PUSH_REFERENCE_P2"]);
     Codes.emplace(string("DEREF_P2"), string("\n") + Codes["DEREF_EBX"]);
     Codes.emplace(string("PUSH_FROM_REFERENCE_P1"), Codes["RESERVE_SPACE"]);

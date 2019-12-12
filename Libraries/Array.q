@@ -16,6 +16,14 @@ class Array < Type >
         action asm GetAt( Integer Position ) returns Type
                 push ebp
                 mov ebp, esp
+                
+                sub esp, 1
+                mov byte [esp], 105
+                mov ebx, esp
+                
+                sub esp, 4
+                mov [esp], ebx
+                call GetAction(OutputByte)(0)
 
                 ; load P into ecx
                 mov ebx, ebp

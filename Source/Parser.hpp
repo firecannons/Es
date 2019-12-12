@@ -270,7 +270,7 @@ void Parser::ParseStartOfLine()
                 {
                     IsAsmFunction = true;
                     string LinkedAsm = LinkAsm(CurrentToken.Contents);
-                    OutputAsm = OutputAsm + CurrentToken.Contents + GlobalKeywords.ReservedWords["NEW_LINE"];
+                    OutputAsm = OutputAsm + LinkedAsm + GlobalKeywords.ReservedWords["NEW_LINE"];
                 }
             }
             if(IsAsmFunction == false)
@@ -1707,7 +1707,7 @@ Scope * Parser::GetGlobalScope()
 void Parser::OutputCallingFunctionCommentToAsm(const Function & InFunction)
 {
     string Output = SPACE + SEMICOLON + SPACE;
-    OutputAsm = OutputAsm + Output + string("Calling ") + InFunction.Name;
+    OutputAsm = OutputAsm + Output + string("Calling ") + OutputFunctionNameWithObjects(InFunction.Name, InFunction.Parameters);
 }
 
 bool Parser::IsRParenNext()
