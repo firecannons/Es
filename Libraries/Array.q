@@ -16,14 +16,6 @@ class Array < Type >
         action asm GetAt( Integer Position ) returns Type
                 push ebp
                 mov ebp, esp
-                
-                sub esp, 1
-                mov byte [esp], 105
-                mov ebx, esp
-                
-                sub esp, 4
-                mov [esp], ebx
-                call GetAction(OutputByte)(0)
 
                 ; load P into ecx
                 mov ebx, ebp
@@ -31,16 +23,44 @@ class Array < Type >
                 mov ebx, [ebx]
                 add ebx, 4
                 mov dword ecx, [ebx]
+                
+                ;sub esp, 1
+                ;mov byte [esp], cl
+                ;mov esi, esp
+                ;
+                ;sub esp, 4
+                ;mov [esp], esi
+                ;call GetAction(OutputByte)(0)
+                ;add esp, 5
 
                 ; mov value of Position into eax
-                mov edx, ebp
-                add edx, 12
-                mov edx, [edx]
-                mov dword edx, [edx]
+                mov eax, ebp
+                add eax, 12
+                mov eax, [eax]
+                mov dword eax, [eax]
 
                 ; perform addition
-                mov eax, GetSize(Type)
+                mov edx, GetSize(Type)
                 mul dl
+                
+                
+                
+                
+                
+                
+                
+                ;sub esp, 1
+                ;mov byte [esp], al
+                ;mov esi, esp
+                ;
+                ;sub esp, 4
+                ;mov [esp], esi
+                ;call GetAction(OutputByteDigit)(0)
+                ;add esp, 5
+                
+                
+                
+                
                 add dword ecx, eax
 
                 ; Load the ebx position onto the stack
@@ -57,6 +77,84 @@ class Array < Type >
                 
                 ; Move the stack pointer back up
                 add esp, 8
+                
+                ;sub esp, 1
+                ;mov byte [esp], 105
+                ;mov esi, esp
+                
+                ;sub esp, 4
+                ;mov [esp], esi
+                ;call GetAction(OutputByte)(0)
+                ;add esp, 5
+
+                mov esp, ebp
+                pop ebp        
+        end
+        
+        action asm SetAt(Integer Position, Type Elem)
+                push ebp
+                mov ebp, esp
+
+                ; load P into ecx
+                mov ebx, ebp
+                add ebx, 8
+                mov ebx, [ebx]
+                add ebx, 4
+                mov dword ecx, [ebx]
+
+                ; mov value of Position into eax
+                mov eax, ebp
+                add eax, 12
+                mov eax, [eax]
+                mov dword eax, [eax]
+
+                ; perform addition
+                mov edx, GetSize(Type)
+                mul dl
+                
+                
+                
+                
+                
+                
+                
+                ;sub esp, 1
+                ;mov byte [esp], al
+                ;mov esi, esp
+                ;
+                ;sub esp, 4
+                ;mov [esp], esi
+                ;call GetAction(OutputByteDigit)(0)
+                ;add esp, 5
+                
+                
+                
+                
+                add dword ecx, eax
+                
+                ; Load the return position
+                mov ebx, ebp
+                add ebx, 20
+                add esp, -4
+                mov [esp], ebx
+
+                ; Load the ebx position onto the stack
+                add esp, -4
+                mov [esp], ecx
+                
+                call GetAction(Type:=)(0)
+                
+                ; Move the stack pointer back up
+                add esp, 8
+                
+                ;sub esp, 1
+                ;mov byte [esp], 105
+                ;mov esi, esp
+                
+                ;sub esp, 4
+                ;mov [esp], esi
+                ;call GetAction(OutputByte)(0)
+                ;add esp, 5
 
                 mov esp, ebp
                 pop ebp        

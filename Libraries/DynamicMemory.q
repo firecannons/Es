@@ -67,8 +67,14 @@ class DynamicMemory<T>
         
         ; move new memory location to return position
         mov ebx, ebp
-        add ebx, 12
+        add ebx, 16
         mov [ebx], eax
+        
+        ;mov eax, 0
+        mov byte [eax], 12
+        mov byte [eax+1], 12
+        mov byte [eax+2], 12
+        mov byte [eax+3], 12
         
         mov esp, ebp
         pop ebp

@@ -323,7 +323,7 @@ class Byte size 1
             mov ebx, [ebx]
             
             ; mov value of eax into position of [ebx]
-            mov dword [ebx], eax
+            mov byte [ebx], al
             
             
             

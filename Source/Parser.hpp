@@ -5,6 +5,8 @@ string Parser::Parse(const vector<Token> & Tokens)
     Initialize(Tokens);
     
     RunAllPasses();
+    
+    OutputTypeTable();
 
     OutputTemplateAsm();
 
@@ -67,9 +69,15 @@ bool Parser::IsNextToken()
 
 void Parser::Operate()
 {
-    if(CurrentClass.Type != NULL && CurrentClass.Type->Name == "Array" && PassMode == PASS_MODE::FUNCTION_SKIM)
+    //if(CurrentClass.Type != NULL && CurrentClass.Type->Name == "Array" && PassMode == PASS_MODE::FUNCTION_SKIM)
+    if(DoesMapContain("Integer", TypeTable) == true && TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() != 0)
     {
-    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << endl;
+    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << " " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << " " 
+    << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.OrderedObjects.size() << endl;
+    }
+    else
+    {
+        cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << endl;
     }
 /*
                 BaseType BT1;
@@ -794,9 +802,8 @@ Scope * Parser::GetCurrentScope()
 
 void Parser::ParseTemplates()
 {
-    cout << "Position = " << Position << endl;
     InitializeTemplateTokens();
-    cout << "Position = " << Position << endl;
+    OutputTokens(TemplateTokens);
     InitializeTemplateParse();
     ParseTemplateTokens();
 }
@@ -943,8 +950,12 @@ void Parser::OperateTemplateTokens()
                 cout << OutputFullTemplatesToString(StoredParsedTemplates[0]) << endl;
                 CurrentParsingType.Templates->Templates = StoredParsedTemplates;
                 cout << "fire" << endl << OutputFullTemplatesToString(StoredParsedTemplates[0]) << &StoredParsedTemplates[StoredParsedTemplates.size() - 1] << endl;
-
+                
+                
+                cout << "entering parsing template " << OutputFullTemplatesToString(CurrentParsingType) << " from " << OutputFullTemplatesToString(CurrentClass) << endl;
                 CompileTemplatedCode();
+                
+                cout << "leaving parsing template " << OutputFullTemplatesToString(CurrentParsingType) << "to return to " << OutputFullTemplatesToString(CurrentClass) << endl;
                 // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
             }
             else
@@ -1178,12 +1189,19 @@ void Parser::ParseExpectVariableName()
                     {
                         cout << "adding P" << endl;
                         cout << OutputFullTemplatesToString(CurrentParsingType) << endl;
+                        cout << CurrentClass.Templates->Size << endl;
                     }
+                    
+                    cout << "wth " << CurrentClass.Type->Name << " getting " << CurrentToken.Contents << " " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
+                    string i;
+                    //cin >> i;
+                    
                     GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                     GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
                 }
                 else if(IsFunctionScopeClosest() == true && PassMode == PASS_MODE::FULL_PASS)
                 {
+                    cout << "adding object to function scope " << NewParamObject.Name << endl;
                     GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                     AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
                 }
@@ -1252,6 +1270,7 @@ void Parser::ReduceLine()
 void Parser::OperateReduceTokens()
 {
     OutputTokens(ReduceTokens);
+    cout << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
     if(IsCurrentlyLeftParen() == true)
     {
         ReducePosition = ReducePosition + 1;
@@ -1268,6 +1287,10 @@ void Parser::OperateReduceTokens()
     {
         ReducePosition = ReducePosition + 2;
     }
+    else if(ReduceTokens.size() - ReducePosition <= 1)
+    {
+        ReducePosition = ReducePosition - 2;
+    }
     else if(IsAColonInNextOperatorPosition() == true)
     {
         DoColonReduce();
@@ -1279,10 +1302,6 @@ void Parser::OperateReduceTokens()
     else if(IsRParenNext() == true)
     {
         ReduceRParen();
-    }
-    else if(ReduceTokens.size() - ReducePosition <= 2)
-    {
-        ReducePosition = ReducePosition - 2;
     }
     else if(IsFirstOperatorHigherPrecedence() == true)
     {
@@ -1514,6 +1533,7 @@ bool Parser::IsAColonInFarOperatorPosition()
 
 void Parser::DoColonReduce()
 {
+    cout << "yo " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << " " << ReducePosition << endl;
     Object * CallingObject = GetInAnyScope(ReduceTokens[ReducePosition].Contents);
     Object * ScopeObject = &CallingObject->Type.Templates->MyScope.Objects[ReduceTokens[ReducePosition + 2].Contents];
     if(CurrentClass.Type != NULL)
@@ -1529,7 +1549,9 @@ void Parser::DoColonReduce()
     NewObject.Offset = CallingObject->Offset + OffsetShift;
     NewObject.IsReference = CallingObject->IsReference;
     NewObject.ReferenceOffset = CallingObject->ReferenceOffset;
+    cout << "adding objects to colon reduce " << NewObject.Name << " " << GetCurrentScope()->Origin << " " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
     GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
+    cout << "adding objects to colon reduce " << NewObject.Name << " " << GetCurrentScope()->Origin << " " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
 }
@@ -1613,6 +1635,7 @@ void Parser::AddToArgList(const unsigned int InPosition)
         ReduceTokens[InPosition].Contents = NumberObject.Name;
         NumberObject.Type.Type = &TypeTable["Integer"];
         NumberObject.Type.Templates = TypeTable["Integer"].GetFirstCompiledTemplate();
+        cout << "adding number to objects " << endl;
         GetCurrentScope()->Objects.emplace(NumberObject.Name, NumberObject);
         AddNewVariableToStack(GetCurrentScope()->Objects[NumberObject.Name]);
         AddNumericalValueToTempInteger(VariableName);
@@ -1730,6 +1753,7 @@ void Parser::AddReturnValue(const Function & InFunction)
         Object NewObject;
         NewObject.Name = GetNextTemporaryVariable();
         NewObject.Type = InFunction.ReturnType;
+        cout << "adding return value " << NewObject.Name << endl;
         GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
         AddNewVariableToStack(GetCurrentScope()->Objects[NewObject.Name]);
         ReduceTokens[ReducePosition].Contents = NewObject.Name;
@@ -1870,7 +1894,7 @@ string Parser::OutputCompiledTemplateToString(const CompiledTemplate & OutputCT,
     
     
     
-    cout << "before" << endl;
+    cout << "before " << InType.Name << endl;
     OutputString = OutputString + "Recursive Template: " + OutputFullTemplatesToString(NewTT); /*to_string(NewTT.Templates->Templates.size()) + " " + to_string(TypeTable[string("Box")].CompiledTemplates.size()) + " "
         + to_string(TypeTable[string("Box")].CompiledTemplates[2].Templates[0].Templates->Templates.size()) + " " + OutputFullTemplatesToString(NewTT) + '\n';*/
     cout << "after" << endl;
@@ -1880,12 +1904,15 @@ string Parser::OutputCompiledTemplateToString(const CompiledTemplate & OutputCT,
     
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Scope:\n";
+    cout << "entering printing scope" << endl;
     OutputString = OutputString + OutputScopeToString((Scope &)OutputCT.MyScope, Level + 1);
+    cout << "exiting printing scope" << endl;
     return OutputString;
 }
 
 string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level)
 {
+    cout << "one" << endl;
     string OutputString;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Offset: " + to_string(OutputScope.Offset) + '\n';
@@ -1895,12 +1922,15 @@ string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level
     OutputString = OutputString + "Ordered Objects Size: " + to_string(OutputScope.OrderedObjects.size()) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Objects:\n";
+    cout << "two" << endl;
 
     map<string, Object>::iterator Iterator;
     for (Iterator = OutputScope.Objects.begin(); Iterator != OutputScope.Objects.end(); Iterator++)
     {
+        cout << Iterator->second.Name << endl;
         OutputString = OutputString + OutputObjectToString(Iterator->second, Level + 1);
     }
+    cout << "three" << endl;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Functions:\n";
 
@@ -1914,6 +1944,7 @@ string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level
             Index = Index + 1;
         }
     }
+    cout << "four" << endl;
     return OutputString;
 }
 
@@ -2118,6 +2149,14 @@ void Parser::SizeCompiledTemplate(CompiledTemplate & InCompiledTemplate)
         InCompiledTemplate.MyScope.OrderedObjects[Index]->Offset = InCompiledTemplate.MyScope.Offset;
         InCompiledTemplate.MyScope.Offset = InCompiledTemplate.MyScope.Offset + InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->Size;
         InCompiledTemplate.Size = InCompiledTemplate.MyScope.Offset;
+        if(InCompiledTemplate.MyScope.OrderedObjects[Index]->Name == "P" ||
+        InCompiledTemplate.MyScope.OrderedObjects[Index]->Name == "Size")
+        {
+            cout << "sizing " << InCompiledTemplate.MyScope.OrderedObjects[Index]->Name << endl;
+            cout << InCompiledTemplate.MyScope.OrderedObjects[Index]->Offset << " " << InCompiledTemplate.MyScope.Offset << " "
+            << InCompiledTemplate.Size << " " << InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->Size << endl;
+            //exit(1);
+        }
         Index = Index + 1;
     }
 }
