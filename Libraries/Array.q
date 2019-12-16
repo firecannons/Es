@@ -132,29 +132,24 @@ class Array < Type >
                 
                 add dword ecx, eax
                 
-                ; Load the return position
+                
+                
+                ; Load Elem
                 mov ebx, ebp
-                add ebx, 20
+                add ebx, 16
+                mov ebx, [ebx]
                 add esp, -4
                 mov [esp], ebx
 
-                ; Load the ebx position onto the stack
+                ; Load the array position
                 add esp, -4
                 mov [esp], ecx
+                mov edi, ecx
                 
                 call GetAction(Type:=)(0)
                 
                 ; Move the stack pointer back up
                 add esp, 8
-                
-                ;sub esp, 1
-                ;mov byte [esp], 105
-                ;mov esi, esp
-                
-                ;sub esp, 4
-                ;mov [esp], esi
-                ;call GetAction(OutputByte)(0)
-                ;add esp, 5
 
                 mov esp, ebp
                 pop ebp        

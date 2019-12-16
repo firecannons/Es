@@ -169,14 +169,34 @@ action Main
     Byte B = MyArray:GetAt(0)
     OverloadTest = 100
     OutputByte(OverloadTest)
-    OutputByte(B)
+    //OutputByte(B)
     
     
     
-    Byte TestByte = 1
+    Byte TestByte = 4
+    MyArray:SetAt(0, TestByte)
+    
+    TestByte = 3
     MyArray:SetAt(1, TestByte)
-    TestByte = 5
+    
+    TestByte = 2
+    MyArray:SetAt(2, TestByte)
+    
+    TestByte = 1
+    MyArray:SetAt(3, TestByte)
+    
+    
+    
+    TestByte = MyArray:GetAt(0)
+    OutputByteDigit(TestByte)
+    
     TestByte = MyArray:GetAt(1)
+    OutputByteDigit(TestByte)
+    
+    TestByte = MyArray:GetAt(2)
+    OutputByteDigit(TestByte)
+    
+    TestByte = MyArray:GetAt(3)
     OutputByteDigit(TestByte)
 end
 
