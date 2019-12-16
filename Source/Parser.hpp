@@ -5,8 +5,6 @@ string Parser::Parse(const vector<Token> & Tokens)
     Initialize(Tokens);
     
     RunAllPasses();
-    
-    OutputTypeTable();
 
     OutputTemplateAsm();
 
@@ -2116,6 +2114,7 @@ void Parser::InitializeForPass()
 
 void Parser::SetSizesAndOffsets()
 {
+    OutputTypeTable();
     map<string, BaseType>::iterator Iterator;
     for (Iterator = TypeTable.begin(); Iterator != TypeTable.end(); Iterator++)
     {
@@ -2128,7 +2127,7 @@ void Parser::SizeType(BaseType & InBaseType)
     unsigned int Index = 0;
     while(Index < InBaseType.CompiledTemplates.size())
     {
-        if(GetInList(InBaseType.CompiledTemplates, Index).HasSizeBeenCalculated == false)
+        if(GetInList(InBaseType.CompiledTemplates, Index).HasSizeBeenCalculated == false || &GetInList(InBaseType.CompiledTemplates, Index) == CurrentClass.Templates)
         {
             SizeCompiledTemplate(GetInList(InBaseType.CompiledTemplates, Index));
         }
@@ -2140,9 +2139,10 @@ void Parser::SizeCompiledTemplate(CompiledTemplate & InCompiledTemplate)
 {
     InCompiledTemplate.HasSizeBeenCalculated = true;
     unsigned int Index = 0;
+    InCompiledTemplate.MyScope.Offset = 0;
     while(Index < InCompiledTemplate.MyScope.OrderedObjects.size())
     {
-        if(InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->HasSizeBeenCalculated == false)
+        if(InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->HasSizeBeenCalculated == false || InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates == CurrentClass.Templates)
         {
             SizeCompiledTemplate(*(InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates));
         }
