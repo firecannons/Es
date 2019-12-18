@@ -187,7 +187,7 @@ public:
     void AppendNewlinesToOutputASM(const unsigned int Number);
     string GetNewlines(const unsigned int Number);
     void OutputCurrentFunctionToAsm();
-    void OutputDeclaringVariableToAsm(const string & VariableName);
+    void OutputDeclaringVariableToAsm(const Object & VariableName);
     void AddToArgList(const unsigned int Position);
     void AddNewVariableToStack(Object & NewObject);
     void CallFunction(const Function & InFunction);

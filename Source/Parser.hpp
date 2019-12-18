@@ -5,6 +5,8 @@ string Parser::Parse(const vector<Token> & Tokens)
     Initialize(Tokens);
     
     RunAllPasses();
+    
+    OutputTypeTable();
 
     OutputTemplateAsm();
 
@@ -258,6 +260,13 @@ void Parser::ParseStartOfLine()
                     OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
                     AppendNewlinesToOutputASM(2);
                 }
+            }
+        }
+        else if(PassMode == PASS_MODE::FUNCTION_SKIM)
+        {
+            if(GetCurrentScope()->Origin == SCOPE_ORIGIN::CLASS)
+            {
+                SizeCompiledTemplate(*CurrentClass.Templates);
             }
         }
         if(IsLocalScopeInOneLevelLow() == true || (PassMode == PASS_MODE::CLASS_SKIM && GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION))
@@ -584,6 +593,8 @@ void Parser::ParseExpectActionName()
             NewFunction.Name = CurrentToken.Contents;
             NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
             NewFunction.LatestPassMode = PASS_MODE::CLASS_SKIM;
+            string NextLabel = GetNextLabel();
+            NewFunction.Label = NextLabel;
             GetCurrentScope()->Functions[CurrentToken.Contents].Functions.push_back(NewFunction);
             CurrentFunction = GetCurrentScope()->Functions[CurrentToken.Contents].GetLastFunction();
         }
@@ -610,9 +621,7 @@ void Parser::ParseExpectActionName()
         
         if(PassMode == PASS_MODE::FULL_PASS)
         {
-            string NextLabel = GetNextLabel();
-            CurrentFunction->Label = NextLabel;
-            OutputAsm = OutputAsm + NextLabel + GlobalKeywords.ReservedWords["COLON"];
+            OutputAsm = OutputAsm + CurrentFunction->Label + GlobalKeywords.ReservedWords["COLON"];
             if(DEBUG == true)
             {
                 OutputCurrentFunctionToAsm();
@@ -1434,8 +1443,15 @@ void Parser::DoReduceFunctionCall()
             CurrentToken);
     }
     WantedFunction = GetFromFunctionList(CallingScope->Functions[ReduceTokens[ReducePosition].Contents], Reverse(NextFunctionObjects));
-    cout << "two " << ReduceTokens[ReducePosition].Contents << endl;
+    OutputScopeToString(*CallingScope, 1);
+    cout << "two " << ReduceTokens[ReducePosition].Contents << " " << WantedFunction << endl;
     CallFunction(*WantedFunction);
+    if(WantedFunction->Label == "")
+    {
+        OutputTypeTable();
+        cout << "mess up" << endl;
+        //exit(1);
+    }
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
 }
@@ -1616,10 +1632,10 @@ void Parser::OutputCurrentFunctionToAsm()
     OutputAsm = OutputAsm + FunctionPath;
 }
 
-void Parser::OutputDeclaringVariableToAsm(const string & VariableName)
+void Parser::OutputDeclaringVariableToAsm(const Object & Variable)
 {
     string Output = SPACE + SEMICOLON + SPACE;
-    OutputAsm = OutputAsm + Output + string("Declaring ") + VariableName;
+    OutputAsm = OutputAsm + Output + string("Declaring ") + Variable.Name + string(" at offset ") + to_string(Variable.Offset);
 }
 
 void Parser::AddToArgList(const unsigned int InPosition)
@@ -1652,7 +1668,7 @@ void Parser::AddNewVariableToStack(Object & NewObject)
     OutputAsm = OutputAsm + GlobalASM.CalcReserveSpaceAsm(NewObject.Type.Templates->Size);
     if(DEBUG == true)
     {
-        OutputDeclaringVariableToAsm(NewObject.Name);
+        OutputDeclaringVariableToAsm(NewObject);
     }
     AppendNewlinesToOutputASM(1);
     MoveBackCurrentScopeOffset(NewObject);
@@ -1728,7 +1744,7 @@ Scope * Parser::GetGlobalScope()
 void Parser::OutputCallingFunctionCommentToAsm(const Function & InFunction)
 {
     string Output = SPACE + SEMICOLON + SPACE;
-    OutputAsm = OutputAsm + Output + string("Calling ") + OutputFunctionNameWithObjects(InFunction.Name, InFunction.Parameters);
+    OutputAsm = OutputAsm + Output + string("Calling ") + OutputFunctionNameWithObjects(InFunction.Name, InFunction.Parameters) + " " + InFunction.Label;
 }
 
 bool Parser::IsRParenNext()
@@ -1931,7 +1947,8 @@ string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level
     cout << "three" << endl;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Functions:\n";
-
+    
+    cout << &OutputScope << " outputting scope " << OutputScope.Functions.size() << endl;
     map<string, FunctionList>::iterator FuncIterator;
     for (FuncIterator = OutputScope.Functions.begin(); FuncIterator != OutputScope.Functions.end(); FuncIterator++)
     {
@@ -1985,6 +2002,7 @@ string Parser::OutputFunctionToString(Function & OutputFunction, const unsigned 
     string OutputString;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Name: " + OutputFunction.Name + '\n';
+    cout << &OutputFunction << " " << OutputFunction.Name << endl;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Is Asm: " + to_string(OutputFunction.IsAsm) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
@@ -2409,6 +2427,7 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
     bool Found = false;
     unsigned int FoundPos = 0;
     unsigned int Index = 0;
+    cout << "ok... " << InList.Functions.size() << endl;
     while(Index < InList.Functions.size() && Found == false)
     {
         if(DoesFunctionMatch(GetInList(InList.Functions, Index), InObjects) == true)
@@ -2416,6 +2435,7 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
             Found = true;
             FoundPos = Index;
         }
+        cout << "Index: " << Index << " FOund: " << Found << " " << GetInList(InList.Functions, FoundPos).Label << endl;
         Index = Index + 1;
     }
     if(Found == false)

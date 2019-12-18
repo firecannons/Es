@@ -1,8 +1,22 @@
 using Libraries . Array
+using Libraries . DataTypes
 
 class Text
-        Array < Letter > TextArray
-        
-        action on create
-        end
+    Array<Byte> Letters
+
+
+    action Text
+    end
+
+    action Resize ( Integer Size )
+        Me : Letters : Resize ( Size )
+    end
+
+    action GetAt( Integer Position ) returns Byte
+        Me : Letters : GetAt ( Position )
+    end
+    
+    action SetAt(Integer Position, Byte Elem)
+        Me : Letters : SetAt ( Position , Elem )
+    end
 end
