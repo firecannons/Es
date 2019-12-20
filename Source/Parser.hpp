@@ -1664,8 +1664,8 @@ void Parser::AddNewVariableToStack(Object & NewObject)
 
 void Parser::CallFunction(const Function & InFunction)
 {
-    int StartOffset = GetCurrentScope()->Offset;
     AddExternalReturnValue(InFunction);
+    int StartOffset = GetCurrentScope()->Offset;
     PushArguments();
     OutputCallAsm(InFunction);
     if(DEBUG == true)

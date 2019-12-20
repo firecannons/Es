@@ -294,12 +294,12 @@ action Main
     OutputByteDigit(FirstText:GetAt(0))*/
     //OutputText ( FirstText )
    
-    /*NewByte = 2
+    NewByte = 2
     Array<Byte> MyText
     MyText:Resize(1)
     MyText:SetAt(0, TestByte)
     NewByte = MyText:GetAt(0)
-    OutputByteDigit(NewByte)*/
+    OutputByteDigit(NewByte)
     
     Text MyText3
     MyText3:Letters:Resize(1)
@@ -315,9 +315,9 @@ action Main
     NewByte = MyText2:Letters:GetAt(0)
     OutputByteDigit(NewByte)
     
-    /*Array<Byte> CoolArray
+    Array<Byte> CoolArray
     CreateCoolString ( CoolArray )
-    OutputText ( CoolArray )*/
+    OutputText ( CoolArray )
 end
 
 class afterClass
