@@ -13,7 +13,7 @@ class Text
     end
 
     action GetAt( Integer Position ) returns Byte
-        Me : Letters : GetAt ( Position )
+        return Me : Letters : GetAt ( Position )
     end
     
     action SetAt(Integer Position, Byte Elem)

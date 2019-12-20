@@ -209,6 +209,10 @@ void Parser::Operate()
     {
         ParseExpectNewlineAfterVariableDeclaration();
     }
+    else if(State == PARSER_STATE::EXPECT_WAIT_FOR_END)
+    {
+        ParseExpectWaitForEnd();
+    }
 }
 
 void Parser::ParseStartOfLine()
@@ -245,33 +249,17 @@ void Parser::ParseStartOfLine()
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"])
     {
-        State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
-        if(PassMode == PASS_MODE::FULL_PASS)
+        ParseEndToken();
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURN"])
+    {
+        if(IsLocalScopeToBeParsedNow() == true)
         {
-            if(IsLocalScopeInOneLevelLow() == true)
-            {
-                if(CurrentFunction != NULL)
-                {
-                    if(CurrentFunction->IsAsm == false)
-                    {
-                        OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
-                        AppendNewlinesToOutputASM(2);
-                    }
-                    OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
-                    AppendNewlinesToOutputASM(2);
-                }
-            }
-        }
-        else if(PassMode == PASS_MODE::FUNCTION_SKIM)
-        {
-            if(GetCurrentScope()->Origin == SCOPE_ORIGIN::CLASS)
-            {
-                SizeCompiledTemplate(*CurrentClass.Templates);
-            }
-        }
-        if(IsLocalScopeInOneLevelLow() == true || (PassMode == PASS_MODE::CLASS_SKIM && GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION))
-        {
-            EndCurrentScope();
+            Position = Position + 1;
+            CopyUntilNextNewline();
+            ReduceLine();
+            ReturnAfterReduce();
+            State = PARSER_STATE::EXPECT_WAIT_FOR_END;
         }
     }
     else
@@ -1666,18 +1654,18 @@ void Parser::AddToArgList(const unsigned int InPosition)
 void Parser::AddNewVariableToStack(Object & NewObject)
 {
     OutputAsm = OutputAsm + GlobalASM.CalcReserveSpaceAsm(NewObject.Type.Templates->Size);
+    MoveBackCurrentScopeOffset(NewObject);
     if(DEBUG == true)
     {
         OutputDeclaringVariableToAsm(NewObject);
     }
     AppendNewlinesToOutputASM(1);
-    MoveBackCurrentScopeOffset(NewObject);
 }
 
 void Parser::CallFunction(const Function & InFunction)
 {
-    AddReturnValue(InFunction);
     int StartOffset = GetCurrentScope()->Offset;
+    AddExternalReturnValue(InFunction);
     PushArguments();
     OutputCallAsm(InFunction);
     if(DEBUG == true)
@@ -1758,20 +1746,6 @@ bool Parser::IsRParenNext()
         }
     }
     return Output;
-}
-
-void Parser::AddReturnValue(const Function & InFunction)
-{
-    if(InFunction.HasReturnType == true)
-    {
-        Object NewObject;
-        NewObject.Name = GetNextTemporaryVariable();
-        NewObject.Type = InFunction.ReturnType;
-        cout << "adding return value " << NewObject.Name << endl;
-        GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
-        AddNewVariableToStack(GetCurrentScope()->Objects[NewObject.Name]);
-        ReduceTokens[ReducePosition].Contents = NewObject.Name;
-    }
 }
 
 void Parser::ParseExpectNewlineAfterVariableDeclaration()
@@ -2440,7 +2414,8 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
     }
     if(Found == false)
     {
-        OutputStandardErrorMessage(string("No function matching ") + OutputFunctionNameWithObjects(((FunctionList &) InList).GetFirstFunction()->Name, InObjects) + string("."),
+        cout << "hello " << InObjects.size() << endl;
+        OutputStandardErrorMessage(string("No function matching ") + OutputFunctionNameWithObjects(((FunctionList &) InList).GetFirstFunction()->Name, InObjects) + string(" in list."),
             CurrentToken);
     }
     return &GetInList(InList.Functions, FoundPos);
@@ -2568,7 +2543,7 @@ string Parser::PerformLinkStringAction(const string & LinkString, const string &
             CalledFunctionList = &GetGlobalScope()->Functions[ParenOperand];
         }
         size_t RightParenPosition = OutAsmCode.find(GlobalKeywords.ReservedWords["RPAREN"], Found);
-        cout << "ok... " << ParenOperand << " " << RightParenPosition << " " << Found << " " << RightParenPosition - (Found + 1) << " " << OutAsmCode.substr(Found - 5, 10) << endl;
+        //cout << "ok... " << ParenOperand << " " << RightParenPosition << " " << Found << " " << RightParenPosition - (Found + 1) << " " << OutAsmCode.substr(Found - 5, 10) << endl;
         string FunctionNumberString = OutAsmCode.substr(Found + 1, RightParenPosition - (Found + 1));
         unsigned int FunctionNumber = stoi(FunctionNumberString);
         cout << "aha we got one sdf " << LinkString << " " << FunctionNumberString << " " << FunctionNumber << " " << CalledFunctionList->Functions.size() << endl;
@@ -2578,4 +2553,93 @@ string Parser::PerformLinkStringAction(const string & LinkString, const string &
         cout << "aha we got one " << LinkString << " " << ParenOperand << endl;
     }
     return OutAsmCode;
+}
+
+void Parser::ReturnAfterReduce()
+{
+    cout << "reduce return! " << ReduceTokens[ReducePosition].Contents << endl;
+    string VariableName = ReduceTokens[ReducePosition].Contents;
+    Object * NextArg = GetInAnyScope(VariableName);
+    NextFunctionObjects.push_back(NextArg);
+    AddInternalReturnObject();
+    CallFunction(*GetFromFunctionList(NextArg->Type.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["EQUALS"]],
+        Reverse(NextFunctionObjects)));
+}
+
+int Parser::GetReturnVariableOffset()
+{
+    int Offset = STACK_FRAME_SIZE + NextFunctionObjects.size() * POINTER_SIZE + CurrentFunction->ReturnType.Templates->Size;
+    return Offset;
+}
+
+void Parser::ParseExpectWaitForEnd()
+{
+    if(IsWhiteSpace(CurrentToken.Contents) == false)
+    {
+        if(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"])
+        {
+            ParseEndToken();
+        }
+        else
+        {
+            OutputStandardErrorMessage(string("Expected 'return' statement ") + InsteadErrorMessage(CurrentToken.Contents), CurrentToken);
+        }
+    }
+}
+
+void Parser::ParseEndToken()
+{
+    State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
+    if(PassMode == PASS_MODE::FULL_PASS)
+    {
+        if(IsLocalScopeInOneLevelLow() == true)
+        {
+            if(CurrentFunction != NULL)
+            {
+                if(CurrentFunction->IsAsm == false)
+                {
+                    OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
+                    AppendNewlinesToOutputASM(2);
+                }
+                OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
+                AppendNewlinesToOutputASM(2);
+            }
+        }
+    }
+    else if(PassMode == PASS_MODE::FUNCTION_SKIM)
+    {
+        if(GetCurrentScope()->Origin == SCOPE_ORIGIN::CLASS)
+        {
+            SizeCompiledTemplate(*CurrentClass.Templates);
+        }
+    }
+    if(IsLocalScopeInOneLevelLow() == true || (PassMode == PASS_MODE::CLASS_SKIM && GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION))
+    {
+        EndCurrentScope();
+    }
+}
+
+void Parser::AddExternalReturnValue(const Function & InFunction)
+{
+    if(InFunction.HasReturnType == true)
+    {
+        Object NewObject;
+        NewObject.Name = GetNextTemporaryVariable();
+        NewObject.Type = InFunction.ReturnType;
+        cout << "adding return value " << NewObject.Name << endl;
+        GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
+        AddNewVariableToStack(GetCurrentScope()->Objects[NewObject.Name]);
+        ReduceTokens[ReducePosition].Contents = NewObject.Name;
+    }
+}
+
+void Parser::AddInternalReturnObject()
+{
+    Object NewObject;
+    NewObject.Name = GetNextTemporaryVariable();
+    NewObject.Type = CurrentFunction->ReturnType;
+    int ReturnOffset = GetReturnVariableOffset();
+    NewObject.Offset = ReturnOffset;
+    GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
+    NextFunctionObjects.push_back(GetInAnyScope(NewObject.Name));
 }

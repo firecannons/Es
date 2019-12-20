@@ -293,20 +293,27 @@ action Main
     FirstText:SetAt(0, TestByte)
     OutputByteDigit(FirstText:GetAt(0))*/
     //OutputText ( FirstText )
-   /*
-    NewByte = 2
+   
+    /*NewByte = 2
     Array<Byte> MyText
     MyText:Resize(1)
     MyText:SetAt(0, TestByte)
     NewByte = MyText:GetAt(0)
     OutputByteDigit(NewByte)*/
     
-    /*Text MyText2
+    Text MyText3
+    MyText3:Letters:Resize(1)
+    TestByte = 2
+    MyText3:Letters:SetAt(0, TestByte)
+    NewByte = MyText3:Letters:GetAt(0)
+    OutputByteDigit(NewByte)
+    
+    Text MyText2
     MyText2:Resize(1)
     TestByte = 2
     MyText2:SetAt(0, TestByte)
-    NewByte = MyText2:GetAt(0)
-    OutputByteDigit(NewByte)*/
+    NewByte = MyText2:Letters:GetAt(0)
+    OutputByteDigit(NewByte)
     
     /*Array<Byte> CoolArray
     CreateCoolString ( CoolArray )

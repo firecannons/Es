@@ -128,4 +128,26 @@ T Reverse(T & InVector)
     return NewVector;
 }
 
+bool IsWhiteSpace(const char InChar)
+{
+    bool Output = false;
+    if(InChar == ' ' || InChar == '\t' || InChar == '\n')
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+bool IsWhiteSpace(const string & InString)
+{
+    bool Output = true;
+    unsigned int Index = 0;
+    while(Index < InString.size() && Output == true)
+    {
+        Output = IsWhiteSpace(InString[Index]);
+        Index = Index + 1;
+    }
+    return Output;
+}
+
 #endif

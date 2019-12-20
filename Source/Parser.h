@@ -46,7 +46,8 @@ enum PARSER_STATE
     EXPECT_COMMA_OR_RPAREN,
     EXPECT_VARIABLE_NAME,
     EXPECT_FIRST_OPERATOR_OR_NEWLINE,
-    EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION
+    EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION,
+    EXPECT_WAIT_FOR_END
 };
 
 enum TYPE_PARSE_MODE
@@ -198,7 +199,6 @@ public:
     Scope * GetGlobalScope();
     void OutputCallingFunctionCommentToAsm(const Function & InFunction);
     bool IsRParenNext();
-    void AddReturnValue(const Function & InFunction);
     void ParseExpectNewlineAfterVariableDeclaration();
     bool IsGlobalScopeClosest();
     bool IsClassScopeClosest();
@@ -250,6 +250,12 @@ public:
     string LinkAsm(const string & LinkAsm);
     string ReplaceLinkString(const string & LinkString, const string & InAsmCode);
     string PerformLinkStringAction(const string & LinkString, const string & InAsmCode, const size_t Found, const string & ParenOperand);
+    void ReturnAfterReduce();
+    int GetReturnVariableOffset();
+    void ParseExpectWaitForEnd();
+    void ParseEndToken();
+    void AddExternalReturnValue(const Function & InFunction);
+    void AddInternalReturnObject();
 };
 
 #include "Compiler.h"
