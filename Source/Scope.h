@@ -22,6 +22,7 @@ class Scope
     
 public:
     int Offset;
+    int AfterTestOffset;
     map<string, FunctionList> Functions;
     map<string, Object> Objects;
     vector<Object *> OrderedObjects;

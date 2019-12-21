@@ -25,6 +25,7 @@ AsmCode::AsmCode()
     Codes.emplace(string("TEST_BOOLEAN"), string("mov byte cl, [esp]\ntest cl, cl"));
     Codes.emplace(string("JUMP_FALSE"), string("je "));
     Codes.emplace(string("JUMP_TRUE"), string("jne "));
+    Codes.emplace(string("UNCONDITIONAL_JUMP"), string("jmp "));
 }
 
 string AsmCode::CalcReserveSpaceAsm(const unsigned int ReserveAmount)

@@ -262,6 +262,9 @@ public:
     void DoPossibleControlStructureErase();
     bool IsValidRepeatType(const string & InToken);
     void DoPossibleControlStructureOutput();
+    void ProcessEndScope();
+    void DoPossibleDeleteFunctionScope();
+    void DoPossibleDeleteClassScope();
 };
 
 #include "Compiler.h"

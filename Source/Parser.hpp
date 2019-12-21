@@ -1104,15 +1104,6 @@ void Parser::ParseExpectReturnsNewline()
 
 void Parser::EndCurrentScope()
 {
-    if(CurrentFunction != NULL)
-    {
-        CurrentFunction = NULL;
-    }
-    else if(CurrentClass.Type != NULL)
-    {
-        CurrentClass.Type = NULL;
-        CurrentClass.Templates = NULL;
-    }
     ScopeStack.pop_back();
 }
 
@@ -2604,8 +2595,9 @@ void Parser::ParseEndToken()
     {
         if(IsLocalScopeInOneLevelLow() == true)
         {
-            if(CurrentFunction != NULL)
+            if(GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION)
             {
+                cout << "Current function ending scope: " << CurrentFunction << endl;
                 if(CurrentFunction->IsAsm == false)
                 {
                     OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
@@ -2623,12 +2615,7 @@ void Parser::ParseEndToken()
             SizeCompiledTemplate(*CurrentClass.Templates);
         }
     }
-    if(IsLocalScopeInOneLevelLow() == true || (PassMode == PASS_MODE::CLASS_SKIM && GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION))
-    {
-        DoPossibleControlStructureOutput();
-        DoPossibleControlStructureErase();
-        EndCurrentScope();
-    }
+    ProcessEndScope();
 }
 
 void Parser::AddExternalReturnValue(const Function & InFunction)
@@ -2659,22 +2646,26 @@ void Parser::AddInternalReturnObject()
 
 void Parser::ParseExpectUntilOrWhile()
 {
-    if(IsLocalScopeToBeParsedNow() == true)
+    if(IsValidRepeatType(CurrentToken.Contents) == true)
     {
-        if(IsValidRepeatType(CurrentToken.Contents) == true)
+        Scope NewScope;
+        NewScope.Offset = GetCurrentScope()->Offset;
+        NewScope.Origin = SCOPE_ORIGIN::REPEAT;
+        ControlStructureScopes.push_back(NewScope);
+        ScopeStack.push_back(&ControlStructureScopes[ControlStructureScopes.size() - 1]);
+        if(IsLocalScopeToBeParsedNow() == true)
         {
-            Scope NewScope;
-            NewScope.Origin = SCOPE_ORIGIN::REPEAT;
-            NewScope.ControlStructureBeginLabel = GetNextLabel();
-            NewScope.ControlStructureEndLabel = GetNextLabel();
-            OutputAsm = OutputAsm + NewScope.ControlStructureBeginLabel + GlobalKeywords.ReservedWords["COLON"];
+            GetCurrentScope()->ControlStructureBeginLabel = GetNextLabel();
+            GetCurrentScope()->ControlStructureEndLabel = GetNextLabel();
+            OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureBeginLabel + GlobalKeywords.ReservedWords["COLON"];
             AppendNewlinesToOutputASM(2);
             
             Position = Position + 1;
             CopyUntilNextNewline();
             ReduceLine();
-            ControlStructureScopes.push_back(NewScope);
-            ScopeStack.push_back(&ControlStructureScopes[ControlStructureScopes.size() - 1]);
+            
+            GetCurrentScope()->AfterTestOffset = GetCurrentScope()->Offset;
+            
             OutputAsm = OutputAsm + GlobalASM.Codes["TEST_BOOLEAN"];
             AppendNewlinesToOutputASM(1);
             if(CurrentToken.Contents == GlobalKeywords.ReservedWords["UNTIL"])
@@ -2685,11 +2676,12 @@ void Parser::ParseExpectUntilOrWhile()
             {
                 OutputAsm = OutputAsm + GlobalASM.Codes["JUMP_FALSE"] + GetCurrentScope()->ControlStructureEndLabel;
             }
+            AppendNewlinesToOutputASM(2);
         }
-        else
-        {
-            OutputStandardErrorMessage(string("Expected 'until' or 'while' in repeat statement ") + InsteadErrorMessage(CurrentToken.Contents), CurrentToken);
-        }
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected 'until' or 'while' in repeat statement ") + InsteadErrorMessage(CurrentToken.Contents), CurrentToken);
     }
     State = PARSER_STATE::START_OF_LINE;
 }
@@ -2714,9 +2706,45 @@ bool Parser::IsValidRepeatType(const string & InToken)
 
 void Parser::DoPossibleControlStructureOutput()
 {
-    if(GetCurrentScope()->Origin == SCOPE_ORIGIN::REPEAT)
+    if(IsLocalScopeInOneLevelLow() == true)
     {
-        OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureEndLabel + GlobalKeywords.ReservedWords["COLON"];
-        AppendNewlinesToOutputASM(2);
+        if(GetCurrentScope()->Origin == SCOPE_ORIGIN::REPEAT)
+        {
+            cout << "exiting repeat scope" << endl;
+            OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->Offset - ScopeStack[ScopeStack.size() - 2]->Offset));
+            AppendNewlinesToOutputASM(1);
+            OutputAsm = OutputAsm + GlobalASM.Codes["UNCONDITIONAL_JUMP"] + GetCurrentScope()->ControlStructureBeginLabel;
+            AppendNewlinesToOutputASM(1);
+            OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureEndLabel + GlobalKeywords.ReservedWords["COLON"];
+            AppendNewlinesToOutputASM(1);
+            OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->AfterTestOffset - ScopeStack[ScopeStack.size() - 2]->Offset));
+            AppendNewlinesToOutputASM(1);
+        }
+    }
+}
+
+void Parser::ProcessEndScope()
+{
+    DoPossibleControlStructureOutput();
+    DoPossibleControlStructureErase();
+    DoPossibleDeleteFunctionScope();
+    DoPossibleDeleteClassScope();
+    EndCurrentScope();
+}
+
+void Parser::DoPossibleDeleteFunctionScope()
+{
+    if(GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION)
+    {
+        CurrentFunction = NULL;
+    }
+}
+
+void Parser::DoPossibleDeleteClassScope()
+{
+    if(GetCurrentScope()->Origin == SCOPE_ORIGIN::CLASS)
+    {
+        CurrentClass.Type = NULL;
+        CurrentClass.Templates = NULL;
     }
 }
