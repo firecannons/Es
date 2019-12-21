@@ -40,6 +40,12 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("EXCLAMATION"), string("!")));
     ReservedWords.insert(pair<string,string>(string("MULTI_LINE_COMMENT_BEGIN"), string("/*")));
     ReservedWords.insert(pair<string,string>(string("MULTI_LINE_COMMENT_END"), string("*/")));
+    ReservedWords.insert(pair<string,string>(string("REPEAT"), string("repeat")));
+    ReservedWords.insert(pair<string,string>(string("WHILE"), string("while")));
+    ReservedWords.insert(pair<string,string>(string("UNTIL"), string("until")));
+    ReservedWords.insert(pair<string,string>(string("IF"), string("if")));
+    ReservedWords.insert(pair<string,string>(string("ELSE_IF"), string("elseif")));
+    ReservedWords.insert(pair<string,string>(string("ELSE"), string("else")));
     
     ShortOperators.emplace(ReservedWords["LESS_THAN"]);
     ShortOperators.emplace(ReservedWords["GREATER_THAN"]);

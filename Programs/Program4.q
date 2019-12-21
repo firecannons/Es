@@ -318,6 +318,12 @@ action Main
     Array<Byte> CoolArray
     CreateCoolString ( CoolArray )
     OutputText ( CoolArray )
+    
+    /*Byte LoopByte = 1
+    repeat while LoopByte < 9
+        OutputByteDigit(LoopByte)
+        LoopByte = LoopByte + 1
+    end*/
 end
 
 class afterClass

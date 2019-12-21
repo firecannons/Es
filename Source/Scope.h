@@ -26,8 +26,11 @@ public:
     map<string, Object> Objects;
     vector<Object *> OrderedObjects;
     SCOPE_ORIGIN Origin;
+    string ControlStructureBeginLabel;
+    string ControlStructureEndLabel;
 
     Scope();
+    bool IsControlStructureScope();
 };
 
 #include "FunctionList.h"

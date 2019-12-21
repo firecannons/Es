@@ -47,7 +47,8 @@ enum PARSER_STATE
     EXPECT_VARIABLE_NAME,
     EXPECT_FIRST_OPERATOR_OR_NEWLINE,
     EXPECT_NEWLINE_AFTER_VARIABLE_DECLARATION,
-    EXPECT_WAIT_FOR_END
+    EXPECT_WAIT_FOR_END,
+    EXPECT_UNTIL_OR_WHILE
 };
 
 enum TYPE_PARSE_MODE
@@ -106,6 +107,7 @@ public:
     PASS_MODE PassMode;
     vector<TemplatedType> TemplateCompileStack;
     string TemplateOutputAsm;
+    vector<Scope> ControlStructureScopes;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -256,6 +258,10 @@ public:
     void ParseEndToken();
     void AddExternalReturnValue(const Function & InFunction);
     void AddInternalReturnObject();
+    void ParseExpectUntilOrWhile();
+    void DoPossibleControlStructureErase();
+    bool IsValidRepeatType(const string & InToken);
+    void DoPossibleControlStructureOutput();
 };
 
 #include "Compiler.h"
