@@ -1193,7 +1193,7 @@ void Parser::ParseExpectVariableName()
                     GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                     GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
                 }
-                else if(IsFunctionScopeClosest() == true && PassMode == PASS_MODE::FULL_PASS)
+                else if(IsOriginCloserOrEqual(GetCurrentScope()->Origin, SCOPE_ORIGIN::FUNCTION) == true && PassMode == PASS_MODE::FULL_PASS)
                 {
                     cout << "adding object to function scope " << NewParamObject.Name << endl;
                     GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
@@ -2747,4 +2747,14 @@ void Parser::DoPossibleDeleteClassScope()
         CurrentClass.Type = NULL;
         CurrentClass.Templates = NULL;
     }
+}
+
+bool Parser::IsOriginCloserOrEqual(const SCOPE_ORIGIN InOrigin, const SCOPE_ORIGIN TopOrigin)
+{
+    bool Output = false;
+    if(InOrigin >= TopOrigin)
+    {
+        Output = true;
+    }
+    return Output;
 }

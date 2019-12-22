@@ -58,10 +58,21 @@ action Main
     OutputByte(Byte1)
     Byte1 = Byte1 + Byte2
     OutputByte(Byte1)
-    Byte Byte3 = 105
+    Byte Byte3 = 120
     
     repeat while Byte1 < Byte3
         OutputByte(Byte1)
+        Byte Byte2_1 = 97
+        Byte Byte2_2 = 1
+        Byte Byte2_3 = 120
+        repeat while Byte2_1 < Byte2_3
+            OutputByte(Byte2_1)
+            Byte2_1 = Byte2_1 + Byte2_2
+        end
         Byte1 = Byte1 + Byte2
     end
+    
+    /*repeat while 25 < 26
+        OutputByte(Byte1)
+    end*/
 end

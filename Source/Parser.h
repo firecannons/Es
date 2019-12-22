@@ -265,6 +265,7 @@ public:
     void ProcessEndScope();
     void DoPossibleDeleteFunctionScope();
     void DoPossibleDeleteClassScope();
+    bool IsOriginCloserOrEqual(const SCOPE_ORIGIN InOrigin, const SCOPE_ORIGIN TopOrigin);
 };
 
 #include "Compiler.h"
