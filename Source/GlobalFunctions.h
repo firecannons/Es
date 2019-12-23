@@ -150,4 +150,17 @@ bool IsWhiteSpace(const string & InString)
     return Output;
 }
 
+template<class T>
+string OutputSetToString(const unordered_set<T> & MySet)
+{
+    string Output;
+    typename unordered_set<T>::const_iterator it = MySet.begin();
+    while(it != MySet.end())
+    {
+        Output = Output + *it + " ";
+        it++;
+    }
+    return Output;
+}
+
 #endif

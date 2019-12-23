@@ -70,15 +70,7 @@ bool Parser::IsNextToken()
 void Parser::Operate()
 {
     //if(CurrentClass.Type != NULL && CurrentClass.Type->Name == "Array" && PassMode == PASS_MODE::FUNCTION_SKIM)
-    if(DoesMapContain("Integer", TypeTable) == true && TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() != 0)
-    {
-    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << " " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << " " 
-    << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.OrderedObjects.size() << endl;
-    }
-    else
-    {
-        cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << endl;
-    }
+    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << endl;
 /*
                 BaseType BT1;
                 BT1.Name = "toy";
@@ -116,6 +108,7 @@ void Parser::Operate()
                 OutputTypeTable();
                 exit(1);
                 OutputTypeTable();*/
+    cout << "end " << endl;
 
     if(State == PARSER_STATE::START_OF_LINE)
     {
@@ -257,18 +250,30 @@ void Parser::ParseStartOfLine()
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURN"])
     {
+        Position = Position + 1;
+        CopyUntilNextNewline();
         if(IsLocalScopeToBeParsedNow() == true)
         {
-            Position = Position + 1;
-            CopyUntilNextNewline();
             ReduceLine();
             ReturnAfterReduce();
-            State = PARSER_STATE::EXPECT_WAIT_FOR_END;
         }
+        State = PARSER_STATE::EXPECT_WAIT_FOR_END;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["REPEAT"])
     {
         State = PARSER_STATE::EXPECT_UNTIL_OR_WHILE;
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["IF"])
+    {
+        ParseIfStatement();
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ELSE_IF"])
+    {
+        ParseElseIfStatement();
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ELSE"])
+    {
+        ParseElseStatement();
     }
     else
     {
@@ -1105,6 +1110,7 @@ void Parser::ParseExpectReturnsNewline()
 void Parser::EndCurrentScope()
 {
     ScopeStack.pop_back();
+    cout << "after pop " << GetCurrentScope()->Origin << endl;
 }
 
 void Parser::ParseExpectNewlineAfterEnd()
@@ -1353,6 +1359,7 @@ bool Parser::IsFirstOperatorHigherPrecedence()
     unsigned int OrderingIndex = 0;
     while(OrderingIndex < OperatorOrdering.size() && Done == false)
     {
+        cout << ReduceTokens[ReducePosition + 1].Contents << " " << Output << " " << OutputSetToString((const unordered_set<string> &) OperatorOrdering[OrderingIndex]) << endl;
         if(DoesSetContain(ReduceTokens[ReducePosition + 1].Contents, OperatorOrdering[OrderingIndex]) == true)
         {
             Output = true;
@@ -2047,6 +2054,8 @@ bool Parser::IsPassModeHigherOrEqual(const PASS_MODE InPassMode)
 
 bool Parser::IsLocalScopeToBeParsedNow()
 {
+    cout << "entering IsLocalScopeToBeParsedNow " << GetCurrentScope() << endl;
+    cout << "getting " << GetCurrentScope()->Origin << endl;
     bool Output = false;
     if(PassMode == PASS_MODE::CLASS_SKIM)
     {
@@ -2247,7 +2256,7 @@ void Parser::CompileTemplatedCode()
     vector<TemplatedType> OldStoredParsedTemplates = StoredParsedTemplates;
     TemplatedType OldCurrentParsingType = CurrentParsingType;
     PASS_MODE OldPassMode = PassMode;
-    vector<Scope> OldControlStructureScopes = ControlStructureScopes;
+    list<Scope> OldControlStructureScopes = ControlStructureScopes;
 
     State = PARSER_STATE::START_OF_LINE;
     InitializePosition();
@@ -2652,7 +2661,11 @@ void Parser::ParseExpectUntilOrWhile()
         NewScope.Offset = GetCurrentScope()->Offset;
         NewScope.Origin = SCOPE_ORIGIN::REPEAT;
         ControlStructureScopes.push_back(NewScope);
-        ScopeStack.push_back(&ControlStructureScopes[ControlStructureScopes.size() - 1]);
+        ScopeStack.push_back(&GetInList(ControlStructureScopes, ControlStructureScopes.size() - 1));
+        cout << "Added " << GetCurrentScope() << endl;
+        
+        Position = Position + 1;
+        CopyUntilNextNewline();
         if(IsLocalScopeToBeParsedNow() == true)
         {
             GetCurrentScope()->ControlStructureBeginLabel = GetNextLabel();
@@ -2660,8 +2673,6 @@ void Parser::ParseExpectUntilOrWhile()
             OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureBeginLabel + GlobalKeywords.ReservedWords["COLON"];
             AppendNewlinesToOutputASM(2);
             
-            Position = Position + 1;
-            CopyUntilNextNewline();
             ReduceLine();
             
             GetCurrentScope()->AfterTestOffset = GetCurrentScope()->Offset;
@@ -2720,15 +2731,23 @@ void Parser::DoPossibleControlStructureOutput()
             OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->AfterTestOffset - ScopeStack[ScopeStack.size() - 2]->Offset));
             AppendNewlinesToOutputASM(1);
         }
+        else if(GetCurrentScope()->Origin == SCOPE_ORIGIN::IF)
+        {
+            cout << "exiting repeat scope" << endl;
+            OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->Offset - ScopeStack[ScopeStack.size() - 2]->Offset));
+            AppendNewlinesToOutputASM(1);
+            OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureEndLabel + GlobalKeywords.ReservedWords["COLON"];
+            AppendNewlinesToOutputASM(1);
+        }
     }
 }
 
 void Parser::ProcessEndScope()
 {
-    DoPossibleControlStructureOutput();
-    DoPossibleControlStructureErase();
     DoPossibleDeleteFunctionScope();
     DoPossibleDeleteClassScope();
+    DoPossibleControlStructureOutput();
+    DoPossibleControlStructureErase();
     EndCurrentScope();
 }
 
@@ -2757,4 +2776,68 @@ bool Parser::IsOriginCloserOrEqual(const SCOPE_ORIGIN InOrigin, const SCOPE_ORIG
         Output = true;
     }
     return Output;
+}
+
+void Parser::ParseIfStatement()
+{
+    Scope NewScope;
+    NewScope.Offset = GetCurrentScope()->Offset;
+    NewScope.Origin = SCOPE_ORIGIN::IF;
+    ControlStructureScopes.push_back(NewScope);
+    ScopeStack.push_back(&GetInList(ControlStructureScopes, ControlStructureScopes.size() - 1));
+    if(IsLocalScopeToBeParsedNow() == true)
+    {
+        GetCurrentScope()->ControlStructureEndLabel = GetNextLabel();
+        ParseNewIfComponent();
+    }
+    State = PARSER_STATE::START_OF_LINE;
+}
+
+void Parser::ParseElseIfStatement()
+{
+    Object * sadf = GetInAnyScope("IfTest1");
+    cout << sadf->Name << endl;
+    OutputEndControlStructureAsm();
+    
+    ParseNewIfComponent();
+}
+
+void Parser::ParseNewIfComponent()
+{
+    
+    Position = Position + 1;
+    CopyUntilNextNewline();
+    if(IsLocalScopeToBeParsedNow() == true)
+    {
+        GetCurrentScope()->ControlStructureBeginLabel = GetNextLabel();
+        ReduceLine();
+        
+        OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->AfterTestOffset - ScopeStack[ScopeStack.size() - 2]->Offset));
+        AppendNewlinesToOutputASM(1);
+        
+        GetCurrentScope()->AfterTestOffset = GetCurrentScope()->Offset;
+        
+        OutputAsm = OutputAsm + GlobalASM.Codes["TEST_BOOLEAN"];
+        AppendNewlinesToOutputASM(1);
+        OutputAsm = OutputAsm + GlobalASM.Codes["JUMP_FALSE"] + GetCurrentScope()->ControlStructureBeginLabel;
+        AppendNewlinesToOutputASM(2);
+    }
+}
+
+void Parser::ParseElseStatement()
+{
+    OutputEndControlStructureAsm();
+    
+}
+
+void Parser::OutputEndControlStructureAsm()
+{
+    OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->Offset - ScopeStack[ScopeStack.size() - 2]->Offset));
+    AppendNewlinesToOutputASM(1);
+    GetCurrentScope()->Offset = ScopeStack[ScopeStack.size() - 2]->Offset;
+    OutputAsm = OutputAsm + GlobalASM.Codes["UNCONDITIONAL_JUMP"] + GetCurrentScope()->ControlStructureEndLabel;
+    AppendNewlinesToOutputASM(1);
+    OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureBeginLabel;
+    AppendNewlinesToOutputASM(1);
+    GetCurrentScope()->AfterTestOffset = ScopeStack[ScopeStack.size() - 2]->Offset;
 }

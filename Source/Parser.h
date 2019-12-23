@@ -19,6 +19,7 @@ enum PASS_MODE
 #include <map>
 #include <locale>
 #include <unordered_set>
+#include <list>
 using namespace std;
 
 enum PARSER_STATE
@@ -107,7 +108,7 @@ public:
     PASS_MODE PassMode;
     vector<TemplatedType> TemplateCompileStack;
     string TemplateOutputAsm;
-    vector<Scope> ControlStructureScopes;
+    list<Scope> ControlStructureScopes;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -266,6 +267,11 @@ public:
     void DoPossibleDeleteFunctionScope();
     void DoPossibleDeleteClassScope();
     bool IsOriginCloserOrEqual(const SCOPE_ORIGIN InOrigin, const SCOPE_ORIGIN TopOrigin);
+    void ParseIfStatement();
+    void ParseElseIfStatement();
+    void ParseNewIfComponent();
+    void ParseElseStatement();
+    void OutputEndControlStructureAsm();
 };
 
 #include "Compiler.h"

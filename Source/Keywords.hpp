@@ -31,7 +31,7 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("MINUS"), string("-")));
     ReservedWords.insert(pair<string,string>(string("LESS_OR_EQUAL"), string("<=")));
     ReservedWords.insert(pair<string,string>(string("GREATER_OR_EQUAL"), string(">=")));
-    ReservedWords.insert(pair<string,string>(string("IS_EQUALS"), string("==")));
+    ReservedWords.insert(pair<string,string>(string("IS_EQUAL"), string("==")));
     ReservedWords.insert(pair<string,string>(string("NOT_EQUALS"), string("!=")));
     ReservedWords.insert(pair<string,string>(string("UNDER_SCORE"), string("_")));
     ReservedWords.insert(pair<string,string>(string("ME"), string("Me")));
@@ -58,7 +58,7 @@ Keywords::Keywords()
     OverloadableOperators.emplace(ReservedWords["GREATER_OR_EQUAL"]);
     OverloadableOperators.emplace(ReservedWords["LEFT_BRACKET"]);
     OverloadableOperators.emplace(ReservedWords["RIGHT_BRACKET"]);
-    OverloadableOperators.emplace(ReservedWords["IS_EQUALS"]);
+    OverloadableOperators.emplace(ReservedWords["IS_EQUAL"]);
     OverloadableOperators.emplace(ReservedWords["PLUS"]);
     OverloadableOperators.emplace(ReservedWords["MINUS"]);
     OverloadableOperators.emplace(ReservedWords["STAR"]);

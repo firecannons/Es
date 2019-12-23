@@ -75,4 +75,15 @@ action Main
     /*repeat while 25 < 26
         OutputByte(Byte1)
     end*/
+    /*
+    Byte IfTest1 = 4
+    if IfTest1 == 4
+        IfTest1 = 7
+    elseif IfTest1 == 5
+        IfTest1 = 8
+    else
+        IfTest1 = 9
+    end*/
+    
+    OutputByteDigit(IfTest1)
 end
