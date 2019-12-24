@@ -589,7 +589,7 @@ void Parser::ParseExpectActionName()
         {
             Function NewFunction;
             NewFunction.IsAsm = IsAsmFunction;
-            NewFunction.HasReturnType = false;
+            NewFunction.HasReturnObject = false;
             NewFunction.Name = CurrentToken.Contents;
             NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
             NewFunction.LatestPassMode = PASS_MODE::CLASS_SKIM;
@@ -652,7 +652,7 @@ void Parser::ParseExpectReturnsOrLParenOrNewline()
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURNS"])
     {
         State = PARSER_STATE::EXPECT_TYPE;
-        CurrentFunction->HasReturnType = true;
+        CurrentFunction->HasReturnObject = true;
         TypeMode = TYPE_PARSE_MODE::PARSING_RETURNS;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LPAREN"])
@@ -766,12 +766,12 @@ void Parser::ParseExpectTemplateStartOrNewline()
         {
             ParseTemplates();
         }
-        CurrentFunction->ReturnType = CurrentParsingType;
+        CurrentFunction->ReturnObject.Type = CurrentParsingType;
         State = PARSER_STATE::EXPECT_RETURNS_NEWLINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
-        CurrentFunction->ReturnType = CurrentParsingType;
+        CurrentFunction->ReturnObject.Type = CurrentParsingType;
         State = PARSER_STATE::START_OF_LINE;
     }
     else
@@ -1150,7 +1150,7 @@ void Parser::ParseExpectNewlineOrReturns()
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURNS"])
     {
-        CurrentFunction->HasReturnType = true;
+        CurrentFunction->HasReturnObject = true;
         State = PARSER_STATE::EXPECT_TYPE;
         TypeMode = TYPE_PARSE_MODE::PARSING_RETURNS;
     }
@@ -1438,15 +1438,7 @@ void Parser::DoReduceFunctionCall()
             CurrentToken);
     }
     WantedFunction = GetFromFunctionList(CallingScope->Functions[ReduceTokens[ReducePosition].Contents], Reverse(NextFunctionObjects));
-    OutputScopeToString(*CallingScope, 1);
-    cout << "two " << ReduceTokens[ReducePosition].Contents << " " << WantedFunction << endl;
     CallFunction(*WantedFunction);
-    if(WantedFunction->Label == "")
-    {
-        OutputTypeTable();
-        cout << "mess up" << endl;
-        //exit(1);
-    }
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
 }
@@ -1971,7 +1963,8 @@ string Parser::OutputObjectToString(const Object & OutputObject, const unsigned 
 string Parser::OutputTemplatedTypeToString(const TemplatedType & OutputTT, const unsigned int Level)
 {
     string OutputString;
-
+    
+    cout << OutputTT.Type->Name << "testing" << endl;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Type: " + OutputFullTemplatesToString(OutputTT) + '\n';
 
@@ -1989,12 +1982,12 @@ string Parser::OutputFunctionToString(Function & OutputFunction, const unsigned 
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Label: " + OutputFunction.Label + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
-    OutputString = OutputString + "Has Return Type: " + to_string(OutputFunction.HasReturnType) + '\n';
-    if(OutputFunction.HasReturnType == true)
+    OutputString = OutputString + "Has Return Object: " + to_string(OutputFunction.HasReturnObject) + '\n';
+    if(OutputFunction.HasReturnObject == true)
     {
         OutputString = OutputString + OutputTabsToString(Level);
         OutputString = OutputString + "Return Type: \n";
-        OutputString = OutputString + OutputTemplatedTypeToString(OutputFunction.ReturnType, Level + 1);
+        OutputString = OutputString + OutputObjectToString(OutputFunction.ReturnObject, Level + 1);
     }
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Parameters: \n";
@@ -2115,7 +2108,6 @@ void Parser::InitializeForPass()
 
 void Parser::SetSizesAndOffsets()
 {
-    OutputTypeTable();
     map<string, BaseType>::iterator Iterator;
     for (Iterator = TypeTable.begin(); Iterator != TypeTable.end(); Iterator++)
     {
@@ -2579,7 +2571,7 @@ void Parser::ReturnAfterReduce()
 
 int Parser::GetReturnVariableOffset()
 {
-    int Offset = STACK_FRAME_SIZE + NextFunctionObjects.size() * POINTER_SIZE + CurrentFunction->ReturnType.Templates->Size;
+    int Offset = STACK_FRAME_SIZE + NextFunctionObjects.size() * POINTER_SIZE + CurrentFunction->ReturnObject.Type.Templates->Size;
     return Offset;
 }
 
@@ -2630,11 +2622,11 @@ void Parser::ParseEndToken()
 
 void Parser::AddExternalReturnValue(const Function & InFunction)
 {
-    if(InFunction.HasReturnType == true)
+    if(InFunction.HasReturnObject == true)
     {
         Object NewObject;
         NewObject.Name = GetNextTemporaryVariable();
-        NewObject.Type = InFunction.ReturnType;
+        NewObject.Type = InFunction.ReturnObject.Type;
         cout << "adding return value " << NewObject.Name << " " << ReduceTokens[ReducePosition].Contents << " " << ReducePosition << endl;
         GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
         AddNewVariableToStack(GetCurrentScope()->Objects[NewObject.Name]);
@@ -2647,7 +2639,7 @@ void Parser::AddInternalReturnObject()
 {
     Object NewObject;
     NewObject.Name = GetNextTemporaryVariable();
-    NewObject.Type = CurrentFunction->ReturnType;
+    NewObject.Type = CurrentFunction->ReturnObject.Type;
     int ReturnOffset = GetReturnVariableOffset();
     NewObject.Offset = ReturnOffset;
     GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);

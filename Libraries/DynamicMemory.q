@@ -80,7 +80,7 @@ class DynamicMemory<T>
         pop ebp
     end
 
-    action asm DeallocateHeapMemory ( Pointer<T> Location , Byte Size )
+    action asm DeallocateHeapMemory ( Pointer<T> Location , Integer Size )
         push ebp
         mov ebp, esp
         
@@ -97,7 +97,7 @@ class DynamicMemory<T>
         mov ebx, [ebx]
         
         ; call mmap
-        mov eax, 90
+        mov eax, 91
         mov ebx, esp
         ;lea ebx, [mmap_arg]
         int	0x80

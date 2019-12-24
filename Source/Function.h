@@ -14,12 +14,12 @@ class Function
     
 public:
     string Name;
-    TemplatedType ReturnType;
+    Object ReturnObject;
     Scope MyScope;
     vector<Object*> Parameters;
     bool IsAsm;
     string Label;
-    bool HasReturnType;
+    bool HasReturnObject;
     PASS_MODE LatestPassMode;
 };
 
