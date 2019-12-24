@@ -76,20 +76,21 @@ action Main
         OutputByte(Byte1)
     end*/
     
+    Byte Byte1 = 1
+    Byte Byte2 = 2
+    Byte Byte3 = 3
     Byte Byte4 = 4
     Byte Byte5 = 5
     
-    Byte IfTest1 = 5
-    OutputByteDigit(IfTest1)
-    if IfTest1 == Byte4
-        IfTest1 = 7
-        OutputByteDigit(IfTest1)
-    elseif IfTest1 == Byte5
-        IfTest1 = 8
-        OutputByteDigit(IfTest1)
-    else
-        IfTest1 = 9
+    Byte IfTest1 = 1
+    repeat while IfTest1 != Byte4
+        if IfTest1 == Byte1
+            IfTest1 = Byte2
+        elseif IfTest1 == Byte2
+            IfTest1 = Byte3
+        else
+            IfTest1 = Byte4
+        end
         OutputByteDigit(IfTest1)
     end
-    OutputByteDigit(IfTest1)
 end
