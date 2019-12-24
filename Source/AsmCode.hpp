@@ -22,7 +22,8 @@ AsmCode::AsmCode()
     Codes.emplace(string("PUSH_FROM_REFERENCE_P1"), Codes["RESERVE_SPACE"]);
     Codes.emplace(string("PUSH_FROM_REFERENCE_P2"), string("\n") + Codes["ADD_NUM_TO_EBX"]);
     Codes.emplace(string("PUSH_FROM_REFERENCE_P3"), string("\n") + Codes["EBX_TO_STACK_TOP"]);
-    Codes.emplace(string("TEST_BOOLEAN"), string("mov byte cl, [esp]\ntest cl, cl"));
+    Codes.emplace(string("TEST_BOOLEAN_P1"), string("mov byte cl, [esp]"));
+    Codes.emplace(string("TEST_BOOLEAN_P2"), string("test cl, cl"));
     Codes.emplace(string("JUMP_FALSE"), string("je "));
     Codes.emplace(string("JUMP_TRUE"), string("jne "));
     Codes.emplace(string("UNCONDITIONAL_JUMP"), string("jmp "));

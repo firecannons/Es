@@ -70,7 +70,7 @@ bool Parser::IsNextToken()
 void Parser::Operate()
 {
     //if(CurrentClass.Type != NULL && CurrentClass.Type->Name == "Array" && PassMode == PASS_MODE::FUNCTION_SKIM)
-    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << endl;
+    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << endl;// << " " << DoesMapContain("IfTest1", ScopeStack[ScopeStack.size() - 1]->Objects) << endl;
 /*
                 BaseType BT1;
                 BT1.Name = "toy";
@@ -108,7 +108,6 @@ void Parser::Operate()
                 OutputTypeTable();
                 exit(1);
                 OutputTypeTable();*/
-    cout << "end " << endl;
 
     if(State == PARSER_STATE::START_OF_LINE)
     {
@@ -1039,6 +1038,8 @@ Object * Parser::GetInAnyScope(const string & VariableName)
         }
         Index = Index + 1;
     }
+    cout << OutputMapToString(GetCurrentScope()->Objects) << endl;
+    cout << OutputMapToString(ScopeStack[ScopeStack.size() - 2]->Objects) << endl;
     if(WasVariableFound == false)
     {
         OutputStandardErrorMessage(string("No variable '") + VariableName + string("' found."), CurrentToken);
@@ -2677,7 +2678,9 @@ void Parser::ParseExpectUntilOrWhile()
             
             GetCurrentScope()->AfterTestOffset = GetCurrentScope()->Offset;
             
-            OutputAsm = OutputAsm + GlobalASM.Codes["TEST_BOOLEAN"];
+            OutputAsm = OutputAsm + GlobalASM.Codes["TEST_BOOLEAN_P1"];
+            AppendNewlinesToOutputASM(1);
+            OutputAsm = OutputAsm + GlobalASM.Codes["TEST_BOOLEAN_P2"];
             AppendNewlinesToOutputASM(1);
             if(CurrentToken.Contents == GlobalKeywords.ReservedWords["UNTIL"])
             {
@@ -2795,9 +2798,10 @@ void Parser::ParseIfStatement()
 
 void Parser::ParseElseIfStatement()
 {
-    Object * sadf = GetInAnyScope("IfTest1");
-    cout << sadf->Name << endl;
-    OutputEndControlStructureAsm();
+    if(IsLocalScopeToBeParsedNow() == true)
+    {
+        OutputEndControlStructureAsm();
+    }
     
     ParseNewIfComponent();
 }
@@ -2811,14 +2815,15 @@ void Parser::ParseNewIfComponent()
     {
         GetCurrentScope()->ControlStructureBeginLabel = GetNextLabel();
         ReduceLine();
-        
-        OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->AfterTestOffset - ScopeStack[ScopeStack.size() - 2]->Offset));
-        AppendNewlinesToOutputASM(1);
-        
         GetCurrentScope()->AfterTestOffset = GetCurrentScope()->Offset;
         
-        OutputAsm = OutputAsm + GlobalASM.Codes["TEST_BOOLEAN"];
+        OutputAsm = OutputAsm + GlobalASM.Codes["TEST_BOOLEAN_P1"];
         AppendNewlinesToOutputASM(1);
+        OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->AfterTestOffset - ScopeStack[ScopeStack.size() - 2]->Offset));
+        AppendNewlinesToOutputASM(1);
+        OutputAsm = OutputAsm + GlobalASM.Codes["TEST_BOOLEAN_P2"];
+        AppendNewlinesToOutputASM(1);
+        GetCurrentScope()->Offset = GetCurrentScope()->Offset + -(GetCurrentScope()->AfterTestOffset - ScopeStack[ScopeStack.size() - 2]->Offset);
         OutputAsm = OutputAsm + GlobalASM.Codes["JUMP_FALSE"] + GetCurrentScope()->ControlStructureBeginLabel;
         AppendNewlinesToOutputASM(2);
     }
@@ -2826,7 +2831,10 @@ void Parser::ParseNewIfComponent()
 
 void Parser::ParseElseStatement()
 {
-    OutputEndControlStructureAsm();
+    if(IsLocalScopeToBeParsedNow() == true)
+    {
+        OutputEndControlStructureAsm();
+    }
     
 }
 
@@ -2837,7 +2845,7 @@ void Parser::OutputEndControlStructureAsm()
     GetCurrentScope()->Offset = ScopeStack[ScopeStack.size() - 2]->Offset;
     OutputAsm = OutputAsm + GlobalASM.Codes["UNCONDITIONAL_JUMP"] + GetCurrentScope()->ControlStructureEndLabel;
     AppendNewlinesToOutputASM(1);
-    OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureBeginLabel;
+    OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureBeginLabel + GlobalKeywords.ReservedWords["COLON"];
     AppendNewlinesToOutputASM(1);
     GetCurrentScope()->AfterTestOffset = ScopeStack[ScopeStack.size() - 2]->Offset;
 }

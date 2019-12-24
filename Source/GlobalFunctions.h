@@ -163,4 +163,17 @@ string OutputSetToString(const unordered_set<T> & MySet)
     return Output;
 }
 
+template<class T>
+string OutputMapToString(const map<string, T> & MyMap)
+{
+    string Output;
+    typename map<string, T>::const_iterator it = MyMap.begin();
+    while(it != MyMap.end())
+    {
+        Output = Output + it->second.Name + " ";
+        it++;
+    }
+    return Output;
+}
+
 #endif
