@@ -80,6 +80,9 @@ void Lexer::DoSingleLineCommentMode(const char InChar)
     {
         Mode = LEXER_MODE::NORMAL;
         SavedWord.clear();
+        SavedWord = "\n";
+        AppendSavedWordToTokens();
+        SavedWord.clear();
     }
 }
 
