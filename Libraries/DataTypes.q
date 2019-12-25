@@ -610,9 +610,37 @@ class Pointer<T>
     //action Deref ( ) returns T
     //end
 
-    /*action Dereference ( ) return T Reference
-        return Me
-    end*/
+    action asm Dereference ( ) returns T reference
+        push ebp
+        mov ebp, esp
+        
+        ; Put &Position into ecx
+        mov ecx, [ebp+8]
+        mov ecx, [ecx]
+        
+        ; Put &T into eax
+        mov [ebp+12], ecx
+        
+        mov esp, ebp
+        pop ebp
+    end
+    
+    action asm PointTo(T Object)
+        push ebp
+        mov ebp, esp
+    
+        ; Put &Object into eax
+        mov eax, [ebp+12]
+        
+        ; Put &Position into ecx
+        mov ecx, [ebp+8]
+        
+        ; Put &Object(eax) into Position([ecx])
+        mov [ecx], eax
+        
+        mov esp, ebp
+        pop ebp
+    end
 end
 
 class Box<T>

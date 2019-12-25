@@ -165,9 +165,9 @@ void Parser::Operate()
     {
         ParseExpectTemplateStartOrIdent();
     }
-    else if(State == PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE)
+    else if(State == PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_REFERENCE)
     {
-        ParseExpectTemplateStartOrNewline();
+        ParseExpectTemplateStartOrNewlineOrReference();
     }
     else if(State == PARSER_STATE::EXPECT_TOKEN_UNTIL_END)
     {
@@ -208,6 +208,10 @@ void Parser::Operate()
     else if(State == PARSER_STATE::EXPECT_UNTIL_OR_WHILE)
     {
         ParseExpectUntilOrWhile();
+    }
+    else if(State == PARSER_STATE::EXPECT_RETURNS_NEWLINE_OR_REFERENCE)
+    {
+        ParseExpectReturnsNewlineOrReference();
     }
 }
 
@@ -697,7 +701,7 @@ void Parser::ParseExpectType()
         }
         else if(TypeMode == TYPE_PARSE_MODE::PARSING_RETURNS)
         {
-            State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE;
+            State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_REFERENCE;
         }
     }
     else
@@ -753,7 +757,7 @@ void Parser::ParseExpectTemplateStartOrIdent()
     }
 }
 
-void Parser::ParseExpectTemplateStartOrNewline()
+void Parser::ParseExpectTemplateStartOrNewlineOrReference()
 {
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
@@ -766,17 +770,20 @@ void Parser::ParseExpectTemplateStartOrNewline()
         {
             ParseTemplates();
         }
-        CurrentFunction->ReturnObject.Type = CurrentParsingType;
-        State = PARSER_STATE::EXPECT_RETURNS_NEWLINE;
+        State = PARSER_STATE::EXPECT_RETURNS_NEWLINE_OR_REFERENCE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
-        CurrentFunction->ReturnObject.Type = CurrentParsingType;
-        State = PARSER_STATE::START_OF_LINE;
+        ParseNewlineAtActionDeclarationEnd();
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["REFERENCE"])
+    {
+        CurrentFunction->ReturnObject.IsReference = true;
+        State = PARSER_STATE::EXPECT_RETURNS_NEWLINE;
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected '<' or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+        OutputStandardErrorMessage(string("Expected '<' or 'reference' or newline ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
@@ -1100,7 +1107,7 @@ void Parser::ParseExpectReturnsNewline()
 {
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
-        State = PARSER_STATE::START_OF_LINE;
+        ParseNewlineAtActionDeclarationEnd();
     }
     else
     {
@@ -1622,7 +1629,8 @@ void Parser::OutputCurrentFunctionToAsm()
 void Parser::OutputDeclaringVariableToAsm(const Object & Variable)
 {
     string Output = SPACE + SEMICOLON + SPACE;
-    OutputAsm = OutputAsm + Output + string("Declaring ") + Variable.Name + string(" at offset ") + to_string(Variable.Offset);
+    OutputAsm = OutputAsm + Output + string("Declaring ") + Variable.Name + string(" at offset ") + to_string(Variable.Offset)
+        + string(" with Reference Offset = ") + to_string(Variable.ReferenceOffset);
 }
 
 void Parser::AddToArgList(const unsigned int InPosition)
@@ -1652,7 +1660,12 @@ void Parser::AddToArgList(const unsigned int InPosition)
 
 void Parser::AddNewVariableToStack(Object & NewObject)
 {
-    OutputAsm = OutputAsm + GlobalASM.CalcReserveSpaceAsm(NewObject.Type.Templates->Size);
+    int SpaceSize = NewObject.Type.Templates->Size;
+    if(NewObject.IsReference == true)
+    {
+        SpaceSize = POINTER_SIZE;
+    }
+    OutputAsm = OutputAsm + GlobalASM.CalcReserveSpaceAsm(SpaceSize);
     MoveBackCurrentScopeOffset(NewObject);
     if(DEBUG == true)
     {
@@ -1786,8 +1799,16 @@ SCOPE_ORIGIN Parser::GetClosestScopeOrigin()
 
 void Parser::MoveBackCurrentScopeOffset(Object & NewObject)
 {
-    GetCurrentScope()->Offset = GetCurrentScope()->Offset - NewObject.Type.Templates->Size;
-    NewObject.Offset = GetCurrentScope()->Offset;
+    if(NewObject.IsReference == true)
+    {
+        GetCurrentScope()->Offset = GetCurrentScope()->Offset - POINTER_SIZE;
+        NewObject.ReferenceOffset = GetCurrentScope()->Offset;
+    }
+    else
+    {
+        GetCurrentScope()->Offset = GetCurrentScope()->Offset - NewObject.Type.Templates->Size;
+        NewObject.Offset = GetCurrentScope()->Offset;
+    }
 }
 
 void Parser::AddNumericalValueToTempInteger(const string & NewValue)
@@ -2004,7 +2025,8 @@ string Parser::OutputFunctionToString(Function & OutputFunction, const unsigned 
 void Parser::OutputDerefReference(const string & VariableName, const int ReferenceOffset)
 {
     string Output = SPACE + SEMICOLON + SPACE;
-    OutputAsm = OutputAsm + Output + string("Dereferencing before push ") + VariableName + string(" from reference offset ") + to_string(ReferenceOffset);
+    OutputAsm = OutputAsm + Output + string("Dereferencing before push ") + VariableName + string(" from reference offset ") + to_string(ReferenceOffset)
+        + string(" with Offset = ") + to_string(ReferenceOffset);
 }
 
 bool Parser::IsParsingType()
@@ -2627,6 +2649,7 @@ void Parser::AddExternalReturnValue(const Function & InFunction)
         Object NewObject;
         NewObject.Name = GetNextTemporaryVariable();
         NewObject.Type = InFunction.ReturnObject.Type;
+        NewObject.IsReference = InFunction.ReturnObject.IsReference;
         cout << "adding return value " << NewObject.Name << " " << ReduceTokens[ReducePosition].Contents << " " << ReducePosition << endl;
         GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
         AddNewVariableToStack(GetCurrentScope()->Objects[NewObject.Name]);
@@ -2840,4 +2863,27 @@ void Parser::OutputEndControlStructureAsm()
     OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureBeginLabel + GlobalKeywords.ReservedWords["COLON"];
     AppendNewlinesToOutputASM(1);
     GetCurrentScope()->AfterTestOffset = ScopeStack[ScopeStack.size() - 2]->Offset;
+}
+
+void Parser::ParseExpectReturnsNewlineOrReference()
+{
+    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["REFERENCE"])
+    {
+        CurrentFunction->ReturnObject.IsReference = true;
+        State = PARSER_STATE::EXPECT_RETURNS_NEWLINE;
+    }
+    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
+    {
+        ParseNewlineAtActionDeclarationEnd();
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("Expected newline or 'reference' ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+    }
+}
+
+void Parser::ParseNewlineAtActionDeclarationEnd()
+{
+    CurrentFunction->ReturnObject.Type = CurrentParsingType;
+    State = PARSER_STATE::START_OF_LINE;
 }

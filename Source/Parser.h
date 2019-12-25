@@ -40,8 +40,9 @@ enum PARSER_STATE
     EXPECT_NEWLINE_OR_RETURNS,
     EXPECT_TYPE,
     EXPECT_TEMPLATE_START_OR_IDENT,
-    EXPECT_TEMPLATE_START_OR_NEWLINE,
+    EXPECT_TEMPLATE_START_OR_NEWLINE_OR_REFERENCE,
     EXPECT_TOKEN_UNTIL_END,
+    EXPECT_RETURNS_NEWLINE_OR_REFERENCE,
     EXPECT_RETURNS_NEWLINE,
     EXPECT_NEWLINE_AFTER_END,
     EXPECT_COMMA_OR_RPAREN,
@@ -143,7 +144,7 @@ public:
     string GetFileNameErrorMessage(const Token & OutToken);
     void ParseExpectActionNameOrActionType();
     void ParseExpectTemplateStartOrIdent();
-    void ParseExpectTemplateStartOrNewline();
+    void ParseExpectTemplateStartOrNewlineOrReference();
     void ParseExpectTokenUntilEnd();
     Scope * GetCurrentScope();
     void ParseTemplates();
@@ -272,6 +273,8 @@ public:
     void ParseNewIfComponent();
     void ParseElseStatement();
     void OutputEndControlStructureAsm();
+    void ParseExpectReturnsNewlineOrReference();
+    void ParseNewlineAtActionDeclarationEnd();
 };
 
 #include "Compiler.h"
