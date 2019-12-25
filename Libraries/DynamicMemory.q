@@ -85,20 +85,15 @@ class DynamicMemory<T>
         mov ebp, esp
         
         ; len to ecx
-        xor ecx, ecx
-        mov ebx, ebp
-        add ebx, 12
-        mov byte cl, [ebx]
+        mov ebx, [ebp+16]
+        mov ecx, [ebx]
         
         ; addr to ebx
-        mov ebx, ebp
-        add ebx, 8
-        mov ebx, [ebx]
+        mov ebx, [ebp+12]
         mov ebx, [ebx]
         
         ; call mmap
         mov eax, 91
-        mov ebx, esp
         ;lea ebx, [mmap_arg]
         int	0x80
         

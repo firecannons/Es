@@ -62,11 +62,12 @@ action Main
     Integer OneInt = 1
     Byte One = 1
     Byte CounterByte = 0
-    repeat while I != 10000
+    repeat while I != 100000
         CounterByte = CounterByte + One
         OutputByteDigit(CounterByte)
         I = I + 1
-        DM:AllocateHeapMemory(OneInt)
+        Pointer<Integer> Pb = DM:AllocateHeapMemory(OneInt)
+        DM:DeallocateHeapMemory(Pb, OneInt)
     end
     
     I = 100
