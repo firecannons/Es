@@ -60,6 +60,29 @@ action Main
     Byte SimpleByte2 = 2
     OutputByteDigit(SimpleByte)
     Pb:Dereference() = SimpleByte2
-    
     OutputByteDigit(SimpleByte)
+    
+    // Should output 457
+    Byte ConstByte4 = 4
+    Byte ConstByte5 = 5
+    Byte ConstByte6 = 6
+    Byte ConstByte7 = 7
+    Byte Test1 = 1
+    Byte Test2 = 2
+    Byte Test3 = 3
+    Pointer<Byte> Pb1
+    Pointer<Byte> Pb2
+    Pointer<Byte> Pb3
+    Pointer<Byte> Pb4
+    Pb1:PointTo(Test1)
+    Pb2:PointTo(Test2)
+    Pb3:PointTo(Test3)
+    Pb4:PointTo(Test3)
+    Pb1:Dereference() = ConstByte4
+    Pb2:Dereference() = ConstByte5
+    Pb3:Dereference() = ConstByte6
+    Pb4:Dereference() = ConstByte7
+    OutputByteDigit(Test1)
+    OutputByteDigit(Test2)
+    OutputByteDigit(Test3)
 end
