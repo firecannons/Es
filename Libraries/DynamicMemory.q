@@ -1,5 +1,5 @@
 class DynamicMemory<T>
-    action asm AllocateHeapMemory( Integer Size ) returns Pointer<T>
+    action asm AllocateHeapMemory( Integer Size, Pointer<T> P ) returns Pointer<T>
         push ebp
         mov ebp, esp
         
@@ -31,6 +31,8 @@ class DynamicMemory<T>
         
         ; addr
         add esp, -4
+        mov ebx, [ebp+12]
+        mov ebx, [ebx]
         mov dword [esp], 0
         
         ; call mmap
@@ -68,11 +70,11 @@ class DynamicMemory<T>
         
         ; move new memory location to return position
         mov ebx, ebp
-        add ebx, 16
+        add ebx, 20
         mov [ebx], eax
         
         ;mov eax, 0
-        mov byte [eax], 12
+        mov byte [eax], 20
         mov byte [eax+1], 12
         mov byte [eax+2], 12
         mov byte [eax+3], 12
@@ -103,7 +105,7 @@ class DynamicMemory<T>
     end
     
     action ReallocateHeapMemory( Integer NewSize, Pointer<T> OldLocation, Integer OldSize ) returns Pointer<T>
-        Pointer<T> NewP = Me:AllocateHeapMemory(NewSize)
+        Pointer<T> NewP = Me:AllocateHeapMemory(NewSize, OldLocation)
         if NewP != OldLocation
             Me:CopyMemory(NewP, OldLocation, OldSize)
             Me:DeallocateHeapMemory(OldLocation, OldSize)

@@ -17,7 +17,7 @@ class Array < Type >
         
         action SetMemorySize ( Integer Size )
             DynamicMemory < Type > DM
-            Me : P = DM : AllocateHeapMemory ( Size )
+            Me : P = DM : AllocateHeapMemory ( Size, Me:P )
             Me : ReservedSize = Size
             if Me : ReservedSize < Me : Size
                 Me : Size = Me : ReservedSize
