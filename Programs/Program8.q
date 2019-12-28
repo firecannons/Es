@@ -29,6 +29,14 @@ action asm OutputByteDigit ( Byte L )
     pop ebp
 end
 
+action OutputByteArray(Array<Byte> Ar)
+    Integer Index = 0
+    repeat while Index < Ar:Size
+        OutputByteDigit(Ar:GetAt(Index))
+        Index = Index + 1
+    end
+end
+
 action Main
     Array<Byte> Ab
     Ab:Initialize()
@@ -60,4 +68,6 @@ action Main
     
     Test = Ab:GetAt(4)
     OutputByteDigit(Test)
+    
+    OutputByteArray(Ab)
 end
