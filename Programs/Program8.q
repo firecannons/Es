@@ -33,9 +33,31 @@ action Main
     Array<Byte> Ab
     Ab:Initialize()
     Byte Test = 1
-    OutputByteDigit(Test)
     Ab:Add(Test)
-    OutputByteDigit(Test)
     Test = Ab:GetAt(0)
+    OutputByteDigit(Test)
+    
+    Test = 2
+    Ab:Add(Test)
+    
+    Test = 3
+    Ab:Add(Test)
+    
+    Test = 4
+    Ab:Add(Test)
+    
+    Test = 5
+    Ab:Add(Test)
+    
+    Test = Ab:GetAt(1)
+    OutputByteDigit(Test)
+    
+    Test = Ab:GetAt(2)
+    OutputByteDigit(Test)
+    
+    Test = Ab:GetAt(3)
+    OutputByteDigit(Test)
+    
+    Test = Ab:GetAt(4)
     OutputByteDigit(Test)
 end

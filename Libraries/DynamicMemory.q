@@ -103,16 +103,11 @@ class DynamicMemory<T>
     end
     
     action ReallocateHeapMemory( Integer NewSize, Pointer<T> OldLocation, Integer OldSize ) returns Pointer<T>
-    Byte Eight = NewSize
-            OutputByteDigit(Eight)
         Pointer<T> NewP = Me:AllocateHeapMemory(NewSize)
-            OutputByteDigit(Eight)
         if NewP != OldLocation
-            OutputByteDigit(Eight)
             Me:CopyMemory(NewP, OldLocation, OldSize)
+            Me:DeallocateHeapMemory(OldLocation, OldSize)
         end
-            OutputByteDigit(Eight)
-        Me:DeallocateHeapMemory(OldLocation, OldSize)
         return NewP
     end
     
@@ -135,8 +130,31 @@ class DynamicMemory<T>
         ; Set ecx to 0 because is will be our "loop index"
         xor ecx, ecx
         
+        ;push eax
+        ;push ebx
+        ;push ecx
+        ;push edx
+       ; 
+       ; mov edx, edi
+       ; cmp byte cl, dl
+       ; sete byte cl
+       ; 
+       ; add esp, -1
+       ; mov byte [esp], cl
+       ; mov esi, esp
+       ; add esp, -4
+       ; mov [esp], esi ; Pushing reference to Test from offset -21
+        ;
+        ;call L27 ; Calling Byte:OutputByteDigit() L27
+        ;add esp, 5
+       ; 
+       ; pop edx
+       ; pop ecx
+       ; pop ebx
+       ; pop eax
+        
         CopyMemoryRepeatLabel:
-        test ecx, edi
+        cmp ecx, edi
         je CopyMemoryExitLabel
         
         ; Load current value in OldLocation to edx
@@ -144,6 +162,25 @@ class DynamicMemory<T>
         
         ; Copy esi to the current position in NewLocation
         mov byte [eax+ecx], dl
+        
+        ;push eax
+        ;push ebx
+        ;push ecx
+        ;push edx
+       ; 
+       ; add esp, -1
+       ; mov byte [esp], 8
+       ; mov esi, esp
+       ; add esp, -4
+       ; mov [esp], esi ; Pushing reference to Test from offset -21
+       ; 
+       ; call L27 ; Calling Byte:OutputByteDigit() L27
+       ; add esp, 5
+       ; 
+       ; pop edx
+       ; pop ecx
+       ; pop ebx
+       ; pop eax
         
         inc ecx
         

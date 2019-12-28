@@ -26,22 +26,15 @@ class Array < Type >
 
         action Resize ( Integer Size )
             DynamicMemory < Type > DM
-            Byte Nine = 9
-            OutputByteDigit(Nine)
-            Me : P = DM : AllocateHeapMemory ( Size )
-            OutputByteDigit(Nine)
-            //Me : P = DM : ReallocateHeapMemory ( Size , P , Me:ReservedSize )
+            Me : P = DM : ReallocateHeapMemory ( Size , Me : P , Me:ReservedSize )
             Me : ReservedSize = Size
         end
         
         action Add ( Type Item )
-            Byte Four = 4
             if Me:Size == Me:ReservedSize
                 Me:Resize(Me:ReservedSize + 1)
             end
-            OutputByteDigit(Four)
             Me:SetAt(Me:Size, Item)
-            OutputByteDigit(Four)
             Me:Size = Me:Size + 1
         end
 
