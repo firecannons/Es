@@ -23,8 +23,9 @@ class DynamicMemory<T>
         ; len
         xor ecx, ecx
         mov ebx, ebp
-        add ebx, 8
-        mov byte cl, [ebx]
+        add ebx, 12
+        mov ecx, [ebx]
+        mov ecx, [ecx]
         add esp, -4
         mov dword [esp], ecx
         
@@ -96,6 +97,58 @@ class DynamicMemory<T>
         mov eax, 91
         ;lea ebx, [mmap_arg]
         int	0x80
+        
+        mov esp, ebp
+        pop ebp
+    end
+    
+    action ReallocateHeapMemory( Integer NewSize, Pointer<T> OldLocation, Integer OldSize ) returns Pointer<T>
+    Byte Eight = NewSize
+            OutputByteDigit(Eight)
+        Pointer<T> NewP = Me:AllocateHeapMemory(NewSize)
+            OutputByteDigit(Eight)
+        if NewP != OldLocation
+            OutputByteDigit(Eight)
+            Me:CopyMemory(NewP, OldLocation, OldSize)
+        end
+            OutputByteDigit(Eight)
+        Me:DeallocateHeapMemory(OldLocation, OldSize)
+        return NewP
+    end
+    
+    action asm CopyMemory( Pointer<T> NewLocation, Pointer<T> OldLocation, Integer OldSize)
+        push ebp
+        mov ebp, esp
+        
+        ; load NewLocation into eax
+        mov eax, [ebp+12]
+        mov eax, [eax]
+        
+        ; load OldLocation into ebx
+        mov ebx, [ebp+16]
+        mov ebx, [ebx]
+        
+        ; load OldSize into edi
+        mov edi, [ebp+20]
+        mov edi, [edi]
+        
+        ; Set ecx to 0 because is will be our "loop index"
+        xor ecx, ecx
+        
+        CopyMemoryRepeatLabel:
+        test ecx, edi
+        je CopyMemoryExitLabel
+        
+        ; Load current value in OldLocation to edx
+        mov byte dl, [ebx+ecx]
+        
+        ; Copy esi to the current position in NewLocation
+        mov byte [eax+ecx], dl
+        
+        inc ecx
+        
+        jmp CopyMemoryRepeatLabel
+        CopyMemoryExitLabel:
         
         mov esp, ebp
         pop ebp

@@ -595,6 +595,24 @@ class Bool size 1
         pop ebp
         
     end
+    
+    action asm = ( Bool Source )
+        push ebp
+        mov ebp, esp
+        
+        ; mov value of Source into eax
+        mov ebx, [ebp+12]
+        mov byte al, [ebx]
+        
+        ; mov address of return byte into ebx
+        mov ebx, [ebp+8]
+        
+        ; mov value of eax into position of [ebx]
+        mov byte [ebx], al
+        
+        mov esp, ebp
+        pop ebp
+    end
 end
 
 class Pointer<T>
@@ -605,6 +623,14 @@ class Pointer<T>
     
     action = ( Pointer<T> Source )
         Me : Position = Source : Position
+    end
+    
+    action == ( Pointer<T> Source ) returns Bool
+        return Me:Position == Source:Position
+    end
+    
+    action != ( Pointer<T> Source ) returns Bool
+        return Me:Position != Source:Position
     end
 
     //action Deref ( ) returns T

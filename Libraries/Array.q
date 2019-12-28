@@ -2,15 +2,47 @@ using Libraries . DataTypes
 using Libraries . DynamicMemory
 
 class Array < Type >
-        Integer Size
         Pointer < Type > P
+        Integer Size
+        Integer ReservedSize
         
         action Array
         end
+        
+        action Initialize()
+            Me:Size = 0
+            Me:ReservedSize = 0
+            Me:P:Position = 0
+        end
+        
+        action SetMemorySize ( Integer Size )
+            DynamicMemory < Type > DM
+            Me : P = DM : AllocateHeapMemory ( Size )
+            Me : ReservedSize = Size
+            if Me : ReservedSize < Me : Size
+                Me : Size = Me : ReservedSize
+            end
+        end
 
         action Resize ( Integer Size )
-                DynamicMemory < Type > DM
-                Me : P = DM : AllocateHeapMemory ( Size )
+            DynamicMemory < Type > DM
+            Byte Nine = 9
+            OutputByteDigit(Nine)
+            Me : P = DM : AllocateHeapMemory ( Size )
+            OutputByteDigit(Nine)
+            //Me : P = DM : ReallocateHeapMemory ( Size , P , Me:ReservedSize )
+            Me : ReservedSize = Size
+        end
+        
+        action Add ( Type Item )
+            Byte Four = 4
+            if Me:Size == Me:ReservedSize
+                Me:Resize(Me:ReservedSize + 1)
+            end
+            OutputByteDigit(Four)
+            Me:SetAt(Me:Size, Item)
+            OutputByteDigit(Four)
+            Me:Size = Me:Size + 1
         end
 
         action asm GetAt( Integer Position ) returns Type
@@ -21,17 +53,8 @@ class Array < Type >
                 mov ebx, ebp
                 add ebx, 8
                 mov ebx, [ebx]
-                add ebx, 4
+                add ebx, 0
                 mov dword ecx, [ebx]
-                
-                ;sub esp, 1
-                ;mov byte [esp], cl
-                ;mov esi, esp
-                ;
-                ;sub esp, 4
-                ;mov [esp], esi
-                ;call GetAction(OutputByte)(0)
-                ;add esp, 5
 
                 ; mov value of Position into eax
                 mov eax, ebp
@@ -42,21 +65,6 @@ class Array < Type >
                 ; perform addition
                 mov edx, GetSize(Type)
                 mul dl
-                
-                
-                
-                
-                
-                
-                
-                ;sub esp, 1
-                ;mov byte [esp], al
-                ;mov esi, esp
-                ;
-                ;sub esp, 4
-                ;mov [esp], esi
-                ;call GetAction(OutputByteDigit)(0)
-                ;add esp, 5
                 
                 
                 
@@ -77,15 +85,6 @@ class Array < Type >
                 
                 ; Move the stack pointer back up
                 add esp, 8
-                
-                ;sub esp, 1
-                ;mov byte [esp], 105
-                ;mov esi, esp
-                
-                ;sub esp, 4
-                ;mov [esp], esi
-                ;call GetAction(OutputByte)(0)
-                ;add esp, 5
 
                 mov esp, ebp
                 pop ebp        
@@ -99,7 +98,7 @@ class Array < Type >
                 mov ebx, ebp
                 add ebx, 8
                 mov ebx, [ebx]
-                add ebx, 4
+                add ebx, 0
                 mov dword ecx, [ebx]
 
                 ; mov value of Position into eax
@@ -116,16 +115,6 @@ class Array < Type >
                 
                 
                 
-                
-                
-                ;sub esp, 1
-                ;mov byte [esp], al
-                ;mov esi, esp
-                ;
-                ;sub esp, 4
-                ;mov [esp], esi
-                ;call GetAction(OutputByteDigit)(0)
-                ;add esp, 5
                 
                 
                 

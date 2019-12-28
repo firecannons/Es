@@ -2593,7 +2593,8 @@ void Parser::ReturnAfterReduce()
 
 int Parser::GetReturnVariableOffset()
 {
-    int Offset = STACK_FRAME_SIZE + NextFunctionObjects.size() * POINTER_SIZE + CurrentFunction->ReturnObject.Type.Templates->Size;
+    int Offset = STACK_FRAME_SIZE + CurrentFunction->Parameters.size() * POINTER_SIZE;
+    OutputAsm = OutputAsm + ";" + to_string(STACK_FRAME_SIZE) + " " + to_string(NextFunctionObjects.size()) + " " + to_string(POINTER_SIZE) + "\n";
     return Offset;
 }
 
@@ -2753,6 +2754,8 @@ void Parser::DoPossibleControlStructureOutput()
         {
             cout << "exiting repeat scope" << endl;
             OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->Offset - ScopeStack[ScopeStack.size() - 2]->Offset));
+            AppendNewlinesToOutputASM(1);
+            OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureBeginLabel + GlobalKeywords.ReservedWords["COLON"];
             AppendNewlinesToOutputASM(1);
             OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureEndLabel + GlobalKeywords.ReservedWords["COLON"];
             AppendNewlinesToOutputASM(1);
