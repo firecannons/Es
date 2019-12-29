@@ -5,11 +5,15 @@ class Text
     Array<Byte> Letters
 
 
-    action Text
+    action Constructor
     end
 
     action Resize ( Integer Size )
         Me : Letters : Resize ( Size )
+    end
+    
+    action = ( Text Source )
+        Me:Letters = Source:Letters
     end
 
     action GetAt( Integer Position ) returns Byte

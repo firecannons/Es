@@ -3,7 +3,7 @@ using Libraries . DataTypes
 class Letter
         Byte c
         
-        action on create
+        action Constructor
         end
         
         action on = ( Letter Source )

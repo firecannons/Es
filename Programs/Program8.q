@@ -70,4 +70,9 @@ action Main
     OutputByteDigit(Test)
     
     OutputByteArray(Ab)
+    
+    Array<Byte> NewAb
+    NewAb:Initialize()
+    NewAb = Ab
+    OutputByteArray(NewAb)
 end

@@ -126,7 +126,7 @@ class ClassScopeTest
     Byte B2
     Byte B3
     
-    action on create
+    action on Constructor
         Me : B2 = 65
     end
     
@@ -139,7 +139,7 @@ end
 class ClassScopeTestTwo
     CapTest C1
     
-    action on create
+    action Constructor
         Me : C1 : B2 = 68
     end
     
@@ -152,7 +152,7 @@ action NoParamTest ( )
 end
 
 class DoubleMethodTest
-    action on create
+    action Constructor
     end
     
     action Method1 ( )
@@ -170,7 +170,7 @@ action ReturnTest ( ) returns Byte
 end
 
 class RetTestCls
-    action on create
+    action Constructor
     end
     
     action RetTe ( ) returns Byte
@@ -187,7 +187,7 @@ end
 class TemplateTest<T>
     T MyT
     
-    action on create
+    action Constructor
         Me : MyT = 67
         OutputByte ( Me : MyT )
     end
@@ -198,7 +198,7 @@ class Array<T>
     Pointer DP
     Byte MemorySize
     
-    action on create
+    action Constructor
         Me : Size = 0
         Me : MemorySize = 0
         Me : DP = AllocateHeapMemory ( Me : MemorySize )
@@ -351,7 +351,7 @@ end
 class Text
     Array<Letter> Data
     
-    action on create
+    action Constructor
     end
     
     action SetAt ( Byte Position , Letter L )
@@ -402,7 +402,7 @@ class MultiTemplateTest<T, T2, T3>
     T2 MyT2
     T3 MyT3
     
-    action on create
+    action Constructor
         Me : MyT = 67
         Me : MyT2 = 68
         OutputByte ( Me : MyT2 )
@@ -414,7 +414,7 @@ class RefTemplateTest<T, T2, T3>
     T2 MyT2
     T3 MyT3
     
-    action on create
+    action Constructor
         Me : MyT = 67
         Me : MyT2 = 68
         OutputByte ( Me : MyT2 )

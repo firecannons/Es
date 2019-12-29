@@ -5,7 +5,7 @@ test 3*/
 
 class Integer size 4
         
-        action asm Integer
+        action asm Constructor
             
         end
         
@@ -260,7 +260,7 @@ end
 
 class Byte size 1
         
-        action asm Byte
+        action asm Constructor
             push ebp
             mov ebp, esp
             
@@ -578,7 +578,7 @@ class Byte size 1
 end
 
 class Bool size 1
-    action asm Bool
+    action asm Constructor
         push ebp
         mov ebp, esp
     
@@ -618,7 +618,7 @@ end
 class Pointer<T>
     Integer Position
     
-    action Pointer
+    action Constructor
     end
     
     action = ( Pointer<T> Source )
@@ -673,7 +673,7 @@ class Box<T>
     T MyT
     //Pointer<T> MyP
 
-    action Box
+    action Constructor
     end
 
     action = ( Box<T> Source )
@@ -692,7 +692,7 @@ class CapTest
     Byte B1
     Byte B2
     
-    action CapTest
+    action Constructor
     end
 end
 
@@ -700,7 +700,7 @@ class CapTest2
     CapTest C1
     CapTest C2
     
-    action CapTest2
+    action Constructor
     end
 end
 
@@ -708,6 +708,6 @@ class CapTest3
     CapTest2 C1
     CapTest2 C2
     
-    action CapTest3
+    action Constructor
     end
 end

@@ -6,7 +6,10 @@ class Array < Type >
         Integer Size
         Integer ReservedSize
         
-        action Array
+        action Constructor
+        end
+        
+        action Destructor
         end
         
         action Initialize()
@@ -37,7 +40,25 @@ class Array < Type >
             Me:SetAt(Me:Size, Item)
             Me:Size = Me:Size + 1
         end
-
+        
+        action = ( Array<Type> Source )
+            DynamicMemory DM
+            Pointer<Type> OldP = Me:P
+            Me:P = DM:AllocateHeapMemory(Source:ReservedSize, Me:P)
+            Me:CopyElementsToMe(Source)
+            DM:DeallocateHeapMemory(OldP, Me:ReservedSize)
+            Me:ReservedSize = Source:ReservedSize
+            Me:Size = Source:Size
+        end
+        
+        action CopyElementsToMe(Array<Type> Source)
+            Integer Index = 0
+            repeat while Index < Source:Size
+                Me:SetAt(Index, Source:GetAt(Index))
+                Index = Index + 1
+            end
+        end
+        
         action asm GetAt( Integer Position ) returns Type
                 push ebp
                 mov ebp, esp
