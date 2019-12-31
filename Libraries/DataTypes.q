@@ -5,10 +5,6 @@ test 3*/
 
 class Integer size 4
         
-        action asm Constructor
-            
-        end
-        
         action asm = ( Integer Source )
             push ebp
             mov ebp, esp
@@ -691,9 +687,6 @@ end*/
 class CapTest
     Byte B1
     Byte B2
-    
-    action Constructor
-    end
 end
 
 class CapTest2

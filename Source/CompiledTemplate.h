@@ -17,6 +17,10 @@ public:
     unsigned int Size;
     Scope MyScope;
     bool HasSizeBeenCalculated;
+    bool HasUserDefinedEmptyConstructor;
+    bool HasUserDefinedCopyConstructor;
+    bool HasUserDefinedAssignmentOperator;
+    bool HasUserDefinedDestructor;
 
     CompiledTemplate();
     

@@ -613,13 +613,7 @@ void Parser::ParseExpectActionName()
         {
             if(CurrentClass.Type != NULL)
             {
-                Object NewObject;
-                NewObject.Name = GlobalKeywords.ReservedWords["ME"];
-                NewObject.Type = CurrentClass;
-                NewObject.ReferenceOffset = GetNextParamOffset();
-                NewObject.IsReference = true;
-                GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
-                CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
+                AddMeParameterToFunction();
             }
         }
         
@@ -2434,6 +2428,7 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
             Found = true;
             FoundPos = Index;
         }
+        cout << OutputFunctionNameWithObjects(GetInList(InList.Functions, Index).Name, InObjects) << endl;
         cout << "Index: " << Index << " FOund: " << Found << " " << GetInList(InList.Functions, FoundPos).Label << endl;
         Index = Index + 1;
     }
@@ -2448,6 +2443,7 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
 
 bool Parser::DoesFunctionMatch(const Function & InFunction, const vector<Object *> InObjects)
 {
+    cout << "getting size " << InFunction.Parameters.size() << " " << InObjects.size() << endl;
     bool IsMatch = true;
     if(InFunction.Parameters.size() != InObjects.size())
     {
@@ -2458,6 +2454,7 @@ bool Parser::DoesFunctionMatch(const Function & InFunction, const vector<Object 
         unsigned int Index = 0;
         while(Index < InObjects.size() && IsMatch == true)
         {
+            cout << InFunction.Parameters[Index]->Type.Type->Name << " " << InObjects[Index]->Type.Type->Name << endl;
             if(InFunction.Parameters[Index]->Type.Type != InObjects[Index]->Type.Type || InFunction.Parameters[Index]->Type.Templates != InObjects[Index]->Type.Templates)
             {
                 IsMatch = false;
@@ -2784,6 +2781,15 @@ void Parser::DoPossibleDeleteClassScope()
 {
     if(GetCurrentScope()->Origin == SCOPE_ORIGIN::CLASS)
     {
+        if(PassMode == PASS_MODE::FUNCTION_SKIM)
+        {
+            DoPossiblyAddBigThree();
+        }
+        else if(PassMode == PASS_MODE::FULL_PASS)
+        {
+            DoPossiblyOutputBigThreeCode();
+            cout << "testing #3" << endl;
+        }
         CurrentClass.Type = NULL;
         CurrentClass.Templates = NULL;
     }
@@ -2889,4 +2895,153 @@ void Parser::ParseNewlineAtActionDeclarationEnd()
 {
     CurrentFunction->ReturnObject.Type = CurrentParsingType;
     State = PARSER_STATE::START_OF_LINE;
+}
+
+void Parser::DoPossiblyAddBigThree()
+{
+    DoPossiblyAddEmptyConstructor();
+}
+
+bool Parser::DoesFunctionListContain(const FunctionList & InList, const vector<Object *> & InObjects)
+{
+    bool Found = false;
+    unsigned int Index = 0;
+    while(Index < InList.Functions.size() && Found == false)
+    {
+        if(DoesFunctionMatch(GetInList(InList.Functions, Index), InObjects) == true)
+        {
+            Found = true;
+        }
+        Index = Index + 1;
+    }
+    return Found;
+}
+
+void Parser::DoPossiblyAddEmptyConstructor()
+{
+    CurrentClass.Templates->HasUserDefinedEmptyConstructor = true;
+    if(DoesMapContain(GlobalKeywords.ReservedWords["CONSTRUCTOR"], CurrentClass.Templates->MyScope.Functions) == false)
+    {
+        DoAddEmptyConstructor();
+    }
+    else
+    {
+        vector<Object *> Objects;
+        Object MeObject = CreateMeObject();
+        Objects.push_back(&MeObject);
+        if(DoesFunctionListContain(CurrentClass.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]], Objects) == false)
+        {
+            DoAddEmptyConstructor();
+        }
+    }
+}
+
+void Parser::DoAddEmptyConstructor()
+{
+    Function NewFunction;
+    NewFunction.IsAsm = false;
+    NewFunction.HasReturnObject = false;
+    NewFunction.Name = GlobalKeywords.ReservedWords["CONSTRUCTOR"];
+    NewFunction.MyScope.Origin = SCOPE_ORIGIN::FUNCTION;
+    NewFunction.LatestPassMode = PASS_MODE::FUNCTION_SKIM;
+    string NextLabel = GetNextLabel();
+    NewFunction.Label = NextLabel;
+    GetCurrentScope()->Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]].Functions.push_back(NewFunction);
+    CurrentClass.Templates->HasUserDefinedEmptyConstructor = false;
+    CurrentFunction = GetCurrentScope()->Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]].GetLastFunction();
+    ScopeStack.push_back(&(CurrentFunction->MyScope));
+    AddMeParameterToFunction();
+    ScopeStack.pop_back();
+    CurrentFunction = NULL;
+}
+
+void Parser::CallAllSubObjectsEmptyConstructors()
+{
+    cout << "This is class " << CurrentClass.Type->Name << " and it has " << CurrentClass.Templates->MyScope.Objects.size() << " sub objects " << endl;
+    map<string, Object>::const_iterator Iterator;
+    for(Iterator = CurrentClass.Templates->MyScope.Objects.begin(); Iterator != CurrentClass.Templates->MyScope.Objects.end(); Iterator++)
+    {
+        CallObjectEmptyConstructor(Iterator->second);
+    }
+}
+
+void Parser::CallObjectEmptyConstructor(const Object & InObject)
+{
+    cout << "this is the culprit " << InObject.Type.Type->Name << endl;
+    Object * CallingObject = GetInAnyScope(GlobalKeywords.ReservedWords["ME"]);
+    unsigned int OffsetShift = InObject.Offset;
+    Object NewObject;
+    NewObject.Name = GetNextTemporaryVariable();
+    NewObject.Type = InObject.Type;
+    NewObject.Offset = CallingObject->Offset + OffsetShift;
+    NewObject.IsReference = true;
+    NewObject.ReferenceOffset = CallingObject->ReferenceOffset;
+    GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
+    
+    NextFunctionObjects.push_back(GetInAnyScope(NewObject.Name));
+    
+    Function * WantedFunction = GetFromFunctionList(InObject.Type.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]], Reverse(NextFunctionObjects));
+    CallFunction(*WantedFunction);
+}
+
+void Parser::AddMeParameterToFunction()
+{
+    Object NewObject = CreateMeObject();
+    NewObject.ReferenceOffset = GetNextParamOffset();
+    GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
+    CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
+}
+
+void Parser::DoPossiblyOutputBigThreeCode()
+{
+    DoPossiblyOutputEmptyConstructorCode();
+}
+
+void Parser::DoPossiblyOutputEmptyConstructorCode()
+{
+    if(CurrentClass.Templates->HasUserDefinedEmptyConstructor == false)
+    {
+        OutputEmptyConstructorCode();
+    }
+}
+
+void Parser::OutputEmptyConstructorCode()
+{
+    cout << "testing #1 " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]].GetFirstFunction()->LatestPassMode << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]].GetFirstFunction() << endl;
+    CurrentFunction = CurrentClass.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]].GetFirstFunctionNotOfPassMode(PassMode);
+    cout << CurrentClass.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]].GetFirstFunctionNotOfPassMode(PassMode) << endl;
+    cout << "testing #2" << endl;
+    ScopeStack.push_back(&CurrentFunction->MyScope);
+    
+    OutputAsm = OutputAsm + CurrentFunction->Label + GlobalKeywords.ReservedWords["COLON"];
+    if(DEBUG == true)
+    {
+        OutputCurrentFunctionToAsm();
+    }
+    AppendNewlinesToOutputASM(2);
+    OutputAsm = OutputAsm + GlobalASM.CalcCreateStackFrameAsm();
+    AppendNewlinesToOutputASM(2);
+    
+    CallAllSubObjectsEmptyConstructors();
+    
+    OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
+    AppendNewlinesToOutputASM(2);
+    
+    OutputAsm = OutputAsm + GlobalASM.CalcRetAsm();
+    AppendNewlinesToOutputASM(2);
+    
+    ScopeStack.pop_back();
+    CurrentFunction->LatestPassMode = PassMode;
+    CurrentFunction = NULL;
+}
+
+Object Parser::CreateMeObject()
+{
+    Object NewObject;
+    NewObject.Name = GlobalKeywords.ReservedWords["ME"];
+    NewObject.Type = CurrentClass;
+    NewObject.IsReference = true;
+    return NewObject;
 }

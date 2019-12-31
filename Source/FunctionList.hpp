@@ -19,6 +19,7 @@ Function * FunctionList::GetFirstFunction()
 
 Function * FunctionList::GetFirstFunctionNotOfPassMode(const PASS_MODE InPassMode)
 {
+    Function * OutputFunction;
     bool Found = false;
     unsigned int Index = 0;
     typename list<Function>::iterator it = Functions.begin();
@@ -27,6 +28,7 @@ Function * FunctionList::GetFirstFunctionNotOfPassMode(const PASS_MODE InPassMod
         if((*it).LatestPassMode != InPassMode)
         {
             Found = true;
+            OutputFunction = &(*it);
         }
         else
         {
@@ -34,5 +36,9 @@ Function * FunctionList::GetFirstFunctionNotOfPassMode(const PASS_MODE InPassMod
             it++;
         }
     }
-    return &(*it);
+    if(Found == false)
+    {
+        OutputFunction = NULL;
+    }
+    return OutputFunction;
 }

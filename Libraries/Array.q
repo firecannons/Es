@@ -7,9 +7,7 @@ class Array < Type >
         Integer ReservedSize
         
         action Constructor
-        end
-        
-        action Destructor
+            Me:Initialize()
         end
         
         action Initialize()

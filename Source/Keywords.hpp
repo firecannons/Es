@@ -47,6 +47,8 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("ELSE_IF"), string("elseif")));
     ReservedWords.insert(pair<string,string>(string("ELSE"), string("else")));
     ReservedWords.insert(pair<string,string>(string("REFERENCE"), string("reference")));
+    ReservedWords.insert(pair<string,string>(string("CONSTRUCTOR"), string("Constructor")));
+    ReservedWords.insert(pair<string,string>(string("DESTRUCTOR"), string("Destructor")));
     
     ShortOperators.emplace(ReservedWords["LESS_THAN"]);
     ShortOperators.emplace(ReservedWords["GREATER_THAN"]);

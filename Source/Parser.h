@@ -275,6 +275,17 @@ public:
     void OutputEndControlStructureAsm();
     void ParseExpectReturnsNewlineOrReference();
     void ParseNewlineAtActionDeclarationEnd();
+    void DoPossiblyAddBigThree();
+    bool DoesFunctionListContain(const FunctionList & InList, const vector<Object *> & InObjects);
+    void DoPossiblyAddEmptyConstructor();
+    void DoAddEmptyConstructor();
+    void CallAllSubObjectsEmptyConstructors();
+    void CallObjectEmptyConstructor(const Object & InObject);
+    void AddMeParameterToFunction();
+    void DoPossiblyOutputBigThreeCode();
+    void DoPossiblyOutputEmptyConstructorCode();
+    void OutputEmptyConstructorCode();
+    Object CreateMeObject();
 };
 
 #include "Compiler.h"
