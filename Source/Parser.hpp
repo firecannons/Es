@@ -2900,6 +2900,9 @@ void Parser::ParseNewlineAtActionDeclarationEnd()
 void Parser::DoPossiblyAddBigThree()
 {
     DoPossiblyAddEmptyConstructor();
+    DoPossiblyAddCopyConstructor();
+    DoPossiblyAddAssignmentOperator();
+    DoPossiblyAddEmptyDestructor();
 }
 
 bool Parser::DoesFunctionListContain(const FunctionList & InList, const vector<Object *> & InObjects)
@@ -2917,20 +2920,23 @@ bool Parser::DoesFunctionListContain(const FunctionList & InList, const vector<O
     return Found;
 }
 
-void Parser::DoPossiblyAddAutoGenerateFunction()
+bool Parser::DoPossiblyAddAutoGenerateFunction()
 {
-    CurrentClass.Templates->HasUserDefinedEmptyConstructor = true;
+    bool DidUserOverloadFunction = true;
     if(DoesMapContain(AutoGenerateFunctionName, CurrentClass.Templates->MyScope.Functions) == false)
     {
+        DidUserOverloadFunction = false;
         DoAddAutoGenerateFunction();
     }
     else
     {
         if(DoesFunctionListContain(CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName], AutoGenerateFunctionParameters) == false)
         {
+            DidUserOverloadFunction = false;
             DoAddAutoGenerateFunction();
         }
     }
+    return DidUserOverloadFunction;
 }
 
 void Parser::DoAddAutoGenerateFunction()
@@ -2944,7 +2950,6 @@ void Parser::DoAddAutoGenerateFunction()
     string NextLabel = GetNextLabel();
     NewFunction.Label = NextLabel;
     GetCurrentScope()->Functions[AutoGenerateFunctionName].Functions.push_back(NewFunction);
-    CurrentClass.Templates->HasUserDefinedEmptyConstructor = false;
     CurrentFunction = GetCurrentScope()->Functions[AutoGenerateFunctionName].GetLastFunction();
     ScopeStack.push_back(&(CurrentFunction->MyScope));
     CopyAutoGenerateParametersToFunction();
@@ -2964,7 +2969,7 @@ void Parser::CallAllSubObjectsAutoGenerateFunctions()
 
 void Parser::CallObjectAutoGenerateFunction(const Object & InObject)
 {
-    cout << "this is the culprit " << InObject.Type.Type->Name << endl;
+    cout << "this is the culprit " << InObject.Type.Type->Name << " " << AutoGenerateFunctionName << " " << CurrentClass.Type->Name << endl;
     Object * CallingObject = GetInAnyScope(GlobalKeywords.ReservedWords["ME"]);
     unsigned int OffsetShift = InObject.Offset;
     Object NewObject;
@@ -2977,7 +2982,22 @@ void Parser::CallObjectAutoGenerateFunction(const Object & InObject)
     
     NextFunctionObjects.push_back(GetInAnyScope(NewObject.Name));
     
-    Function * WantedFunction = GetFromFunctionList(InObject.Type.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]], Reverse(NextFunctionObjects));
+    if(AutoGenerateFunctionParameters.size() >= 2)
+    {
+        Object * CallingObject = GetInAnyScope(GlobalKeywords.ReservedWords["SOURCE"]);
+        unsigned int OffsetShift = InObject.Offset;
+        Object NewObject;
+        NewObject.Name = GetNextTemporaryVariable();
+        NewObject.Type = InObject.Type;
+        NewObject.Offset = CallingObject->Offset + OffsetShift;
+        NewObject.IsReference = true;
+        NewObject.ReferenceOffset = CallingObject->ReferenceOffset;
+        GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
+        
+        NextFunctionObjects.push_back(GetInAnyScope(NewObject.Name));
+    }
+    
+    Function * WantedFunction = GetFromFunctionList(InObject.Type.Templates->MyScope.Functions[AutoGenerateFunctionName], Reverse(NextFunctionObjects));
     CallFunction(*WantedFunction);
 }
 
@@ -2996,24 +3016,39 @@ void Parser::CopyAutoGenerateParametersToFunction()
 void Parser::DoPossiblyOutputBigThreeCode()
 {
     DoPossiblyOutputEmptyConstructorCode();
+    DoPossiblyOutputCopyConstructorCode();
+    DoPossiblyOutputAssignmentOperatorCode();
+    DoPossiblyOutputEmptyDestructorCode();
 }
 
 void Parser::DoPossiblyOutputEmptyConstructorCode()
 {
+    cout << "fire " << CurrentClass.Templates->HasUserDefinedEmptyConstructor << " " << CurrentClass.Type->Name << endl;
     if(CurrentClass.Templates->HasUserDefinedEmptyConstructor == false)
     {
         AutoGenerateFunctionName = GlobalKeywords.ReservedWords["CONSTRUCTOR"];
+            cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction()->LatestPassMode << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction() << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetLastFunction() << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction()->LatestPassMode << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetLastFunction()->LatestPassMode << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].Functions.size() << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunctionNotOfPassMode(PassMode) << endl;
         OutputAutoGenerateFunctionCode();
     }
 }
 
 void Parser::OutputAutoGenerateFunctionCode()
 {
-    cout << "testing #1 " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
+    cout << "testing #1 " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << " " << CurrentClass.Type->Name << endl;
     cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction()->LatestPassMode << endl;
     cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction() << endl;
-    CurrentFunction = CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunctionNotOfPassMode(PassMode);
+    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetLastFunction() << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction()->LatestPassMode << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetLastFunction()->LatestPassMode << endl;
+    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].Functions.size() << endl;
     cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunctionNotOfPassMode(PassMode) << endl;
+    CurrentFunction = CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunctionNotOfPassMode(PassMode);
     cout << "testing #2" << endl;
     ScopeStack.push_back(&CurrentFunction->MyScope);
     
@@ -3039,10 +3074,10 @@ void Parser::OutputAutoGenerateFunctionCode()
     CurrentFunction = NULL;
 }
 
-Object Parser::CreateMeObject()
+Object Parser::CreateCurrentClassObject(const string & VariableName)
 {
     Object NewObject;
-    NewObject.Name = GlobalKeywords.ReservedWords["ME"];
+    NewObject.Name = VariableName;
     NewObject.Type = CurrentClass;
     NewObject.IsReference = true;
     return NewObject;
@@ -3050,7 +3085,7 @@ Object Parser::CreateMeObject()
 
 void Parser::AddMeParameterToFunction()
 {
-    Object NewObject = CreateMeObject();
+    Object NewObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["ME"]);
     NewObject.ReferenceOffset = GetNextParamOffset();
     GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
     CurrentFunction->Parameters.push_back(&GetCurrentScope()->Objects[NewObject.Name]);
@@ -3059,9 +3094,66 @@ void Parser::AddMeParameterToFunction()
 void Parser::DoPossiblyAddEmptyConstructor()
 {
     AutoGenerateFunctionName = GlobalKeywords.ReservedWords["CONSTRUCTOR"];
-    Object MeObject = CreateMeObject();
-    MeObject.ReferenceOffset = GetNextParamOffset();
+    Object MeObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["ME"]);
     AutoGenerateFunctionParameters.push_back(&MeObject);
-    DoPossiblyAddAutoGenerateFunction();
+    CurrentClass.Templates->HasUserDefinedEmptyConstructor = DoPossiblyAddAutoGenerateFunction();
     AutoGenerateFunctionParameters.clear();
+}
+
+void Parser::DoPossiblyAddCopyConstructor()
+{
+    AutoGenerateFunctionName = GlobalKeywords.ReservedWords["CONSTRUCTOR"];
+    Object MeObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["ME"]);
+    AutoGenerateFunctionParameters.push_back(&MeObject);
+    MeObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["SOURCE"]);
+    AutoGenerateFunctionParameters.push_back(&MeObject);
+    CurrentClass.Templates->HasUserDefinedCopyConstructor = DoPossiblyAddAutoGenerateFunction();
+    AutoGenerateFunctionParameters.clear();
+}
+
+void Parser::DoPossiblyAddAssignmentOperator()
+{
+    AutoGenerateFunctionName = GlobalKeywords.ReservedWords["EQUALS"];
+    Object MeObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["ME"]);
+    AutoGenerateFunctionParameters.push_back(&MeObject);
+    MeObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["SOURCE"]);
+    AutoGenerateFunctionParameters.push_back(&MeObject);
+    CurrentClass.Templates->HasUserDefinedAssignmentOperator = DoPossiblyAddAutoGenerateFunction();
+    AutoGenerateFunctionParameters.clear();
+}
+
+void Parser::DoPossiblyAddEmptyDestructor()
+{
+    AutoGenerateFunctionName = GlobalKeywords.ReservedWords["DESTRUCTOR"];
+    Object MeObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["ME"]);
+    AutoGenerateFunctionParameters.push_back(&MeObject);
+    CurrentClass.Templates->HasUserDefinedDestructor = DoPossiblyAddAutoGenerateFunction();
+    AutoGenerateFunctionParameters.clear();
+}
+
+void Parser::DoPossiblyOutputCopyConstructorCode()
+{
+    if(CurrentClass.Templates->HasUserDefinedCopyConstructor == false)
+    {
+        AutoGenerateFunctionName = GlobalKeywords.ReservedWords["CONSTRUCTOR"];
+        OutputAutoGenerateFunctionCode();
+    }
+}
+
+void Parser::DoPossiblyOutputAssignmentOperatorCode()
+{
+    if(CurrentClass.Templates->HasUserDefinedAssignmentOperator == false)
+    {
+        AutoGenerateFunctionName = GlobalKeywords.ReservedWords["EQUALS"];
+        OutputAutoGenerateFunctionCode();
+    }
+}
+
+void Parser::DoPossiblyOutputEmptyDestructorCode()
+{
+    if(CurrentClass.Templates->HasUserDefinedDestructor == false)
+    {
+        AutoGenerateFunctionName = GlobalKeywords.ReservedWords["DESTRUCTOR"];
+        OutputAutoGenerateFunctionCode();
+    }
 }

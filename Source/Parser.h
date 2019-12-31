@@ -279,7 +279,7 @@ public:
     void ParseNewlineAtActionDeclarationEnd();
     void DoPossiblyAddBigThree();
     bool DoesFunctionListContain(const FunctionList & InList, const vector<Object *> & InObjects);
-    void DoPossiblyAddAutoGenerateFunction();
+    bool DoPossiblyAddAutoGenerateFunction();
     void DoAddAutoGenerateFunction();
     void CallAllSubObjectsAutoGenerateFunctions();
     void CallObjectAutoGenerateFunction(const Object & InObject);
@@ -287,9 +287,15 @@ public:
     void DoPossiblyOutputBigThreeCode();
     void DoPossiblyOutputEmptyConstructorCode();
     void OutputAutoGenerateFunctionCode();
-    Object CreateMeObject();
+    Object CreateCurrentClassObject(const string & VariableName);
     void AddMeParameterToFunction();
     void DoPossiblyAddEmptyConstructor();
+    void DoPossiblyAddCopyConstructor();
+    void DoPossiblyAddAssignmentOperator();
+    void DoPossiblyAddEmptyDestructor();
+    void DoPossiblyOutputCopyConstructorCode();
+    void DoPossiblyOutputAssignmentOperatorCode();
+    void DoPossiblyOutputEmptyDestructorCode();
 };
 
 #include "Compiler.h"

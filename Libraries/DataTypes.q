@@ -4,6 +4,9 @@
 test 3*/
 
 class Integer size 4
+
+        action asm Constructor
+        end
         
         action asm = ( Integer Source )
             push ebp
