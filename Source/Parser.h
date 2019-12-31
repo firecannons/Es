@@ -110,6 +110,8 @@ public:
     vector<TemplatedType> TemplateCompileStack;
     string TemplateOutputAsm;
     list<Scope> ControlStructureScopes;
+    string AutoGenerateFunctionName;
+    vector<Object *> AutoGenerateFunctionParameters;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -277,15 +279,17 @@ public:
     void ParseNewlineAtActionDeclarationEnd();
     void DoPossiblyAddBigThree();
     bool DoesFunctionListContain(const FunctionList & InList, const vector<Object *> & InObjects);
-    void DoPossiblyAddEmptyConstructor();
-    void DoAddEmptyConstructor();
-    void CallAllSubObjectsEmptyConstructors();
-    void CallObjectEmptyConstructor(const Object & InObject);
-    void AddMeParameterToFunction();
+    void DoPossiblyAddAutoGenerateFunction();
+    void DoAddAutoGenerateFunction();
+    void CallAllSubObjectsAutoGenerateFunctions();
+    void CallObjectAutoGenerateFunction(const Object & InObject);
+    void CopyAutoGenerateParametersToFunction();
     void DoPossiblyOutputBigThreeCode();
     void DoPossiblyOutputEmptyConstructorCode();
-    void OutputEmptyConstructorCode();
+    void OutputAutoGenerateFunctionCode();
     Object CreateMeObject();
+    void AddMeParameterToFunction();
+    void DoPossiblyAddEmptyConstructor();
 };
 
 #include "Compiler.h"
