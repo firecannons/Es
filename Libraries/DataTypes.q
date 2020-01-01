@@ -275,6 +275,20 @@ class Byte size 1
             pop ebp
         end
         
+        action asm Destructor
+            push ebp
+            mov ebp, esp
+            
+            ; asm comment
+            ; mov address of the object into
+            mov ebx, [ebp+8]
+            
+            mov byte [ebx], 5
+            
+            mov esp, ebp
+            pop ebp
+        end
+        
         action asm = ( Byte Source )
             push ebp
             mov ebp, esp

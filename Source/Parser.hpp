@@ -2982,7 +2982,7 @@ void Parser::CallObjectAutoGenerateFunction(const Object & InObject)
     
     NextFunctionObjects.push_back(GetInAnyScope(NewObject.Name));
     
-    if(AutoGenerateFunctionParameters.size() >= 2)
+    if(CurrentFunction->Parameters.size() >= 2)
     {
         Object * CallingObject = GetInAnyScope(GlobalKeywords.ReservedWords["SOURCE"]);
         unsigned int OffsetShift = InObject.Offset;
@@ -2997,7 +2997,7 @@ void Parser::CallObjectAutoGenerateFunction(const Object & InObject)
         NextFunctionObjects.push_back(GetInAnyScope(NewObject.Name));
     }
     
-    Function * WantedFunction = GetFromFunctionList(InObject.Type.Templates->MyScope.Functions[AutoGenerateFunctionName], Reverse(NextFunctionObjects));
+    Function * WantedFunction = GetFromFunctionList(InObject.Type.Templates->MyScope.Functions[CurrentFunction->Name], Reverse(NextFunctionObjects));
     CallFunction(*WantedFunction);
 }
 
@@ -3105,8 +3105,8 @@ void Parser::DoPossiblyAddCopyConstructor()
     AutoGenerateFunctionName = GlobalKeywords.ReservedWords["CONSTRUCTOR"];
     Object MeObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["ME"]);
     AutoGenerateFunctionParameters.push_back(&MeObject);
-    MeObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["SOURCE"]);
-    AutoGenerateFunctionParameters.push_back(&MeObject);
+    Object SourceObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["SOURCE"]);
+    AutoGenerateFunctionParameters.push_back(&SourceObject);
     CurrentClass.Templates->HasUserDefinedCopyConstructor = DoPossiblyAddAutoGenerateFunction();
     AutoGenerateFunctionParameters.clear();
 }
@@ -3116,8 +3116,8 @@ void Parser::DoPossiblyAddAssignmentOperator()
     AutoGenerateFunctionName = GlobalKeywords.ReservedWords["EQUALS"];
     Object MeObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["ME"]);
     AutoGenerateFunctionParameters.push_back(&MeObject);
-    MeObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["SOURCE"]);
-    AutoGenerateFunctionParameters.push_back(&MeObject);
+    Object SourceObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["SOURCE"]);
+    AutoGenerateFunctionParameters.push_back(&SourceObject);
     CurrentClass.Templates->HasUserDefinedAssignmentOperator = DoPossiblyAddAutoGenerateFunction();
     AutoGenerateFunctionParameters.clear();
 }

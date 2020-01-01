@@ -37,6 +37,11 @@ action OutputByteArray(Array<Byte> Ar)
     end
 end
 
+class DestructorCallThroughTest
+    Byte B1
+    Byte B2
+end
+
 action Main
     Array<Byte> Ab
     Ab:Initialize()
@@ -75,4 +80,9 @@ action Main
     NewAb:Initialize()
     NewAb = Ab
     OutputByteArray(NewAb)
+    
+    DestructorCallThroughTest DCTT
+    DCTT:Destructor()
+    OutputByteDigit(DCTT:B1)
+    OutputByteDigit(DCTT:B2)
 end
