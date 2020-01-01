@@ -1208,6 +1208,7 @@ void Parser::ParseExpectVariableName()
                     AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
                 }
             }
+            CurrentParsingObject = &GetCurrentScope()->Objects[NewParamObject.Name];
         }
         if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
         {
@@ -1238,10 +1239,12 @@ void Parser::ParseExpectFirstOperatorOrNewline()
         Position = Position - 1;
         CopyUntilNextNewline();
         ReduceLine();
+        CurrentParsingType.Templates = NULL;
         State = PARSER_STATE::START_OF_LINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
+        CallEmptyConstructor();
         State = PARSER_STATE::START_OF_LINE;
     }
     else
@@ -2365,10 +2368,17 @@ void Parser::RunAllTemplatedPasses()
     InitializeForTemplatedPass();
     RunParse();
     SetSizesAndOffsets();
+    DoPossiblyAddBigThree();
+    cout << CurrentClass.Type->Name << endl;
+    if(CurrentClass.Type->Name == "DynamicMemory")
+    {
+        //exit(1);
+    }
 
     PassMode = PASS_MODE::FULL_PASS;
     InitializeForTemplatedPass();
     RunParse();
+    DoPossiblyOutputBigThreeCode();
 }
 
 string Parser::OutputFullCompiledTemplateVector(const vector<TemplatedType> & TTs)
@@ -2423,6 +2433,10 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
     cout << "ok... " << InList.Functions.size() << endl;
     while(Index < InList.Functions.size() && Found == false)
     {
+        if(InList.Functions.size() > 0)
+        {
+            cout << "first parameter type name = " << InObjects[0]->Type.Type->Name << endl;
+        }
         if(DoesFunctionMatch(GetInList(InList.Functions, Index), InObjects) == true)
         {
             Found = true;
@@ -2788,7 +2802,6 @@ void Parser::DoPossibleDeleteClassScope()
         else if(PassMode == PASS_MODE::FULL_PASS)
         {
             DoPossiblyOutputBigThreeCode();
-            cout << "testing #3" << endl;
         }
         CurrentClass.Type = NULL;
         CurrentClass.Templates = NULL;
@@ -2950,6 +2963,7 @@ void Parser::DoAddAutoGenerateFunction()
     string NextLabel = GetNextLabel();
     NewFunction.Label = NextLabel;
     GetCurrentScope()->Functions[AutoGenerateFunctionName].Functions.push_back(NewFunction);
+    cout << "adding new function" << endl;
     CurrentFunction = GetCurrentScope()->Functions[AutoGenerateFunctionName].GetLastFunction();
     ScopeStack.push_back(&(CurrentFunction->MyScope));
     CopyAutoGenerateParametersToFunction();
@@ -2959,7 +2973,6 @@ void Parser::DoAddAutoGenerateFunction()
 
 void Parser::CallAllSubObjectsAutoGenerateFunctions()
 {
-    cout << "This is class " << CurrentClass.Type->Name << " and it has " << CurrentClass.Templates->MyScope.Objects.size() << " sub objects " << endl;
     map<string, Object>::const_iterator Iterator;
     for(Iterator = CurrentClass.Templates->MyScope.Objects.begin(); Iterator != CurrentClass.Templates->MyScope.Objects.end(); Iterator++)
     {
@@ -2969,7 +2982,6 @@ void Parser::CallAllSubObjectsAutoGenerateFunctions()
 
 void Parser::CallObjectAutoGenerateFunction(const Object & InObject)
 {
-    cout << "this is the culprit " << InObject.Type.Type->Name << " " << AutoGenerateFunctionName << " " << CurrentClass.Type->Name << endl;
     Object * CallingObject = GetInAnyScope(GlobalKeywords.ReservedWords["ME"]);
     unsigned int OffsetShift = InObject.Offset;
     Object NewObject;
@@ -3023,33 +3035,16 @@ void Parser::DoPossiblyOutputBigThreeCode()
 
 void Parser::DoPossiblyOutputEmptyConstructorCode()
 {
-    cout << "fire " << CurrentClass.Templates->HasUserDefinedEmptyConstructor << " " << CurrentClass.Type->Name << endl;
     if(CurrentClass.Templates->HasUserDefinedEmptyConstructor == false)
     {
         AutoGenerateFunctionName = GlobalKeywords.ReservedWords["CONSTRUCTOR"];
-            cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction()->LatestPassMode << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction() << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetLastFunction() << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction()->LatestPassMode << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetLastFunction()->LatestPassMode << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].Functions.size() << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunctionNotOfPassMode(PassMode) << endl;
         OutputAutoGenerateFunctionCode();
     }
 }
 
 void Parser::OutputAutoGenerateFunctionCode()
 {
-    cout << "testing #1 " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << " " << CurrentClass.Type->Name << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction()->LatestPassMode << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction() << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetLastFunction() << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunction()->LatestPassMode << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetLastFunction()->LatestPassMode << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].Functions.size() << endl;
-    cout << CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunctionNotOfPassMode(PassMode) << endl;
     CurrentFunction = CurrentClass.Templates->MyScope.Functions[AutoGenerateFunctionName].GetFirstFunctionNotOfPassMode(PassMode);
-    cout << "testing #2" << endl;
     ScopeStack.push_back(&CurrentFunction->MyScope);
     
     OutputAsm = OutputAsm + CurrentFunction->Label + GlobalKeywords.ReservedWords["COLON"];
@@ -3074,11 +3069,11 @@ void Parser::OutputAutoGenerateFunctionCode()
     CurrentFunction = NULL;
 }
 
-Object Parser::CreateCurrentClassObject(const string & VariableName)
+Object Parser::CreateReferenceObject(const string & VariableName, const TemplatedType & InTT)
 {
     Object NewObject;
     NewObject.Name = VariableName;
-    NewObject.Type = CurrentClass;
+    NewObject.Type = InTT;
     NewObject.IsReference = true;
     return NewObject;
 }
@@ -3108,6 +3103,7 @@ void Parser::DoPossiblyAddCopyConstructor()
     Object SourceObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["SOURCE"]);
     AutoGenerateFunctionParameters.push_back(&SourceObject);
     CurrentClass.Templates->HasUserDefinedCopyConstructor = DoPossiblyAddAutoGenerateFunction();
+    cout << CurrentClass.Type->Name << " does " << CurrentClass.Templates->HasUserDefinedCopyConstructor << " have a copy constructor" << endl;
     AutoGenerateFunctionParameters.clear();
 }
 
@@ -3156,4 +3152,18 @@ void Parser::DoPossiblyOutputEmptyDestructorCode()
         AutoGenerateFunctionName = GlobalKeywords.ReservedWords["DESTRUCTOR"];
         OutputAutoGenerateFunctionCode();
     }
+}
+
+void Parser::CallEmptyConstructor()
+{
+    cout << OutputCompiledTemplateToString(*(CurrentParsingType.Templates), *(CurrentParsingType.Type), 1) << endl;
+    NextFunctionObjects.push_back(CurrentParsingObject);
+    Function * WantedFunction = GetFromFunctionList(CurrentParsingType.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]], Reverse(NextFunctionObjects));
+    CallFunction(*WantedFunction);
+    NextFunctionObjects.clear();
+}
+
+Object Parser::CreateCurrentClassObject(const string & VariableName)
+{
+    return CreateReferenceObject(VariableName, CurrentClass);
 }

@@ -112,6 +112,7 @@ public:
     list<Scope> ControlStructureScopes;
     string AutoGenerateFunctionName;
     vector<Object *> AutoGenerateFunctionParameters;
+    Object * CurrentParsingObject;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -287,7 +288,7 @@ public:
     void DoPossiblyOutputBigThreeCode();
     void DoPossiblyOutputEmptyConstructorCode();
     void OutputAutoGenerateFunctionCode();
-    Object CreateCurrentClassObject(const string & VariableName);
+    Object CreateReferenceObject(const string & VariableName, const TemplatedType & InTT);
     void AddMeParameterToFunction();
     void DoPossiblyAddEmptyConstructor();
     void DoPossiblyAddCopyConstructor();
@@ -296,6 +297,8 @@ public:
     void DoPossiblyOutputCopyConstructorCode();
     void DoPossiblyOutputAssignmentOperatorCode();
     void DoPossiblyOutputEmptyDestructorCode();
+    void CallEmptyConstructor();
+    Object CreateCurrentClassObject(const string & VariableName);
 };
 
 #include "Compiler.h"
