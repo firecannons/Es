@@ -33,9 +33,13 @@ class Array < Type >
         end
 
         action Resize ( Integer Size )
-            DynamicMemory < Type > DM
-            Me : P = DM : ReallocateHeapMemory ( Size , Me : P , Me:ReservedSize )
-            Me : ReservedSize = Size
+            if Size != 0
+                DynamicMemory < Type > DM
+                Me : P = DM : ReallocateHeapMemory ( Size , Me : P , Me:ReservedSize )
+                Me : ReservedSize = Size
+            elseif Me:ReservedSize != 0
+                DM:DeallocateHeapMemory(Me:P, Me:ReservedSize)
+            end
         end
         
         action Add ( Type Item )
