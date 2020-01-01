@@ -7,13 +7,20 @@ class Array < Type >
         Integer ReservedSize
         
         action Constructor
-            Me:Initialize()
-        end
-        
-        action Initialize()
             Me:Size = 0
             Me:ReservedSize = 0
             Me:P:Position = 0
+        end
+        
+        action Destructor
+            DynamicMemory < Type > DM
+            if Me:ReservedSize != 0
+                DM:DeallocateHeapMemory(Me:P, Me:ReservedSize)
+            end
+        end
+        
+        action Initialize
+            Me:Constructor()
         end
         
         action SetMemorySize ( Integer Size )

@@ -299,6 +299,10 @@ public:
     void DoPossiblyOutputEmptyDestructorCode();
     void CallEmptyConstructor();
     Object CreateCurrentClassObject(const string & VariableName);
+    void CallEmptyDestructorsForCurrentScope();
+    void CallEmptyDestructors(vector<Object *> OrderedObjects);
+    void CallEmptyDestructor(Object * InObject);
+    void DoPossiblyCallDestructors();
 };
 
 #include "Compiler.h"

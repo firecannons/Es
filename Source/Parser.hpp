@@ -1205,6 +1205,7 @@ void Parser::ParseExpectVariableName()
                 {
                     cout << "adding object to function scope " << NewParamObject.Name << endl;
                     GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
+                    GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
                     AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
                 }
             }
@@ -1239,12 +1240,15 @@ void Parser::ParseExpectFirstOperatorOrNewline()
         Position = Position - 1;
         CopyUntilNextNewline();
         ReduceLine();
+        CurrentParsingObject = NULL;
         CurrentParsingType.Templates = NULL;
         State = PARSER_STATE::START_OF_LINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
     {
         CallEmptyConstructor();
+        CurrentParsingObject = NULL;
+        CurrentParsingType.Templates = NULL;
         State = PARSER_STATE::START_OF_LINE;
     }
     else
@@ -2776,6 +2780,7 @@ void Parser::DoPossibleControlStructureOutput()
 
 void Parser::ProcessEndScope()
 {
+    DoPossiblyCallDestructors();
     DoPossibleDeleteFunctionScope();
     DoPossibleDeleteClassScope();
     DoPossibleControlStructureOutput();
@@ -3156,7 +3161,6 @@ void Parser::DoPossiblyOutputEmptyDestructorCode()
 
 void Parser::CallEmptyConstructor()
 {
-    cout << OutputCompiledTemplateToString(*(CurrentParsingType.Templates), *(CurrentParsingType.Type), 1) << endl;
     NextFunctionObjects.push_back(CurrentParsingObject);
     Function * WantedFunction = GetFromFunctionList(CurrentParsingType.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]], Reverse(NextFunctionObjects));
     CallFunction(*WantedFunction);
@@ -3166,4 +3170,41 @@ void Parser::CallEmptyConstructor()
 Object Parser::CreateCurrentClassObject(const string & VariableName)
 {
     return CreateReferenceObject(VariableName, CurrentClass);
+}
+
+void Parser::CallEmptyDestructorsForCurrentScope()
+{
+    CallEmptyDestructors(Reverse(GetCurrentScope()->OrderedObjects));
+}
+
+void Parser::CallEmptyDestructors(vector<Object *> OrderedObjects)
+{
+    unsigned int Index = 0;
+    while(Index < OrderedObjects.size())
+    {
+        CallEmptyDestructor(OrderedObjects[Index]);
+        Index = Index + 1;
+    }
+}
+
+void Parser::CallEmptyDestructor(Object * InObject)
+{
+    NextFunctionObjects.push_back(InObject);
+    Function * WantedFunction = GetFromFunctionList(InObject->Type.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["DESTRUCTOR"]], Reverse(NextFunctionObjects));
+    CallFunction(*WantedFunction);
+    NextFunctionObjects.clear();
+}
+
+void Parser::DoPossiblyCallDestructors()
+{
+    if(CurrentFunction != NULL)
+    {
+        if(CurrentFunction->IsAsm == false)
+        {
+            if(PassMode == PASS_MODE::FULL_PASS)
+            {
+                CallEmptyDestructorsForCurrentScope();
+            }
+        }
+    }
 }
