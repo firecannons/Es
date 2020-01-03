@@ -113,6 +113,7 @@ public:
     string AutoGenerateFunctionName;
     vector<Object *> AutoGenerateFunctionParameters;
     Object * CurrentParsingObject;
+    bool JustDeclaredObject;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();

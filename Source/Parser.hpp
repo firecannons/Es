@@ -1235,11 +1235,18 @@ void Parser::ParseExpectVariableName()
 
 void Parser::ParseExpectFirstOperatorOrNewline()
 {
-    if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true)
+    if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true
+    || CurrentToken.Contents == GlobalKeywords.ReservedWords["LPAREN"] || CurrentToken.Contents == GlobalKeywords.ReservedWords["COLON"])
     {
+        if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true)
+        {
+            CallEmptyConstructor();
+        }
+        JustDeclaredObject = true;
         Position = Position - 1;
         CopyUntilNextNewline();
         ReduceLine();
+        JustDeclaredObject = false;
         CurrentParsingObject = NULL;
         CurrentParsingType.Templates = NULL;
         State = PARSER_STATE::START_OF_LINE;
@@ -1253,7 +1260,7 @@ void Parser::ParseExpectFirstOperatorOrNewline()
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected newline or '=' ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+        OutputStandardErrorMessage(string("Expected newline or '='or '(' ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
     }
 }
 
@@ -1424,6 +1431,29 @@ void Parser::DoReduceFunctionCall()
     Scope * CallingScope = NULL;
     bool IsCallingObject = false;
     cout << "one:" << ReduceTokens[ReducePosition].Contents << endl;
+    if(JustDeclaredObject == true)
+    {
+        if(ReduceTokens[ReducePosition].Contents != GlobalKeywords.ReservedWords["CONSTRUCTOR"])
+        {
+            if(ReducePosition >= 2 && ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["COLON"])
+            {
+                CallEmptyConstructor();
+            }
+            else
+            {
+                cout << "sdf" << endl;
+                //exit(1);
+                ReduceTokens.insert(ReduceTokens.begin() + ReducePosition + 1, Token());
+                ReduceTokens.insert(ReduceTokens.begin() + ReducePosition + 2, Token());
+                ReduceTokens[ReducePosition + 1] = ReduceTokens[ReducePosition];
+                ReduceTokens[ReducePosition + 2] = ReduceTokens[ReducePosition];
+                ReduceTokens[ReducePosition + 1].Contents = GlobalKeywords.ReservedWords["COLON"];
+                ReduceTokens[ReducePosition + 2].Contents = GlobalKeywords.ReservedWords["CONSTRUCTOR"];
+                ReducePosition = ReducePosition + 2;
+                JustDeclaredObject = false;
+            }
+        }
+    }
     if(ReducePosition >= 2)
     {
         if(ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["COLON"])
@@ -2125,6 +2155,7 @@ void Parser::InitializeForPass()
     SavedUsingIdents.clear();
     CurrentFunction = NULL;
     CurrentClass.Type = NULL;
+    CurrentParsingType.Type = NULL;
     IsAsmFunction = false;
     WasVariableFound = false;
 }
@@ -2437,15 +2468,13 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
     cout << "ok... " << InList.Functions.size() << endl;
     while(Index < InList.Functions.size() && Found == false)
     {
-        if(InList.Functions.size() > 0)
-        {
-            cout << "first parameter type name = " << InObjects[0]->Type.Type->Name << endl;
-        }
+        cout << "fsad " << endl;
         if(DoesFunctionMatch(GetInList(InList.Functions, Index), InObjects) == true)
         {
             Found = true;
             FoundPos = Index;
         }
+        cout << "fsad " << endl;
         cout << OutputFunctionNameWithObjects(GetInList(InList.Functions, Index).Name, InObjects) << endl;
         cout << "Index: " << Index << " FOund: " << Found << " " << GetInList(InList.Functions, FoundPos).Label << endl;
         Index = Index + 1;

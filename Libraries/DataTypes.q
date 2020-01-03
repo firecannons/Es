@@ -266,7 +266,23 @@ class Byte size 1
             add ebx, 8
             mov eax, [ebx]
             
-            mov byte [eax], 101
+            mov byte [eax], 4
+            
+            mov esp, ebp
+            pop ebp
+        end
+        
+        action asm Constructor ( Byte InB )
+            push ebp
+            mov ebp, esp
+            
+            ; asm comment
+            ; mov address of the object into
+            mov ebx, [ebp+8]
+            mov eax, [ebp+12]
+            
+            mov byte al, [eax]
+            mov byte [ebx], al
             
             mov esp, ebp
             pop ebp
