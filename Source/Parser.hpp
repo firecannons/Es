@@ -2659,6 +2659,7 @@ void Parser::ParseExpectWaitForEnd()
 
 void Parser::ParseEndToken()
 {
+    DoPossiblyCallDestructors();
     State = PARSER_STATE::EXPECT_NEWLINE_AFTER_END;
     if(PassMode == PASS_MODE::FULL_PASS)
     {
@@ -2809,7 +2810,6 @@ void Parser::DoPossibleControlStructureOutput()
 
 void Parser::ProcessEndScope()
 {
-    DoPossiblyCallDestructors();
     DoPossibleDeleteFunctionScope();
     DoPossibleDeleteClassScope();
     DoPossibleControlStructureOutput();

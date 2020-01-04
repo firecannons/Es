@@ -50,6 +50,20 @@ class Array < Type >
             Me:Size = Me:Size + 1
         end
         
+        /*action Find ( Type Item ) returns Integer, Boolean
+            Boolean Output = False
+            Integer Location = -1
+            Index = 0
+            repeat while Index < Me:ReservedSize
+                if Me:GetAt( Index ) == Item
+                    Output = True
+                    Location = Index
+                end
+                Index = Index + 1
+            end
+            return Index, Output
+        end*/
+        
         action = ( Array<Type> Source )
             DynamicMemory DM
             Pointer<Type> OldP = Me:P
