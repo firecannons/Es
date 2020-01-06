@@ -71,6 +71,7 @@ const unsigned int POINTER_SIZE = 4;
 const string MAIN_FUNCTION_NAME = "Main";
 const unsigned int INTEGER_SIZE = POINTER_SIZE;
 const unsigned int STACK_FRAME_SIZE = 8;
+const string GLOBAL_VARIABLE_PREFIX = "G";
 
 class Parser
 {
@@ -114,6 +115,8 @@ public:
     vector<Object *> AutoGenerateFunctionParameters;
     Object * CurrentParsingObject;
     bool JustDeclaredObject;
+    string GlobalVariableReserveAsm;
+    unsigned int GlobalVariableCounter;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -304,6 +307,10 @@ public:
     void CallEmptyDestructors(vector<Object *> OrderedObjects);
     void CallEmptyDestructor(Object * InObject);
     void DoPossiblyCallDestructors();
+    void AddNewGlobalVariableToAsm(const Object & InObject);
+    void AppendGlobalVariableAsmToOutputAsm();
+    void AppendExecutableSectionAsmToOutputAsm();
+    string GetNextGlobalVariable();
 };
 
 #include "Compiler.h"

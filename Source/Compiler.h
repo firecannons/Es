@@ -2,6 +2,15 @@
 #ifndef COMPILER_H
 #define COMPILER_H
 
+enum SCOPE_ORIGIN
+{
+    GLOBAL,
+    CLASS,
+    FUNCTION,
+    IF,
+    REPEAT
+};
+
 #include "Keywords.h"
 #include "GlobalFunctions.h"
 #include "Lexer.h"

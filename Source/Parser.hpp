@@ -9,6 +9,10 @@ string Parser::Parse(const vector<Token> & Tokens)
     OutputTypeTable();
 
     OutputTemplateAsm();
+    
+    AppendExecutableSectionAsmToOutputAsm();
+    
+    AppendGlobalVariableAsmToOutputAsm();
 
     AppendInitialASM();
     
@@ -34,6 +38,7 @@ void Parser::Initialize(const vector<Token> & Tokens)
     ScopeStack.push_back(& GlobalScope);
     TemplateVariableCounter = 0;
     TemporaryVariableCounter = 0;
+    GlobalVariableCounter = 0;
     LabelCounter = 0;
     InitializeOperatorOrdering();
 }
@@ -70,7 +75,7 @@ bool Parser::IsNextToken()
 void Parser::Operate()
 {
     //if(CurrentClass.Type != NULL && CurrentClass.Type->Name == "Array" && PassMode == PASS_MODE::FUNCTION_SKIM)
-    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << ScopeStack.size() << " " << Position << endl;// << " " << DoesMapContain("IfTest1", ScopeStack[ScopeStack.size() - 1]->Objects) << endl;
+    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << GlobalScope.Objects.size() << " " << Position << endl;// << " " << DoesMapContain("IfTest1", ScopeStack[ScopeStack.size() - 1]->Objects) << endl;
 /*
                 BaseType BT1;
                 BT1.Name = "toy";
@@ -411,6 +416,7 @@ void Parser::ParseExpectClassName()
                 }
             }
         }
+        cout << "does TypeTable have " << CurrentToken.Contents << " " << DoesMapContain(CurrentToken.Contents, TypeTable) << endl;
         CurrentClass.Type = &TypeTable[CurrentToken.Contents];
         State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE;
     }
@@ -448,9 +454,14 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
             CurrentClass.Type->InitializeBlankCompiledTemplate();
             CurrentClass.Type->IsTemplated = false;
         }
+        cout << "2 " << CurrentClass.Type->Name << endl;
         CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates.front();
+        cout << "3 " << CurrentClass.Templates << " " << CurrentClass.Type->CompiledTemplates.size() << endl;
         CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
+        
+        cout << "4" << endl;
         ScopeStack.push_back(&CurrentClass.Templates->MyScope);
+        cout << "5" << endl;
         State = PARSER_STATE::START_OF_LINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
@@ -1173,6 +1184,7 @@ void Parser::ParseExpectVariableName()
             Object NewParamObject;
             NewParamObject.Name = CurrentToken.Contents;
             NewParamObject.Type = CurrentParsingType;
+            NewParamObject.OuterScopeOrigin = GetCurrentScope()->Origin;
             if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM && PassMode == PASS_MODE::FUNCTION_SKIM)
             {
                 NewParamObject.ReferenceOffset = GetNextParamOffset();
@@ -1200,16 +1212,24 @@ void Parser::ParseExpectVariableName()
                     
                     GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                     GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
+                    CurrentParsingObject = &GetCurrentScope()->Objects[NewParamObject.Name];
                 }
-                else if(IsOriginCloserOrEqual(GetCurrentScope()->Origin, SCOPE_ORIGIN::FUNCTION) == true && PassMode == PASS_MODE::FULL_PASS)
+                else if(PassMode == PASS_MODE::FULL_PASS)
                 {
-                    cout << "adding object to function scope " << NewParamObject.Name << endl;
                     GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                     GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
-                    AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
+                    if(IsOriginCloserOrEqual(GetCurrentScope()->Origin, SCOPE_ORIGIN::FUNCTION) == true)
+                    {
+                        AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
+                    }
+                    else if(GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
+                    {
+                        GetCurrentScope()->Objects[NewParamObject.Name].GlobalName = GetNextGlobalVariable();
+                        AddNewGlobalVariableToAsm(GetCurrentScope()->Objects[NewParamObject.Name]);
+                    }
+                    CurrentParsingObject = &GetCurrentScope()->Objects[NewParamObject.Name];
                 }
             }
-            CurrentParsingObject = &GetCurrentScope()->Objects[NewParamObject.Name];
         }
         if(TypeMode == TYPE_PARSE_MODE::PARSING_PARAM)
         {
@@ -1235,33 +1255,39 @@ void Parser::ParseExpectVariableName()
 
 void Parser::ParseExpectFirstOperatorOrNewline()
 {
-    if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true
-    || CurrentToken.Contents == GlobalKeywords.ReservedWords["LPAREN"] || CurrentToken.Contents == GlobalKeywords.ReservedWords["COLON"])
+    if(IsPassModeHigherOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
     {
-        if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true)
-        {
-            CallEmptyConstructor();
-        }
-        JustDeclaredObject = true;
-        Position = Position - 1;
         CopyUntilNextNewline();
-        ReduceLine();
-        JustDeclaredObject = false;
-        CurrentParsingObject = NULL;
-        CurrentParsingType.Templates = NULL;
-        State = PARSER_STATE::START_OF_LINE;
-    }
-    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
-    {
-        CallEmptyConstructor();
-        CurrentParsingObject = NULL;
-        CurrentParsingType.Templates = NULL;
-        State = PARSER_STATE::START_OF_LINE;
     }
     else
     {
-        OutputStandardErrorMessage(string("Expected newline or '='or '(' ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+        if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true
+        || CurrentToken.Contents == GlobalKeywords.ReservedWords["LPAREN"] || CurrentToken.Contents == GlobalKeywords.ReservedWords["COLON"])
+        {
+            if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true)
+            {
+                CallEmptyConstructor();
+            }
+            JustDeclaredObject = true;
+            Position = Position - 1;
+            CopyUntilNextNewline();
+            ReduceLine();
+            JustDeclaredObject = false;
+            CurrentParsingObject = NULL;
+            CurrentParsingType.Templates = NULL;
+        }
+        else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["NEW_LINE"])
+        {
+            CallEmptyConstructor();
+            CurrentParsingObject = NULL;
+            CurrentParsingType.Templates = NULL;
+        }
+        else
+        {
+            OutputStandardErrorMessage(string("Expected newline or '='or '(' ") + InsteadErrorMessage(CurrentToken.Contents) + string("."), CurrentToken);
+        }
     }
+    State = PARSER_STATE::START_OF_LINE;
 }
 
 void Parser::CopyUntilNextNewline()
@@ -3236,4 +3262,32 @@ void Parser::DoPossiblyCallDestructors()
             }
         }
     }
+}
+
+void Parser::AddNewGlobalVariableToAsm(const Object & InObject)
+{
+    cout << "adding global variable " << endl;
+    cout << InObject.GlobalName << endl;
+    cout << InObject.Type.Templates->Size << endl;
+    GlobalVariableReserveAsm = GlobalVariableReserveAsm + InObject.GlobalName + GlobalASM.Codes["RESERVE_BYTES"] +
+        to_string(InObject.Type.Templates->Size);
+    GlobalVariableReserveAsm = GlobalVariableReserveAsm + GetNewlines(1);
+}
+
+void Parser::AppendGlobalVariableAsmToOutputAsm()
+{
+    GlobalVariableReserveAsm = GlobalASM.Codes["START_OF_GLOBAL_VARIABLES"] + GetNewlines(1) + GlobalVariableReserveAsm;
+    OutputAsm = GlobalVariableReserveAsm + GetNewlines(2) + OutputAsm;
+}
+
+void Parser::AppendExecutableSectionAsmToOutputAsm()
+{
+    OutputAsm = GlobalASM.Codes["START_OF_CODE"] + GetNewlines(2) + OutputAsm;
+}
+
+string Parser::GetNextGlobalVariable()
+{
+    string NextGlobalVariable = GLOBAL_VARIABLE_PREFIX + to_string(GlobalVariableCounter);
+    GlobalVariableCounter = GlobalVariableCounter + 1;
+    return NextGlobalVariable;
 }

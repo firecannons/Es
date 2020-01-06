@@ -604,42 +604,10 @@ class Byte size 1
 end
 
 class Bool size 1
-    action asm Constructor
-        push ebp
-        mov ebp, esp
-    
-        ; asm comment
-        ; mov address of the object into
-        mov ebx, ebp
-        add ebx, 8
-        mov eax, [ebx]
-        
-        ; Automatically assign true
-        mov byte [eax], 1
-        
-        mov esp, ebp
-        pop ebp
-        
-    end
-    
-    action asm = ( Bool Source )
-        push ebp
-        mov ebp, esp
-        
-        ; mov value of Source into eax
-        mov ebx, [ebp+12]
-        mov byte al, [ebx]
-        
-        ; mov address of return byte into ebx
-        mov ebx, [ebp+8]
-        
-        ; mov value of eax into position of [ebx]
-        mov byte [ebx], al
-        
-        mov esp, ebp
-        pop ebp
-    end
+    Byte Value
 end
+
+Bool True
 
 class Pointer<T>
     Integer Position

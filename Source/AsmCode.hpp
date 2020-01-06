@@ -2,7 +2,9 @@
 
 AsmCode::AsmCode()
 {
-    Codes.emplace(string("START_OF_FILE"), string("format ELF executable 3\nsegment readable executable\nentry "));
+    Codes.emplace(string("START_OF_FILE"), string("format ELF executable 3\nentry "));
+    Codes.emplace(string("START_OF_GLOBAL_VARIABLES"), string("segment readable writeable"));
+    Codes.emplace(string("START_OF_CODE"), string("segment readable executable"));
     Codes.emplace(string("RET"), string("ret"));
     Codes.emplace(string("RESERVE_SPACE"), string("add esp, "));
     Codes.emplace(string("MOV_EBX_EBP"), string("mov ebx, ebp"));
@@ -27,6 +29,7 @@ AsmCode::AsmCode()
     Codes.emplace(string("JUMP_FALSE"), string("je "));
     Codes.emplace(string("JUMP_TRUE"), string("jne "));
     Codes.emplace(string("UNCONDITIONAL_JUMP"), string("jmp "));
+    Codes.emplace(string("RESERVE_BYTES"), string(" db "));
 }
 
 string AsmCode::CalcReserveSpaceAsm(const unsigned int ReserveAmount)

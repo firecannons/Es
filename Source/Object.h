@@ -16,6 +16,8 @@ public:
     bool IsConstant;
     bool IsReference;
     int ReferenceOffset;
+    SCOPE_ORIGIN OuterScopeOrigin;
+    string GlobalName;
 
     Object();
 };

@@ -8,15 +8,6 @@
 #include <map>
 using namespace std;
 
-enum SCOPE_ORIGIN
-{
-    GLOBAL,
-    CLASS,
-    FUNCTION,
-    IF,
-    REPEAT
-};
-
 class Scope
 {
     
