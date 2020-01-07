@@ -24,6 +24,8 @@ public:
     string CalcIntegerQuickAssignAsm(const int Integer);
     string CalcDerefForFuncCall(const int ReferenceOffset);
     string CalcPushFromReference(const int ObjectOffset, const int ObjectSize);
+    string CalcPushFromGlobal(const string & GlobalNameInAsm, const int ObjectSize);
+    string CalcGlobalDerefForFuncCall(const string & GlobalName);
 };
 
 AsmCode GlobalASM;

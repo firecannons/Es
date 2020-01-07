@@ -605,6 +605,10 @@ end
 
 class Bool size 1
     Byte Value
+    
+    action AssignNumericValue(Integer I)
+        Me:Value = I
+    end
 end
 
 Bool True

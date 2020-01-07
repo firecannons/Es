@@ -29,25 +29,17 @@ action asm OutputByteDigit ( Byte L )
     pop ebp
 end
 
-action BlankFuncWithParenTest ( )
-    Byte B = 5
-    OutputByteDigit(B)
-end
-
-Byte B1
+Byte B
 
 action Main
-    B1 = 4
-    OutputByteDigit(B1)
-    BlankFuncWithParenTest()
-    Byte B = 5
-    Byte B2(B)
-    Byte B3:Constructor(B)
-    Byte B4:Constructor()
-    Byte B5()
+    CapTest CT
+    OutputByteDigit(CT:B1)
+    OutputByteDigit(True:Value)
+    True:AssignNumericValue(4)
+    OutputByteDigit(True:Value)
+    Byte Five = 5
+    OutputByteDigit(Five)
+    B = 8
     OutputByteDigit(B)
-    OutputByteDigit(B2)
-    OutputByteDigit(B3)
-    OutputByteDigit(B4)
-    OutputByteDigit(B5)
+    Byte D = 5
 end

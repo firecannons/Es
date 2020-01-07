@@ -311,6 +311,8 @@ public:
     void AppendGlobalVariableAsmToOutputAsm();
     void AppendExecutableSectionAsmToOutputAsm();
     string GetNextGlobalVariable();
+    void OutputDereferenceCode(const Object * InObject);
+    void OutputNormalPushAsm(const Object * InObject, const int ObjectSize);
 };
 
 #include "Compiler.h"

@@ -29,7 +29,12 @@ AsmCode::AsmCode()
     Codes.emplace(string("JUMP_FALSE"), string("je "));
     Codes.emplace(string("JUMP_TRUE"), string("jne "));
     Codes.emplace(string("UNCONDITIONAL_JUMP"), string("jmp "));
-    Codes.emplace(string("RESERVE_BYTES"), string(" db "));
+    Codes.emplace(string("RESERVE_BYTES"), string(" rb "));
+    Codes.emplace(string("NAME_TO_STACK_TOP"), string("mov dword [esp], "));
+    Codes.emplace(string("PUSH_FROM_GLOBAL_P1"), Codes["RESERVE_SPACE"]);
+    Codes.emplace(string("PUSH_FROM_GLOBAL_P2"), string("\n") + Codes["NAME_TO_STACK_TOP"]);
+    Codes.emplace(string("NAME_TO_EBX"), string("mov dword ebx, "));
+    Codes.emplace(string("DEREF_FROM_GLOBAL_P1"), Codes["NAME_TO_EBX"]);
 }
 
 string AsmCode::CalcReserveSpaceAsm(const unsigned int ReserveAmount)
@@ -93,10 +98,21 @@ string AsmCode::CalcDerefForFuncCall(const int ReferenceOffset)
     return Output;
 }
 
-
 string AsmCode::CalcPushFromReference(const int ObjectOffset, const int ObjectSize)
 {
     string Output = Codes["PUSH_FROM_REFERENCE_P1"] + to_string(-((int)ObjectSize)) + Codes["PUSH_FROM_REFERENCE_P2"] + to_string(ObjectOffset) +
         Codes["PUSH_FROM_REFERENCE_P3"];
+    return Output;
+}
+
+string AsmCode::CalcPushFromGlobal(const string & GlobalNameInAsm, const int ObjectSize)
+{
+    string Output = Codes["PUSH_FROM_GLOBAL_P1"] + to_string(-((int)ObjectSize)) + Codes["PUSH_FROM_GLOBAL_P2"] + GlobalNameInAsm;
+    return Output;
+}
+
+string AsmCode::CalcGlobalDerefForFuncCall(const string & GlobalName)
+{
+    string Output = Codes["DEREF_FROM_GLOBAL_P1"] + GlobalName + Codes["DEREF_FROM_GLOBAL_P2"];
     return Output;
 }

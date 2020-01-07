@@ -1456,7 +1456,7 @@ void Parser::DoReduceFunctionCall()
     Function * WantedFunction = NULL;
     Scope * CallingScope = NULL;
     bool IsCallingObject = false;
-    cout << "one:" << ReduceTokens[ReducePosition].Contents << endl;
+    cout << "one:" << ReduceTokens[ReducePosition].Contents << " " << JustDeclaredObject << endl;
     if(JustDeclaredObject == true)
     {
         if(ReduceTokens[ReducePosition].Contents != GlobalKeywords.ReservedWords["CONSTRUCTOR"])
@@ -1480,6 +1480,7 @@ void Parser::DoReduceFunctionCall()
             }
         }
     }
+    cout << "wer" << endl;
     if(ReducePosition >= 2)
     {
         if(ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["COLON"])
@@ -1492,6 +1493,7 @@ void Parser::DoReduceFunctionCall()
             ReducePosition = ReducePosition - 2;
         }
     }
+    cout << "fd" << endl;
     if(IsCallingObject == false)
     {
         CallingScope = GetGlobalScope();
@@ -1501,6 +1503,7 @@ void Parser::DoReduceFunctionCall()
         OutputStandardErrorMessage(string("No function matching ") + OutputFunctionNameWithObjects(ReduceTokens[ReducePosition].Contents, Reverse(NextFunctionObjects)) + string("."),
             CurrentToken);
     }
+    cout << "tyes" << endl;
     WantedFunction = GetFromFunctionList(CallingScope->Functions[ReduceTokens[ReducePosition].Contents], Reverse(NextFunctionObjects));
     CallFunction(*WantedFunction);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
@@ -1608,12 +1611,21 @@ void Parser::DoColonReduce()
     }
     unsigned int OffsetShift = ScopeObject->Offset;
     Object NewObject;
+    NewObject.OuterScopeOrigin = GetCurrentScope()->Origin;
     NewObject.Name = GetNextTemporaryVariable();
     ReduceTokens[ReducePosition + 2].Contents = NewObject.Name;
     NewObject.Type = ScopeObject->Type;
     NewObject.Offset = CallingObject->Offset + OffsetShift;
     NewObject.IsReference = CallingObject->IsReference;
     NewObject.ReferenceOffset = CallingObject->ReferenceOffset;
+    if(CallingObject->OuterScopeOrigin == SCOPE_ORIGIN::GLOBAL)
+    {
+        NewObject.IsReference = true;
+        NewObject.GlobalName = CallingObject->GlobalName;
+        NewObject.OuterScopeOrigin = SCOPE_ORIGIN::GLOBAL;
+        cout << "obodokobo" << endl;
+        cout << OutputTokensToString(ReduceTokens) << endl;
+    }
     cout << "adding objects to colon reduce " << NewObject.Name << " " << GetCurrentScope()->Origin << " " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
     GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
     cout << "adding objects to colon reduce " << NewObject.Name << " " << GetCurrentScope()->Origin << " " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
@@ -1697,6 +1709,7 @@ void Parser::AddToArgList(const unsigned int InPosition)
     if(IsNumber(VariableName) == true)
     {
         Object NumberObject;
+        NumberObject.OuterScopeOrigin = GetCurrentScope()->Origin;
         NumberObject.Name = GetNextTemporaryVariable();
         ReduceTokens[InPosition].Contents = NumberObject.Name;
         NumberObject.Type.Type = &TypeTable["Integer"];
@@ -1747,7 +1760,7 @@ void Parser::CallFunction(const Function & InFunction)
     GetCurrentScope()->Offset = StartOffset;
     NextFunctionObjects.clear();
 }
-
+int index = 0;
 void Parser::PushArguments()
 {
     unsigned int Index = 0;
@@ -1755,7 +1768,13 @@ void Parser::PushArguments()
     {
         if(NextFunctionObjects[Index]->IsReference == true)
         {
-            OutputAsm = OutputAsm + GlobalASM.CalcDerefForFuncCall(NextFunctionObjects[Index]->ReferenceOffset);
+            index++;
+            //if(index == 4)
+            {
+                cout << "oboh" << NextFunctionObjects[Index]->Name << " " << NextFunctionObjects[Index]->OuterScopeOrigin << " " << NextFunctionObjects[Index]->GlobalName << endl;
+                //exit(1);
+            }
+            OutputDereferenceCode(NextFunctionObjects[Index]);
             if(DEBUG == true)
             {
                 OutputDerefReference(NextFunctionObjects[Index]->Name, NextFunctionObjects[Index]->ReferenceOffset);
@@ -1765,7 +1784,7 @@ void Parser::PushArguments()
         }
         else
         {
-            OutputAsm = OutputAsm + GlobalASM.CalcPushFromBasePointer(NextFunctionObjects[Index]->Offset, POINTER_SIZE);
+            OutputNormalPushAsm(NextFunctionObjects[Index], POINTER_SIZE);
         }
         if(DEBUG == true)
         {
@@ -2184,6 +2203,7 @@ void Parser::InitializeForPass()
     CurrentParsingType.Type = NULL;
     IsAsmFunction = false;
     WasVariableFound = false;
+    JustDeclaredObject = false;
 }
 
 void Parser::SetSizesAndOffsets()
@@ -2719,6 +2739,7 @@ void Parser::AddExternalReturnValue(const Function & InFunction)
     if(InFunction.HasReturnObject == true)
     {
         Object NewObject;
+        NewObject.OuterScopeOrigin = GetCurrentScope()->Origin;
         NewObject.Name = GetNextTemporaryVariable();
         NewObject.Type = InFunction.ReturnObject.Type;
         NewObject.IsReference = InFunction.ReturnObject.IsReference;
@@ -2733,6 +2754,7 @@ void Parser::AddExternalReturnValue(const Function & InFunction)
 void Parser::AddInternalReturnObject()
 {
     Object NewObject;
+    NewObject.OuterScopeOrigin = GetCurrentScope()->Origin;
     NewObject.Name = GetNextTemporaryVariable();
     NewObject.Type = CurrentFunction->ReturnObject.Type;
     int ReturnOffset = GetReturnVariableOffset();
@@ -3045,6 +3067,7 @@ void Parser::CallObjectAutoGenerateFunction(const Object & InObject)
     Object * CallingObject = GetInAnyScope(GlobalKeywords.ReservedWords["ME"]);
     unsigned int OffsetShift = InObject.Offset;
     Object NewObject;
+    NewObject.OuterScopeOrigin = GetCurrentScope()->Origin;
     NewObject.Name = GetNextTemporaryVariable();
     NewObject.Type = InObject.Type;
     NewObject.Offset = CallingObject->Offset + OffsetShift;
@@ -3059,6 +3082,7 @@ void Parser::CallObjectAutoGenerateFunction(const Object & InObject)
         Object * CallingObject = GetInAnyScope(GlobalKeywords.ReservedWords["SOURCE"]);
         unsigned int OffsetShift = InObject.Offset;
         Object NewObject;
+        NewObject.OuterScopeOrigin = GetCurrentScope()->Origin;
         NewObject.Name = GetNextTemporaryVariable();
         NewObject.Type = InObject.Type;
         NewObject.Offset = CallingObject->Offset + OffsetShift;
@@ -3132,6 +3156,7 @@ void Parser::OutputAutoGenerateFunctionCode()
 Object Parser::CreateReferenceObject(const string & VariableName, const TemplatedType & InTT)
 {
     Object NewObject;
+    NewObject.OuterScopeOrigin = GetCurrentScope()->Origin;
     NewObject.Name = VariableName;
     NewObject.Type = InTT;
     NewObject.IsReference = true;
@@ -3290,4 +3315,35 @@ string Parser::GetNextGlobalVariable()
     string NextGlobalVariable = GLOBAL_VARIABLE_PREFIX + to_string(GlobalVariableCounter);
     GlobalVariableCounter = GlobalVariableCounter + 1;
     return NextGlobalVariable;
+}
+
+void Parser::OutputDereferenceCode(const Object * InObject)
+{
+    if(InObject->GlobalName != "")
+    {
+        cout << InObject->GlobalName  << endl;
+        //exit(1);
+    }
+    if(InObject->OuterScopeOrigin == SCOPE_ORIGIN::GLOBAL)
+    {
+        //exit(1);
+        OutputAsm = OutputAsm + GlobalASM.CalcGlobalDerefForFuncCall(InObject->GlobalName);
+    }
+    else
+    {
+        OutputAsm = OutputAsm + GlobalASM.CalcDerefForFuncCall(InObject->ReferenceOffset);
+    }
+}
+
+void Parser::OutputNormalPushAsm(const Object * InObject, const int ObjectSize)
+{
+    if(InObject->OuterScopeOrigin == SCOPE_ORIGIN::GLOBAL)
+    {
+        OutputAsm = OutputAsm + GlobalASM.CalcPushFromGlobal(InObject->GlobalName, ObjectSize);
+        AppendNewlinesToOutputASM(1);
+    }
+    else
+    {
+        OutputAsm = OutputAsm + GlobalASM.CalcPushFromBasePointer(InObject->Offset, ObjectSize);
+    }
 }
