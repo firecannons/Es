@@ -75,7 +75,7 @@ bool Parser::IsNextToken()
 void Parser::Operate()
 {
     //if(CurrentClass.Type != NULL && CurrentClass.Type->Name == "Array" && PassMode == PASS_MODE::FUNCTION_SKIM)
-    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << GlobalScope.Objects.size() << " " << Position << endl;// << " " << DoesMapContain("IfTest1", ScopeStack[ScopeStack.size() - 1]->Objects) << endl;
+    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << GlobalScope.Objects.size() << " " << Position << " " << EndPositionOfGlobalVarInitialization << endl;// << " " << DoesMapContain("IfTest1", ScopeStack[ScopeStack.size() - 1]->Objects) << endl;
 /*
                 BaseType BT1;
                 BT1.Name = "toy";
@@ -222,102 +222,137 @@ void Parser::Operate()
 
 void Parser::ParseStartOfLine()
 {
-    if(CurrentToken.Contents == GlobalKeywords.ReservedWords["USING"])
+    cout << "in...1" << endl;
+    if(CurrentFunction != NULL)
     {
-        State = PARSER_STATE::EXPECT_USING_IDENT;
-    }
-    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["CLASS"])
-    {
-        if(CurrentClass.Type != NULL)
+        if(JustParsedActionLine == true)
         {
-            OutputStandardErrorMessage(string("Cannot create class while already in class ") + CurrentClass.Type->Name + string("."), CurrentToken);
-        }
-        else if(CurrentFunction != NULL)
-        {
-            OutputStandardErrorMessage(string("Cannot create class while already in function ") + CurrentFunction->Name + string("."), CurrentToken);
-        }
-        else
-        {
-            State = PARSER_STATE::EXPECT_CLASS_NAME;
+            if(CurrentFunction->Name == MAIN_FUNCTION_NAME && PassMode == PASS_MODE::FULL_PASS)
+            {
+                cout << "safd" << endl;
+                cout << OutputTokensToString(GlobalVariableInitializeTokens) << endl;
+                Tokens.insert(Tokens.begin() + Position, GlobalVariableInitializeTokens.begin(), GlobalVariableInitializeTokens.end());
+                CurrentToken = Tokens[Position];
+                IsParsingGlobalVariables = true;
+                EndPositionOfGlobalVarInitialization = Position + GlobalVariableInitializeTokens.size();
+            }
+            JustParsedActionLine = false;
         }
     }
-    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ACTION"])
+    cout << IsParsingGlobalVariables << " " << CurrentToken.Contents << endl;
+    if(IsParsingGlobalVariables == true)
     {
-        if(CurrentFunction != NULL)
+        cout << "in..." << endl;
+        if(Position >= EndPositionOfGlobalVarInitialization)
         {
-            OutputStandardErrorMessage(string("Cannot create new action while inside another action."), CurrentToken);
+            cout << "done parsing global init" << endl;
+            IsParsingGlobalVariables = false;
         }
-        else
+        else if(CurrentToken.Contents != GlobalKeywords.ReservedWords["NEW_LINE"])
         {
-            State = PARSER_STATE::EXPECT_ACTION_NAME_OR_ACTION_TYPE;
+            JustDeclaredObject = true;
+            ParseExpectVariableName();
         }
     }
-    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"])
+    if(IsParsingGlobalVariables == false)
     {
-        ParseEndToken();
-    }
-    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURN"])
-    {
-        Position = Position + 1;
-        CopyUntilNextNewline();
-        if(IsLocalScopeToBeParsedNow() == true)
+        if(CurrentToken.Contents == GlobalKeywords.ReservedWords["USING"])
         {
-            ReduceLine();
-            ReturnAfterReduce();
+            State = PARSER_STATE::EXPECT_USING_IDENT;
         }
-        State = PARSER_STATE::EXPECT_WAIT_FOR_END;
-    }
-    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["REPEAT"])
-    {
-        State = PARSER_STATE::EXPECT_UNTIL_OR_WHILE;
-    }
-    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["IF"])
-    {
-        ParseIfStatement();
-    }
-    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ELSE_IF"])
-    {
-        ParseElseIfStatement();
-    }
-    else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ELSE"])
-    {
-        ParseElseStatement();
-    }
-    else
-    {
-        if(IsLocalScopeToBeParsedNow() == true)
+        else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["CLASS"])
         {
-            bool IsAsmFunction = false;
+            if(CurrentClass.Type != NULL)
+            {
+                OutputStandardErrorMessage(string("Cannot create class while already in class ") + CurrentClass.Type->Name + string("."), CurrentToken);
+            }
+            else if(CurrentFunction != NULL)
+            {
+                OutputStandardErrorMessage(string("Cannot create class while already in function ") + CurrentFunction->Name + string("."), CurrentToken);
+            }
+            else
+            {
+                State = PARSER_STATE::EXPECT_CLASS_NAME;
+            }
+        }
+        else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ACTION"])
+        {
             if(CurrentFunction != NULL)
             {
-                if(CurrentFunction->IsAsm == true)
-                {
-                    IsAsmFunction = true;
-                    string LinkedAsm = LinkAsm(CurrentToken.Contents);
-                    OutputAsm = OutputAsm + LinkedAsm + GlobalKeywords.ReservedWords["NEW_LINE"];
-                }
+                OutputStandardErrorMessage(string("Cannot create new action while inside another action."), CurrentToken);
             }
-            if(IsAsmFunction == false)
+            else
             {
-                if(IsAType(CurrentToken.Contents) == true)
+                JustParsedActionLine = true;
+                State = PARSER_STATE::EXPECT_ACTION_NAME_OR_ACTION_TYPE;
+            }
+        }
+        else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["END"])
+        {
+            ParseEndToken();
+        }
+        else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["RETURN"])
+        {
+            Position = Position + 1;
+            CopyUntilNextNewline();
+            if(IsLocalScopeToBeParsedNow() == true)
+            {
+                ReduceLine();
+                ReturnAfterReduce();
+            }
+            State = PARSER_STATE::EXPECT_WAIT_FOR_END;
+        }
+        else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["REPEAT"])
+        {
+            State = PARSER_STATE::EXPECT_UNTIL_OR_WHILE;
+        }
+        else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["IF"])
+        {
+            ParseIfStatement();
+        }
+        else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ELSE_IF"])
+        {
+            ParseElseIfStatement();
+        }
+        else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["ELSE"])
+        {
+            ParseElseStatement();
+        }
+        else
+        {
+            if(IsLocalScopeToBeParsedNow() == true)
+            {
+                bool IsAsmFunction = false;
+                if(CurrentFunction != NULL)
                 {
-                    TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
-                    ParseExpectType();
+                    if(CurrentFunction->IsAsm == true)
+                    {
+                        IsAsmFunction = true;
+                        string LinkedAsm = LinkAsm(CurrentToken.Contents);
+                        OutputAsm = OutputAsm + LinkedAsm + GlobalKeywords.ReservedWords["NEW_LINE"];
+                    }
                 }
-                else if(IsParsingType() == true)
+                if(IsAsmFunction == false)
                 {
-                    OutputStandardErrorMessage(string("Unknown type: ") + CurrentToken.Contents, CurrentToken);
-                }
-                else
-                {
-                    CopyUntilNextNewline();
-                    ReduceLine();
-                    State = PARSER_STATE::START_OF_LINE;
+                    if(IsAType(CurrentToken.Contents) == true)
+                    {
+                        TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
+                        ParseExpectType();
+                    }
+                    else if(IsParsingType() == true)
+                    {
+                        OutputStandardErrorMessage(string("Unknown type: ") + CurrentToken.Contents, CurrentToken);
+                    }
+                    else
+                    {
+                        CopyUntilNextNewline();
+                        ReduceLine();
+                        State = PARSER_STATE::START_OF_LINE;
+                    }
                 }
             }
         }
     }
-    
 }
 
 void Parser::ParseExpectUsingIdent()
@@ -1032,7 +1067,15 @@ bool Parser::IsInAnyScope(const string & VariableName)
 
 Object * Parser::GetInCurrentScope(const string & VariableName)
 {
-    Object * Variable = &ScopeStack[ScopeStack.size() - 1]->Objects[VariableName];
+    Object * Variable = NULL;
+    if(DoesMapContain(VariableName, ScopeStack[ScopeStack.size() - 1]->Objects) == true)
+    {
+        Variable = &ScopeStack[ScopeStack.size() - 1]->Objects[VariableName];
+    }
+    else
+    {
+        OutputStandardErrorMessage(string("No variable '") + VariableName + string("' found in current scope."), CurrentToken);
+    }
     return Variable;
 }
 
@@ -1043,6 +1086,8 @@ Object * Parser::GetInAnyScope(const string & VariableName)
     unsigned Index = 0;
     while(Index < ScopeStack.size() && WasVariableFound == false)
     {
+        cout << "#" << Index << " " << ScopeStack[ScopeStack.size() - 1 - Index]->Origin << " " << DoesMapContain(VariableName, ScopeStack[ScopeStack.size() - 1 - Index]->Objects)
+        << " " << VariableName << " " << " " << ScopeStack[ScopeStack.size() - 1 - Index]->Objects.size() << " " << OutputMapToString(ScopeStack[ScopeStack.size() - 1 - Index]->Objects) << endl;
         if(DoesMapContain(VariableName, ScopeStack[ScopeStack.size() - 1 - Index]->Objects) == true)
         {
             Variable = &ScopeStack[ScopeStack.size() - 1 - Index]->Objects[VariableName];
@@ -1051,7 +1096,6 @@ Object * Parser::GetInAnyScope(const string & VariableName)
         Index = Index + 1;
     }
     cout << OutputMapToString(GetCurrentScope()->Objects) << endl;
-    cout << OutputMapToString(ScopeStack[ScopeStack.size() - 2]->Objects) << endl;
     if(WasVariableFound == false)
     {
         OutputStandardErrorMessage(string("No variable '") + VariableName + string("' found."), CurrentToken);
@@ -1216,18 +1260,22 @@ void Parser::ParseExpectVariableName()
                 }
                 else if(PassMode == PASS_MODE::FULL_PASS)
                 {
-                    GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
-                    GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
-                    if(IsOriginCloserOrEqual(GetCurrentScope()->Origin, SCOPE_ORIGIN::FUNCTION) == true)
+                    if(IsParsingGlobalVariables == false)
                     {
-                        AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
+                        GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
+                        GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
+                        if(IsOriginCloserOrEqual(GetCurrentScope()->Origin, SCOPE_ORIGIN::FUNCTION) == true)
+                        {
+                            AddNewVariableToStack(GetCurrentScope()->Objects[NewParamObject.Name]);
+                        }
+                        else if(GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
+                        {
+                            GetCurrentScope()->Objects[NewParamObject.Name].GlobalName = GetNextGlobalVariable();
+                            AddNewGlobalVariableToAsm(GetCurrentScope()->Objects[NewParamObject.Name]);
+                        }
                     }
-                    else if(GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
-                    {
-                        GetCurrentScope()->Objects[NewParamObject.Name].GlobalName = GetNextGlobalVariable();
-                        AddNewGlobalVariableToAsm(GetCurrentScope()->Objects[NewParamObject.Name]);
-                    }
-                    CurrentParsingObject = &GetCurrentScope()->Objects[NewParamObject.Name];
+                    CurrentParsingObject = GetInAnyScope(NewParamObject.Name);
+                    CurrentParsingType = CurrentParsingObject->Type;
                 }
             }
         }
@@ -1261,7 +1309,18 @@ void Parser::ParseExpectFirstOperatorOrNewline()
     }
     else
     {
-        if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true
+        if(GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
+        {
+            Position = Position - 1;
+            CopyUntilNextNewline();
+            GlobalVariableInitializeTokens.insert(GlobalVariableInitializeTokens.end(), ReduceTokens.begin(), ReduceTokens.end());
+            Token NewToken;
+            NewToken.Contents = GlobalKeywords.ReservedWords["NEW_LINE"];
+            NewToken.LineNumber = CurrentToken.LineNumber;
+            NewToken.SourceFileName = CurrentToken.SourceFileName;
+            GlobalVariableInitializeTokens.push_back(NewToken);
+        }
+        else if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true
         || CurrentToken.Contents == GlobalKeywords.ReservedWords["LPAREN"] || CurrentToken.Contents == GlobalKeywords.ReservedWords["COLON"])
         {
             if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true)
@@ -1281,6 +1340,7 @@ void Parser::ParseExpectFirstOperatorOrNewline()
             CallEmptyConstructor();
             CurrentParsingObject = NULL;
             CurrentParsingType.Templates = NULL;
+            JustDeclaredObject = false;
         }
         else
         {
@@ -1483,8 +1543,10 @@ void Parser::DoReduceFunctionCall()
     cout << "wer" << endl;
     if(ReducePosition >= 2)
     {
+        cout << "pos >= 2 " << ReducePosition << " " << ReduceTokens[ReducePosition].Contents << " " << ReduceTokens.size() << " " << OutputTokensToString(ReduceTokens) << endl;
         if(ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["COLON"])
         {
+            cout << "has colon" << endl;
             IsCallingObject = true;
             AddToArgList(ReducePosition - 2);
             CallingScope = &GetInAnyScope(ReduceTokens[ReducePosition - 2].Contents)->Type.Templates->MyScope;
@@ -1603,16 +1665,25 @@ void Parser::DoColonReduce()
 {
     cout << "yo " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << " " << ReducePosition << endl;
     Object * CallingObject = GetInAnyScope(ReduceTokens[ReducePosition].Contents);
+    cout << "sdf" << endl;
+    cout << CallingObject << endl;
+    cout << CallingObject->Name << endl;
+    cout << CallingObject->Type.Type->Name << endl;
+    cout << OutputObjectToString(*CallingObject, 1) << endl;
     Object * ScopeObject = &CallingObject->Type.Templates->MyScope.Objects[ReduceTokens[ReducePosition + 2].Contents];
+    cout << "sdf" << endl;
     if(CurrentClass.Type != NULL)
     {
         //cout << "doing colon reduce " << CallingObject->Type.Type->Name << " " << ScopeObject->Type.Type->Name << endl;
         cout << ReduceTokens[ReducePosition + 2].Contents << " " << ReduceTokens[ReducePosition].Contents << endl;
     }
+    cout << "sdf" << endl;
     unsigned int OffsetShift = ScopeObject->Offset;
     Object NewObject;
+    cout << "sdf" << endl;
     NewObject.OuterScopeOrigin = GetCurrentScope()->Origin;
     NewObject.Name = GetNextTemporaryVariable();
+    cout << "sdf" << endl;
     ReduceTokens[ReducePosition + 2].Contents = NewObject.Name;
     NewObject.Type = ScopeObject->Type;
     NewObject.Offset = CallingObject->Offset + OffsetShift;
@@ -2204,6 +2275,9 @@ void Parser::InitializeForPass()
     IsAsmFunction = false;
     WasVariableFound = false;
     JustDeclaredObject = false;
+    JustParsedActionLine = false;
+    IsParsingGlobalVariables = false;
+    EndPositionOfGlobalVarInitialization = 0;
 }
 
 void Parser::SetSizesAndOffsets()
@@ -2443,6 +2517,7 @@ void Parser::InitializeForTemplatedPass()
 void Parser::RunAllTemplatedPasses()
 {
     PassMode = PASS_MODE::CLASS_SKIM;
+    InitializeForTemplatedPass();
     RunParse();
 
     PassMode = PASS_MODE::FUNCTION_SKIM;
@@ -2511,9 +2586,10 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
     bool Found = false;
     unsigned int FoundPos = 0;
     unsigned int Index = 0;
-    cout << "ok... " << InList.Functions.size() << endl;
+    cout << "ok... " << InList.Functions.size() << " " << GetInList(InList.Functions, 0).Parameters[0]->Type.Type->Name << endl;
     while(Index < InList.Functions.size() && Found == false)
     {
+        cout << OutputFunctionToString(GetInList(InList.Functions, Index), 1) << endl;
         cout << "fsad " << endl;
         if(DoesFunctionMatch(GetInList(InList.Functions, Index), InObjects) == true)
         {
@@ -3241,6 +3317,9 @@ void Parser::DoPossiblyOutputEmptyDestructorCode()
 
 void Parser::CallEmptyConstructor()
 {
+    cout << OutputObjectToString(*CurrentParsingObject, 1) << endl << CurrentParsingObject->Type.Type->Name << endl;
+    cout << OutputCompiledTemplateToString(*(CurrentParsingObject->Type.Templates), *(CurrentParsingObject->Type.Type), 1) << endl;
+    cout << OutputFunctionToString(GetInList(CurrentParsingType.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]].Functions, 0), 1) << endl;
     NextFunctionObjects.push_back(CurrentParsingObject);
     Function * WantedFunction = GetFromFunctionList(CurrentParsingType.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]], Reverse(NextFunctionObjects));
     CallFunction(*WantedFunction);
@@ -3284,6 +3363,10 @@ void Parser::DoPossiblyCallDestructors()
             if(PassMode == PASS_MODE::FULL_PASS)
             {
                 CallEmptyDestructorsForCurrentScope();
+                if(CurrentFunction->Name == MAIN_FUNCTION_NAME)
+                {
+                    CallEmptyDestructorsForGlobalScope();
+                }
             }
         }
     }
@@ -3346,4 +3429,9 @@ void Parser::OutputNormalPushAsm(const Object * InObject, const int ObjectSize)
     {
         OutputAsm = OutputAsm + GlobalASM.CalcPushFromBasePointer(InObject->Offset, ObjectSize);
     }
+}
+
+void Parser::CallEmptyDestructorsForGlobalScope()
+{
+    CallEmptyDestructors(Reverse(GetGlobalScope()->OrderedObjects));
 }

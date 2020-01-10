@@ -117,6 +117,10 @@ public:
     bool JustDeclaredObject;
     string GlobalVariableReserveAsm;
     unsigned int GlobalVariableCounter;
+    vector<Token> GlobalVariableInitializeTokens;
+    bool JustParsedActionLine;
+    bool IsParsingGlobalVariables;
+    unsigned int EndPositionOfGlobalVarInitialization;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -313,6 +317,7 @@ public:
     string GetNextGlobalVariable();
     void OutputDereferenceCode(const Object * InObject);
     void OutputNormalPushAsm(const Object * InObject, const int ObjectSize);
+    void CallEmptyDestructorsForGlobalScope();
 };
 
 #include "Compiler.h"

@@ -29,9 +29,10 @@ action asm OutputByteDigit ( Byte L )
     pop ebp
 end
 
-Byte B
+Byte B = 2
 
 action Main
+    OutputByteDigit(B)
     CapTest CT
     OutputByteDigit(CT:B1)
     OutputByteDigit(True:Value)
