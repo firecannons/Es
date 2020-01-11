@@ -75,7 +75,7 @@ bool Parser::IsNextToken()
 void Parser::Operate()
 {
     //if(CurrentClass.Type != NULL && CurrentClass.Type->Name == "Array" && PassMode == PASS_MODE::FUNCTION_SKIM)
-    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << GlobalScope.Objects.size() << " " << Position << " " << EndPositionOfGlobalVarInitialization << endl;// << " " << DoesMapContain("IfTest1", ScopeStack[ScopeStack.size() - 1]->Objects) << endl;
+    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << GlobalScope.Objects.size() << " " << Position << " " << NextFunctionObjects.size() << endl;// << " " << DoesMapContain("IfTest1", ScopeStack[ScopeStack.size() - 1]->Objects) << endl;
 /*
                 BaseType BT1;
                 BT1.Name = "toy";
@@ -1326,11 +1326,12 @@ void Parser::ParseExpectFirstOperatorOrNewline()
         else if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true
         || CurrentToken.Contents == GlobalKeywords.ReservedWords["LPAREN"] || CurrentToken.Contents == GlobalKeywords.ReservedWords["COLON"])
         {
+            JustDeclaredObject = true;
             if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true)
             {
                 CallEmptyConstructor();
+                JustDeclaredObject = false;
             }
-            JustDeclaredObject = true;
             Position = Position - 1;
             CopyUntilNextNewline();
             ReduceLine();
@@ -1524,11 +1525,7 @@ void Parser::DoReduceFunctionCall()
     {
         if(ReduceTokens[ReducePosition].Contents != GlobalKeywords.ReservedWords["CONSTRUCTOR"])
         {
-            if(ReducePosition >= 2 && ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["COLON"])
-            {
-                CallEmptyConstructor();
-            }
-            else
+            if(ReducePosition >= 2 && ReduceTokens[ReducePosition - 1].Contents != GlobalKeywords.ReservedWords["COLON"])
             {
                 cout << "sdf" << endl;
                 //exit(1);
@@ -3320,9 +3317,10 @@ void Parser::DoPossiblyOutputEmptyDestructorCode()
 
 void Parser::CallEmptyConstructor()
 {
-    cout << OutputObjectToString(*CurrentParsingObject, 1) << endl << CurrentParsingObject->Type.Type->Name << endl;
-    cout << OutputCompiledTemplateToString(*(CurrentParsingObject->Type.Templates), *(CurrentParsingObject->Type.Type), 1) << endl;
-    cout << OutputFunctionToString(GetInList(CurrentParsingType.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]].Functions, 0), 1) << endl;
+    //cout << OutputObjectToString(*CurrentParsingObject, 1) << endl << CurrentParsingObject->Type.Type->Name << endl;
+    //cout << OutputCompiledTemplateToString(*(CurrentParsingObject->Type.Templates), *(CurrentParsingObject->Type.Type), 1) << endl;
+    //cout << OutputFunctionToString(GetInList(CurrentParsingType.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]].Functions, 0), 1) << endl;
+    cout << "NextFunctionObjects.size() = " << NextFunctionObjects.size() << endl;
     NextFunctionObjects.push_back(CurrentParsingObject);
     Function * WantedFunction = GetFromFunctionList(CurrentParsingType.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]], Reverse(NextFunctionObjects));
     CallFunction(*WantedFunction);

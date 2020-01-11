@@ -615,9 +615,6 @@ class Bool size 1
     end
 end
 
-Bool True = 1
-Bool False = 0
-
 class Pointer<T>
     Integer Position
     

@@ -46,5 +46,18 @@ action Main
     OutputByteDigit(B)
     Byte D = 5
     
+    //Array<Byte> Ar
+    /*Ar:Resize(5)
+    Ar:SetAt(0, 4)
+    Ar:SetAt(1, 3)
+    Ar:SetAt(2, 2)
+    Ar:SetAt(3, 1)
+    Ar:SetAt(4, 0)
+    
+    Integer Position
+    Position = Ar:Find(3)
+    Byte OutPos = Position
+    OutputByteDigit(OutPos)*/
+    
     Box<Byte> BB
 end

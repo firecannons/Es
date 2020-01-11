@@ -50,8 +50,8 @@ class Array < Type >
             Me:Size = Me:Size + 1
         end
         
-        /*action Find ( Type Item ) returns Integer, Boolean
-            Boolean Output = False
+        /*action Find ( Type Item ) returns Integer
+            Bool Output = False
             Integer Location = -1
             Index = 0
             repeat while Index < Me:ReservedSize
@@ -61,7 +61,7 @@ class Array < Type >
                 end
                 Index = Index + 1
             end
-            return Index, Output
+            return Index
         end*/
         
         action = ( Array<Type> Source )
