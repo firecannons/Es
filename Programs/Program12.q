@@ -30,6 +30,7 @@ action asm OutputByteDigit ( Byte L )
 end
 
 Byte B = 2
+Box<Byte> BB1
 
 action Main
     OutputByteDigit(B)
@@ -38,9 +39,12 @@ action Main
     OutputByteDigit(True:Value)
     True:AssignNumericValue(4)
     OutputByteDigit(True:Value)
+    OutputByteDigit(False:Value)
     Byte Five = 5
     OutputByteDigit(Five)
     B = 8
     OutputByteDigit(B)
     Byte D = 5
+    
+    Box<Byte> BB
 end

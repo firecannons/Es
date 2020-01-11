@@ -609,9 +609,14 @@ class Bool size 1
     action AssignNumericValue(Integer I)
         Me:Value = I
     end
+    
+    action =(Integer I)
+        Me:Value = I
+    end
 end
 
-Bool True
+Bool True = 1
+Bool False = 0
 
 class Pointer<T>
     Integer Position

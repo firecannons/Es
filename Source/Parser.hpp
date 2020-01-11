@@ -1305,20 +1305,23 @@ void Parser::ParseExpectFirstOperatorOrNewline()
 {
     if(IsPassModeHigherOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
     {
+        Position = Position - 1;
         CopyUntilNextNewline();
-    }
-    else
-    {
         if(GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
         {
-            Position = Position - 1;
-            CopyUntilNextNewline();
             GlobalVariableInitializeTokens.insert(GlobalVariableInitializeTokens.end(), ReduceTokens.begin(), ReduceTokens.end());
             Token NewToken;
             NewToken.Contents = GlobalKeywords.ReservedWords["NEW_LINE"];
             NewToken.LineNumber = CurrentToken.LineNumber;
             NewToken.SourceFileName = CurrentToken.SourceFileName;
             GlobalVariableInitializeTokens.push_back(NewToken);
+        }
+    }
+    else
+    {
+        if(GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
+        {
+            CopyUntilNextNewline();
         }
         else if(DoesSetContain(CurrentToken.Contents, GlobalKeywords.AfterDeclarationOperators) == true
         || CurrentToken.Contents == GlobalKeywords.ReservedWords["LPAREN"] || CurrentToken.Contents == GlobalKeywords.ReservedWords["COLON"])
