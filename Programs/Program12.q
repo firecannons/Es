@@ -55,7 +55,10 @@ action Main
     Ar:SetAt(4, 0)
     
     Integer Position = 0
-    //Position = Ar:Find(2)
+    Position = Ar:Find(4)
+    Byte OutPos = Position
+    OutputByteDigit(OutPos)
+    Position = Ar:Find(1)
     Byte OutPos = Position
     OutputByteDigit(OutPos)
     

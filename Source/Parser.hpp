@@ -5,8 +5,6 @@ string Parser::Parse(const vector<Token> & Tokens)
     Initialize(Tokens);
     
     RunAllPasses();
-    
-    OutputTypeTable();
 
     OutputTemplateAsm();
     
@@ -74,46 +72,6 @@ bool Parser::IsNextToken()
 
 void Parser::Operate()
 {
-    //if(CurrentClass.Type != NULL && CurrentClass.Type->Name == "Array" && PassMode == PASS_MODE::FUNCTION_SKIM)
-    cout << "'" << CurrentToken.Contents << "' " << State << " " << PassMode << " " << GlobalScope.Objects.size() << " " << Position << " " << NextFunctionObjects.size() << endl;// << " " << DoesMapContain("IfTest1", ScopeStack[ScopeStack.size() - 1]->Objects) << endl;
-/*
-                BaseType BT1;
-                BT1.Name = "toy";
-                BT1.IsTemplated = false;
-                TypeTable.insert(pair<string,BaseType>(string("toy"), BT1));
-                TypeTable[string("toy")].InitializeBlankCompiledTemplate();
-
-
-                BaseType BT;
-                BT.Name = "test";
-                BT.IsTemplated = true;
-                TypeTable.insert(pair<string,BaseType>(string("test"), BT));
-                TypeTable[string("test")].InitializeBlankCompiledTemplate();
-                
-                
-                CompiledTemplate * CT = TypeTable[string("test")].GetFirstCompiledTemplate();
-
-                TemplatedType TT1;
-                TT1.Type = &TypeTable[string("toy")];
-                TT1.Templates = TypeTable[string("toy")].GetFirstCompiledTemplate();
-                CT->Templates.push_back(TT1);
-                
-                TypeTable[string("test")].InitializeBlankCompiledTemplate();
-                CompiledTemplate * CT2 = TypeTable[string("test")].GetLastCompiledTemplate();
-                
-                TemplatedType TestTT2;
-                TestTT2.Type = &TypeTable[string("test")];
-                TestTT2.Templates = TypeTable[string("test")].GetFirstCompiledTemplate();
-                
-                CT2->Templates.push_back(TestTT2);
-                
-                
-                cout << "done setting values" << endl;
-                OutputTypeTable();
-                OutputTypeTable();
-                exit(1);
-                OutputTypeTable();*/
-
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
@@ -222,15 +180,12 @@ void Parser::Operate()
 
 void Parser::ParseStartOfLine()
 {
-    cout << "in...1" << endl;
     if(CurrentFunction != NULL)
     {
         if(JustParsedActionLine == true)
         {
             if(CurrentFunction->Name == MAIN_FUNCTION_NAME && PassMode == PASS_MODE::FULL_PASS)
             {
-                cout << "safd" << endl;
-                cout << OutputTokensToString(GlobalVariableInitializeTokens) << endl;
                 Tokens.insert(Tokens.begin() + Position, GlobalVariableInitializeTokens.begin(), GlobalVariableInitializeTokens.end());
                 CurrentToken = Tokens[Position];
                 IsParsingGlobalVariables = true;
@@ -239,13 +194,10 @@ void Parser::ParseStartOfLine()
             JustParsedActionLine = false;
         }
     }
-    cout << IsParsingGlobalVariables << " " << CurrentToken.Contents << endl;
     if(IsParsingGlobalVariables == true)
     {
-        cout << "in..." << endl;
         if(Position >= EndPositionOfGlobalVarInitialization)
         {
-            cout << "done parsing global init" << endl;
             IsParsingGlobalVariables = false;
         }
         else if(CurrentToken.Contents != GlobalKeywords.ReservedWords["NEW_LINE"])
@@ -452,7 +404,6 @@ void Parser::ParseExpectClassName()
                 }
             }
         }
-        cout << "does TypeTable have " << CurrentToken.Contents << " " << DoesMapContain(CurrentToken.Contents, TypeTable) << endl;
         CurrentClass.Type = &TypeTable[CurrentToken.Contents];
         State = PARSER_STATE::EXPECT_TEMPLATE_START_OR_NEWLINE_OR_SIZE;
     }
@@ -490,14 +441,10 @@ void Parser::ParseExpectTemplateStartOrNewlineOrSize()
             CurrentClass.Type->InitializeBlankCompiledTemplate();
             CurrentClass.Type->IsTemplated = false;
         }
-        cout << "2 " << CurrentClass.Type->Name << endl;
         CurrentClass.Templates = &CurrentClass.Type->CompiledTemplates.front();
-        cout << "3 " << CurrentClass.Templates << " " << CurrentClass.Type->CompiledTemplates.size() << endl;
         CurrentClass.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
         
-        cout << "4" << endl;
         ScopeStack.push_back(&CurrentClass.Templates->MyScope);
-        cout << "5" << endl;
         State = PARSER_STATE::START_OF_LINE;
     }
     else if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
@@ -725,11 +672,9 @@ void Parser::ParseExpectType()
     {
         if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
         {
-            cout << "fire" << CurrentToken.Contents << " " << IsAType(CurrentToken.Contents) << endl;
             if(IsAType(CurrentToken.Contents) == true)
             {
                 CurrentParsingType = GetType(CurrentToken.Contents);
-                cout << "fire" << CurrentParsingType.Type->Name << endl;
             }
             else
             {
@@ -858,7 +803,6 @@ Scope * Parser::GetCurrentScope()
 void Parser::ParseTemplates()
 {
     InitializeTemplateTokens();
-    OutputTokens(TemplateTokens);
     InitializeTemplateParse();
     ParseTemplateTokens();
 }
@@ -893,7 +837,6 @@ void Parser::InitializeTemplateTokens()
                 TemplatesFinished = true;
             }
         }
-    cout << Tokens[Index].Contents << " " << TemplateDeepness << endl;
         Index = Index + 1;
     }
     Position = Index - 1;
@@ -924,8 +867,6 @@ void Parser::RemoveTypeInTemplates()
 
 void Parser::OperateTemplateTokens()
 {
-    cout << "entering OperateTemplateTokens" << endl;
-    OutputTokens(TemplateTokens);
     if(StoredParsedTemplates.size() > 0)
     {
         OutputFullTemplatesToString(StoredParsedTemplates[0]);
@@ -935,7 +876,6 @@ void Parser::OperateTemplateTokens()
         if(IsTemplateVariable(TemplateTokens[TemplateTokenIndex].Contents) == true)
         {
             StoredParsedTemplates.push_back(GetTemplateFromVariable(TemplateTokens[TemplateTokenIndex].Contents));
-            cout << TemplateTokens[TemplateTokenIndex].Contents << endl << OutputFullTemplatesToString(StoredParsedTemplates[StoredParsedTemplates.size() - 1]) << &StoredParsedTemplates[StoredParsedTemplates.size() - 1];
             RemoveTypeInTemplates();
         }
         else if(IsAType(TemplateTokens[TemplateTokenIndex].Contents) == true)
@@ -954,7 +894,6 @@ void Parser::OperateTemplateTokens()
     }
     else if(TemplateTokens[TemplateTokenIndex + 1].Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
-        cout << "testing" << endl;
         if(TypeTable[TemplateTokens[TemplateTokenIndex].Contents].PossibleTemplates.size() == 0)
         {
             OutputStandardErrorMessage(string("Type '") + TemplateTokens[TemplateTokenIndex].Contents + "' is not templated. ", TemplateTokens[TemplateTokenIndex]);
@@ -963,38 +902,9 @@ void Parser::OperateTemplateTokens()
         {
             if(DoesTypeHaveTemplates(TypeTable[TemplateTokens[TemplateTokenIndex].Contents], StoredParsedTemplates) == false)
             {
-                cout << OutputFullTemplatesToString(StoredParsedTemplates[0]) << " " << TemplateTokens[TemplateTokenIndex].Contents << endl;
+                TypeTable[TemplateTokens[TemplateTokenIndex].Contents].InitializeBlankCompiledTemplate();
                 
-
-                for(unsigned int i = 0; i < TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates.size(); i++)
-                {
-                    TemplatedType TT;
-                    TT.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
-                    TT.Templates = &GetInList(TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates, i);
-                    cout << OutputFullTemplatesToString(TT) << " " << i << " " << TT.Templates << endl;
-                }
-
-                for(unsigned int i = 0; i < TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates.size(); i++)
-                {
-                    TemplatedType TT;
-                    TT.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
-                    TT.Templates = &GetInList(TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates, i);
-                    cout << OutputFullTemplatesToString(TT) << " " << i << " " << TT.Templates << endl;
-                }
-                    TypeTable[TemplateTokens[TemplateTokenIndex].Contents].InitializeBlankCompiledTemplate();
-                
-                for(unsigned int i = 0; i < TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates.size(); i++)
-                {
-                    TemplatedType TT;
-                    TT.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
-                    TT.Templates = &GetInList(TypeTable[TemplateTokens[TemplateTokenIndex].Contents].CompiledTemplates, i);
-                    cout << OutputFullTemplatesToString(TT) << " " << i << " " << TT.Templates << endl;
-                }
-                cout << StoredParsedTemplates[StoredParsedTemplates.size() - 1].Templates << endl;
-                
-                cout << OutputFullTemplatesToString(StoredParsedTemplates[0]) << "esdd" << TypeTable["Box"].CompiledTemplates.size() << endl;
                 CurrentParsingType.Type = &TypeTable[TemplateTokens[TemplateTokenIndex].Contents];
-                cout << OutputFullTemplatesToString(StoredParsedTemplates[0]) << "esdf" << endl;
                 CurrentParsingType.Templates = TypeTable[TemplateTokens[TemplateTokenIndex].Contents].GetLastCompiledTemplate();
                 CurrentParsingType.Templates->MyScope.Origin = SCOPE_ORIGIN::CLASS;
                 if(CurrentParsingType.Type->PossibleTemplates.size() != StoredParsedTemplates.size())
@@ -1002,15 +912,11 @@ void Parser::OperateTemplateTokens()
                     OutputStandardErrorMessage(string("Type '") + TemplateTokens[TemplateTokenIndex].Contents + "' expects " +
                         to_string(CurrentParsingType.Type->PossibleTemplates.size()) + " templates not " + to_string(StoredParsedTemplates.size()) + ".", TemplateTokens[TemplateTokenIndex]);
                 }
-                cout << OutputFullTemplatesToString(StoredParsedTemplates[0]) << endl;
                 CurrentParsingType.Templates->Templates = StoredParsedTemplates;
-                cout << "fire" << endl << OutputFullTemplatesToString(StoredParsedTemplates[0]) << &StoredParsedTemplates[StoredParsedTemplates.size() - 1] << endl;
                 
                 
-                cout << "entering parsing template " << OutputFullTemplatesToString(CurrentParsingType) << " from " << OutputFullTemplatesToString(CurrentClass) << endl;
                 CompileTemplatedCode();
                 
-                cout << "leaving parsing template " << OutputFullTemplatesToString(CurrentParsingType) << "to return to " << OutputFullTemplatesToString(CurrentClass) << endl;
                 // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
             }
             else
@@ -1087,8 +993,6 @@ Object * Parser::GetInAnyScope(const string & VariableName)
     unsigned Index = 0;
     while(Index < ScopeStack.size() && WasVariableFound == false)
     {
-        cout << "#" << Index << " " << ScopeStack[ScopeStack.size() - 1 - Index]->Origin << " " << DoesMapContain(VariableName, ScopeStack[ScopeStack.size() - 1 - Index]->Objects)
-        << " " << VariableName << " " << " " << ScopeStack[ScopeStack.size() - 1 - Index]->Objects.size() << " " << OutputMapToString(ScopeStack[ScopeStack.size() - 1 - Index]->Objects) << endl;
         if(DoesMapContain(VariableName, ScopeStack[ScopeStack.size() - 1 - Index]->Objects) == true)
         {
             Variable = &ScopeStack[ScopeStack.size() - 1 - Index]->Objects[VariableName];
@@ -1096,7 +1000,6 @@ Object * Parser::GetInAnyScope(const string & VariableName)
         }
         Index = Index + 1;
     }
-    cout << OutputMapToString(GetCurrentScope()->Objects) << endl;
     if(WasVariableFound == false)
     {
         OutputStandardErrorMessage(string("No variable '") + VariableName + string("' found."), CurrentToken);
@@ -1168,7 +1071,6 @@ void Parser::ParseExpectReturnsNewline()
 void Parser::EndCurrentScope()
 {
     ScopeStack.pop_back();
-    cout << "after pop " << GetCurrentScope()->Origin << endl;
 }
 
 void Parser::ParseExpectNewlineAfterEnd()
@@ -1219,13 +1121,10 @@ void Parser::ParseExpectNewlineOrReturns()
 
 void Parser::ParseExpectVariableName()
 {
-    cout << "one " << CurrentToken.Contents << endl;
     if(IsValidIdent(CurrentToken.Contents) == true)
     {
-        cout << "two " << CurrentToken.Contents << endl;
         if(IsPassModeLowerOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
         {
-            cout << "three " << CurrentToken.Contents << endl;
             Object NewParamObject;
             NewParamObject.Name = CurrentToken.Contents;
             NewParamObject.Type = CurrentParsingType;
@@ -1236,25 +1135,11 @@ void Parser::ParseExpectVariableName()
                 NewParamObject.IsReference = true;
                 GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                 CurrentFunction->Parameters.push_back(&CurrentFunction->MyScope.Objects[NewParamObject.Name]);
-                cout << OutputFullTemplatesToString(CurrentFunction->Parameters.back()->Type) << endl;
             }
             else if(TypeMode == TYPE_PARSE_MODE::PARSING_NEW_VARIABLE)
             {
-                cout << "four " << CurrentToken.Contents << endl;
                 if(IsClassScopeClosest() == true && PassMode == PASS_MODE::FUNCTION_SKIM)
                 {
-                    cout << "five " << CurrentToken.Contents << endl;
-                    if(CurrentToken.Contents == "P")
-                    {
-                        cout << "adding P" << endl;
-                        cout << OutputFullTemplatesToString(CurrentParsingType) << endl;
-                        cout << CurrentClass.Templates->Size << endl;
-                    }
-                    
-                    cout << "wth " << CurrentClass.Type->Name << " getting " << CurrentToken.Contents << " " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
-                    string i;
-                    //cin >> i;
-                    
                     GetCurrentScope()->Objects.emplace(NewParamObject.Name, NewParamObject);
                     GetCurrentScope()->OrderedObjects.push_back(&GetCurrentScope()->Objects[NewParamObject.Name]);
                     CurrentParsingObject = &GetCurrentScope()->Objects[NewParamObject.Name];
@@ -1379,8 +1264,6 @@ void Parser::ReduceLine()
 
 void Parser::OperateReduceTokens()
 {
-    OutputTokens(ReduceTokens);
-    cout << ReducePosition << endl;
     if(IsCurrentlyLeftParen() == true)
     {
         ReducePosition = ReducePosition + 1;
@@ -1477,7 +1360,6 @@ bool Parser::IsFirstOperatorHigherPrecedence()
     unsigned int OrderingIndex = 0;
     while(OrderingIndex < OperatorOrdering.size() && Done == false)
     {
-        cout << ReduceTokens[ReducePosition + 1].Contents << " " << Output << " " << OutputSetToString((const unordered_set<string> &) OperatorOrdering[OrderingIndex]) << endl;
         if(DoesSetContain(ReduceTokens[ReducePosition + 1].Contents, OperatorOrdering[OrderingIndex]) == true)
         {
             Output = true;
@@ -1532,15 +1414,12 @@ void Parser::DoReduceFunctionCall()
     Function * WantedFunction = NULL;
     Scope * CallingScope = NULL;
     bool IsCallingObject = false;
-    cout << "one:" << ReduceTokens[ReducePosition].Contents << " " << JustDeclaredObject << endl;
     if(JustDeclaredObject == true)
     {
         if(ReduceTokens[ReducePosition].Contents != GlobalKeywords.ReservedWords["CONSTRUCTOR"])
         {
             if(ReducePosition >= 2 && ReduceTokens[ReducePosition - 1].Contents != GlobalKeywords.ReservedWords["COLON"])
             {
-                cout << "sdf" << endl;
-                //exit(1);
                 ReduceTokens.insert(ReduceTokens.begin() + ReducePosition + 1, Token());
                 ReduceTokens.insert(ReduceTokens.begin() + ReducePosition + 2, Token());
                 ReduceTokens[ReducePosition + 1] = ReduceTokens[ReducePosition];
@@ -1552,13 +1431,10 @@ void Parser::DoReduceFunctionCall()
             }
         }
     }
-    cout << "wer" << endl;
     if(ReducePosition >= 2)
     {
-        cout << "pos >= 2 " << ReducePosition << " " << ReduceTokens[ReducePosition].Contents << " " << ReduceTokens.size() << " " << OutputTokensToString(ReduceTokens) << endl;
         if(ReduceTokens[ReducePosition - 1].Contents == GlobalKeywords.ReservedWords["COLON"])
         {
-            cout << "has colon" << endl;
             IsCallingObject = true;
             AddToArgList(ReducePosition - 2);
             CallingScope = &GetInAnyScope(ReduceTokens[ReducePosition - 2].Contents)->Type.Templates->MyScope;
@@ -1567,7 +1443,6 @@ void Parser::DoReduceFunctionCall()
             ReducePosition = ReducePosition - 2;
         }
     }
-    cout << "fd" << endl;
     if(IsCallingObject == false)
     {
         CallingScope = GetGlobalScope();
@@ -1577,7 +1452,6 @@ void Parser::DoReduceFunctionCall()
         OutputStandardErrorMessage(string("No function matching ") + OutputFunctionNameWithObjects(ReduceTokens[ReducePosition].Contents, Reverse(NextFunctionObjects)) + string("."),
             CurrentToken);
     }
-    cout << "tyes" << endl;
     WantedFunction = GetFromFunctionList(CallingScope->Functions[ReduceTokens[ReducePosition].Contents], Reverse(NextFunctionObjects));
     CallFunction(*WantedFunction);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
@@ -1586,16 +1460,8 @@ void Parser::DoReduceFunctionCall()
 
 void Parser::ReduceOperator()
 {
-    cout << "in ReduceOperator " << ReducePosition << endl;
     AddToArgList(ReducePosition + 2);
     AddToArgList(ReducePosition);
-    cout << "fore " << endl;
-    cout << "fure " << NextFunctionObjects.size() << " " << NextFunctionObjects[0]->Type.Type << " " << NextFunctionObjects[0]->Type.Type->Name << endl;
-    cout << "fyre " << OutputFunctionParameters(Reverse(NextFunctionObjects)) << endl;
-    cout << "fare " << NextFunctionObjects[1]->Type.Type << " " << NextFunctionObjects[1]->Type.Type->Name << endl;
-    cout << "ok" << OutputFunctionParameters(Reverse(NextFunctionObjects)) << " " << NextFunctionObjects[0]->Type.Type->Name << " " << NextFunctionObjects[1]->Type.Type->Name << endl;
-    //cout << Reverse(NextFunctionObjects)[0]->Type.Type->Name << " " << Reverse(NextFunctionObjects)[1]->Type.Type->Name;
-    //exit(1);
     CallFunction(*GetFromFunctionList(GetInAnyScope(ReduceTokens[ReducePosition].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition + 1].Contents],
         Reverse(NextFunctionObjects)));
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 1);
@@ -1675,27 +1541,12 @@ bool Parser::IsAColonInFarOperatorPosition()
 
 void Parser::DoColonReduce()
 {
-    cout << "yo " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << " " << ReducePosition << endl;
     Object * CallingObject = GetInAnyScope(ReduceTokens[ReducePosition].Contents);
-    cout << "sdf" << endl;
-    cout << CallingObject << endl;
-    cout << CallingObject->Name << endl;
-    cout << CallingObject->Type.Type->Name << endl;
-    cout << OutputObjectToString(*CallingObject, 1) << endl;
     Object * ScopeObject = &CallingObject->Type.Templates->MyScope.Objects[ReduceTokens[ReducePosition + 2].Contents];
-    cout << "sdf" << endl;
-    if(CurrentClass.Type != NULL)
-    {
-        //cout << "doing colon reduce " << CallingObject->Type.Type->Name << " " << ScopeObject->Type.Type->Name << endl;
-        cout << ReduceTokens[ReducePosition + 2].Contents << " " << ReduceTokens[ReducePosition].Contents << endl;
-    }
-    cout << "sdf" << endl;
     unsigned int OffsetShift = ScopeObject->Offset;
     Object NewObject;
-    cout << "sdf" << endl;
     NewObject.OuterScopeOrigin = GetCurrentScope()->Origin;
     NewObject.Name = GetNextTemporaryVariable();
-    cout << "sdf" << endl;
     ReduceTokens[ReducePosition + 2].Contents = NewObject.Name;
     NewObject.Type = ScopeObject->Type;
     NewObject.Offset = CallingObject->Offset + OffsetShift;
@@ -1706,12 +1557,8 @@ void Parser::DoColonReduce()
         NewObject.IsReference = true;
         NewObject.GlobalName = CallingObject->GlobalName;
         NewObject.OuterScopeOrigin = SCOPE_ORIGIN::GLOBAL;
-        cout << "obodokobo" << endl;
-        cout << OutputTokensToString(ReduceTokens) << endl;
     }
-    cout << "adding objects to colon reduce " << NewObject.Name << " " << GetCurrentScope()->Origin << " " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
     GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
-    cout << "adding objects to colon reduce " << NewObject.Name << " " << GetCurrentScope()->Origin << " " << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition + 0);
 }
@@ -1797,7 +1644,6 @@ void Parser::AddToArgList(const unsigned int InPosition)
         ReduceTokens[InPosition].Contents = NumberObject.Name;
         NumberObject.Type.Type = &TypeTable["Integer"];
         NumberObject.Type.Templates = TypeTable["Integer"].GetFirstCompiledTemplate();
-        cout << "adding number to objects " << endl;
         GetCurrentScope()->Objects.emplace(NumberObject.Name, NumberObject);
         AddNewVariableToStack(GetCurrentScope()->Objects[NumberObject.Name]);
         AddNumericalValueToTempInteger(VariableName);
@@ -1808,7 +1654,6 @@ void Parser::AddToArgList(const unsigned int InPosition)
         NextArg = GetInAnyScope(VariableName);
     }
     NextFunctionObjects.push_back(NextArg);
-    cout << "adding " << NextArg->Name << " " << OutputFullTemplatesToString(NextArg->Type) << endl;
 }
 
 void Parser::AddNewVariableToStack(Object & NewObject)
@@ -1831,11 +1676,8 @@ void Parser::CallFunction(const Function & InFunction)
 {
     AddExternalReturnValue(InFunction);
     int StartOffset = GetCurrentScope()->Offset;
-    cout << "before push" << endl;
     PushArguments();
-    cout << "after push" << endl;
     OutputCallAsm(InFunction);
-    cout << "after call" << endl;
     if(DEBUG == true)
     {
         OutputCallingFunctionCommentToAsm(InFunction);
@@ -1855,11 +1697,6 @@ void Parser::PushArguments()
         if(NextFunctionObjects[Index]->IsReference == true)
         {
             index++;
-            //if(index == 4)
-            {
-                cout << "oboh" << NextFunctionObjects[Index]->Name << " " << NextFunctionObjects[Index]->OuterScopeOrigin << " " << NextFunctionObjects[Index]->GlobalName << endl;
-                //exit(1);
-            }
             OutputDereferenceCode(NextFunctionObjects[Index]);
             if(DEBUG == true)
             {
@@ -1990,7 +1827,6 @@ void Parser::OutputTypeTable()
     string OutputString;
 
     OutputString = OutputString + OutputTypeTableToString();
-    cout << OutputString << endl;
 }
 
 string Parser::OutputTypeTableToString()
@@ -2061,28 +1897,19 @@ string Parser::OutputCompiledTemplateToString(const CompiledTemplate & OutputCT,
     NewTT.Type = (BaseType *) &InType;
     NewTT.Templates = (CompiledTemplate *) &OutputCT;
     
-    
-    
-    
-    cout << "before " << InType.Name << endl;
-    OutputString = OutputString + "Recursive Template: " + OutputFullTemplatesToString(NewTT); /*to_string(NewTT.Templates->Templates.size()) + " " + to_string(TypeTable[string("Box")].CompiledTemplates.size()) + " "
-        + to_string(TypeTable[string("Box")].CompiledTemplates[2].Templates[0].Templates->Templates.size()) + " " + OutputFullTemplatesToString(NewTT) + '\n';*/
-    cout << "after" << endl;
+    OutputString = OutputString + "Recursive Template: " + OutputFullTemplatesToString(NewTT);
     
     OutputString = OutputString + NewTT.Type->Name;
     
     
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Scope:\n";
-    cout << "entering printing scope" << endl;
     OutputString = OutputString + OutputScopeToString((Scope &)OutputCT.MyScope, Level + 1);
-    cout << "exiting printing scope" << endl;
     return OutputString;
 }
 
 string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level)
 {
-    cout << "one" << endl;
     string OutputString;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Offset: " + to_string(OutputScope.Offset) + '\n';
@@ -2092,19 +1919,15 @@ string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level
     OutputString = OutputString + "Ordered Objects Size: " + to_string(OutputScope.OrderedObjects.size()) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Objects:\n";
-    cout << "two" << endl;
 
     map<string, Object>::iterator Iterator;
     for (Iterator = OutputScope.Objects.begin(); Iterator != OutputScope.Objects.end(); Iterator++)
     {
-        cout << Iterator->second.Name << endl;
         OutputString = OutputString + OutputObjectToString(Iterator->second, Level + 1);
     }
-    cout << "three" << endl;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Functions:\n";
     
-    cout << &OutputScope << " outputting scope " << OutputScope.Functions.size() << endl;
     map<string, FunctionList>::iterator FuncIterator;
     for (FuncIterator = OutputScope.Functions.begin(); FuncIterator != OutputScope.Functions.end(); FuncIterator++)
     {
@@ -2115,7 +1938,6 @@ string Parser::OutputScopeToString(Scope & OutputScope, const unsigned int Level
             Index = Index + 1;
         }
     }
-    cout << "four" << endl;
     return OutputString;
 }
 
@@ -2146,8 +1968,6 @@ string Parser::OutputObjectToString(const Object & OutputObject, const unsigned 
 string Parser::OutputTemplatedTypeToString(const TemplatedType & OutputTT, const unsigned int Level)
 {
     string OutputString;
-    
-    cout << OutputTT.Type->Name << "testing" << endl;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Type: " + OutputFullTemplatesToString(OutputTT) + '\n';
 
@@ -2159,7 +1979,6 @@ string Parser::OutputFunctionToString(Function & OutputFunction, const unsigned 
     string OutputString;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Name: " + OutputFunction.Name + '\n';
-    cout << &OutputFunction << " " << OutputFunction.Name << endl;
     OutputString = OutputString + OutputTabsToString(Level);
     OutputString = OutputString + "Is Asm: " + to_string(OutputFunction.IsAsm) + '\n';
     OutputString = OutputString + OutputTabsToString(Level);
@@ -2232,8 +2051,6 @@ bool Parser::IsPassModeHigherOrEqual(const PASS_MODE InPassMode)
 
 bool Parser::IsLocalScopeToBeParsedNow()
 {
-    cout << "entering IsLocalScopeToBeParsedNow " << GetCurrentScope() << endl;
-    cout << "getting " << GetCurrentScope()->Origin << endl;
     bool Output = false;
     if(PassMode == PASS_MODE::CLASS_SKIM)
     {
@@ -2331,14 +2148,6 @@ void Parser::SizeCompiledTemplate(CompiledTemplate & InCompiledTemplate)
         InCompiledTemplate.MyScope.OrderedObjects[Index]->Offset = InCompiledTemplate.MyScope.Offset;
         InCompiledTemplate.MyScope.Offset = InCompiledTemplate.MyScope.Offset + InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->Size;
         InCompiledTemplate.Size = InCompiledTemplate.MyScope.Offset;
-        if(InCompiledTemplate.MyScope.OrderedObjects[Index]->Name == "P" ||
-        InCompiledTemplate.MyScope.OrderedObjects[Index]->Name == "Size")
-        {
-            cout << "sizing " << InCompiledTemplate.MyScope.OrderedObjects[Index]->Name << endl;
-            cout << InCompiledTemplate.MyScope.OrderedObjects[Index]->Offset << " " << InCompiledTemplate.MyScope.Offset << " "
-            << InCompiledTemplate.Size << " " << InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->Size << endl;
-            //exit(1);
-        }
         Index = Index + 1;
     }
 }
@@ -2366,7 +2175,6 @@ void Parser::DoPossibleTemplatedClassTokenCopy()
 
 string Parser::OutputFullTemplatesToString(const TemplatedType & InTT)
 {
-    //cout << "entering OutputFullTemplatesToString"<< endl;
     string Output;
     if(InTT.Type != NULL)
     {
@@ -2507,10 +2315,6 @@ TemplatedType Parser::GetType(const string & InName)
             {
                 Output = CurrentClass.Templates->Templates[Location];
                 IsATemplate = true;
-                /*for(unsigned int i = 0; i < CurrentClass.Templates->Templates.size(); i++)
-                {
-                    cout << CurrentClass.Templates->Templates[i].Type->Name << endl;
-                }*/
             }
         }
     }
@@ -2540,11 +2344,6 @@ void Parser::RunAllTemplatedPasses()
     RunParse();
     SetSizesAndOffsets();
     DoPossiblyAddBigThree();
-    cout << CurrentClass.Type->Name << endl;
-    if(CurrentClass.Type->Name == "DynamicMemory")
-    {
-        //exit(1);
-    }
 
     PassMode = PASS_MODE::FULL_PASS;
     InitializeForTemplatedPass();
@@ -2554,13 +2353,8 @@ void Parser::RunAllTemplatedPasses()
 
 string Parser::OutputFullCompiledTemplateVector(const vector<TemplatedType> & TTs)
 {
-    //cout << "entering OutputFullCompiledTemplateVector asfd" << endl;
-    //cout << "size is";
     string Output;
-    //cout << "size is";
     unsigned int Index = 0;
-    //cout << "size is";
-    //cout << "size: " << TTs.size() << endl;
     while(Index < TTs.size())
     {
         Output = Output + OutputFullTemplatesToString(TTs[Index]);
@@ -2601,24 +2395,17 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
     bool Found = false;
     unsigned int FoundPos = 0;
     unsigned int Index = 0;
-    cout << "ok... " << InList.Functions.size() << " " << GetInList(InList.Functions, 0).Parameters[0]->Type.Type->Name << endl;
     while(Index < InList.Functions.size() && Found == false)
     {
-        cout << OutputFunctionToString(GetInList(InList.Functions, Index), 1) << endl;
-        cout << "fsad " << endl;
         if(DoesFunctionMatch(GetInList(InList.Functions, Index), InObjects) == true)
         {
             Found = true;
             FoundPos = Index;
         }
-        cout << "fsad " << endl;
-        cout << OutputFunctionNameWithObjects(GetInList(InList.Functions, Index).Name, InObjects) << endl;
-        cout << "Index: " << Index << " FOund: " << Found << " " << GetInList(InList.Functions, FoundPos).Label << endl;
         Index = Index + 1;
     }
     if(Found == false)
     {
-        cout << "hello " << InObjects.size() << endl;
         OutputStandardErrorMessage(string("No function matching ") + OutputFunctionNameWithObjects(((FunctionList &) InList).GetFirstFunction()->Name, InObjects) + string(" in list."),
             CurrentToken);
     }
@@ -2627,7 +2414,6 @@ Function * Parser::GetFromFunctionList(const FunctionList & InList, const vector
 
 bool Parser::DoesFunctionMatch(const Function & InFunction, const vector<Object *> InObjects)
 {
-    cout << "getting size " << InFunction.Parameters.size() << " " << InObjects.size() << endl;
     bool IsMatch = true;
     if(InFunction.Parameters.size() != InObjects.size())
     {
@@ -2638,7 +2424,6 @@ bool Parser::DoesFunctionMatch(const Function & InFunction, const vector<Object 
         unsigned int Index = 0;
         while(Index < InObjects.size() && IsMatch == true)
         {
-            cout << InFunction.Parameters[Index]->Type.Type->Name << " " << InObjects[Index]->Type.Type->Name << endl;
             if(InFunction.Parameters[Index]->Type.Type != InObjects[Index]->Type.Type || InFunction.Parameters[Index]->Type.Templates != InObjects[Index]->Type.Templates)
             {
                 IsMatch = false;
@@ -2652,16 +2437,12 @@ bool Parser::DoesFunctionMatch(const Function & InFunction, const vector<Object 
 string Parser::OutputFunctionNameWithObjects(const string & Name, const vector<Object *> InObjects)
 {
     string Prototype;
-    cout << "Name" << Name << endl;
     if(CurrentParsingType.Type != NULL)
     {
-        cout << "before" << endl;
         Prototype = Prototype + CurrentParsingType.Type->Name;
-        cout << "after" << endl;
         Prototype = Prototype + GlobalKeywords.ReservedWords["COLON"];
     }
     Prototype = Prototype + Name;
-    cout << "after two" << Name << endl;
     Prototype = Prototype + GlobalKeywords.ReservedWords["LPAREN"];
     Prototype = Prototype + OutputFunctionParameters(InObjects);
     Prototype = Prototype + GlobalKeywords.ReservedWords["RPAREN"];
@@ -2705,7 +2486,6 @@ string Parser::ReplaceLinkString(const string & LinkString, const string & InAsm
     size_t Found = OutAsmCode.find(LinkString);
     while(Found != std::string::npos)
     {
-        cout << "we got one " << LinkString << endl;
         Found = OutAsmCode.find(LinkString);
         OutAsmCode.erase(Found, LinkString.size());
         OutAsmCode.erase(Found, 1);
@@ -2714,7 +2494,6 @@ string Parser::ReplaceLinkString(const string & LinkString, const string & InAsm
         OutAsmCode.erase(Found, 1);
         OutAsmCode = PerformLinkStringAction(LinkString, OutAsmCode, Found, ParenOperand);
         Found = OutAsmCode.find(LinkString);
-        cout << OutAsmCode << endl;
     }
     return OutAsmCode;
 }
@@ -2724,12 +2503,9 @@ string Parser::PerformLinkStringAction(const string & LinkString, const string &
     string OutAsmCode = InAsmCode;
     if(LinkString == GlobalKeywords.AsmLinkWords["GET_SIZE_OF"])
     {
-        cout << "in" << ParenOperand << endl;
         TemplatedType SizeTT = GetType(ParenOperand);
         string SizeString = to_string(SizeTT.Templates->Size);
-        cout << "going..." << SizeString << endl;
         OutAsmCode.insert(Found, SizeString);
-        cout << "out" << endl;
     }
     else if(LinkString == GlobalKeywords.AsmLinkWords["GET_ACTION"])
     {
@@ -2740,7 +2516,6 @@ string Parser::PerformLinkStringAction(const string & LinkString, const string &
         {
             string ClassName = ParenOperand.substr(0, ColonPosition);
             string ActionName = ParenOperand.substr(ColonPosition + 1, ParenOperand.size() - (ColonPosition + 1));
-            cout << "Class Name: " << ClassName << " ActionName: " << ActionName << endl;
             TemplatedType ClassTT = GetType(ClassName);
             CalledFunctionList = &ClassTT.Templates->MyScope.Functions[ActionName];
         }
@@ -2749,21 +2524,17 @@ string Parser::PerformLinkStringAction(const string & LinkString, const string &
             CalledFunctionList = &GetGlobalScope()->Functions[ParenOperand];
         }
         size_t RightParenPosition = OutAsmCode.find(GlobalKeywords.ReservedWords["RPAREN"], Found);
-        //cout << "ok... " << ParenOperand << " " << RightParenPosition << " " << Found << " " << RightParenPosition - (Found + 1) << " " << OutAsmCode.substr(Found - 5, 10) << endl;
         string FunctionNumberString = OutAsmCode.substr(Found + 1, RightParenPosition - (Found + 1));
         unsigned int FunctionNumber = stoi(FunctionNumberString);
-        cout << "aha we got one sdf " << LinkString << " " << FunctionNumberString << " " << FunctionNumber << " " << CalledFunctionList->Functions.size() << endl;
         CalledFunction = &GetInList(CalledFunctionList->Functions, FunctionNumber);
         OutAsmCode.erase(Found, RightParenPosition - Found + 1);
         OutAsmCode.insert(Found, CalledFunction->Label);
-        cout << "aha we got one " << LinkString << " " << ParenOperand << endl;
     }
     return OutAsmCode;
 }
 
 void Parser::ReturnAfterReduce()
 {
-    cout << "reduce return! " << ReduceTokens[ReducePosition].Contents << endl;
     string VariableName = ReduceTokens[ReducePosition].Contents;
     Object * NextArg = GetInAnyScope(VariableName);
     NextFunctionObjects.push_back(NextArg);
@@ -2804,7 +2575,6 @@ void Parser::ParseEndToken()
         {
             if(GetCurrentScope()->Origin == SCOPE_ORIGIN::FUNCTION)
             {
-                cout << "Current function ending scope: " << CurrentFunction << endl;
                 if(CurrentFunction->IsAsm == false)
                 {
                     OutputAsm = OutputAsm + GlobalASM.CalcDestroyStackFrameAsm();
@@ -2827,20 +2597,16 @@ void Parser::ParseEndToken()
 
 void Parser::AddExternalReturnValue(const Function & InFunction)
 {
-    cout << "in AddExternalReturnValue" << endl;
     if(InFunction.HasReturnObject == true)
     {
-        cout << "in InFunction.HasReturnObject" << endl;
         Object NewObject;
         NewObject.OuterScopeOrigin = GetCurrentScope()->Origin;
         NewObject.Name = GetNextTemporaryVariable();
         NewObject.Type = InFunction.ReturnObject.Type;
         NewObject.IsReference = InFunction.ReturnObject.IsReference;
-        cout << "adding return value " << NewObject.Name << " " << ReduceTokens[ReducePosition].Contents << " " << ReducePosition << endl;
         GetCurrentScope()->Objects.emplace(NewObject.Name, NewObject);
         AddNewVariableToStack(GetCurrentScope()->Objects[NewObject.Name]);
         ReduceTokens[ReducePosition].Contents = NewObject.Name;
-        OutputTokens(ReduceTokens);
     }
 }
 
@@ -2865,7 +2631,6 @@ void Parser::ParseExpectUntilOrWhile()
         NewScope.Origin = SCOPE_ORIGIN::REPEAT;
         ControlStructureScopes.push_back(NewScope);
         ScopeStack.push_back(&GetInList(ControlStructureScopes, ControlStructureScopes.size() - 1));
-        cout << "Added " << GetCurrentScope() << endl;
         
         Position = Position + 1;
         CopyUntilNextNewline();
@@ -2926,7 +2691,6 @@ void Parser::DoPossibleControlStructureOutput()
     {
         if(GetCurrentScope()->Origin == SCOPE_ORIGIN::REPEAT)
         {
-            cout << "exiting repeat scope" << endl;
             OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->Offset - ScopeStack[ScopeStack.size() - 2]->Offset));
             AppendNewlinesToOutputASM(1);
             OutputAsm = OutputAsm + GlobalASM.Codes["UNCONDITIONAL_JUMP"] + GetCurrentScope()->ControlStructureBeginLabel;
@@ -2938,7 +2702,6 @@ void Parser::DoPossibleControlStructureOutput()
         }
         else if(GetCurrentScope()->Origin == SCOPE_ORIGIN::IF)
         {
-            cout << "exiting repeat scope" << endl;
             OutputAsm = OutputAsm + GlobalASM.Codes["SHIFT_UP_ASM"] + to_string(-(GetCurrentScope()->Offset - ScopeStack[ScopeStack.size() - 2]->Offset));
             AppendNewlinesToOutputASM(1);
             OutputAsm = OutputAsm + GetCurrentScope()->ControlStructureBeginLabel + GlobalKeywords.ReservedWords["COLON"];
@@ -3138,7 +2901,6 @@ void Parser::DoAddAutoGenerateFunction()
     string NextLabel = GetNextLabel();
     NewFunction.Label = NextLabel;
     GetCurrentScope()->Functions[AutoGenerateFunctionName].Functions.push_back(NewFunction);
-    cout << "adding new function" << endl;
     CurrentFunction = GetCurrentScope()->Functions[AutoGenerateFunctionName].GetLastFunction();
     ScopeStack.push_back(&(CurrentFunction->MyScope));
     CopyAutoGenerateParametersToFunction();
@@ -3281,7 +3043,6 @@ void Parser::DoPossiblyAddCopyConstructor()
     Object SourceObject = CreateCurrentClassObject(GlobalKeywords.ReservedWords["SOURCE"]);
     AutoGenerateFunctionParameters.push_back(&SourceObject);
     CurrentClass.Templates->HasUserDefinedCopyConstructor = DoPossiblyAddAutoGenerateFunction();
-    cout << CurrentClass.Type->Name << " does " << CurrentClass.Templates->HasUserDefinedCopyConstructor << " have a copy constructor" << endl;
     AutoGenerateFunctionParameters.clear();
 }
 
@@ -3334,10 +3095,6 @@ void Parser::DoPossiblyOutputEmptyDestructorCode()
 
 void Parser::CallEmptyConstructor()
 {
-    //cout << OutputObjectToString(*CurrentParsingObject, 1) << endl << CurrentParsingObject->Type.Type->Name << endl;
-    //cout << OutputCompiledTemplateToString(*(CurrentParsingObject->Type.Templates), *(CurrentParsingObject->Type.Type), 1) << endl;
-    //cout << OutputFunctionToString(GetInList(CurrentParsingType.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]].Functions, 0), 1) << endl;
-    cout << "NextFunctionObjects.size() = " << NextFunctionObjects.size() << endl;
     NextFunctionObjects.push_back(CurrentParsingObject);
     Function * WantedFunction = GetFromFunctionList(CurrentParsingType.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["CONSTRUCTOR"]], Reverse(NextFunctionObjects));
     CallFunction(*WantedFunction);
@@ -3392,9 +3149,6 @@ void Parser::DoPossiblyCallDestructors()
 
 void Parser::AddNewGlobalVariableToAsm(const Object & InObject)
 {
-    cout << "adding global variable " << endl;
-    cout << InObject.GlobalName << endl;
-    cout << InObject.Type.Templates->Size << endl;
     GlobalVariableReserveAsm = GlobalVariableReserveAsm + InObject.GlobalName + GlobalASM.Codes["RESERVE_BYTES"] +
         to_string(InObject.Type.Templates->Size);
     GlobalVariableReserveAsm = GlobalVariableReserveAsm + GetNewlines(1);
@@ -3420,14 +3174,8 @@ string Parser::GetNextGlobalVariable()
 
 void Parser::OutputDereferenceCode(const Object * InObject)
 {
-    if(InObject->GlobalName != "")
-    {
-        cout << InObject->GlobalName  << endl;
-        //exit(1);
-    }
     if(InObject->OuterScopeOrigin == SCOPE_ORIGIN::GLOBAL)
     {
-        //exit(1);
         OutputAsm = OutputAsm + GlobalASM.CalcGlobalDerefForFuncCall(InObject->GlobalName);
     }
     else
@@ -3456,7 +3204,6 @@ void Parser::CallEmptyDestructorsForGlobalScope()
 
 bool Parser::IsUnaryOperator()
 {
-    cout << "checking if " << ReduceTokens[ReducePosition].Contents << " is unary in close position and the answer is " << DoesSetContain(ReduceTokens[ReducePosition].Contents, GlobalKeywords.UnaryOperators) << endl;
     bool Output = false;
     if(DoesSetContain(ReduceTokens[ReducePosition].Contents, GlobalKeywords.UnaryOperators) == true)
     {
@@ -3470,7 +3217,6 @@ bool Parser::IsUnaryOperatorInFarPosition()
     bool Output = false;
     if(ReduceTokens.size() - ReducePosition > 3)
     {
-        cout << "checking if " << ReduceTokens[ReducePosition].Contents << " is unary in far position and the answer is " << DoesSetContain(ReduceTokens[ReducePosition + 2].Contents, GlobalKeywords.UnaryOperators) << endl;
         if(DoesSetContain(ReduceTokens[ReducePosition + 2].Contents, GlobalKeywords.UnaryOperators) == true)
         {
             Output = true;
@@ -3481,11 +3227,8 @@ bool Parser::IsUnaryOperatorInFarPosition()
 
 void Parser::DoUnaryOperator()
 {
-    cout << "doing unary operator" << endl;
     AddToArgList(ReducePosition + 1);
-    cout << "calling unary function" << endl;
     CallFunction(*GetFromFunctionList(GetInAnyScope(ReduceTokens[ReducePosition + 1].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition].Contents],
         Reverse(NextFunctionObjects)));
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
-    cout << "leaving unary operator" << endl;
 }
