@@ -46,18 +46,26 @@ action Main
     OutputByteDigit(B)
     Byte D = 5
     
-    //Array<Byte> Ar
-    /*Ar:Resize(5)
+    Array<Integer> Ar
+    Ar:Resize(5)
     Ar:SetAt(0, 4)
     Ar:SetAt(1, 3)
     Ar:SetAt(2, 2)
     Ar:SetAt(3, 1)
     Ar:SetAt(4, 0)
     
-    Integer Position
-    Position = Ar:Find(3)
+    Integer Position = 0
+    //Position = Ar:Find(2)
     Byte OutPos = Position
-    OutputByteDigit(OutPos)*/
+    OutputByteDigit(OutPos)
     
     Box<Byte> BB
+    
+    Integer I = 1
+    
+    Integer NegTest = 8
+    NegTest = NegTest + -1
+    NegTest = NegTest + -I
+    Byte NegTestByte = NegTest
+    OutputByteDigit(NegTestByte)
 end

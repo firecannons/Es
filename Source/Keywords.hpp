@@ -57,16 +57,21 @@ Keywords::Keywords()
     ShortOperators.emplace(ReservedWords["SLASH"]);
     ShortOperators.emplace(ReservedWords["EXCLAMATION"]);
     
-    OverloadableOperators = ShortOperators;
-    OverloadableOperators.emplace(ReservedWords["LESS_OR_EQUAL"]);
-    OverloadableOperators.emplace(ReservedWords["GREATER_OR_EQUAL"]);
-    OverloadableOperators.emplace(ReservedWords["LEFT_BRACKET"]);
-    OverloadableOperators.emplace(ReservedWords["RIGHT_BRACKET"]);
-    OverloadableOperators.emplace(ReservedWords["IS_EQUAL"]);
-    OverloadableOperators.emplace(ReservedWords["NOT_EQUAL"]);
-    OverloadableOperators.emplace(ReservedWords["PLUS"]);
-    OverloadableOperators.emplace(ReservedWords["MINUS"]);
-    OverloadableOperators.emplace(ReservedWords["STAR"]);
+    BinaryOperators = ShortOperators;
+    BinaryOperators.emplace(ReservedWords["LESS_OR_EQUAL"]);
+    BinaryOperators.emplace(ReservedWords["GREATER_OR_EQUAL"]);
+    BinaryOperators.emplace(ReservedWords["LEFT_BRACKET"]);
+    BinaryOperators.emplace(ReservedWords["RIGHT_BRACKET"]);
+    BinaryOperators.emplace(ReservedWords["IS_EQUAL"]);
+    BinaryOperators.emplace(ReservedWords["NOT_EQUAL"]);
+    BinaryOperators.emplace(ReservedWords["PLUS"]);
+    BinaryOperators.emplace(ReservedWords["MINUS"]);
+    BinaryOperators.emplace(ReservedWords["STAR"]);
+    
+    UnaryOperators.emplace(ReservedWords["MINUS"]);
+    
+    OverloadableOperators = BinaryOperators;
+    OverloadableOperators.insert(UnaryOperators.begin(), UnaryOperators.end());
 
     AfterDeclarationOperators.emplace(ReservedWords["EQUALS"]);
     

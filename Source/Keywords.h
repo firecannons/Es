@@ -14,6 +14,8 @@ class Keywords
 public:
     map<string, string> ReservedWords;
     unordered_set<string> AllOperators;
+    unordered_set<string> BinaryOperators;
+    unordered_set<string> UnaryOperators;
     unordered_set<string> OverloadableOperators;
     unordered_set<string> ShortOperators;
     unordered_set<string> AfterDeclarationOperators;

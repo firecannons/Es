@@ -318,6 +318,9 @@ public:
     void OutputDereferenceCode(const Object * InObject);
     void OutputNormalPushAsm(const Object * InObject, const int ObjectSize);
     void CallEmptyDestructorsForGlobalScope();
+    bool IsUnaryOperator();
+    void DoUnaryOperator();
+    bool IsUnaryOperatorInFarPosition();
 };
 
 #include "Compiler.h"

@@ -89,6 +89,21 @@ class Integer size 4
             pop ebp
         end
         
+        action asm - ( ) returns Integer
+            push ebp
+            mov ebp, esp
+            
+            mov ebx, [ebp+8]
+            mov eax, [ebx]
+            
+            neg eax
+            
+            mov [ebx], eax
+            
+            mov esp, ebp
+            pop ebp
+        end
+        
         action asm > ( Integer Rhs ) returns Bool
             push ebp
             mov ebp, esp
@@ -614,6 +629,9 @@ class Bool size 1
         Me:Value = I
     end
 end
+
+Bool True = 1
+Bool False = 0
 
 class Pointer<T>
     Integer Position

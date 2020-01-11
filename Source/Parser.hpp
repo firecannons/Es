@@ -251,6 +251,7 @@ void Parser::ParseStartOfLine()
         else if(CurrentToken.Contents != GlobalKeywords.ReservedWords["NEW_LINE"])
         {
             JustDeclaredObject = true;
+            TypeMode = TYPE_PARSE_MODE::PARSING_NEW_VARIABLE;
             ParseExpectVariableName();
         }
     }
@@ -1305,16 +1306,19 @@ void Parser::ParseExpectFirstOperatorOrNewline()
 {
     if(IsPassModeHigherOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
     {
-        Position = Position - 1;
-        CopyUntilNextNewline();
-        if(GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
+        if(PassMode == PASS_MODE::FUNCTION_SKIM)
         {
-            GlobalVariableInitializeTokens.insert(GlobalVariableInitializeTokens.end(), ReduceTokens.begin(), ReduceTokens.end());
-            Token NewToken;
-            NewToken.Contents = GlobalKeywords.ReservedWords["NEW_LINE"];
-            NewToken.LineNumber = CurrentToken.LineNumber;
-            NewToken.SourceFileName = CurrentToken.SourceFileName;
-            GlobalVariableInitializeTokens.push_back(NewToken);
+            Position = Position - 1;
+            CopyUntilNextNewline();
+            if(GetCurrentScope()->Origin == SCOPE_ORIGIN::GLOBAL)
+            {
+                GlobalVariableInitializeTokens.insert(GlobalVariableInitializeTokens.end(), ReduceTokens.begin(), ReduceTokens.end());
+                Token NewToken;
+                NewToken.Contents = GlobalKeywords.ReservedWords["NEW_LINE"];
+                NewToken.LineNumber = CurrentToken.LineNumber;
+                NewToken.SourceFileName = CurrentToken.SourceFileName;
+                GlobalVariableInitializeTokens.push_back(NewToken);
+            }
         }
     }
     else
@@ -1376,10 +1380,18 @@ void Parser::ReduceLine()
 void Parser::OperateReduceTokens()
 {
     OutputTokens(ReduceTokens);
-    cout << TypeTable["Integer"].GetFirstCompiledTemplate()->MyScope.Objects.size() << endl;
+    cout << ReducePosition << endl;
     if(IsCurrentlyLeftParen() == true)
     {
         ReducePosition = ReducePosition + 1;
+    }
+    else if(IsUnaryOperator() == true)
+    {
+        DoUnaryOperator();
+    }
+    else if(IsUnaryOperatorInFarPosition() == true)
+    {
+        ReducePosition = ReducePosition + 2;
     }
     else if(IsFunctionCallCurrently() == true)
     {
@@ -1819,8 +1831,11 @@ void Parser::CallFunction(const Function & InFunction)
 {
     AddExternalReturnValue(InFunction);
     int StartOffset = GetCurrentScope()->Offset;
+    cout << "before push" << endl;
     PushArguments();
+    cout << "after push" << endl;
     OutputCallAsm(InFunction);
+    cout << "after call" << endl;
     if(DEBUG == true)
     {
         OutputCallingFunctionCommentToAsm(InFunction);
@@ -2812,8 +2827,10 @@ void Parser::ParseEndToken()
 
 void Parser::AddExternalReturnValue(const Function & InFunction)
 {
+    cout << "in AddExternalReturnValue" << endl;
     if(InFunction.HasReturnObject == true)
     {
+        cout << "in InFunction.HasReturnObject" << endl;
         Object NewObject;
         NewObject.OuterScopeOrigin = GetCurrentScope()->Origin;
         NewObject.Name = GetNextTemporaryVariable();
@@ -3435,4 +3452,40 @@ void Parser::OutputNormalPushAsm(const Object * InObject, const int ObjectSize)
 void Parser::CallEmptyDestructorsForGlobalScope()
 {
     CallEmptyDestructors(Reverse(GetGlobalScope()->OrderedObjects));
+}
+
+bool Parser::IsUnaryOperator()
+{
+    cout << "checking if " << ReduceTokens[ReducePosition].Contents << " is unary in close position and the answer is " << DoesSetContain(ReduceTokens[ReducePosition].Contents, GlobalKeywords.UnaryOperators) << endl;
+    bool Output = false;
+    if(DoesSetContain(ReduceTokens[ReducePosition].Contents, GlobalKeywords.UnaryOperators) == true)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+bool Parser::IsUnaryOperatorInFarPosition()
+{
+    bool Output = false;
+    if(ReduceTokens.size() - ReducePosition > 3)
+    {
+        cout << "checking if " << ReduceTokens[ReducePosition].Contents << " is unary in far position and the answer is " << DoesSetContain(ReduceTokens[ReducePosition + 2].Contents, GlobalKeywords.UnaryOperators) << endl;
+        if(DoesSetContain(ReduceTokens[ReducePosition + 2].Contents, GlobalKeywords.UnaryOperators) == true)
+        {
+            Output = true;
+        }
+    }
+    return Output;
+}
+
+void Parser::DoUnaryOperator()
+{
+    cout << "doing unary operator" << endl;
+    AddToArgList(ReducePosition + 1);
+    cout << "calling unary function" << endl;
+    CallFunction(*GetFromFunctionList(GetInAnyScope(ReduceTokens[ReducePosition + 1].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition].Contents],
+        Reverse(NextFunctionObjects)));
+    ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
+    cout << "leaving unary operator" << endl;
 }

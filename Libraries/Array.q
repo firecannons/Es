@@ -50,10 +50,10 @@ class Array < Type >
             Me:Size = Me:Size + 1
         end
         
-        /*action Find ( Type Item ) returns Integer
+        action Find ( Type Item ) returns Integer
             Bool Output = False
             Integer Location = -1
-            Index = 0
+            Integer Index = 0
             repeat while Index < Me:ReservedSize
                 if Me:GetAt( Index ) == Item
                     Output = True
@@ -61,8 +61,8 @@ class Array < Type >
                 end
                 Index = Index + 1
             end
-            return Index
-        end*/
+            return Location
+        end
         
         action = ( Array<Type> Source )
             DynamicMemory DM
