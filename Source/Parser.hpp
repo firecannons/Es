@@ -1688,7 +1688,7 @@ void Parser::CallFunction(const Function & InFunction)
     GetCurrentScope()->Offset = StartOffset;
     NextFunctionObjects.clear();
 }
-int index = 0;
+
 void Parser::PushArguments()
 {
     unsigned int Index = 0;
@@ -1696,7 +1696,6 @@ void Parser::PushArguments()
     {
         if(NextFunctionObjects[Index]->IsReference == true)
         {
-            index++;
             OutputDereferenceCode(NextFunctionObjects[Index]);
             if(DEBUG == true)
             {
@@ -1827,6 +1826,8 @@ void Parser::OutputTypeTable()
     string OutputString;
 
     OutputString = OutputString + OutputTypeTableToString();
+    
+    cout << OutputString;
 }
 
 string Parser::OutputTypeTableToString()
@@ -2948,12 +2949,13 @@ void Parser::CallObjectAutoGenerateFunction(const Object & InObject)
         NextFunctionObjects.push_back(GetInAnyScope(NewObject.Name));
     }
     
-    Function * WantedFunction = GetFromFunctionList(InObject.Type.Templates->MyScope.Functions[CurrentFunction->Name], Reverse(NextFunctionObjects));
+    Function * WantedFunction = GetFromFunctionList(InObject.Type.Templates->MyScope.Functions[CurrentFunction->Name], NextFunctionObjects);
     CallFunction(*WantedFunction);
 }
 
 void Parser::CopyAutoGenerateParametersToFunction()
 {
+    AutoGenerateFunctionParameters = Reverse(AutoGenerateFunctionParameters);
     unsigned int Index = 0;
     while(Index < AutoGenerateFunctionParameters.size())
     {

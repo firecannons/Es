@@ -54,6 +54,8 @@ class Array < Type >
             Bool Output = False
             Integer Location = -1
             Integer Index = 0
+            OutputByteDigit(False:Value)
+            OutputByteDigit(True:Value)
             repeat while Index < Me:ReservedSize
                 if Me:GetAt( Index ) == Item
                     Output = True
@@ -62,6 +64,14 @@ class Array < Type >
                 Index = Index + 1
             end
             return Location
+        end
+        
+        action Contains ( Type Item ) returns Bool
+            Bool Output = False
+            if Me:Find(Item) != -1
+                Output = True
+            end
+            return Output
         end
         
         action = ( Array<Type> Source )
