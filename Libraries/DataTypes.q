@@ -301,6 +301,7 @@ class Integer size 4
             ; mov value of Me into eax
             mov eax, [ebp+8]
             mov eax, [eax]
+            cdq
             
             ; load in the object into ecx
             mov ecx, [ebp+12]
@@ -311,6 +312,29 @@ class Integer size 4
             
             ; mov value into return area
             mov [ebp+16], eax
+            
+            mov esp, ebp
+            pop ebp
+        end
+        
+        action asm Remainder ( Integer Rhs ) returns Integer
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Me into eax
+            mov eax, [ebp+8]
+            mov eax, [eax]
+            cdq
+            
+            ; load in the object into ecx
+            mov ecx, [ebp+12]
+            mov ecx, [ecx]
+            
+            ; perform division
+            idiv ecx
+            
+            ; mov value into return area
+            mov [ebp+16], edx
             
             mov esp, ebp
             pop ebp
@@ -680,8 +704,6 @@ class Byte size 1
             mov eax, [ebp+8]
             mov byte al, [eax]
             cbw
-            ; extend
-            cbw
             
             ; load in Rhs into ecx
             mov ecx, [ebp+12]
@@ -692,6 +714,29 @@ class Byte size 1
             
             ; mov value into return area
             mov byte [ebp+16], al
+            
+            mov esp, ebp
+            pop ebp
+        end
+        
+        action asm Remainder ( Byte Rhs ) returns Byte
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Me into eax
+            mov eax, [ebp+8]
+            mov byte al, [eax]
+            cbw
+            
+            ; load in Rhs into ecx
+            mov ecx, [ebp+12]
+            mov byte cl, [ecx]
+            
+            ; perform division
+            idiv cl
+            
+            ; mov value into return area
+            mov byte [ebp+16], ah
             
             mov esp, ebp
             pop ebp
