@@ -48,6 +48,7 @@ public:
     vector<Token> Lex(const string & InputCode, const string & SourceFileName);
     void DoAsmBlockMode(const char InChar);
     bool IsEndOfString(const string & Haystack, const string & Needle);
+    bool IsEndOfStringAfterWhiteSpaceAndNewline(const string & Haystack, const string & Needle);
     void DoSingleLineCommentMode(const char InChar);
     void DoMultiLineCommentMode(const char InChar);
     void DoNormalLexMode(const char InChar);

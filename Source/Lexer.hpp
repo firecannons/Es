@@ -50,7 +50,7 @@ vector<Token> Lexer::Lex(const string & InputCode, const string & SourceFileName
 void Lexer::DoAsmBlockMode(const char InChar)
 {
     AppendToSavedWord(InChar);
-    if(IsEndOfString(SavedWord, "end") == true)
+    if(IsEndOfStringAfterWhiteSpaceAndNewline(SavedWord, "end") == true)
     {
         SavedWord.erase(SavedWord.end() - 3, SavedWord.end());
         Position = Position - 3;
@@ -201,4 +201,38 @@ void Lexer::AppendCharactersToTokens()
         AppendSavedWordToTokens();
         Index = Index + 1;
     }
+}
+
+bool Lexer::IsEndOfStringAfterWhiteSpaceAndNewline(const string & Haystack, const string & Needle)
+{
+    bool Output = false;
+    if(Haystack.size() > 0 && Haystack.size() > Needle.size())
+    {
+        if(Haystack.substr(Haystack.size() - Needle.size(), Needle.size()) == Needle)
+        {
+            bool HitNewline = false;
+            bool HitNonWhitespace = false;
+            unsigned int Index = Haystack.size() - Needle.size() - 1;
+            while(Index > 0 && HitNewline == false && HitNonWhitespace == false)
+            {
+                if(GetTextTypeOfChar(Haystack[Index]) == TEXT_TYPE::WHITE_SPACE)
+                {
+                    if(Haystack[Index] == GlobalKeywords.ReservedWords["NEW_LINE"][0])
+                    {
+                        HitNewline = true;
+                    }
+                }
+                else
+                {
+                    HitNonWhitespace = true;
+                }
+                Index = Index - 1;
+            }
+            if(HitNewline == true)
+            {
+                Output = true;
+            }
+        }
+    }
+    return Output;
 }

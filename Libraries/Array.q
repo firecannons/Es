@@ -54,8 +54,6 @@ class Array < Type >
             Bool Output = False
             Integer Location = -1
             Integer Index = 0
-            OutputByteDigit(False:Value)
-            OutputByteDigit(True:Value)
             repeat while Index < Me:ReservedSize
                 if Me:GetAt( Index ) == Item
                     Output = True
@@ -72,6 +70,10 @@ class Array < Type >
                 Output = True
             end
             return Output
+        end
+        
+        action + ( Type Item )
+            Me:Add ( Item )
         end
         
         action = ( Array<Type> Source )

@@ -31,19 +31,15 @@ end
 
 action Main
     
-    Array<Integer> Ar
-    Ar:Resize(5)
-    Ar:SetAt(0, 4)
-    Ar:SetAt(1, 3)
-    Ar:SetAt(2, 2)
-    Ar:SetAt(3, 1)
-    Ar:SetAt(4, 0)
-    
-    Integer SearchValue = 3
-    Bool Found = Ar:Contains(SearchValue)
-    OutputByteDigit(Found:Value)
-    
-    SearchValue = 7
-    Found = Ar:Contains(SearchValue)
-    OutputByteDigit(Found:Value)
+    Byte B = 2
+    Byte Mult = 4
+    B = B * Mult
+    OutputByteDigit(B)
+    Byte TwoByte = 2
+    OutputByteDigit(TwoByte)
+    OutputByteDigit(B)
+    B = B / TwoByte
+    OutputByteDigit(B)
+    B = B / TwoByte
+    OutputByteDigit(B)
 end

@@ -78,7 +78,7 @@ class Integer size 4
             mov ecx, [ebx]
             mov dword ecx, [ecx]
             
-            ; perform addition
+            ; perform subtraction
             sub dword ecx, eax
             
             ; mov value into return area
@@ -263,6 +263,54 @@ class Integer size 4
             ; move resultto stack
             add ebx, 8
             mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+        end
+        
+        action asm * ( Integer Rhs ) returns Integer
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov dword eax, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov dword ecx, [ecx]
+            
+            ; perform multiplication
+            imul ecx
+            
+            ; mov value into return area
+            add ebx, 8
+            mov dword [ebx], eax
+            
+            mov esp, ebp
+            pop ebp
+        end
+        
+        action asm / ( Integer Rhs ) returns Integer
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Me into eax
+            mov eax, [ebp+8]
+            mov eax, [eax]
+            
+            ; load in the object into ecx
+            mov ecx, [ebp+12]
+            mov ecx, [ecx]
+            
+            ; perform division
+            idiv ecx
+            
+            ; mov value into return area
+            mov [ebp+16], eax
             
             mov esp, ebp
             pop ebp
@@ -596,6 +644,57 @@ class Byte size 1
             mov esp, ebp
             pop ebp
             
+        end
+        
+        action asm * ( Byte Rhs ) returns Byte
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform multiplication
+            imul cl
+            
+            ; mov value into return area
+            add ebx, 8
+            mov byte [ebx], al
+            
+            mov esp, ebp
+            pop ebp
+        end
+        
+        action asm / ( Byte Rhs ) returns Byte
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Me into eax
+            mov eax, [ebp+8]
+            mov byte al, [eax]
+            cbw
+            ; extend
+            cbw
+            
+            ; load in Rhs into ecx
+            mov ecx, [ebp+12]
+            mov byte cl, [ecx]
+            
+            ; perform division
+            idiv cl
+            
+            ; mov value into return area
+            mov byte [ebp+16], al
+            
+            mov esp, ebp
+            pop ebp
         end
 
         action asm OutputToConsole ( )
