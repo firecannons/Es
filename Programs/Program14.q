@@ -29,6 +29,25 @@ action asm OutputByteDigit ( Byte L )
     pop ebp
 end
 
+action Output ( Integer I )
+    Array<Byte> ArNums
+    Integer Index = 0
+    Integer OutI = I
+    repeat while OutI > 10
+        Integer Rem = OutI:Remainder(10)
+        OutI = OutI / 10
+        Byte BRem = Rem
+        ArNums:Add(BRem)
+        Index = Index + 1
+    end
+    Byte One = 1
+    ArNums:SetAt(Index, One)
+    repeat while Index < ArNums:Size
+        OutputByteDigit(ArNums:GetAt(ArNums:Size - Index - 1))
+        Index = Index + 1
+    end
+end
+
 action Main
     
     Byte B = 2
@@ -58,4 +77,7 @@ action Main
     B = 11
     Byte Modulus = B:Remainder(TwoByte)
     OutputByteDigit(Modulus) // 1
+    
+    Integer I = 1234567
+    Output ( I )
 end

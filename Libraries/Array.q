@@ -25,7 +25,7 @@ class Array < Type >
         
         action SetMemorySize ( Integer Size )
             DynamicMemory < Type > DM
-            Me : P = DM : AllocateHeapMemory ( Size, Me:P )
+            Me : P = DM : ReallocateHeapMemory ( Size , Me : P , Me:ReservedSize )
             Me : ReservedSize = Size
             if Me : ReservedSize < Me : Size
                 Me : Size = Me : ReservedSize
@@ -37,6 +37,7 @@ class Array < Type >
                 DynamicMemory < Type > DM
                 Me : P = DM : ReallocateHeapMemory ( Size , Me : P , Me:ReservedSize )
                 Me : ReservedSize = Size
+                Me : Size = Size
             elseif Me:ReservedSize != 0
                 DM:DeallocateHeapMemory(Me:P, Me:ReservedSize)
             end
@@ -44,7 +45,11 @@ class Array < Type >
         
         action Add ( Type Item )
             if Me:Size == Me:ReservedSize
-                Me:Resize(Me:ReservedSize + 1)
+                Integer NewSize = Me:ReservedSize
+                if NewSize == 0
+                    NewSize = 1
+                end
+                Me:SetMemorySize(NewSize)
             end
             Me:SetAt(Me:Size, Item)
             Me:Size = Me:Size + 1
