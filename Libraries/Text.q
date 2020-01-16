@@ -35,4 +35,8 @@ class Text
     action SetAt(Integer Position, Byte Elem)
         Me : Letters : SetAt ( Position , Elem )
     end
+    
+    action DeepReverse()
+        Me:Letters:DeepReverse()
+    end
 end

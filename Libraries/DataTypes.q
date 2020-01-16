@@ -350,11 +350,12 @@ class Integer size 4
                 Integer Rem = OutI:Remainder(10)
                 OutI = OutI / 10
                 Byte BRem = Rem
-                ArNums:Add(BRem)
+                ArNums:Add(BRem + 48)
                 Index = Index + 1
             end
             Byte One = 1
-            ArNums:SetAt(Index, One)
+            ArNums:Add(One + 48)
+            ArNums:DeepReverse()
             return ArNums
         end
 end
@@ -472,6 +473,32 @@ class Byte size 1
         end
         
         action asm + ( Byte Rhs ) returns Byte
+            push ebp
+            mov ebp, esp
+            
+            ; mov value of Source into eax
+            mov ebx, ebp
+            add ebx, 12
+            mov eax, [ebx]
+            mov byte al, [eax]
+            
+            ; load in the object into ecx
+            sub ebx, 4
+            mov ecx, [ebx]
+            mov byte cl, [ecx]
+            
+            ; perform addition
+            add byte cl, al
+            
+            ; mov value into return area
+            add ebx, 8
+            mov byte [ebx], cl
+            
+            mov esp, ebp
+            pop ebp
+        end
+        
+        action asm + ( Integer Rhs ) returns Byte
             push ebp
             mov ebp, esp
             

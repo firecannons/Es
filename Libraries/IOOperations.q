@@ -64,6 +64,14 @@ action Output ( Text T )
     end
 end
 
+action OutputAsByteDigits ( Text T )
+    Integer Index = 0
+    repeat while Index < T:GetSize()
+        OutputByteDigit(T:GetAt(Index))
+        Index = Index + 1
+    end
+end
+
 action Output ( Integer I )
     Text ArNums = I:GetText()
     Output(ArNums)

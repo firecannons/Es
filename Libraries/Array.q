@@ -193,4 +193,15 @@ class Array < Type >
                 mov esp, ebp
                 pop ebp        
         end
+        
+        action DeepReverse()
+            Type Temp
+            Integer Index = 0
+            repeat while Index < Me:Size / 2
+                Temp = Me:GetAt(Index)
+                Me:SetAt(Index, Me:GetAt(Me:Size - Index - 1))
+                Me:SetAt(Me:Size - Index - 1, Temp)
+                Index = Index + 1
+            end
+        end
 end
