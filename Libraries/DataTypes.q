@@ -346,15 +346,13 @@ class Integer size 4
             Text ArNums
             Integer Index = 0
             Integer OutI = Me
-            repeat while OutI > 10
+            repeat while OutI > 0
                 Integer Rem = OutI:Remainder(10)
                 OutI = OutI / 10
                 Byte BRem = Rem
                 ArNums:Add(BRem + 48)
                 Index = Index + 1
             end
-            Byte One = 1
-            ArNums:Add(One + 48)
             ArNums:DeepReverse()
             return ArNums
         end
@@ -782,6 +780,20 @@ class Byte size 1
             
             ; mov value into return area
             mov byte [ebp+16], ah
+            
+            mov esp, ebp
+            pop ebp
+        end
+        
+        action asm GetInteger() returns Integer
+            push ebp
+            mov ebp, esp
+            
+            mov ebx, [ebp+8]
+            xor eax, eax ; 0 out eax
+            mov byte al, [ebx]
+            
+            mov [ebp+12], eax
             
             mov esp, ebp
             pop ebp

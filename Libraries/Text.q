@@ -47,4 +47,18 @@ class Text
     action DeepReverse()
         Me:Letters:DeepReverse()
     end
+    
+    action ParseInteger() returns Integer
+        Text NewMe = Me
+        NewMe:DeepReverse()
+        Integer Result = 0
+        Integer TenPower = 1
+        Integer Index = 0
+        repeat while Index < NewMe:GetSize()
+            Result = Result + TenPower * NewMe:GetAt(Index):GetInteger()
+            TenPower = TenPower * 10
+            Index = Index + 1
+        end
+        return Result
+    end
 end
