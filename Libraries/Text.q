@@ -12,6 +12,14 @@ class Text
         Me : Letters : Add ( B )
     end
     
+    action AddAt ( Integer Location, Byte Item )
+        Me : Letters : AddAt ( Location , Item )
+    end
+    
+    action RemoveAt ( Integer Position ) returns Byte
+        return Me : Letters : RemoveAt ( Position )
+    end
+    
     action Find ( Byte B )
         Me : Letters : Find ( B )
     end

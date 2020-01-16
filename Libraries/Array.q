@@ -51,6 +51,45 @@ class Array < Type >
             Me:Size = Me:Size + 1
         end
         
+        action AddAt ( Integer Location, Type Item )
+            if Me:Size == Me:ReservedSize
+                Integer NewSize = Me:ReservedSize
+                if NewSize == 0
+                    NewSize = 1
+                end
+                Me:SetMemorySize(NewSize)
+            end
+            Me:Size = Me:Size + 1
+            Me:ShiftForwardFrom(Location)
+            Me:SetAt(Location, Item)
+        end
+        
+        action RemoveAt ( Integer Position ) returns Type
+            Type ReturnValue = Me:GetAt(Position)
+            Me:ShiftBackwardFrom(Position)
+            Me:Size = Me:Size - 1
+            if Me:Size < Me:ReservedSize / 2
+                Me:SetMemorySize(Me:ReservedSize / 2)
+            end
+            return ReturnValue
+        end
+        
+        action ShiftForwardFrom(Integer Position)
+            Integer Index = Me:Size - 1
+            repeat while Index >= Position
+                Me:SetAt(Index + 1, Me:GetAt(Index))
+                Index = Index - 1
+            end
+        end
+        
+        action ShiftBackwardFrom(Integer Position)
+            Integer Index = Position
+            repeat while Index < Me:Size - 1
+                Me:SetAt(Index, Me:GetAt(Index + 1))
+                Index = Index + 1
+            end
+        end
+        
         action Find ( Type Item ) returns Integer
             Bool Output = False
             Integer Location = -1
