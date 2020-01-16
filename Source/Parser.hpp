@@ -5,6 +5,8 @@ string Parser::Parse(const vector<Token> & Tokens)
     Initialize(Tokens);
     
     RunAllPasses();
+    
+    OutputTypeTable();
 
     OutputTemplateAsm();
     
@@ -29,6 +31,7 @@ void Parser::RunParse()
 void Parser::Initialize(const vector<Token> & Tokens)
 {
     this->Tokens = Tokens;
+    InitializeGlobalPasses();
     InitializeForPass();
     OutputAsm = string("");
     GlobalScope.Origin = SCOPE_ORIGIN::GLOBAL;
@@ -72,6 +75,15 @@ bool Parser::IsNextToken()
 
 void Parser::Operate()
 {
+    //cout << CurrentToken.Contents << " " << State << " " << PassMode << endl;
+    if(CurrentClass.Type != NULL)
+    {
+        if(CurrentClass.Type->Name == "Pointer")
+        {
+            //cout << CurrentClass.Type->Name << endl;
+            //OutputTokens(Tokens);
+        }
+    }
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
@@ -345,6 +357,8 @@ void Parser::ParseExpectUsingDotOrNewline()
 
 void Parser::OutputStandardErrorMessage(const string & Message, const Token & OutToken)
 {
+    //OutputTypeTable();
+    //OutputTokens(Tokens);
     PrintError(GetFileNameErrorMessage(OutToken) + GetErrorLineNumberText(OutToken) + Message);
 }
 
@@ -748,7 +762,7 @@ void Parser::ParseExpectTemplateStartOrNewlineOrReference()
     if(CurrentToken.Contents == GlobalKeywords.ReservedWords["LESS_THAN"])
     {
         // At this point, parse the template
-        if(IsPassModeHigherOrEqual(PASS_MODE::FUNCTION_SKIM) == true)
+        if(IsPassModeHigherOrEqual(PASS_MODE::CLASS_SKIM) == true)
         {
             InitializeTemplateTokens();
         }
@@ -914,14 +928,19 @@ void Parser::OperateTemplateTokens()
                 }
                 CurrentParsingType.Templates->Templates = StoredParsedTemplates;
                 
-                
-                CompileTemplatedCode();
+                cout << "creating new templates for " << CurrentParsingType.Type->Name << endl;
                 
                 // At this point compile the tokens of the templated class (CurrentParsingType.Type) with (CurrentClsas = CurrentParsingType).
             }
             else
             {
                 CurrentParsingType.Templates = GetCompiledTemplate(TypeTable[TemplateTokens[TemplateTokenIndex].Contents], StoredParsedTemplates);
+            }
+            
+            cout << "comparing " << CurrentParsingType.Templates->MostRecentPass << " " << PassMode << " " << IsInputPassModeLowerOrEqual(CurrentParsingType.Templates->MostRecentPass, PassMode) << endl;
+            if(IsInputPassModeLowerOrEqual(CurrentParsingType.Templates->MostRecentPass, PassMode) == false)
+            {
+                CompileTemplatedCode(PassMode);
             }
 
             //TemplateTokens.erase(TemplateTokens.begin() + (TemplateTokenIndex + 2));
@@ -2142,13 +2161,20 @@ void Parser::SizeCompiledTemplate(CompiledTemplate & InCompiledTemplate)
     InCompiledTemplate.MyScope.Offset = 0;
     while(Index < InCompiledTemplate.MyScope.OrderedObjects.size())
     {
+        cout << "About to size " << InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Type->Name << endl;
         if(InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->HasSizeBeenCalculated == false || InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates == CurrentClass.Templates)
         {
+            cout << " zero " << endl;
             SizeCompiledTemplate(*(InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates));
+            cout << " half " << endl;
         }
+        cout << " one " << endl;
         InCompiledTemplate.MyScope.OrderedObjects[Index]->Offset = InCompiledTemplate.MyScope.Offset;
+        cout << " two " << endl;
         InCompiledTemplate.MyScope.Offset = InCompiledTemplate.MyScope.Offset + InCompiledTemplate.MyScope.OrderedObjects[Index]->Type.Templates->Size;
+        cout << " three " << endl;
         InCompiledTemplate.Size = InCompiledTemplate.MyScope.Offset;
+        cout << " four " << endl;
         Index = Index + 1;
     }
 }
@@ -2225,7 +2251,7 @@ bool Parser::AreTemplateListsEqual(const vector<TemplatedType> & InTypes, const 
     return IsValid;
 }
 
-void Parser::CompileTemplatedCode()
+void Parser::CompileTemplatedCode(PASS_MODE RunPassMode)
 {
     TemplatedType OldCurrentClass = CurrentClass;
     Function * OldCurrentFunction = CurrentFunction;
@@ -2255,7 +2281,7 @@ void Parser::CompileTemplatedCode()
     Tokens = CurrentClass.Type->Tokens;
     CurrentFunction = NULL;
 
-    RunAllTemplatedPasses();
+    RunTemplatedPass(RunPassMode);
 
     TemplateCompileStack.pop_back();
 
@@ -2334,22 +2360,45 @@ void Parser::InitializeForTemplatedPass()
     HasToken = false;
 }
 
-void Parser::RunAllTemplatedPasses()
+void Parser::RunTemplatedPass(PASS_MODE RunPassMode)
 {
-    PassMode = PASS_MODE::CLASS_SKIM;
-    InitializeForTemplatedPass();
-    RunParse();
-
-    PassMode = PASS_MODE::FUNCTION_SKIM;
-    InitializeForTemplatedPass();
-    RunParse();
-    SetSizesAndOffsets();
-    DoPossiblyAddBigThree();
-
-    PassMode = PASS_MODE::FULL_PASS;
-    InitializeForTemplatedPass();
-    RunParse();
-    DoPossiblyOutputBigThreeCode();
+    TemplatedType TemplatingType = CurrentParsingType;
+    cout << "DOING TEMPLATES OF " << CurrentClass.Type->Name << " with starting pass mode " << TemplatingType.Templates->MostRecentPass << " going to " << RunPassMode << endl;
+    if(TemplatingType.Templates->IsNewCompiledTemplate == true)
+    {
+        cout << "DOING TEMPLATES OF " << CurrentClass.Type->Name << " with pass mode " << PASS_MODE::CLASS_SKIM << endl;
+        PassMode = PASS_MODE::CLASS_SKIM;
+        InitializeForTemplatedPass();
+        RunParse();
+        TemplatingType.Templates->IsNewCompiledTemplate = false;
+        cout << "LEAVING TEMPLATES OF " << CurrentClass.Type->Name << " with pass mode " << PassMode << endl;
+    }
+    unsigned int PassModeIndex = GetGlobalPassModeIndex(TemplatingType.Templates->MostRecentPass);
+    PASS_MODE CurrentPass;
+    while(PassModeIndex < GetGlobalPassModeIndex(RunPassMode))
+    {
+        PassModeIndex = PassModeIndex + 1;
+        CurrentPass = GlobalPasses[PassModeIndex];
+        TemplatingType.Templates->MostRecentPass = CurrentPass;
+        PassMode = CurrentPass;
+        cout << "DOING TEMPLATES OF " << CurrentClass.Type->Name << " with pass mode " << CurrentPass << " " << PassModeIndex << " " << GetGlobalPassModeIndex(RunPassMode) << endl;
+        InitializeForTemplatedPass();
+        cout << "Before " << TemplatingType.Templates->MostRecentPass << endl;
+        RunParse();
+        //Current Parsing Type is not constant accross the parse.
+        cout << "After " << TemplatingType.Templates->MostRecentPass << endl;
+        if(PassMode == PASS_MODE::FUNCTION_SKIM)
+        {
+            SetSizesAndOffsets();
+            DoPossiblyAddBigThree();
+        }
+        else if(PassMode == PASS_MODE::FULL_PASS)
+        {
+            DoPossiblyOutputBigThreeCode();
+        }
+        cout << "LEAVING TEMPLATES OF " << CurrentClass.Type->Name << " with pass mode " << PassMode << " " << TemplatingType.Templates->MostRecentPass << " " << CurrentPass << endl;
+    }
+    cout << "LEAVING TEMPLATES OF " << CurrentClass.Type->Name << " with ending mode " << TemplatingType.Templates->MostRecentPass  << endl;
 }
 
 string Parser::OutputFullCompiledTemplateVector(const vector<TemplatedType> & TTs)
@@ -3233,4 +3282,49 @@ void Parser::DoUnaryOperator()
     CallFunction(*GetFromFunctionList(GetInAnyScope(ReduceTokens[ReducePosition + 1].Contents)->Type.Templates->MyScope.Functions[ReduceTokens[ReducePosition].Contents],
         Reverse(NextFunctionObjects)));
     ReduceTokens.erase(ReduceTokens.begin() + ReducePosition);
+}
+
+bool Parser::IsInputPassModeLowerOrEqual(const PASS_MODE InPassMode, const PASS_MODE BasePassMode)
+{
+    bool Output = false;
+    if(InPassMode >= BasePassMode)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+unsigned int Parser::GetGlobalPassModeIndex(const PASS_MODE InPassMode)
+{
+    unsigned int Index = 0;
+    bool Found = false;
+    while(Found == false)
+    {
+        if(InPassMode == GlobalPasses[Index])
+        {
+            Found = true;
+        }
+        else
+        {
+            Index = Index + 1;
+        }
+    }
+    return Index;
+}
+
+bool Parser::IsInputPassModeHigherOrEqual(const PASS_MODE InPassMode, const PASS_MODE BasePassMode)
+{
+    bool Output = false;
+    if(InPassMode <= BasePassMode)
+    {
+        Output = true;
+    }
+    return Output;
+}
+
+void Parser::InitializeGlobalPasses()
+{
+    GlobalPasses.push_back(PASS_MODE::CLASS_SKIM);
+    GlobalPasses.push_back(PASS_MODE::FUNCTION_SKIM);
+    GlobalPasses.push_back(PASS_MODE::FULL_PASS);
 }

@@ -44,7 +44,7 @@ end
 
 action Main
     Array<Byte> Ab
-    Ab:Initialize()
+    //Ab:Initialize()
     Byte Test = 1
     Ab:Add(Test)
     Test = Ab:GetAt(0)
@@ -77,7 +77,7 @@ action Main
     OutputByteArray(Ab)
     
     Array<Byte> NewAb
-    NewAb:Initialize()
+    //NewAb:Initialize()
     NewAb = Ab
     OutputByteArray(NewAb)
     

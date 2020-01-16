@@ -3,6 +3,8 @@
 /* comment
 test 3*/
 
+//using Libraries . Text
+
 class Integer size 4
         
         action asm = ( Integer Source )
@@ -338,6 +340,22 @@ class Integer size 4
             
             mov esp, ebp
             pop ebp
+        end
+        
+        action GetText ( ) returns Text
+            Text ArNums
+            Integer Index = 0
+            Integer OutI = Me
+            repeat while OutI > 10
+                Integer Rem = OutI:Remainder(10)
+                OutI = OutI / 10
+                Byte BRem = Rem
+                ArNums:Add(BRem)
+                Index = Index + 1
+            end
+            Byte One = 1
+            ArNums:SetAt(Index, One)
+            return ArNums
         end
 end
 

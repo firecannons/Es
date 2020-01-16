@@ -21,6 +21,8 @@ public:
     bool HasUserDefinedCopyConstructor;
     bool HasUserDefinedAssignmentOperator;
     bool HasUserDefinedDestructor;
+    bool IsNewCompiledTemplate;
+    PASS_MODE MostRecentPass;
 
     CompiledTemplate();
     

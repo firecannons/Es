@@ -19,10 +19,6 @@ class Array < Type >
             end
         end
         
-        action Initialize
-            Me:Constructor()
-        end
-        
         action SetMemorySize ( Integer Size )
             DynamicMemory < Type > DM
             Me : P = DM : ReallocateHeapMemory ( Size , Me : P , Me:ReservedSize )

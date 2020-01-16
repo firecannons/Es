@@ -121,6 +121,7 @@ public:
     bool JustParsedActionLine;
     bool IsParsingGlobalVariables;
     unsigned int EndPositionOfGlobalVarInitialization;
+    vector<PASS_MODE> GlobalPasses;
     
     string Parse(const vector<Token> & Tokens);
     void RunParse();
@@ -249,12 +250,12 @@ public:
     string OutputFullTemplatesToString(const TemplatedType & InTT);
     bool DoesTypeHaveTemplates(const BaseType & InType, const vector<TemplatedType> & InTypes);
     bool AreTemplateListsEqual(const vector<TemplatedType> & InTypes, const vector<TemplatedType> & InTypes2);
-    void CompileTemplatedCode();
+    void CompileTemplatedCode(PASS_MODE RunPassMode);
     void RunAllPasses();
     string OutputSingleLineSetToString(unordered_set<string> & InSet);
     TemplatedType GetType(const string & InName);
     void InitializeForTemplatedPass();
-    void RunAllTemplatedPasses();
+    void RunTemplatedPass(PASS_MODE RunPassMode);
     string OutputFullCompiledTemplateVector(const vector<TemplatedType> & TTs);
     void OutputTemplateAsm();
     CompiledTemplate * GetCompiledTemplate(BaseType & InType, vector<TemplatedType> & InTypes);
@@ -321,6 +322,10 @@ public:
     bool IsUnaryOperator();
     void DoUnaryOperator();
     bool IsUnaryOperatorInFarPosition();
+    bool IsInputPassModeLowerOrEqual(const PASS_MODE InPassMode, const PASS_MODE BasePassMode);
+    unsigned int GetGlobalPassModeIndex(const PASS_MODE InPassMode);
+    bool IsInputPassModeHigherOrEqual(const PASS_MODE InPassMode, const PASS_MODE BasePassMode);
+    void InitializeGlobalPasses();
 };
 
 #include "Compiler.h"

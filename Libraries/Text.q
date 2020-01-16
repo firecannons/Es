@@ -4,16 +4,28 @@ using Libraries . DataTypes
 class Text
     Array<Byte> Letters
 
-
-    action Constructor
-    end
-
     action Resize ( Integer Size )
         Me : Letters : Resize ( Size )
     end
     
-    action = ( Text Source )
-        Me:Letters = Source:Letters
+    action Add ( Byte B )
+        Me : Letters : Add ( B )
+    end
+    
+    action Find ( Byte B )
+        Me : Letters : Find ( B )
+    end
+    
+    action Contains ( Byte B )
+        Me : Letters : Contains ( B )
+    end
+    
+    action + ( Byte B )
+        Me : Letters = Me : Letters + B
+    end
+    
+    action GetSize ( ) returns Integer
+        return Me : Letters : Size
     end
 
     action GetAt( Integer Position ) returns Byte
