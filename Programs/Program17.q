@@ -11,4 +11,8 @@ action Main
     
     Integer I = T:ParseInteger()
     Output(I)
+    
+    B = 2
+    I = B:GetInteger()
+    Output(I)
 end

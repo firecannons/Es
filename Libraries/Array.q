@@ -51,6 +51,19 @@ class Array < Type >
             Me:Size = Me:Size + 1
         end
         
+        action Add ( Array<Type> In )
+            Integer NewSize = Me:Size + In:Size
+            if Me:Size >= Me:ReservedSize
+                Integer NewSize = Me:ReservedSize
+                if NewSize == 0
+                    NewSize = 1
+                end
+                Me:SetMemorySize(NewSize)
+            end
+            Me:CopyElementsToMe(Me:Size, In)
+            Me:Size = Me:Size + In:Size
+        end
+        
         action AddAt ( Integer Location, Type Item )
             if Me:Size == Me:ReservedSize
                 Integer NewSize = Me:ReservedSize
@@ -112,23 +125,25 @@ class Array < Type >
             return Output
         end
         
-        action + ( Type Item )
-            Me:Add ( Item )
+        action + ( Type Item ) returns Array<Type>
+            Array<Type> NewAr = Me
+            NewAr:Add ( Item )
+            return NewAr
         end
         
         action = ( Array<Type> Source )
             DynamicMemory DM
             Pointer<Type> OldP = Me:P
             Me:P = DM:AllocateHeapMemory(Source:ReservedSize, Me:P)
-            Me:CopyElementsToMe(Source)
+            Me:CopyElementsToMe(0, Source)
             DM:DeallocateHeapMemory(OldP, Me:ReservedSize)
             Me:ReservedSize = Source:ReservedSize
             Me:Size = Source:Size
         end
         
-        action CopyElementsToMe(Array<Type> Source)
-            Integer Index = 0
-            repeat while Index < Source:Size
+        action CopyElementsToMe(Integer StartingPosition, Array<Type> Source)
+            Integer Index = StartingPosition
+            repeat while Index < Source:Size + StartingPosition
                 Me:SetAt(Index, Source:GetAt(Index))
                 Index = Index + 1
             end

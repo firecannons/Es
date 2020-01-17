@@ -12,6 +12,10 @@ class Text
         Me : Letters : Add ( B )
     end
     
+    action Add ( Text T )
+        Me : Letters : Add ( T : Letters )
+    end
+    
     action AddAt ( Integer Location, Byte Item )
         Me : Letters : AddAt ( Location , Item )
     end
@@ -28,8 +32,16 @@ class Text
         Me : Letters : Contains ( B )
     end
     
-    action + ( Byte B )
-        Me : Letters = Me : Letters + B
+    action + ( Byte B ) returns Text
+        Text OldT = Me
+        OldT : Letters = OldT : Letters + B
+        return OldT
+    end
+    
+    action + ( Text T ) returns Text
+        Text OldT = Me
+        //OldT : Letters = OldT : Letters + T : Letters
+        return OldT
     end
     
     action GetSize ( ) returns Integer
