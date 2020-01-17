@@ -38,11 +38,11 @@ class Text
         return OldT
     end
     
-    /*action + ( Text T ) returns Text
+    action + ( Text T ) returns Text
         Text OldT = Me
         OldT : Letters = OldT : Letters + T : Letters
         return OldT
-    end*/
+    end
     
     action GetSize ( ) returns Integer
         return Me : Letters : Size

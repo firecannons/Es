@@ -130,6 +130,12 @@ class Array < Type >
             return NewAr
         end
         
+        action + ( Array<Type> Ar2 ) returns Array<Type>
+            Array<Type> NewAr = Me
+            NewAr:Add ( Ar2 )
+            return NewAr
+        end
+        
         action = ( Array<Type> Source )
             DynamicMemory DM
             Pointer<Type> OldP = Me:P

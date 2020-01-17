@@ -32,12 +32,16 @@ action asm Output ( Byte B )
     pop ebp
 end
 
-action Output ( Text T )
+action OutputNoNewline ( Text T )
     Integer Index = 0
     repeat while Index < T:GetSize()
         Output(T:GetAt(Index))
         Index = Index + 1
     end
+end
+
+action Output ( Text T )
+    OutputNoNewline(T)
     OutputNewline()
 end
 

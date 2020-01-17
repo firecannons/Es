@@ -73,7 +73,6 @@ bool Parser::IsNextToken()
 
 void Parser::Operate()
 {
-    cout << CurrentToken.Contents << " " << State << " " << PassMode << endl;
     if(State == PARSER_STATE::START_OF_LINE)
     {
         ParseStartOfLine();
