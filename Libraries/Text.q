@@ -67,7 +67,8 @@ class Text
         Integer TenPower = 1
         Integer Index = 0
         repeat while Index < NewMe:GetSize()
-            Result = Result + TenPower * NewMe:GetAt(Index):GetInteger()
+            Integer TempInt = NewMe:GetAt(Index):GetInteger() - 48
+            Result = Result + TenPower * TempInt
             TenPower = TenPower * 10
             Index = Index + 1
         end
