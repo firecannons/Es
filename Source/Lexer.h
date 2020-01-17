@@ -58,6 +58,7 @@ public:
     TEXT_TYPE GetTextTypeOfChar(const char InChar);
     bool IsInvalidGrouping();
     void AppendCharactersToTokens();
+    void DoStringConstantMode(const char InChar);
 };
 
 #include "Lexer.hpp"

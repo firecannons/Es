@@ -14,4 +14,5 @@ action Main
     Integer AdderInt = AdderIntText:ParseInteger()
     AdderInt = AdderInt + 1
     Output(AdderInt)
+    Output(48:GetText())
 end

@@ -38,6 +38,12 @@ action Output ( Text T )
         Output(T:GetAt(Index))
         Index = Index + 1
     end
+    OutputNewline()
+end
+
+action OutputNewline()
+    Byte B = 10
+    Output(B)
 end
 
 action OutputAsByteDigits ( Text T )

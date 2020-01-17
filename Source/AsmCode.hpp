@@ -35,6 +35,8 @@ AsmCode::AsmCode()
     Codes.emplace(string("PUSH_FROM_GLOBAL_P2"), string("\n") + Codes["NAME_TO_STACK_TOP"]);
     Codes.emplace(string("NAME_TO_EBX"), string("mov dword ebx, "));
     Codes.emplace(string("DEREF_FROM_GLOBAL_P1"), Codes["NAME_TO_EBX"]);
+    Codes.emplace(string("SET_BYTES"), string(" db "));
+    Codes.emplace(string("BYTE_QUICK_ASSIGN"), string("mov byte [esp], "));
 }
 
 string AsmCode::CalcReserveSpaceAsm(const unsigned int ReserveAmount)
@@ -114,5 +116,11 @@ string AsmCode::CalcPushFromGlobal(const string & GlobalNameInAsm, const int Obj
 string AsmCode::CalcGlobalDerefForFuncCall(const string & GlobalName)
 {
     string Output = Codes["DEREF_FROM_GLOBAL_P1"] + GlobalName + Codes["DEREF_FROM_GLOBAL_P2"];
+    return Output;
+}
+
+string AsmCode::CalcByteQuickAssignAsm(const int Integer)
+{
+    string Output = Codes["BYTE_QUICK_ASSIGN"] + to_string(Integer);
     return Output;
 }

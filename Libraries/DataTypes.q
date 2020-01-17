@@ -356,6 +356,19 @@ class Integer size 4
             ArNums:DeepReverse()
             return ArNums
         end
+        
+        /*action asm GetByte() returns Byte
+            push ebp
+            mov ebp, esp
+            
+            mov ebx, [ebp+8]
+            mov eax, [ebx]
+            
+            mov byte [ebp+12], al
+            
+            mov esp, ebp
+            pop ebp
+        end*/
 end
 
 class Byte size 1

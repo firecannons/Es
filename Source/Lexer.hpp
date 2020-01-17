@@ -34,6 +34,10 @@ vector<Token> Lexer::Lex(const string & InputCode, const string & SourceFileName
         {
             DoAsmBlockMode(InputCode[Position]);
         }
+        else if(Mode == LEXER_MODE::STRING_CONSTANT)
+        {
+            DoStringConstantMode(InputCode[Position]);
+        }
         if(string(1, InputCode[Position]) == GlobalKeywords.ReservedWords["NEW_LINE"] && CountNextNewline == true)
         {
             LineNumber = LineNumber + 1;
@@ -131,6 +135,10 @@ void Lexer::DoNormalLexMode(const char InChar)
     if(SavedWord == "\n" && Mode == LEXER_MODE::NORMAL_WAITING_FOR_ASM_BLOCK)
     {
         Mode = LEXER_MODE::ASM_BLOCK;
+    }
+    if(SavedWord == "'")
+    {
+        Mode = LEXER_MODE::STRING_CONSTANT;
     }
     if(InChar == '\n')
     {
@@ -235,4 +243,15 @@ bool Lexer::IsEndOfStringAfterWhiteSpaceAndNewline(const string & Haystack, cons
         }
     }
     return Output;
+}
+
+void Lexer::DoStringConstantMode(const char InChar)
+{
+    AppendToSavedWord(InChar);
+    if(IsEndOfString(SavedWord, "'") == true)
+    {
+        Mode = LEXER_MODE::NORMAL;
+        AppendSavedWordToTokens();
+        SavedWord.clear();
+    }
 }

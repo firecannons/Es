@@ -54,7 +54,6 @@ class Array < Type >
         action Add ( Array<Type> In )
             Integer NewSize = Me:Size + In:Size
             if Me:Size >= Me:ReservedSize
-                Integer NewSize = Me:ReservedSize
                 if NewSize == 0
                     NewSize = 1
                 end
@@ -142,9 +141,9 @@ class Array < Type >
         end
         
         action CopyElementsToMe(Integer StartingPosition, Array<Type> Source)
-            Integer Index = StartingPosition
-            repeat while Index < Source:Size + StartingPosition
-                Me:SetAt(Index, Source:GetAt(Index))
+            Integer Index = 0
+            repeat while Index < Source:Size
+                Me:SetAt(Index + StartingPosition, Source:GetAt(Index))
                 Index = Index + 1
             end
         end

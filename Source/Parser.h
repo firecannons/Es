@@ -20,6 +20,7 @@ enum PASS_MODE
 #include <locale>
 #include <unordered_set>
 #include <list>
+#include <cstdlib>
 using namespace std;
 
 enum PARSER_STATE
@@ -326,6 +327,9 @@ public:
     unsigned int GetGlobalPassModeIndex(const PASS_MODE InPassMode);
     bool IsInputPassModeHigherOrEqual(const PASS_MODE InPassMode, const PASS_MODE BasePassMode);
     void InitializeGlobalPasses();
+    void AddNewTextConstantGlobalVariableToAsm(const string & GlobalName, const string & LiteralContents);
+    bool IsTextConstant(const string & VariableName);
+    void AddNumericalValueToTempByte(const char NewValue);
 };
 
 #include "Compiler.h"

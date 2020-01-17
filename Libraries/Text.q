@@ -38,11 +38,11 @@ class Text
         return OldT
     end
     
-    action + ( Text T ) returns Text
+    /*action + ( Text T ) returns Text
         Text OldT = Me
-        //OldT : Letters = OldT : Letters + T : Letters
+        OldT : Letters = OldT : Letters + T : Letters
         return OldT
-    end
+    end*/
     
     action GetSize ( ) returns Integer
         return Me : Letters : Size
@@ -73,5 +73,10 @@ class Text
             Index = Index + 1
         end
         return Result
+    end
+    
+    action CopyFromPointer(Pointer<Byte> P, Integer Size)
+        DynamicMemory DM
+        DM:CopyMemory(Me:Letters:P, P, Size)
     end
 end

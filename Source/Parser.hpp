@@ -1653,6 +1653,43 @@ void Parser::AddToArgList(const unsigned int InPosition)
         AddNumericalValueToTempInteger(VariableName);
         NextArg = GetInAnyScope(NumberObject.Name);
     }
+    else if(IsTextConstant(VariableName) == true)
+    {
+        Object TextObject;
+        TextObject.OuterScopeOrigin = GetCurrentScope()->Origin;
+        TextObject.Name = GetNextTemporaryVariable();
+        ReduceTokens[InPosition].Contents = TextObject.Name;
+        TextObject.Type.Type = &TypeTable["Text"];
+        TextObject.Type.Templates = TypeTable["Text"].GetFirstCompiledTemplate();
+        GetCurrentScope()->Objects.emplace(TextObject.Name, TextObject);
+        AddNewVariableToStack(GetCurrentScope()->Objects[TextObject.Name]);
+        vector<Object *> OldNextFunctionObjects = NextFunctionObjects;
+        NextFunctionObjects.clear();
+        CurrentParsingObject = GetInAnyScope(TextObject.Name);
+        CallEmptyConstructor();
+        
+        unsigned int Index = 0;
+        while(Index < VariableName.size() - 2)
+        {
+            Object ByteObject;
+            ByteObject.OuterScopeOrigin = GetCurrentScope()->Origin;
+            ByteObject.Name = GetNextTemporaryVariable();
+            ReduceTokens[InPosition].Contents = ByteObject.Name;
+            ByteObject.Type.Type = &TypeTable["Byte"];
+            ByteObject.Type.Templates = TypeTable["Byte"].GetFirstCompiledTemplate();
+            GetCurrentScope()->Objects.emplace(ByteObject.Name, ByteObject);
+            AddNewVariableToStack(GetCurrentScope()->Objects[ByteObject.Name]);
+            AddNumericalValueToTempByte(VariableName[Index + 1]);
+            NextFunctionObjects.push_back(GetInAnyScope(ByteObject.Name));
+            NextFunctionObjects.push_back(GetInAnyScope(TextObject.Name));
+            CallFunction(*GetFromFunctionList(TextObject.Type.Templates->MyScope.Functions[GlobalKeywords.ReservedWords["ADD"]],
+                Reverse(NextFunctionObjects)));
+            Index = Index + 1;
+        }
+        
+        NextFunctionObjects = OldNextFunctionObjects;
+        NextArg = GetInAnyScope(TextObject.Name);
+    }
     else
     {
         NextArg = GetInAnyScope(VariableName);
@@ -3296,4 +3333,30 @@ void Parser::InitializeGlobalPasses()
     GlobalPasses.push_back(PASS_MODE::CLASS_SKIM);
     GlobalPasses.push_back(PASS_MODE::FUNCTION_SKIM);
     GlobalPasses.push_back(PASS_MODE::FULL_PASS);
+}
+
+void Parser::AddNewTextConstantGlobalVariableToAsm(const string & GlobalName, const string & LiteralContents)
+{
+    GlobalVariableReserveAsm = GlobalVariableReserveAsm + GlobalName + GlobalASM.Codes["SET_BYTES"] +
+        LiteralContents;
+    GlobalVariableReserveAsm = GlobalVariableReserveAsm + GetNewlines(1);
+}
+
+bool Parser::IsTextConstant(const string & VariableName)
+{
+    bool Output = false;
+    if(VariableName.size() > 0)
+    {
+        if(VariableName[0] == GlobalKeywords.ReservedWords["SINGLE_QUOTE"][0])
+        {
+            Output = true;
+        }
+    }
+    return Output;
+}
+
+void Parser::AddNumericalValueToTempByte(const char NewValue)
+{
+    OutputAsm = OutputAsm + GlobalASM.CalcByteQuickAssignAsm(static_cast<int>(NewValue));
+    AppendNewlinesToOutputASM(1);
 }

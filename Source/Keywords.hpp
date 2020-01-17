@@ -50,6 +50,8 @@ Keywords::Keywords()
     ReservedWords.insert(pair<string,string>(string("CONSTRUCTOR"), string("Constructor")));
     ReservedWords.insert(pair<string,string>(string("DESTRUCTOR"), string("Destructor")));
     ReservedWords.insert(pair<string,string>(string("SOURCE"), string("Source")));
+    ReservedWords.insert(pair<string,string>(string("SINGLE_QUOTE"), string("'")));
+    ReservedWords.insert(pair<string,string>(string("ADD"), string("Add")));
     
     ShortOperators.emplace(ReservedWords["LESS_THAN"]);
     ShortOperators.emplace(ReservedWords["GREATER_THAN"]);
