@@ -26,7 +26,7 @@ sudo apt install fasm
 # Clone the repository
 git clone https://github.com/firecannons/Es.git
 # Move the current working directory into the repository
-cd compiler
+cd Es
 # Switch to the C++ShiftReduce branch
 git checkout C++ShiftReduce
 # This is one of the latest working commits.
