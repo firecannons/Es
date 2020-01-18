@@ -12,7 +12,7 @@ To see a video presentation about Quorum and evidence based programming by Dr. S
 ## Running "Es"
 - You must be running a Linux distribution like Ubuntu.  Es does not yet work on Windows or Mac.  The compiler will only output FASM assembly for the Linux version of FASM.
 - Install the Flat Assembler with apt or `sudo apt install fasm`<br>alternatively install FASM from it's [download page](https://flatassembler.net/download.php)
-- Clone the [repository](https://gitlab.com/firecannons/compiler.git)
+- Clone the [repository](https://github.com/firecannons/Es.git)
 - Switch the C++ShiftReduce branch, not the master branch.
 - Build the C++ compiler
 - Run the compiler
@@ -24,7 +24,7 @@ In summary, run these
 # Install fasm
 sudo apt install fasm
 # Clone the repository
-git clone https://gitlab.com/firecannons/compiler.git
+git clone https://github.com/firecannons/Es.git
 # Move the current working directory into the repository
 cd compiler
 # Switch to the C++ShiftReduce branch
