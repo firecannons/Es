@@ -1,9 +1,9 @@
 # Compiler for "Es"
 
-This is a compiler for a pet programming language, currently called [Es](https://blazblue.wiki/wiki/Es).  It is an unfinished work at this time, and the latest commit might not be operational.  It currently can do very basic programs, only on Linux distrobutions, and has only been tested on Linux Mint and Ubuntu.  However, by adding more features to the compiler, and especially by adding more library code, much more functionality could be added.  It is a compiled language, compiled into assembly language for the [Flat Assembler (FASM)](https://flatassembler.net/) which can be assembled into an executable.  The old compiler for Es was written in Python3 but a new more advanced one has been written in C++.
+This is a compiler for a pet programming language, currently called [Es](https://blazblue.wiki/wiki/Es).  It is an unfinished work at this time, and it most likely won't be completed, since other high level programming languages exist that have nearly as good syntax, and are much more developed than Es is (like [Julia](https://julialang.org/)).
  
 ## Inspiration - Evidence Based Programming
-Inspiration for "Es" comes from a programming language named [Quorum](https://quorumlanguage.com/) designed by Dr. Andreas Stefik and a team at the University of Nevada, Las Vegas.  Quorum's syntax is "evidence based" which means that it's syntax was tested scientifically for programmer productivity in randomized controlled trials.  It's syntax was updated over time to yield the best performance for developers.  Quorum is the first of it's kind of evidence based programming languages.  "Es's" syntax is very similar to Quorum.  "Es" is different than Quorum in that "Es" code is converted to FASM code and then compiled to an executable, while Quorum runs on top of the Java JVM.
+Inspiration for "Es" comes from a programming language named [Quorum](https://quorumlanguage.com/) designed by Dr. Andreas Stefik and his team at the University of Nevada, Las Vegas.  Quorum's syntax is "evidence based" which means that its syntax was tested scientifically for programmer productivity in randomized controlled trials.  It's syntax was updated over time to yield the best performance for developers.  Quorum is the first of it's kind of evidence based programming languages.  "Es's" syntax is very similar to Quorum.  "Es" is different than Quorum in that "Es" code is converted to FASM code and then compiled to an executable, while Quorum runs on top of the Java JVM.
 
 Go [here](https://web.cs.unlv.edu/stefika/) for Dr. Stefik's website or [here](https://web.cs.unlv.edu/stefika/research.html) to see his publications.
 
@@ -14,7 +14,7 @@ To see a video presentation about Quorum and evidence based programming by Dr. S
 - Install the Flat Assembler with apt or `sudo apt install fasm`<br>alternatively install FASM from it's [download page](https://flatassembler.net/download.php)
 - Clone the [repository](https://github.com/firecannons/Es.git)
 - Switch the C++ShiftReduce branch, not the master branch.
-- Build the C++ compiler
+- Build the Es compiler
 - Run the compiler
 - Run FASM on the assembly output to create a compiler executable
 - Run the executable
